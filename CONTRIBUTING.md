@@ -45,7 +45,10 @@ chore: add .gitattributes for line-ending normalisation
 
 - Do **not** commit feature work directly to `main`.
 - **Branch names:** `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, `chore/<topic>`.
-- Flow per unit of work:
+- Open a PR for the record, but **merge LOCALLY** — GitHub's merge button / `gh pr
+  merge` authors the merge commit with your GitHub *profile* name ("Shaunak"),
+  which breaks the uniform `Shaunak1012` identity. A local `git merge` uses the
+  configured git identity.
   ```bash
   git checkout main
   git checkout -b feat/<topic>
@@ -53,11 +56,15 @@ chore: add .gitattributes for line-ending normalisation
   git commit -m "feat(scope): ..."
   git push -u origin feat/<topic>
   gh pr create --base main --head feat/<topic> --title "..." --body "..."
+  # merge LOCALLY (keeps Shaunak1012 on the merge commit):
   git checkout main
-  gh pr merge feat/<topic> --merge --delete-branch
-  git fetch origin && git reset --hard origin/main
+  git merge --no-ff feat/<topic> -m "Merge pull request: feat/<topic>"
+  git push origin main                   # GitHub auto-marks the PR merged
+  git push origin --delete feat/<topic>  # remove remote branch
+  git branch -d feat/<topic>             # remove local branch
   ```
-- Use **merge commits** (`--merge`) to keep the branch topology visible.
+- Always `--no-ff` to keep the branch topology visible.
+- **Do not** use the GitHub merge button or `gh pr merge` (identity mismatch).
 - Stage work into **logical, self-contained PRs** — never one big dump.
 
 ## 4. What not to commit
