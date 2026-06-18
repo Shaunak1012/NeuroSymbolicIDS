@@ -1,0 +1,27 @@
+# NeuroSymbolic-IDS — Python dependencies
+# Target: Python 3.11 (TensorFlow 2.15 supports Python 3.9–3.11)
+# Install:  pip install -r requirements.txt
+#
+# Note: native Windows TensorFlow is CPU-only since 2.11.
+#       TF 2.15 uses Keras 2 by default, matching the existing
+#       `tensorflow.keras` code and custom training loop in ltn.py.
+
+# ── Core / data ──
+numpy==1.26.4          # TF 2.15 requires numpy < 2.0
+pandas==2.2.2
+scikit-learn==1.4.2
+scipy==1.11.4
+
+# ── Deep learning (CPU) ──
+tensorflow==2.15.1     # Keras 2 default
+
+# ── Visualisation ──
+matplotlib==3.8.4
+seaborn==0.13.2
+
+# ── Knowledge Graph (planned phase) ──
+networkx==3.2.1
+python-louvain==0.16   # provides the `community` module (Louvain detection)
+
+# ── Explainability (planned phase) ──
+shap==0.45.1
