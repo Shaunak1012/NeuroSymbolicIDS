@@ -1,0 +1,49 @@
+# NeuroSymbolic-IDS — central experiment configuration
+# All protocol parameters live here so experiments are reproducible and one-line changeable.
+# Consumed via scripts/config.py (config.get()).
+
+seed: 42
+
+# ============================================================
+# PROTOCOL: paper-aligned split (Bizzarri et al.)
+#   9 known classes (benign + 8 attacks) -> stratified 80/10/10 into train/val/test
+#   6 rare classes  -> zero-day, appended to TEST only (never trained)
+#   benign under-sampled to ~1:1 vs total known-attack count
+# ============================================================
+protocol:
+  name: paper                 # "paper" (this split) | "temporal" (secondary hard-mode)
+  val_frac: 0.10
+  test_frac: 0.10
+  benign_ratio: 1.0           # benign : known-attack count (1.0 = balanced, paper-faithful)
+  feature_transform: log1p    # A/B (Phase 0.3): signed-log1p beat raw 0.980 vs 0.965 PR-AUC. Apply sign(x)*log1p(|x|) before scaling.
+
+# 8 known attacks + BENIGN = 9 known classes (kept in train/val/test)
+known_attacks:
+  - DDoS
+  - DoS GoldenEye
+  - DoS Hulk
+  - DoS Slowhttptest
+  - DoS slowloris
+  - FTP-Patator
+  - PortScan
+  - SSH-Patator
+
+# 6 zero-day classes (test only) — the rare (<1%) families
+zero_day_classes:
+  - Bot
+  - Heartbleed
+  - Infiltration
+  - Web Attack Brute Force
+  - Web Attack XSS
+  - Web Attack Sql Injection
+
+# ============================================================
+# DATA NOTES
+# ============================================================
+data:
+  variant: MachineLearningCVE   # flow-feature CSVs; NO Flow ID / IP / Timestamp columns
+  has_ip_timestamp: false        # -> RepeatedConnections & response-replay are limited; documented
+  n_features: 68                 # after preprocessing (verify with scripts/check.py)
+
+paths:
+  paper_subdir: paper            # data/processed/paper/  and  models/paper/ etc.

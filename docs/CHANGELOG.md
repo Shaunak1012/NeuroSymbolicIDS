@@ -2,6 +2,21 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-06-18 (Phase 0 — protocol reset)
+
+- **Built the paper-aligned split** (`scripts/preprocess_paper.py` → `data/processed/paper/`): pools all 5 days, 9 known classes (BENIGN + 8 attacks incl. PortScan/DDoS) stratified 80/10/10 (train 883,796 / val 110,475 / test 114,658), benign under-sampled 1:1 (balanced 50/50), 6 rare classes (Bot, Web×3, Infiltration, Heartbleed) appended to test only. Leakage asserted (no zero-day in train/val). Temporal split kept untouched as secondary hard-mode.
+- **Config + scaffolding:** `config.yaml` (all protocol params) + `scripts/config.py`, `scripts/features.py` (shared transform), `scripts/tracking.py` (JSONL run logger). pyyaml pinned.
+- **log1p A/B (Phase 0.3):** signed-log1p `sign(x)·log1p(|x|)` beat raw on the paper split (PR-AUC 0.980 vs 0.965) → adopted in config.
+- **Data constraint found:** the CSVs are the **MachineLearningCVE** variant — no Flow ID/IP/Timestamp columns → IP-based `RepeatedConnections` and response-replay are limited (documented in config `has_ip_timestamp: false`).
+- **Nuance recorded:** overall binary is easy (~0.97) under the paper split since PortScan/DDoS are known; the challenge metric is the **zero-day-only binary** (~4,183 test flows), matching the paper's "6 unknown" metric.
+
+## 2026-06-18 (strategic pivot → conference roadmap)
+
+- **LTN full run completed and underperformed** — PR-AUC 0.4529 vs CNN baseline 0.6689 (−0.22); early-stopped ~epoch 10, val accuracy declined after epoch 2. Root cause: focal CE collapsed to ~0.0005, SAT term dominated ~40:1. Per-family: PortScan 0.36→0.16, DDoS 0.67→0.64.
+- **Fusion investigation (post-hoc, no retraining):** leaky logistic fusion (fit on zero-day-labelled test half) reached 0.78 (+0.11) — but the honest **label-free** parameter-free fusion was −0.16. Conclusion: behaviours carry real signal, but supervised transfer to zero-day is the wall. Also found `model_multiclass_best.keras` is **Keras 3** (won't load in our Keras-2.15 venv) → in-venv retrain required.
+- **Read the base paper** (`basepaper.pdf`, Bizzarri et al., IEEE). Findings: it uses payload bytes (1500) not flow features; stratified 80/10/10 with **known attacks in test**; zero-day = rare classes only (keeps PortScan/DDoS in training); **balanced data + plain CE + ω=1** (why their SAT stays gentle and ours dominated). Their result: zero-day acc 48→60%. Our protocol was a much harder, misaligned exam.
+- **Decided a strategic pivot** to a top-tier-publication plan: protocol reset (paper-aligned split) → retrain in-venv → reproduce paper → fix + extend → multi-pillar fusion → cross-dataset → response engine. Captured in **[conference_roadmap.md](target/conference_roadmap.md)** (plan v1.2 + Tier-S/A/B agenda). Headline thesis: *"when and why neuro-symbolic training fails under imbalance, and the inference-time fusion fix."* Response/IPS engine added as Shaunak's solo final phase. Updated STATUS, enhancements.
+
 ## 2026-06-18 (LTN re-grounded)
 
 - **Re-grounded the LTN axioms on behaviours** (`scripts/ltn.py`), fixing the core flaw (label tautologies). Kept Ax1/Ax2 as supervised anchors; replaced Ax3 (was DoS-label) with **LargePackets∧HighEntropy → ¬benign** and Ax4 (was Patator-label) with **BurstTraffic → ¬benign**, weighted per-flow by fuzzy behaviour confidences from `behavior.py` (computed on raw features pre-scaling, shuffled in lockstep with batches). ScanProbe/HighVolume deliberately excluded from training axioms (ScanProbe benign-heavy in training → reserved for KG stage).

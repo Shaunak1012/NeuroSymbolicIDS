@@ -4,15 +4,31 @@
 
 ## ▶ RESUME HERE (next session)
 
-**Where we stopped:** LTN re-grounding is **implemented and smoke-tested**; the first **full training run is in progress** (background). When it finishes:
-1. Read results from `outputs/ltn_run.log` (PR-AUC, ROC-AUC, per-family zero-day recall) and `outputs/figures/ltn_eval.png`.
-2. Record them in "Last Measured Results" below and in [ltn_current.md](implementation/ltn_current.md).
-3. **Interpret vs baseline (CNN PR-AUC 0.6689):** if the behaviour-grounded LTN improves zero-day recall (esp. DDoS via Ax3), that validates the approach. If not, tune ω / axiom weights or reconsider which behaviours to ground on.
-4. Then proceed to the **Knowledge Graph** (item 3) — where ScanProbe's PortScan value gets realised.
+**Major pivot decided (2026-06-18).** LTN full run finished and **underperformed** the baseline
+(PR-AUC 0.45 vs CNN 0.67). Root cause diagnosed: focal CE collapsed to ~0.0005 so the SAT term
+dominated ~40:1 (base paper used *balanced data + plain CE + ω=1*, keeping SAT gentle). We then
+read the base paper (`basepaper.pdf`) and found our split is a *much harder, misaligned* protocol.
+**Decision: protocol reset + rebuild per plan v1.2.** Full plan + conference agenda in
+**[conference_roadmap.md](target/conference_roadmap.md)** — read that first.
 
-**To re-run training:** `MPLBACKEND=Agg .venv\Scripts\python.exe scripts\ltn.py` (CPU, ~30–60 min). Smoke test: `LTN_SUBSET=50000 LTN_EPOCHS=2 ...`.
+**✅ Phase 0 DONE (2026-06-18).** Paper-aligned split built (`scripts/preprocess_paper.py` → `data/processed/paper/`): 9 known classes (BENIGN + 8 attacks incl. PortScan/DDoS) stratified 80/10/10 = train 883,796 / val 110,475 / test 114,658, balanced 50/50, 6 zero-day (Bot, Web×3, Infiltration, Heartbleed) in test only, leakage-verified. `config.yaml` + `scripts/config.py`/`features.py`/`tracking.py` scaffolding in place. **log1p A/B: signed-log1p wins (0.980 vs 0.965 PR-AUC) → adopted.** IP/timestamp side-table **not possible** (MachineLearningCVE variant has no IP/timestamp cols — documented). Corrected labels (Engelen): deferred, current labels first.
 
-**Compute decision:** **CPU** (Ryzen 9 9950X3D). GPU (RTX 5080 / Blackwell) deferred — needs WSL2 + CUDA 12.8 + newer TF + Keras 3 migration. See Open Decisions.
+**⚠️ Key nuance:** on the paper split, overall binary PR-AUC is ~0.97 (PortScan/DDoS are now *known*). The **real challenge metric is binary on the zero-day-only subset** (Bot/Web/Infiltration/Heartbleed, ~4,183 test flows) — matching the paper's "6 unknown classes" metric. Track that separately everywhere.
+
+**▶ Next action = Phase 1 (neural pillar + baselines):**
+1. Retrain CNN in our venv on the paper split (fixes Keras-3 load issue; produces loadable models).
+2. Add post-hoc novelty scores: Mahalanobis on embeddings + energy/max-logit.
+3. Add classical baselines: XGBoost, Random Forest, Isolation Forest.
+See [conference_roadmap.md](target/conference_roadmap.md) Phase 1.
+
+**Key measured findings to carry forward:**
+- Leaky fusion (fit on zero-day labels) hit 0.78 (+0.11) — behaviours carry real signal, but
+  label-free fusion (parameter-free) was −0.16. The signal is real; unsupervised transfer is the wall.
+- `model_multiclass_best.keras` was saved in **Keras 3** → won't load in our Keras-2.15 venv.
+  Retrain in-venv is required anyway (Phase 1).
+
+**Compute:** **CPU** (Ryzen 9 9950X3D). GPU (RTX 5080 / Blackwell) deferred. For long runs use
+`python -u` so progress is live and completion is caught reliably (last run's notification was missed).
 
 ## Environment
 
@@ -30,10 +46,14 @@
 | CNN (multiclass) | ✅ Verified correct | `scripts/cnn3.py` | See [cnn_current.md](implementation/cnn_current.md). Minor: double class-weighting. |
 | CNN evaluation | ✅ Working | `scripts/eval.py` | Produces PR-AUC baseline + `cnn_zeroday_eval.png`. |
 | Behaviour abstraction | ✅ Rebuilt & validated | `scripts/behavior.py` | Verified indices, vectorised, fuzzy [0,1], thresholds saved. PortScan/DDoS strongly covered. Not yet wired into LTN. See [doc](implementation/behaviour_abstraction_current.md). |
-| LTN reasoning | 🟡 Re-grounded; training run in progress | `scripts/ltn.py` | Ax3/Ax4 now behaviour-grounded (LargePkt∧HighEntropy, BurstTraffic). Smoke-tested OK. Full-run results pending. See [doc](implementation/ltn_current.md). |
-| Knowledge Graph | ❌ Not built | — | Spec: [knowledge_graph.md](target/knowledge_graph.md). |
-| Decision Fusion | ❌ Not built | — | Spec: [decision_fusion.md](target/decision_fusion.md). |
-| Explainability / Final Alert | ❌ Not built | — | Spec: [explainability.md](target/explainability.md). |
+| LTN reasoning | 🔴 Ran, underperformed (0.45 vs 0.67) | `scripts/ltn.py` | Behaviour-grounded, but SAT dominated CE ~40:1. Becomes the **"failure anatomy" headline study** (Phase 2c), not a dead end. See [doc](implementation/ltn_current.md). |
+| Knowledge Graph | ❌ Not built | — | Rescoped as memory + explainability corroboration. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
+| Decision Fusion | ❌ Not built | — | Now legitimately trainable under paper-aligned split. Spec: [decision_fusion.md](target/decision_fusion.md). |
+| Explainability / Final Alert | ❌ Not built | — | + explanation-faithfulness measurement (Tier A). Spec: [explainability.md](target/explainability.md). |
+| Anomaly pillar (autoencoder) | ❌ Not built | — | Phase 3 — benign-only reconstruction error. |
+| Response engine (IPS) | ❌ Not built | — | Phase R (Shaunak solo, last). Temporal-replay containment. |
+
+**Direction:** targeting top-tier publication — see [conference_roadmap.md](target/conference_roadmap.md) for plan v1.2 + the Tier-S/A/B "godly" agenda.
 
 ## Remaining Work ("what's left")
 
