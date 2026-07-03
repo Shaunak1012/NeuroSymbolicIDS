@@ -41,9 +41,11 @@ zero_day_classes:
 # DATA NOTES
 # ============================================================
 data:
-  variant: MachineLearningCVE   # flow-feature CSVs; NO Flow ID / IP / Timestamp columns
-  has_ip_timestamp: false        # -> RepeatedConnections & response-replay are limited; documented
-  n_features: 68                 # after preprocessing (verify with scripts/check.py)
+  variant: GeneratedLabelledFlows  # full CIC-IDS2017 flows WITH Flow ID/IP/Port/Protocol/Timestamp
+  raw_dir: data/raw_csv_full        # 85-col CSVs; preprocess.py reads here
+  has_ip_timestamp: true            # -> RepeatedConnections & source-level response replay ENABLED
+  n_features: 68                    # identical to ML-CVE variant (Destination Port kept as feature)
+  meta_cols: [Flow ID, Source IP, Source Port, Destination IP, Destination Port, Protocol, Timestamp]
 
 paths:
   paper_subdir: paper            # data/processed/paper/  and  models/paper/ etc.
