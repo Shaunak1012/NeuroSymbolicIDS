@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-06-18 (dataset upgrade → full variant with IP/timestamp)
+
+- **Switched from the ML-CVE variant to the full `GeneratedLabelledFlows`** (added `data/raw_csv_full/`, gitignored). Rewrote `scripts/preprocess.py` to ingest the 85-col CSVs, guard the `Infinity`-string quirk (`to_numeric coerce`), and extract a **meta side-table** (`meta_train/test.csv` — Flow ID, Source/Dest IP+Port, Protocol, Timestamp) aligned row-for-row through cleaning.
+- **Verified feature parity:** identical 68 features, same 10 constant columns, exact same row counts (train 1,666,532 / test 1,161,344) as ML-CVE → behaviour indices unchanged (Destination Port at 0, etc.).
+- **`preprocess_paper.py` now splits on indices** so meta follows each row into paper train/val/test (`data/processed/paper/meta_{train,val,test}.csv`), all aligned.
+- **Result:** IP/timestamp available → `RepeatedConnections` + source-level response replay **unblocked**. PortScan test set = 15,881 flows from **1 source IP → 998 distinct dest ports** (canonical scan signature). `config.yaml`: `variant: GeneratedLabelledFlows`, `has_ip_timestamp: true`. Done at the zero-cost window (before any training on the paper split).
+
 ## 2026-06-18 (Phase 0 — protocol reset)
 
 - **Built the paper-aligned split** (`scripts/preprocess_paper.py` → `data/processed/paper/`): pools all 5 days, 9 known classes (BENIGN + 8 attacks incl. PortScan/DDoS) stratified 80/10/10 (train 883,796 / val 110,475 / test 114,658), benign under-sampled 1:1 (balanced 50/50), 6 rare classes (Bot, Web×3, Infiltration, Heartbleed) appended to test only. Leakage asserted (no zero-day in train/val). Temporal split kept untouched as secondary hard-mode.

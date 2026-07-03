@@ -56,7 +56,7 @@ def classify(lbl: str) -> str:
 
 
 # ---- load pooled data (both temporal halves = all 5 days, already cleaned) ----
-print("Loading pooled features + multiclass labels...")
+print("Loading pooled features + multiclass labels + meta...")
 X = np.vstack([
     pd.read_csv(os.path.join(paths.PROCESSED, "features_train.csv")).values,
     pd.read_csv(os.path.join(paths.PROCESSED, "features_test.csv")).values,
@@ -66,7 +66,13 @@ y = np.concatenate([
     np.load(os.path.join(paths.PROCESSED, "labels_test_multiclass.npy"), allow_pickle=True),
 ])
 y = np.array([_norm(s) for s in y])
-print(f"  pooled: X={X.shape}  y={y.shape}")
+# pooled meta (IP/port/timestamp), same row order as X — for RepeatedConnections + response replay
+meta = pd.concat([
+    pd.read_csv(os.path.join(paths.PROCESSED, "meta_train.csv")),
+    pd.read_csv(os.path.join(paths.PROCESSED, "meta_test.csv")),
+], ignore_index=True)
+assert len(meta) == len(X), f"meta/X misalignment: {len(meta)} vs {len(X)}"
+print(f"  pooled: X={X.shape}  y={y.shape}  meta={meta.shape}")
 
 kind = np.array([classify(s) for s in y])
 is_benign, is_known, is_zd = kind == "benign", kind == "known", kind == "zero_day"
@@ -79,26 +85,24 @@ benign_keep = np.random.RandomState(SEED).choice(benign_idx, size=n_benign_keep,
 print(f"\nknown-attack flows: {n_known_atk:,} | benign kept: {n_benign_keep:,} "
       f"(of {is_benign.sum():,}, ratio {P['benign_ratio']})")
 
-# ---- KNOWN pool = kept benign + all known attacks -> stratified 80/10/10 ----
+# ---- split on INDICES so meta follows each row into train/val/test ----
 known_pool = np.concatenate([benign_keep, np.where(is_known)[0]])
-Xk, yk = X[known_pool], y[known_pool]
-strat = yk  # stratify on multiclass to preserve rare known-attack ratios
-
-X_tr, X_tmp, y_tr, y_tmp = train_test_split(
-    Xk, yk, test_size=P["val_frac"] + P["test_frac"], random_state=SEED, stratify=strat)
+tr_idx, tmp_idx = train_test_split(
+    known_pool, test_size=P["val_frac"] + P["test_frac"], random_state=SEED, stratify=y[known_pool])
 rel = P["test_frac"] / (P["val_frac"] + P["test_frac"])
-X_val, X_te_known, y_val, y_te_known = train_test_split(
-    X_tmp, y_tmp, test_size=rel, random_state=SEED, stratify=y_tmp)
+val_idx, te_known_idx = train_test_split(
+    tmp_idx, test_size=rel, random_state=SEED, stratify=y[tmp_idx])
+zd_idx = np.where(is_zd)[0]
+te_idx = np.concatenate([te_known_idx, zd_idx])  # zero-day appended to TEST only
 
-# ---- append zero-day to TEST only ----
-X_zd, y_zd = X[is_zd], y[is_zd]
-X_te = np.vstack([X_te_known, X_zd]).astype(np.float32)
-y_te = np.concatenate([y_te_known, y_zd])
+X_tr, y_tr = X[tr_idx], y[tr_idx]
+X_val, y_val = X[val_idx], y[val_idx]
+X_te, y_te = X[te_idx].astype(np.float32), y[te_idx]
 
 # ---- binary labels ----
 def to_bin(arr): return (arr != "BENIGN").astype(np.int8)
 
-# ---- save ----
+# ---- save features/labels/meta per split ----
 np.save(os.path.join(OUT, "X_train.npy"), X_tr)
 np.save(os.path.join(OUT, "X_val.npy"),   X_val)
 np.save(os.path.join(OUT, "X_test.npy"),  X_te)
@@ -108,6 +112,9 @@ np.save(os.path.join(OUT, "y_test_mc.npy"),  y_te)
 np.save(os.path.join(OUT, "y_train_bin.npy"), to_bin(y_tr))
 np.save(os.path.join(OUT, "y_val_bin.npy"),   to_bin(y_val))
 np.save(os.path.join(OUT, "y_test_bin.npy"),  to_bin(y_te))
+meta.iloc[tr_idx].to_csv(os.path.join(OUT, "meta_train.csv"), index=False)
+meta.iloc[val_idx].to_csv(os.path.join(OUT, "meta_val.csv"), index=False)
+meta.iloc[te_idx].to_csv(os.path.join(OUT, "meta_test.csv"), index=False)
 np.save(os.path.join(OUT, "known_classes.npy"), np.array(sorted(set(y_tr))))
 np.save(os.path.join(OUT, "zero_day_classes.npy"), np.array(sorted(ZERO_DAY)))
 

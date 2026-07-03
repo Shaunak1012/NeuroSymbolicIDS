@@ -12,6 +12,7 @@ __pycache__/
 
 # ── Data (raw inputs + large generated intermediates) ──
 data/raw_csv/
+data/raw_csv_full/
 data/raw_pcaps/
 data/processed/
 
