@@ -1,7 +1,8 @@
-# Enhancement Backlog (Captured Ideas — Not Yet Scheduled)
+# Enhancement Backlog (Captured Ideas)
 
-> Candidate additions beyond the core build plan in [roadmap_gap_analysis.md](roadmap_gap_analysis.md).
-> **Status: captured only — none are in progress.** Decide later whether/when to pull any into the roadmap.
+> **➡️ Most of these are now folded into the [conference_roadmap.md](conference_roadmap.md) (plan v1.2 + "godly" agenda).** This file remains the raw idea list; the roadmap is the scheduled, prioritized version. Post-LTN-failure status noted per item below.
+>
+> Quick status: #1 autoencoder → **Phase 3** · #2 multi-seed → **Phase 5 (now with significance tests)** · #3 cross-dataset → **Phase 6** · #4 HITL → demo · #5 calibration/abstain → **Phase 5** · #6 latency → **Phase 5** · #7–9 hygiene → **Phase 0 (tracking/config mandatory now)** · Engelen labels → **Phase 0 decision**. New conference-tier items (failure-anatomy study, significance testing, classical baselines, explanation-faithfulness, adversarial probe, response engine) live in the roadmap.
 
 ## Tier 1 — high value, strengthens the core thesis
 

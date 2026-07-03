@@ -25,3 +25,7 @@ python-louvain==0.16   # provides the `community` module (Louvain detection)
 
 # ── Explainability (planned phase) ──
 shap==0.45.1
+
+# ── Config + experiment tracking ──
+pyyaml==6.0.3
+# (TensorBoard ships with tensorflow; XGBoost added when Phase 1 baselines land)
