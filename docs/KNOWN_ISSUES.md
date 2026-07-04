@@ -4,6 +4,9 @@
 
 ## Critical (block the neuro-symbolic goal)
 
+### [FIXED 2026-06-18] Focal-loss shape bug silently broke `model.fit()` training
+The categorical focal loss (`cnn3.py`, `cnn_paper.py`) did `tf.one_hot(y_true, n)` where Keras passes `y_true` as `(batch, 1)` — the one-hot then broadcast into a `(batch, batch, n)` garbage tensor, freezing val_loss and pinning accuracy near-random. Confirmed by a controlled race (plain CE → 0.996 val-acc; focal as-is → stuck at 0.50; focal fixed → 0.996). **Fix:** flatten `y_true` to `[-1]` before one-hot. Fixed in `cnn_paper.py` and `cnn3.py`. Note: the LTN custom loop was unaffected (it passes `(batch,)` directly), so the LTN failure analysis still stands. The *old* temporal CNN baseline (0.67 PR-AUC) may have been hampered by this — our clean retrain should be cleaner.
+
 ### [OPEN] LTN axioms are label tautologies
 `scripts/ltn.py` axioms use only ground-truth labels, restating the supervised target. They add no independent knowledge and **cannot help zero-day detection**. Fix: re-ground axioms in behaviour predicates (behaviour → class). Detail: [ltn_current.md](implementation/ltn_current.md).
 

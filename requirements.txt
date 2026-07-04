@@ -28,4 +28,7 @@ shap==0.45.1
 
 # ── Config + experiment tracking ──
 pyyaml==6.0.3
-# (TensorBoard ships with tensorflow; XGBoost added when Phase 1 baselines land)
+# (TensorBoard ships with tensorflow)
+
+# ── Classical baselines (Phase 1) ──
+xgboost==3.2.0
