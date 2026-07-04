@@ -138,7 +138,8 @@ def categorical_focal_loss(alpha_weights, gamma=2.0):
     n_cls     = len(alpha_weights)
 
     def loss(y_true, y_pred):
-        y_true_int = tf.cast(y_true, tf.int32)
+        # Keras passes y_true as (batch, 1); flatten or one_hot broadcasts to garbage.
+        y_true_int = tf.reshape(tf.cast(y_true, tf.int32), [-1])
         y_pred     = tf.clip_by_value(y_pred, K.epsilon(), 1.0 - K.epsilon())
         pt         = tf.reduce_sum(y_pred * tf.one_hot(y_true_int, n_cls), axis=-1)
         alpha_s    = tf.gather(alpha_t, y_true_int)

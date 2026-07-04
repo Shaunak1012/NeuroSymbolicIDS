@@ -2,6 +2,14 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-06-18 (Phase 1 — neural pillar + baselines)
+
+- **Retrained the CNN in-venv on the paper split** (`scripts/cnn_paper.py`) — loadable Keras-2 models, log1p transform, `metrics.py` headline. Early-stopped epoch 25, val-acc 0.997.
+- **Fixed a real focal-loss bug** (see KNOWN_ISSUES): Keras passes `y_true` as `(batch,1)`, so `one_hot` broadcast to a `(B,B,n)` garbage tensor → frozen val_loss / random accuracy. Confirmed by controlled race (focal as-is 0.50 vs fixed 0.996 val-acc). Fixed `reshape([-1])` in `cnn_paper.py` + legacy `cnn3.py`. Also fixed callback monitors (`val_sparse_categorical_accuracy`) that had silently disabled early-stopping/checkpointing.
+- **Classical baselines** (`scripts/baselines.py`): XGBoost, RandomForest, IsolationForest. **Free novelty channels** (`scripts/novelty.py`): MSP + Mahalanobis.
+- **Phase-1 zero-day-only PR-AUC:** xgboost 0.604 · cnn 0.599 · msp 0.587 · mahalanobis 0.583 · rf 0.564 · isolation_forest 0.153. Honest: XGBoost ≈ CNN (pivot to explanation/adaptivity/response); unsupervised anomaly far worse (motivates supervised NSAI). Per-family: CNN catches Web attacks (~0.9) but misses Bot (0.002)/Infiltration.
+- 6 fusion channels saved to `outputs/predictions/`. Metrics logged to `runs.jsonl`. xgboost pinned.
+
 ## 2026-06-18 (dataset upgrade → full variant with IP/timestamp)
 
 - **Switched from the ML-CVE variant to the full `GeneratedLabelledFlows`** (added `data/raw_csv_full/`, gitignored). Rewrote `scripts/preprocess.py` to ingest the 85-col CSVs, guard the `Infinity`-string quirk (`to_numeric coerce`), and extract a **meta side-table** (`meta_train/test.csv` — Flow ID, Source/Dest IP+Port, Protocol, Timestamp) aligned row-for-row through cleaning.

@@ -17,11 +17,21 @@ read the base paper (`basepaper.pdf`) and found our split is a *much harder, mis
 
 **⚠️ Key nuance:** on the paper split, overall binary PR-AUC is ~0.97 (PortScan/DDoS are now *known*). The **real challenge metric is binary on the zero-day-only subset** (Bot/Web/Infiltration/Heartbleed, ~4,183 test flows) — matching the paper's "6 unknown classes" metric. Track that separately everywhere.
 
-**▶ Next action = Phase 1 (neural pillar + baselines):**
-1. Retrain CNN in our venv on the paper split (fixes Keras-3 load issue; produces loadable models).
-2. Add post-hoc novelty scores: Mahalanobis on embeddings + energy/max-logit.
-3. Add classical baselines: XGBoost, Random Forest, Isolation Forest.
-See [conference_roadmap.md](target/conference_roadmap.md) Phase 1.
+**✅ Phase 1 DONE (2026-06-18).** CNN retrained in-venv on paper split (loadable Keras-2 models). Caught+fixed a **focal-loss shape bug** (`(batch,1)` broadcast froze training) and a callback-monitor bug. Classical baselines + free novelty channels done. **6 fusion channels saved.**
+
+**Phase 1 results — zero-day-only binary PR-AUC (headline):**
+| Channel | zd PR-AUC | zd ROC |
+|---------|-----------|--------|
+| xgboost | **0.604** | 0.876 |
+| cnn_paper | 0.599 | 0.855 |
+| msp | 0.587 | 0.855 |
+| mahalanobis | 0.583 | **0.883** |
+| random_forest | 0.564 | 0.812 |
+| isolation_forest | 0.153 | 0.766 |
+
+Honest findings: XGBoost (tabular SOTA) ≈ CNN (pivot story to explanation/adaptivity/response); unsupervised anomaly (IsoForest 0.15) is far worse → motivates supervised neuro-symbolic. Per-family: CNN catches Web attacks (0.9+) but misses Bot (0.002)/Infiltration — the gap fusion/symbolic must close.
+
+**▶ Next action = Phase 2 (symbolic pillar, done right):** (a) faithful paper reproduction (Ax1+Ax2, plain CE, ω=1), (b) LTN v2 with loss-ratio normalization + ScanProbe axiom, (c) failure-anatomy grid, (d) auxiliary behaviour-prediction head. Wire behaviours into a `*_paper` LTN trainer. See [conference_roadmap.md](target/conference_roadmap.md) Phase 2. **Remember the focal-loss `reshape([-1])` fix** in any new loss.
 
 **Key measured findings to carry forward:**
 - Leaky fusion (fit on zero-day labels) hit 0.78 (+0.11) — behaviours carry real signal, but
