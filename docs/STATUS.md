@@ -31,7 +31,18 @@ read the base paper (`basepaper.pdf`) and found our split is a *much harder, mis
 
 Honest findings: XGBoost (tabular SOTA) ≈ CNN (pivot story to explanation/adaptivity/response); unsupervised anomaly (IsoForest 0.15) is far worse → motivates supervised neuro-symbolic. Per-family: CNN catches Web attacks (0.9+) but misses Bot (0.002)/Infiltration — the gap fusion/symbolic must close.
 
-**▶ Next action = Phase 2 (symbolic pillar, done right):** (a) faithful paper reproduction (Ax1+Ax2, plain CE, ω=1), (b) LTN v2 with loss-ratio normalization + ScanProbe axiom, (c) failure-anatomy grid, (d) auxiliary behaviour-prediction head. Wire behaviours into a `*_paper` LTN trainer. See [conference_roadmap.md](target/conference_roadmap.md) Phase 2. **Remember the focal-loss `reshape([-1])` fix** in any new loss.
+**🔄 Phase 2 IN PROGRESS (symbolic pillar).** `scripts/ltn_paper.py` (configurable: loss/axioms/omega/omega-mode, loss-ratio normalization = SAT-domination fix, ScanProbe axiom now valid) + `scripts/cnn_auxhead_paper.py` (aux behaviour head) written & smoke-tested (UNCOMMITTED).
+
+**Phase 2 results so far — zero-day PR-AUC (all LTN variants trained via custom loop):**
+| Model | zd PR-AUC | zd ROC |
+|-------|-----------|--------|
+| cnn_paper (model.fit, reference) | 0.599 | 0.855 |
+| ltn_repro (paper method: ce+Ax1/Ax2+ω=1 fixed) | 0.440 | 0.736 |
+| ltn_v2 (focal+both axioms+ω=0.1 ratio) | 0.491 | 0.735 |
+
+**⚠️ CRITICAL open question:** both LTN variants underperform the CNN — BUT this may be a **training-method confound** (CNN uses `model.fit` w/ LR-reduction + best-restore; LTN uses a basic custom loop, best-selected on a *saturated* 0.998 val-acc). **Running the ω=0 control now (`ltn_ctrl_w0`, background `b43macq2g`)** — custom loop, no SAT. If control ≈ 0.44-0.49 → the gap is training-method (axioms actually help: v2 0.491 > control), and I should upgrade the custom loop (add LR schedule / better model selection). If control ≈ 0.599 → axioms genuinely hurt. **Interpret v2/repro ONLY against the control, not against cnn_paper.**
+
+**▶ Next actions:** (1) read `ltn_ctrl_w0` result → interpret; (2) if training-method confound, add LR-reduction to `ltn_paper.py` custom loop + re-run; (3) run aux head (`cnn_auxhead_paper.py`); (4) failure-anatomy grid (needs a *balance* axis too — vary benign_ratio); (5) commit Phase 2 + table (P2-6). **Remember the focal-loss `reshape([-1])` fix** in any new loss.
 
 **Key measured findings to carry forward:**
 - Leaky fusion (fit on zero-day labels) hit 0.78 (+0.11) — behaviours carry real signal, but
