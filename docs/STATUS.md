@@ -97,22 +97,28 @@ they need the log-odds re-score (`scripts/rescore_logits.py`, blocked, see below
    any metric; the phase transition stands.
 4. **UPHELD — the aux head does not help.** `cnn_auxhead_l0.5` (0.5744) vs `cnn_paper`
    (0.6446), same `model.fit` training method, neither saturated → clean comparison.
-5. **NEW, and the most important result: Bot is at chance for every supervised method.**
-   Lift ≈ 1.0–1.8x across CNN, XGBoost, RF, MSP, and all LTN variants. **Isolation
-   Forest — macro 0.063, near-useless overall — scores 0.0571 on Bot, statistically
-   indistinguishable from the CNN's 0.0591.** 884K labelled training flows buy *no*
-   Bot signal over an unsupervised outlier detector. Mahalanobis (0.1467, 4.3x) is the
-   sole exception and is a *distance* method — the open-set-recognition signature.
-   This is direct evidence that **the per-flow representation does not contain the Bot
-   signal**: Bot is C2 beaconing, whose signature is periodicity *across* flows to the
-   same destination. Classifying flows i.i.d. destroys it by construction. No loss
-   function or axiom can recover information the input lacks — which also explains why
-   every symbolic intervention moves the number by only ±0.02.
-6. **The symbolic layer is currently tautological.** Ax3/Ax4/Ax5 are thresholded
-   functions of the same 68 features the CNN already consumes — a lossy re-encoding,
-   not new knowledge. Genuine symbolic value requires information absent from the
-   feature vector (cross-flow periodicity, host role, fan-out, kill-chain stage) —
-   which is the *same* fix as #5.
+5. **RETRACTED same-day — "Bot's signal is absent from the per-flow representation
+   (beaconing thesis)".** This was a hypothesis stated as a finding, and the skyline
+   oracle test (`scripts/skyline_oracle.py`, 2026-07-27) falsifies it directly: revealing
+   only ~1,000 labelled Bot flows to XGBoost (held-out eval, no leakage) lifts Bot PR-AUC
+   from 0.0314 (never-seen) to **0.9764** — 56x chance, near-ceiling. A Bot-vs-benign-only
+   classifier finds a clean, mundane, **single-flow** signature: `Bwd Packet Length Mean`
+   77→**6** (near-empty backward payload), `Destination Port` 80→**8080**,
+   `Init_Win_bytes_forward` 116→**8192**. Bot's low never-seen PR-AUC is a **zero-day
+   transfer failure of the closed-set classifier**, not an information-theoretic limit —
+   the information was always in the 68 features. Do not repeat the beaconing/cross-flow
+   framing without new evidence; it was an untested domain intuition, not a measurement.
+6. **CORRECTED — why the symbolic axioms don't move Bot.** Not "information absent from
+   the representation" (see #5). Ax3 (LargePackets∧HighEntropy), Ax4 (BurstTraffic), Ax5
+   (ScanProbe) are volume/scan-shaped — tuned for DoS/PortScan — and none of them touch
+   Bot's actual signature (tiny backward payload, port 8080, oversized initial window).
+   **Actionable, cheap fix:** a targeted axiom on the real signature (e.g.
+   `SmallBackwardPayload ∧ NonStandardPort → ¬benign`) is a plausible zero-day-transfer
+   mechanism worth testing directly — genuinely different from "add cross-flow features."
+   Mahalanobis's edge on Bot (4.3x, vs 1.0–1.8x for closed-set classifiers) is still real
+   and still an open-set-recognition signature — a closed-set softmax has no probability
+   mass reserved for "structurally novel," which is the actual mechanism, not missing
+   information.
 7. **Deferred — CE vs focal.** `ltn_repro` (CE + base axioms) looked worst on blended
    (0.485), but it is one of the saturated runs; the comparison is unsafe until re-scored.
 
@@ -125,11 +131,14 @@ they need the log-odds re-score (`scripts/rescore_logits.py`, blocked, see below
 | (2) Representation-level | Aux behaviour-prediction head, `scripts/cnn_auxhead_paper.py` | ✅ measured | 0.5744 — below baseline |
 | (3) Inference-level | Fusion (CNN + LTN + KG) | ❌ Not built — Phase 4 | — |
 
-**Neither symbolic integration point beats the plain CNN under the corrected metric.**
-Per finding #5/#6 this is expected: both inject knowledge that is already a function of
-the input, so neither can add information. The thesis survives — but its evidence is now
-"loss- and representation-level injection cannot exceed the representation", not "ω needs
-tuning".
+**Neither symbolic integration point beats the plain CNN under the corrected metric** —
+but per the oracle result (#5), that is *not* because they inject knowledge already a
+function of the input. Bot's information IS in the input; the axioms just don't encode
+Bot's actual signature. This reframes the thesis from "symbolic injection is structurally
+capped by the representation" to **"zero-day transfer is the real failure mode, and the
+current axiom set targets the wrong signature for the family that matters most."** That
+is a stronger, more actionable claim: it predicts a *targeted* axiom should move Bot,
+which is falsifiable and cheap to test (see B2 below).
 
 **Performance note (2026-07-27):** `ltn_paper.py`'s custom training loop was fully eager (~3,450 raw Python iterations/epoch) and left most CPU cores idle. Rewrote the train step under `@tf.function` (masks precomputed as numeric arrays instead of per-batch string comparison, since that's not graph-compatible) + explicit `intra_op=16`/`inter_op=2` thread config in both `ltn_paper.py` and `cnn_auxhead_paper.py`. Verified numerically equivalent (same ops, same math, just compiled) and faster per epoch on CPU.
 
@@ -142,29 +151,34 @@ PowerShell and Git Bash. TF ran normally earlier the same session, so a Windows
 Application Control / Smart App Control policy refresh landed mid-session. **Diagnose via
 Event Viewer → Applications and Services Logs → Microsoft → Windows → CodeIntegrity →
 Operational.** Not worked around — it is a machine security control and the user's call.
-Blocks anything needing model load/train: the log-odds re-score, multi-seed runs, the
-skyline experiment.
+Blocks anything needing model load/train (TF-based): the log-odds re-score, multi-seed
+neural runs. Does **not** block sklearn/xgboost (unaffected — confirmed by running B below).
 
-**▶ Next (revised plan — measurement → ceiling → representation):**
-- **A. Fix measurement.** ✅ `metrics.py` rewritten (per-family + macro headline, underpowered
-  exclusion, saturation diagnostics, `to_logodds` helper). ✅ STATUS retractions above.
-  ⛔ `scripts/rescore_logits.py` written but **blocked on TF** — recomputes scores as
-  `logsumexp(attack_logits) − benign_logit` from saved models (saved probability arrays
-  cannot be repaired; the resolution is already gone). Note `cnn_auxhead_paper.py` never
-  calls `model.save`, so the aux head needs a retrain to be re-scored — **add the save**.
-  Still TODO: 3–5 seeds + CIs before any comparative claim.
-- **B. Establish the ceiling (highest-value single experiment).** Skyline/oracle: train
-  *with* zero-day labels (deliberately cheating), measure per-family. If a fully-supervised
-  model also can't separate Bot in flow-feature space, Bot is undetectable at this unit of
-  analysis — converting an apparent failure into a measured, publishable finding, and
-  telling us whether C is worth building.
-- **C. Fix the unit of analysis (the real contribution).** Aggregate to host/session level
-  using the IP+timestamp unlocked in the dataset upgrade: per-(src,dst) windowed features —
-  connection counts, inter-arrival **periodicity/beaconing score**, fan-out, byte-ratio
-  consistency. *Then* the symbolic layer stops being tautological (RepeatedConnections,
-  Beaconing, FanOut, LateralMovement are genuinely absent from single-flow features).
-  **Falsifiable prediction: Bot PR-AUC should rise well above chance.** If it doesn't, the
-  theory is wrong and we learn that cheaply.
+**✅ B. Skyline/oracle — RUN (2026-07-27, `scripts/skyline_oracle.py`).** Revealed ~1,000
+labelled Bot flows to XGBoost (held-out eval, no leakage): Bot PR-AUC 0.0314 → **0.9764**
+(56x chance). **Falsifies the beaconing/cross-flow hypothesis** — see finding #5/#6 above.
+Bot's signal is fully present per-flow; the failure is zero-day transfer, not missing
+information. This changes the next step from "build cross-flow features" (C, now
+deprioritized — no longer well-motivated) to a cheaper, more targeted fix:
+
+**▶ Next — B2: targeted Bot axiom (the falsifiable follow-up).**
+Isolated Bot-vs-benign feature importances (same script family) found a clean per-flow
+signature: `Bwd Packet Length Mean` 77→6 (near-empty backward payload),
+`Destination Port` 80→8080, `Init_Win_bytes_forward` 116→8192. None of Ax3
+(LargePackets∧HighEntropy), Ax4 (BurstTraffic), or Ax5 (ScanProbe) touch this — they're
+volume/scan-shaped, tuned for DoS/PortScan. Add a new behaviour predicate on the actual
+signature (e.g. `SmallBackwardPayload ∧ NonStandardPort → ¬benign` in `behavior.py`),
+retrain `ltn_paper.py` with it in the axiom set, and re-run the ω-sweep. **Prediction:**
+Bot lift should rise measurably above the current 1.0–1.1x for LTN variants. If it
+doesn't, the axiom-injection mechanism itself (not just axiom content) is the bottleneck —
+a different, equally important finding, and cheap to learn.
+
+**Remaining from Step A:** `scripts/rescore_logits.py` (log-odds re-score) blocked on TF.
+`cnn_auxhead_paper.py` now has `model.save` added — needs a retrain to produce a
+re-scoreable model. 3–5 seeds + CIs still needed before any comparative claim ships.
+C (host/session-level features) is not abandoned — RepeatedConnections/fan-out may still
+help Infiltration or lateral-movement detection specifically — but it is no longer the
+Bot fix and should wait until B2 is tested.
 
 **Focal-loss `reshape([-1])` fix** required in any new loss. Failure-anatomy *balance* axis
 (vary benign_ratio) still TODO.

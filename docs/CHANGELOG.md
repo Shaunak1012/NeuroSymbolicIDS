@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (skyline/oracle — beaconing hypothesis falsified)
+
+- **Ran the skyline/oracle experiment** (`scripts/skyline_oracle.py`, sklearn/xgboost only, unaffected by the TF block): revealed a random 50% of each zero-day family's test flows to XGBoost training (held-out other 50% for eval, no leakage), same hyperparams as `baselines.py`. Bot PR-AUC rose from 0.0314 (never-seen) to **0.9764** (56x chance) with ~1,000 labelled examples. Every family recovers similarly (macro 0.5947 → 0.9899).
+- **This falsifies the "Bot's signal is absent from the per-flow representation" claim written into STATUS/CHANGELOG earlier the same day.** That was an untested domain-knowledge hypothesis (Bot = C2 beaconing = a cross-flow phenomenon) presented as a finding without verifying it against the labels. The oracle result shows the information was always in the 68 per-flow features; the near-chance never-seen score is a **zero-day transfer failure of the closed-set classifier**, not an information-theoretic limit.
+- **Isolated a Bot-vs-benign-only classifier's feature importances** to find the actual signature: `Bwd Packet Length Mean` 77→6 (near-empty backward payload), `Destination Port` 80→8080, `Init_Win_bytes_forward` 116→8192 — a clean, mundane, single-flow pattern. None of the existing axioms (Ax3 LargePackets∧HighEntropy, Ax4 BurstTraffic, Ax5 ScanProbe) touch it; they're volume/scan-shaped, tuned for DoS/PortScan.
+- **Reframes the Phase-2 thesis:** not "symbolic injection is capped by the representation" but "the current axiom set targets the wrong signature for the family that matters." Next step is a targeted axiom test (B2 in STATUS), not host/session-level feature aggregation (C) — deprioritized, no longer well-motivated for Bot specifically (may still help Infiltration/lateral-movement).
+
 ## 2026-07-27 (measurement audit — retractions + corrected metrics)
 
 - **Found a float32 softmax saturation defect invalidating 4 of 13 runs.** Scores were `1 - softmax[benign]`; for a confident model `p(benign)` rounds to exactly 1.0, so the score underflows to exactly 0.0 — on `ltn_ctrl_w0`, 99.25% of benign and 51.7% of zero-day flows. The 1%-FPR threshold therefore lands at 0.0 and flags everything (achieved FPR 1.000), producing the bogus "recall=1.0000 for every family" rows and an identical `zd_f1 = 0.1315` across three models (the algebraic predict-all constant at 7% prevalence). Saturated: `ltn_ctrl_w0`, `ltn_repro`, `ltn_v2`, `ltn_anat_w2p0` — i.e. every fair-loop run the control experiment depended on.
