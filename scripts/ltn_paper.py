@@ -32,7 +32,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 import paths, config, features, behavior, metrics, tracking
 
-cfg = config.get(); SEED = cfg["seed"]
+cfg = config.get(); SEED = int(os.environ.get("LTN_SEED", cfg["seed"]))
 tf.random.set_seed(SEED); np.random.seed(SEED)
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
