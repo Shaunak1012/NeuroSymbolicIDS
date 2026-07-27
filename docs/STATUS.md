@@ -111,14 +111,19 @@ they need the log-odds re-score (`scripts/rescore_logits.py`, blocked, see below
 6. **CORRECTED — why the symbolic axioms don't move Bot.** Not "information absent from
    the representation" (see #5). Ax3 (LargePackets∧HighEntropy), Ax4 (BurstTraffic), Ax5
    (ScanProbe) are volume/scan-shaped — tuned for DoS/PortScan — and none of them touch
-   Bot's actual signature (tiny backward payload, port 8080, oversized initial window).
-   **Actionable, cheap fix:** a targeted axiom on the real signature (e.g.
-   `SmallBackwardPayload ∧ NonStandardPort → ¬benign`) is a plausible zero-day-transfer
-   mechanism worth testing directly — genuinely different from "add cross-flow features."
-   Mahalanobis's edge on Bot (4.3x, vs 1.0–1.8x for closed-set classifiers) is still real
-   and still an open-set-recognition signature — a closed-set softmax has no probability
-   mass reserved for "structurally novel," which is the actual mechanism, not missing
-   information.
+   Bot's actual signature. **Ax6 built and standalone-validated (2026-07-27, see B2
+   below):** the initial 2-signal design (small backward payload ∧ high port-number) was
+   built from a median-only glance and turned out **backwards on the full distribution** —
+   Bot's `Bwd Packet Length Mean` clusters exactly at the percentile boundary (ROC 0.40,
+   anti-correlated). What actually works, after checking full distributions: destination
+   port **set membership** against a small fixed list of well-known service ports (not a
+   magnitude ramp — port number isn't ordinal) reaches **ROC 0.887, PR-AUC 0.135 alone**
+   (chance 0.034, ~4x lift) — comparable to Mahalanobis. Wired into `ltn_paper.py` as Ax6
+   (`BeaconLike` in `behavior.py`); **training blocked on the same TF issue**, so the
+   effect on the trained model is not yet measured. Mahalanobis's edge on Bot (4.3x, vs
+   1.0–1.8x for closed-set classifiers) is still real and still an open-set-recognition
+   signature — a closed-set softmax has no probability mass reserved for "structurally
+   novel," which is the actual mechanism, not missing information.
 7. **Deferred — CE vs focal.** `ltn_repro` (CE + base axioms) looked worst on blended
    (0.485), but it is one of the saturated runs; the comparison is unsafe until re-scored.
 
@@ -161,17 +166,36 @@ Bot's signal is fully present per-flow; the failure is zero-day transfer, not mi
 information. This changes the next step from "build cross-flow features" (C, now
 deprioritized — no longer well-motivated) to a cheaper, more targeted fix:
 
-**▶ Next — B2: targeted Bot axiom (the falsifiable follow-up).**
-Isolated Bot-vs-benign feature importances (same script family) found a clean per-flow
-signature: `Bwd Packet Length Mean` 77→6 (near-empty backward payload),
-`Destination Port` 80→8080, `Init_Win_bytes_forward` 116→8192. None of Ax3
-(LargePackets∧HighEntropy), Ax4 (BurstTraffic), or Ax5 (ScanProbe) touch this — they're
-volume/scan-shaped, tuned for DoS/PortScan. Add a new behaviour predicate on the actual
-signature (e.g. `SmallBackwardPayload ∧ NonStandardPort → ¬benign` in `behavior.py`),
-retrain `ltn_paper.py` with it in the axiom set, and re-run the ω-sweep. **Prediction:**
+**🟡 B2: targeted Bot axiom — BUILT + standalone-validated, training BLOCKED (2026-07-27).**
+
+Isolated a Bot-vs-benign-only XGBoost's feature importances (no TF needed). First-pass
+design from a median-only glance (`Bwd Packet Length Mean` 77→6, `Destination Port`
+80→8080) was **wrong**: checking the *full* distribution, not just the median, showed
+Bot's backward-payload values cluster exactly at the percentile boundary used for the
+ramp, making the signal net **anti-correlated with Bot** (ROC 0.3995 — worse than
+random). Diagnosed, dropped, and replaced with what the full-distribution check actually
+supports: destination-port **set membership** against a small fixed list of well-known
+service ports (`behavior.WELL_KNOWN_PORTS` — external domain knowledge, not
+data-fitted; a magnitude ramp on the raw port number was tried and also failed, for the
+same "median lies" reason). Standalone (`metrics`-style check, no LTN):
+
+| Signal | Bot ROC | Bot PR-AUC | vs chance |
+|---|---|---|---|
+| magnitude ramp (dropped) | 0.400 | 0.034 | ~1.0x (anti-correlated) |
+| **well-known-port membership (kept)** | **0.887** | **0.135** | **~4.0x** |
+
+Comparable to Mahalanobis's 4.3x — a real, non-tautological signal. Added as
+`BeaconLike` in `behavior.py`, wired into `ltn_paper.py` as **Ax6**
+(`W_tr`/`sat_loss` now carry 4 behaviour columns instead of 3), and
+`cnn_auxhead_paper.py`'s `BEH` list fixed to be robust to `BEHAVIOUR_NAMES` order
+(`[:5]` would have silently dropped the new entry given its list position).
+**Everything up to training is done; the training run itself (`ltn_paper.py` ω-sweep
+with Ax6 in the axiom set) is blocked on the same TensorFlow Application Control
+issue** — re-checked immediately before this write-up, still failing (now on
+`_pywrap_stacktrace_handler`, a 5th distinct DLL). **Prediction to test once unblocked:**
 Bot lift should rise measurably above the current 1.0–1.1x for LTN variants. If it
-doesn't, the axiom-injection mechanism itself (not just axiom content) is the bottleneck —
-a different, equally important finding, and cheap to learn.
+doesn't, the axiom-injection mechanism itself (not just axiom content) is the
+bottleneck — a different, equally important finding.
 
 **Remaining from Step A:** `scripts/rescore_logits.py` (log-odds re-score) blocked on TF.
 `cnn_auxhead_paper.py` now has `model.save` added — needs a retrain to produce a

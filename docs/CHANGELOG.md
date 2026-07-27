@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (targeted Bot axiom — built and validated, training blocked)
+
+- **Designed a first-pass Bot axiom from a median-only glance and got it wrong.** `Bwd Packet Length Mean` looked like a clean separator (benign median 77, Bot median 6), but the full distribution shows Bot's values cluster exactly at the percentile boundary used for the fuzzy ramp — the resulting signal was net anti-correlated with Bot (ROC 0.3995, worse than random). Caught by validating standalone against real labels before spending a training run on it, not by inspection.
+- **Replaced with what the full distribution actually supports:** destination-port membership against a small, externally-defined list of well-known service ports (`behavior.WELL_KNOWN_PORTS`) — not data-fitted, not a magnitude ramp (port number isn't ordinal; a magnitude ramp was tried and also failed for the same median-lies reason). Standalone: ROC 0.887, PR-AUC 0.135 on Bot-vs-benign alone (chance 0.034, ~4x lift) — comparable to Mahalanobis.
+- **Added `BeaconLike` to `behavior.py`** (vectorized via `np.isin`, not a per-row Python loop), wired into `ltn_paper.py` as **Ax6** (behaviour weight matrix and `sat_loss` now carry 4 columns instead of 3). Fixed `cnn_auxhead_paper.py`'s `BEH` list, which used `BEHAVIOUR_NAMES[:5]` to drop the constant-zero `RepeatedConnections` entry — inserting `BeaconLike` before it in the list would have silently excluded the new behaviour too; now filters by name.
+- **Blocked on the same TensorFlow issue** — re-checked before this write-up, still failing on a 5th distinct native DLL. The axiom is built and standalone-validated; its effect on the trained LTN (the actual test of B2's prediction) is not yet measured.
+
 ## 2026-07-27 (skyline/oracle — beaconing hypothesis falsified)
 
 - **Ran the skyline/oracle experiment** (`scripts/skyline_oracle.py`, sklearn/xgboost only, unaffected by the TF block): revealed a random 50% of each zero-day family's test flows to XGBoost training (held-out other 50% for eval, no leakage), same hyperparams as `baselines.py`. Bot PR-AUC rose from 0.0314 (never-seen) to **0.9764** (56x chance) with ~1,000 labelled examples. Every family recovers similarly (macro 0.5947 → 0.9899).
