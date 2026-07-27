@@ -19,52 +19,155 @@ read the base paper (`basepaper.pdf`) and found our split is a *much harder, mis
 
 **✅ Phase 1 DONE (2026-06-18).** CNN retrained in-venv on paper split (loadable Keras-2 models). Caught+fixed a **focal-loss shape bug** (`(batch,1)` broadcast froze training) and a callback-monitor bug. Classical baselines + free novelty channels done. **6 fusion channels saved.**
 
-**Phase 1 results — zero-day-only binary PR-AUC (headline):**
-| Channel | zd PR-AUC | zd ROC |
+**Phase 1 results — ⚠️ SUPERSEDED 2026-07-27, see the corrected table below.** These are
+the *blended* zero-day PR-AUC, which the audit showed is a size-weighted mixture and
+reorders the ranking. Kept for provenance only:
+| Channel | zd PR-AUC (blended, superseded) | zd ROC |
 |---------|-----------|--------|
-| xgboost | **0.604** | 0.876 |
+| xgboost | 0.604 | 0.876 |
 | cnn_paper | 0.599 | 0.855 |
 | msp | 0.587 | 0.855 |
 | mahalanobis | 0.583 | **0.883** |
 | random_forest | 0.564 | 0.812 |
 | isolation_forest | 0.153 | 0.766 |
 
-Honest findings: XGBoost (tabular SOTA) ≈ CNN (pivot story to explanation/adaptivity/response); unsupervised anomaly (IsoForest 0.15) is far worse → motivates supervised neuro-symbolic. Per-family: CNN catches Web attacks (0.9+) but misses Bot (0.002)/Infiltration — the gap fusion/symbolic must close.
+**🔴 RETRACTED: "XGBoost (tabular SOTA) ≈ CNN".** On the corrected macro metric the CNN
+*beats* XGBoost (0.6446 vs 0.6372) — the tie was an artefact of family sizes in the blend.
+The "pivot the story to explanation/adaptivity/response" framing was motivated by a tie
+that isn't there and should be revisited. **Also retracted: "unsupervised anomaly is far
+worse → motivates supervised neuro-symbolic".** IsoForest is far worse *overall* (macro
+0.063) but scores 0.0571 on Bot — indistinguishable from the CNN's 0.0591. On the family
+that actually matters, supervision buys nothing. Upheld: CNN catches Web attacks (~0.92–0.96)
+and misses Bot/Infiltration.
 
 **🔄 Phase 2 IN PROGRESS (symbolic pillar).** `scripts/ltn_paper.py` (configurable: loss/axioms/omega/omega-mode, loss-ratio normalization = SAT-domination fix, ScanProbe axiom now valid) + `scripts/cnn_auxhead_paper.py` (aux behaviour head) written & smoke-tested (UNCOMMITTED).
 
-**✅ CRITICAL open question RESOLVED (2026-07-27).** Ran the ω=0 control + a fixed-ω failure-anatomy sweep, all under the fairness-upgraded custom loop. Full fair-loop comparison (zero-day-only PR-AUC):
+**🔴 MEASUREMENT DEFECT FOUND (2026-07-27) — earlier Phase-2 conclusions RETRACTED.**
+An audit of the actual score distributions found two defects that invalidate the
+comparison this batch was run to settle. Do not cite the ω-sweep conclusions written
+earlier today; the corrected picture is below.
 
-| Run | ω (mode) | zd PR-AUC | zd ROC |
-|---|---|---|---|
-| cnn_paper (reference, `model.fit`) | — | 0.599 | 0.855 |
-| ltn_ctrl_w0 (no SAT, fair loop) | 0 fixed | 0.501 | 0.739 |
-| ltn_repro (paper method: CE + base axioms) | 1.0 fixed | 0.485 | 0.738 |
-| ltn_v2 (focal + both axioms, adaptive) | 0.1 ratio | 0.491 | 0.738 |
-| **ltn_anat_w0p5** | 0.5 fixed | **0.520** | 0.765 |
-| **ltn_anat_w1p0** | 1.0 fixed | **0.513** | 0.759 |
-| ltn_anat_w2p0 | 2.0 fixed | 0.092 | 0.615 |
-| cnn_auxhead_l0.5 (aux behaviour head, `model.fit`) | — | 0.497 | 0.727 |
+**Defect 1 — float32 softmax saturation.** Scores were `patk = 1 - softmax[benign]`.
+For a confident model `p(benign)` rounds to exactly 1.0, so `patk` underflows to
+exactly 0.0: on `ltn_ctrl_w0`, **99.25% of benign and 51.7% of zero-day flows sit at
+exactly 0.0**. The 1%-FPR threshold therefore lands at 0.0, flags everything
+(achieved FPR = 1.000), and produces the "recall=1.0000 for every family" rows —
+an artefact, not detection. `zd_f1 = 0.13153467603729385` is the algebraic
+predict-all-positive constant at 7% prevalence, identical across three different
+models. **4 of 13 runs are saturated: `ltn_ctrl_w0`, `ltn_repro`, `ltn_v2`,
+`ltn_anat_w2p0`** — i.e. all three fair-loop runs the control experiment depended on.
+`metrics.py` now detects and flags this (`diagnostics.saturated`).
 
-**Interpretation:**
-1. **Training-method confound confirmed as the dominant gap.** Even the ω=0 control (no symbolic loss at all, same custom loop) sits at 0.501 vs the CNN's 0.599 — a ~0.10 gap from the custom loop alone (no LR-reduction-on-plateau restore weights, no batch-norm running-stat nuances of `model.fit`, etc.). Everything below must be read *relative to 0.501*, not 0.599.
-2. **Axioms genuinely help in a narrow band.** Fixed ω=0.5 (0.520) and ω=1.0 (0.513) both *beat* the ω=0 control — a real, non-trivial signal that the behaviour-grounded axioms (Ax3/4/5) carry useful information for zero-day detection, contradicting the pre-reset narrative that axioms only hurt.
-3. **But there's a sharp phase transition.** ω=2.0 collapses to 0.092 — SAT overwhelms CE and wrecks classification (Web Attack recall ~0%), reproducing the original full-run failure mode. The safe zone is roughly ω∈[0.5, 1.0]; ω=2.0 is firmly past the cliff.
-4. **The adaptive "ratio" omega-mode (v2) is leaving signal on the table.** It nets out at ω_eff≈0.1-equivalent (0.491), close to the *control*, not the sweet spot found by the fixed sweep (0.5–1.0). The loss-ratio normalization that fixed SAT-domination undershoots the useful axiom weight — worth recalibrating the ratio target if pursuing this loss-level path further.
-5. **CE vs focal is a separate confound.** `ltn_repro` (CE + base axioms) is the *worst* fair-loop variant (0.485), even below the ω=0 control — suggesting plain CE is a poor fit for this class-imbalanced zero-day setting independent of the axiom question.
-6. **Representation-level injection (aux-head) doesn't clearly help either.** `cnn_auxhead_l0.5` uses the *same* `model.fit` method as the CNN reference (no loop confound) yet still underperforms it (0.497 vs 0.599) — the behaviour-prediction auxiliary task alone isn't a free win, landing in the same ~0.49-0.52 band as the SAT variants.
+**Defect 2 — the blended headline is a size-weighted mixture.** "Benign vs all 6
+unknowns" averages families whose detectability differs by ~30x, so it moves for
+reasons unrelated to detection quality. `metrics.py` now reports **per-family PR-AUC
++ macro-average over powered families (n≥100)** as the headline; the blend is
+secondary. Heartbleed (n=11), Infiltration (n=36) and SQL Injection (n=21) are
+excluded as underpowered rather than reported to 4 dp.
+
+**Corrected table** (macro = mean PR-AUC over Bot / Web-BF / Web-XSS; `lift` = PR-AUC ÷ chance):
+
+| Run | sat? | **macro** | Bot | Bot lift | Web BF | XSS | blended (old headline) |
+|---|---|---|---|---|---|---|---|
+| cnn_paper | no | **0.6446** | 0.0591 | 1.7x | 0.9194 | 0.9554 | 0.599 |
+| xgboost | no | 0.6372 | 0.0608 | 1.8x | 0.9484 | 0.9023 | 0.604 |
+| msp | no | 0.6123 | 0.0591 | 1.7x | 0.8864 | 0.8913 | 0.587 |
+| ltn_ctrl_w0 | **YES** | (0.5937) | 0.0342 | 1.0x | 0.8609 | 0.8861 | 0.501 |
+| cnn_auxhead_l0.5 | no | 0.5744 | 0.0339 | 1.0x | 0.8505 | 0.8386 | 0.497 |
+| ltn_anat_w0p5 | no | 0.5552 | 0.0367 | 1.1x | 0.8326 | 0.7962 | 0.520 |
+| ltn_anat_w1p0 | no | 0.5241 | 0.0369 | 1.1x | 0.8105 | 0.7250 | 0.513 |
+| mahalanobis | no | 0.4585 | **0.1467** | **4.3x** | 0.6830 | 0.5457 | 0.583 |
+| isolation_forest | no | 0.0628 | 0.0571 | 1.7x | 0.0861 | 0.0451 | 0.153 |
+| ltn_anat_w2p0 | YES | (0.0348) | 0.0344 | 1.0x | 0.0477 | 0.0223 | 0.092 |
+
+Bracketed values are computed on saturated (tied) scores and are **not trustworthy** —
+they need the log-odds re-score (`scripts/rescore_logits.py`, blocked, see below).
+
+**Corrected interpretation:**
+1. **RETRACTED — "axioms help at ω=0.5–1.0".** That rested on blended (0.520 > 0.501).
+   On macro it *reverses*: ω=0.5 scores 0.5552 vs the control's 0.5937, and per-family
+   ω=0.5 is worse than the control on both families that carry signal (Web BF 0.833 vs
+   0.861; XSS 0.796 vs 0.886). The claim does not survive; n=1 seed and a saturation
+   confound on the control make it unsafe in either direction.
+2. **RETRACTED — "XGBoost ≈ CNN, tabular SOTA matches us".** On macro the CNN *beats*
+   XGBoost (0.6446 vs 0.6372); the blended ordering was an artefact of family sizes.
+   The Phase-1 "pivot the story to explanation/adaptivity" framing needs revisiting —
+   it was motivated by a tie that isn't there.
+3. **UPHELD — the ω=2.0 collapse.** 0.0348 macro, every family at chance. Real under
+   any metric; the phase transition stands.
+4. **UPHELD — the aux head does not help.** `cnn_auxhead_l0.5` (0.5744) vs `cnn_paper`
+   (0.6446), same `model.fit` training method, neither saturated → clean comparison.
+5. **NEW, and the most important result: Bot is at chance for every supervised method.**
+   Lift ≈ 1.0–1.8x across CNN, XGBoost, RF, MSP, and all LTN variants. **Isolation
+   Forest — macro 0.063, near-useless overall — scores 0.0571 on Bot, statistically
+   indistinguishable from the CNN's 0.0591.** 884K labelled training flows buy *no*
+   Bot signal over an unsupervised outlier detector. Mahalanobis (0.1467, 4.3x) is the
+   sole exception and is a *distance* method — the open-set-recognition signature.
+   This is direct evidence that **the per-flow representation does not contain the Bot
+   signal**: Bot is C2 beaconing, whose signature is periodicity *across* flows to the
+   same destination. Classifying flows i.i.d. destroys it by construction. No loss
+   function or axiom can recover information the input lacks — which also explains why
+   every symbolic intervention moves the number by only ±0.02.
+6. **The symbolic layer is currently tautological.** Ax3/Ax4/Ax5 are thresholded
+   functions of the same 68 features the CNN already consumes — a lossy re-encoding,
+   not new knowledge. Genuine symbolic value requires information absent from the
+   feature vector (cross-flow periodicity, host role, fan-out, kill-chain stage) —
+   which is the *same* fix as #5.
+7. **Deferred — CE vs focal.** `ltn_repro` (CE + base axioms) looked worst on blended
+   (0.485), but it is one of the saturated runs; the comparison is unsafe until re-scored.
 
 **Phase-2 "three symbolic integration points" (per [conference_roadmap.md](target/conference_roadmap.md)):**
 
-| Integration point | Method | Status | Best result (zd PR-AUC) |
+| Integration point | Method | Status | Best result (macro zd PR-AUC) |
 |---|---|---|---|
-| (1) Loss-level | Hybrid-LTN (SAT constraint), `scripts/ltn_paper.py` | ✅ Reproduced + anatomized | 0.520 (ω=0.5 fixed) |
-| (2) Representation-level | Aux behaviour-prediction head, `scripts/cnn_auxhead_paper.py` | ✅ Measured | 0.497 |
-| (3) Inference-level | Fusion (CNN + LTN + KG) | ❌ Not built — Phase 4 | — expected primary performance mechanism |
+| (0) Neural baseline | `scripts/cnn_paper.py` | ✅ reference | **0.6446** |
+| (1) Loss-level | Hybrid-LTN (SAT constraint), `scripts/ltn_paper.py` | ⚠️ re-score pending | 0.5552 (ω=0.5) — below baseline |
+| (2) Representation-level | Aux behaviour-prediction head, `scripts/cnn_auxhead_paper.py` | ✅ measured | 0.5744 — below baseline |
+| (3) Inference-level | Fusion (CNN + LTN + KG) | ❌ Not built — Phase 4 | — |
 
-**Performance note (2026-07-27):** `ltn_paper.py`'s custom training loop was fully eager (~3,450 raw Python iterations/epoch) and left most CPU cores idle. Rewrote the train step under `@tf.function` (masks precomputed as numeric arrays instead of per-batch string comparison, since that's not graph-compatible) + explicit `intra_op=16`/`inter_op=2` thread config in both `ltn_paper.py` and `cnn_auxhead_paper.py`. Verified numerically equivalent (same ops, same math, just compiled) and faster per epoch on CPU. All results above are from the upgraded loop.
+**Neither symbolic integration point beats the plain CNN under the corrected metric.**
+Per finding #5/#6 this is expected: both inject knowledge that is already a function of
+the input, so neither can add information. The thesis survives — but its evidence is now
+"loss- and representation-level injection cannot exceed the representation", not "ω needs
+tuning".
 
-**▶ Next:** (1) commit Phase-2 work (P2-6); (2) decide whether to recalibrate the ratio-mode target given finding #4, or move on; (3) Phase 3 (autoencoder) on user's prompt. Note: failure-anatomy *balance* axis (vary benign_ratio) still TODO — follow-up candidate. **Focal-loss `reshape([-1])` fix** required in any new loss.
+**Performance note (2026-07-27):** `ltn_paper.py`'s custom training loop was fully eager (~3,450 raw Python iterations/epoch) and left most CPU cores idle. Rewrote the train step under `@tf.function` (masks precomputed as numeric arrays instead of per-batch string comparison, since that's not graph-compatible) + explicit `intra_op=16`/`inter_op=2` thread config in both `ltn_paper.py` and `cnn_auxhead_paper.py`. Verified numerically equivalent (same ops, same math, just compiled) and faster per epoch on CPU.
+
+**🔴 BLOCKER (2026-07-27): TensorFlow will not load.** Mid-session, `import tensorflow`
+began failing with `ImportError: DLL load failed ... An Application Control policy has
+blocked this file` — a different native DLL each attempt (`_pywrap_py_exception_registry`,
+`flags_pybind`, `_pywrap_determinism`), so the policy is blocking TF's binaries broadly.
+Python 3.11.9, numpy, sklearn and scipy all import fine; only TF is affected, in both
+PowerShell and Git Bash. TF ran normally earlier the same session, so a Windows
+Application Control / Smart App Control policy refresh landed mid-session. **Diagnose via
+Event Viewer → Applications and Services Logs → Microsoft → Windows → CodeIntegrity →
+Operational.** Not worked around — it is a machine security control and the user's call.
+Blocks anything needing model load/train: the log-odds re-score, multi-seed runs, the
+skyline experiment.
+
+**▶ Next (revised plan — measurement → ceiling → representation):**
+- **A. Fix measurement.** ✅ `metrics.py` rewritten (per-family + macro headline, underpowered
+  exclusion, saturation diagnostics, `to_logodds` helper). ✅ STATUS retractions above.
+  ⛔ `scripts/rescore_logits.py` written but **blocked on TF** — recomputes scores as
+  `logsumexp(attack_logits) − benign_logit` from saved models (saved probability arrays
+  cannot be repaired; the resolution is already gone). Note `cnn_auxhead_paper.py` never
+  calls `model.save`, so the aux head needs a retrain to be re-scored — **add the save**.
+  Still TODO: 3–5 seeds + CIs before any comparative claim.
+- **B. Establish the ceiling (highest-value single experiment).** Skyline/oracle: train
+  *with* zero-day labels (deliberately cheating), measure per-family. If a fully-supervised
+  model also can't separate Bot in flow-feature space, Bot is undetectable at this unit of
+  analysis — converting an apparent failure into a measured, publishable finding, and
+  telling us whether C is worth building.
+- **C. Fix the unit of analysis (the real contribution).** Aggregate to host/session level
+  using the IP+timestamp unlocked in the dataset upgrade: per-(src,dst) windowed features —
+  connection counts, inter-arrival **periodicity/beaconing score**, fan-out, byte-ratio
+  consistency. *Then* the symbolic layer stops being tautological (RepeatedConnections,
+  Beaconing, FanOut, LateralMovement are genuinely absent from single-flow features).
+  **Falsifiable prediction: Bot PR-AUC should rise well above chance.** If it doesn't, the
+  theory is wrong and we learn that cheaply.
+
+**Focal-loss `reshape([-1])` fix** required in any new loss. Failure-anatomy *balance* axis
+(vary benign_ratio) still TODO.
 
 **Key measured findings to carry forward:**
 - Leaky fusion (fit on zero-day labels) hit 0.78 (+0.11) — behaviours carry real signal, but
