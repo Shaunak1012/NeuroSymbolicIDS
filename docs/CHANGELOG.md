@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (Ax6 trained — prediction confirmed, with a real tradeoff)
+
+- **TensorFlow unblocked.** Root cause was Windows Smart App Control (`VerifiedAndReputablePolicyState=1` in `HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy`), rejecting TF's unsigned compiled wheels under its "Enterprise signing level" requirement. User turned it off via Windows Security; reversible without reinstall on this build (25H2, build 26200.8875, past the 26200.8116 cutoff). Not a code or environment problem.
+- **Ran `ltn_ax6_w0p5` and `ltn_ax6_w1p0`** — identical configs to the earlier `ltn_anat_w0p5`/`w1p0` runs, with Ax6 (`BeaconLike`) now live in the axiom set. **B2's prediction is confirmed: Bot lift roughly doubles at both ω values** (1.1x → 2.2x at ω=0.5; 1.1x → 1.8x at ω=1.0). The axiom-injection mechanism was never the bottleneck — the old axioms simply targeted the wrong signature.
+- **The gain isn't free.** At ω=0.5, Bot's improvement came with Web Brute Force and Web XSS PR-AUC dropping (0.833→0.779, 0.796→0.696), pulling macro down (0.5552→0.5169). At ω=1.0 the tradeoff is milder — Bot still improves while macro is roughly flat. `sat_loss` weights all active axioms uniformly regardless of how many flows each targets, so satisfying one family's constraint pulls slack from the shared decision boundary that the other axioms also depend on.
+- **Neither Ax6 variant beats the plain CNN's macro (0.6446).** The neural baseline still wins in aggregate; this is the first symbolic intervention with a measured, targeted effect on the family that was actually stuck, at a real but non-catastrophic cost elsewhere — a genuinely different, more nuanced Phase-2 headline than either "axioms don't help" or "axioms are free."
+
 ## 2026-07-27 (targeted Bot axiom — built and validated, training blocked)
 
 - **Designed a first-pass Bot axiom from a median-only glance and got it wrong.** `Bwd Packet Length Mean` looked like a clean separator (benign median 77, Bot median 6), but the full distribution shows Bot's values cluster exactly at the percentile boundary used for the fuzzy ramp — the resulting signal was net anti-correlated with Bot (ROC 0.3995, worse than random). Caught by validating standalone against real labels before spending a training run on it, not by inspection.

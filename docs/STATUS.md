@@ -189,13 +189,34 @@ Comparable to Mahalanobis's 4.3x — a real, non-tautological signal. Added as
 (`W_tr`/`sat_loss` now carry 4 behaviour columns instead of 3), and
 `cnn_auxhead_paper.py`'s `BEH` list fixed to be robust to `BEHAVIOUR_NAMES` order
 (`[:5]` would have silently dropped the new entry given its list position).
-**Everything up to training is done; the training run itself (`ltn_paper.py` ω-sweep
-with Ax6 in the axiom set) is blocked on the same TensorFlow Application Control
-issue** — re-checked immediately before this write-up, still failing (now on
-`_pywrap_stacktrace_handler`, a 5th distinct DLL). **Prediction to test once unblocked:**
-Bot lift should rise measurably above the current 1.0–1.1x for LTN variants. If it
-doesn't, the axiom-injection mechanism itself (not just axiom content) is the
-bottleneck — a different, equally important finding.
+
+**✅ B2 RESOLVED (2026-07-27).** TF unblocked (root cause: Windows Smart App Control,
+`VerifiedAndReputablePolicyState=1` — blocking TF's unsigned wheels; user turned it off,
+reversible on this build per Microsoft, no reinstall needed). Ran `ltn_ax6_w0p5` and
+`ltn_ax6_w1p0` — same configs as the earlier `ltn_anat_*` runs, Ax6 now live:
+
+| Run | macro | Bot PR-AUC | Bot lift |
+|---|---|---|---|
+| cnn_paper (reference) | 0.6446 | 0.0591 | 1.7x |
+| ltn_anat_w0p5 (no Ax6) | 0.5552 | 0.0367 | 1.1x |
+| **ltn_ax6_w0p5 (+Ax6)** | 0.5169 | **0.0762** | **2.2x** |
+| ltn_anat_w1p0 (no Ax6) | 0.5241 | 0.0369 | 1.1x |
+| **ltn_ax6_w1p0 (+Ax6)** | 0.5316 | **0.0632** | **1.8x** |
+
+**Prediction confirmed: Ax6 roughly doubles Bot's lift at both ω values.** The
+axiom-injection mechanism is not the bottleneck — Ax3/4/5 failed to move Bot because
+they targeted the wrong signature, not because loss-level injection structurally cannot
+help. This is the strongest evidence yet for the reframed Phase-2 thesis (finding #6).
+
+**Not free, and this is the more interesting part.** At ω=0.5, Bot's gain came with Web
+Brute Force and Web XSS *dropping* (0.779/0.696 vs 0.833/0.796 without Ax6) — macro fell
+0.5552→0.5169. At ω=1.0 the tradeoff is milder: Bot still improves (1.8x) while macro is
+roughly flat (0.5241→0.5316). `sat_loss` averages all active axiom satisfactions
+uniformly regardless of how many flows each one actually targets — pushing on one
+family's signature pulls slack from the shared decision boundary. **Neither variant beats
+the plain CNN's 0.6446 macro** — the neural baseline still wins in aggregate; Ax6 is the
+first symbolic intervention that measurably moves the specific family that was stuck,
+at a real (not catastrophic) cost elsewhere.
 
 **Remaining from Step A:** `scripts/rescore_logits.py` (log-odds re-score) blocked on TF.
 `cnn_auxhead_paper.py` now has `model.save` added — needs a retrain to produce a
