@@ -218,9 +218,45 @@ the plain CNN's 0.6446 macro** — the neural baseline still wins in aggregate; 
 first symbolic intervention that measurably moves the specific family that was stuck,
 at a real (not catastrophic) cost elsewhere.
 
-**Remaining from Step A:** `scripts/rescore_logits.py` (log-odds re-score) blocked on TF.
-`cnn_auxhead_paper.py` now has `model.save` added — needs a retrain to produce a
-re-scoreable model. 3–5 seeds + CIs still needed before any comparative claim ships.
+**✅ Step A CLOSED (2026-07-27) — log-odds re-score run.** `scripts/rescore_logits.py`
+(TF unblocked) re-scored all 10 saved models. Corrects the 3 genuinely-saturated
+control-family runs; the Ax6 comparison above is untouched (neither side was ever
+saturated):
+
+| Run | macro (log-odds) | Bot lift | change |
+|---|---|---|---|
+| ltn_ctrl_w0 (no axioms) | **0.6049** | **1.5x** | was 0.5937 / ~1.0x — corrected **up** |
+| ltn_repro (CE+base) | **0.5751** | 1.1x | was flagged "worst variant" from a saturated blend — **not true** |
+| ltn_v2 (focal+both, adaptive) | **0.5727** | 1.0x | corrected up |
+| ltn_anat_w2p0 (ω=2.0) | 0.0348 | 1.0x | **still flagged saturated after the fix — the collapse is real**, not a measurement artefact |
+
+**Two real corrections, not just cleanup:**
+1. **Finding #7 (deferred CE-vs-focal) is resolved: false alarm.** `ltn_repro` looked
+   worst under the saturated blended score; cleanly scored it's mid-pack (0.5751),
+   between the control and the old-axiom fixed-ω variants. Plain CE is not a
+   demonstrably poor loss choice here.
+2. **The clean control is stronger than previously measured, which raises the bar Ax6
+   has to clear.** Without any axioms, the custom loop already gets 1.5x lift on Bot
+   (not ~1.0x/chance) and 0.6049 macro (not 0.5937). The Ax6-vs-same-ω-without-Ax6
+   comparison is unaffected (both runs were always clean) — "roughly doubles Bot lift"
+   still holds exactly. But against the *best* baseline, the honest accounting is: Ax6
+   buys +0.7–1.1x Bot lift for a ~0.07–0.09 macro cost, not a wash against a weak
+   control.
+
+`ltn_anat_w2p0` staying saturated even in log-odds space is itself informative: PR-AUC
+is rank-based and threshold-independent, so log-odds only changes it when massive tie
+blocks were corrupting the ranking (true for ctrl_w0/repro/v2). Here it doesn't move,
+meaning the ω=2.0 model didn't just underflow its scores — its weights genuinely
+collapsed. The phase-transition finding is confirmed, not an artefact.
+
+`cnn_auxhead_l0.5` was retrained (needed `model.save`, added earlier) — fresh run's Bot
+lift came in at 0.8x (below chance), vs ~1.0x the first time round. Same seed, same
+config; the gap is most plausibly ordinary single-seed noise (TF isn't perfectly
+deterministic across runs even with a fixed seed), which is itself the strongest
+argument yet for the still-outstanding multi-seed work.
+
+**Remaining:** 3–5 seeds + CIs still needed before any comparative claim ships — this
+session's aux-head reproducibility gap is a concrete demonstration why.
 C (host/session-level features) is not abandoned — RepeatedConnections/fan-out may still
 help Infiltration or lateral-movement detection specifically — but it is no longer the
 Bot fix and should wait until B2 is tested.

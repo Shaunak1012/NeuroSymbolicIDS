@@ -2,6 +2,15 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (log-odds re-score — resolves the deferred CE finding, strengthens the control)
+
+- **Retrained `cnn_auxhead_l0.5`** (needed the `model.save` added earlier) and ran `scripts/rescore_logits.py` across all 10 saved models now that TF is unblocked.
+- **Corrects the 3 genuinely-saturated runs.** `ltn_ctrl_w0` moves from 0.5937/~1.0x Bot lift to a clean **0.6049/1.5x**; `ltn_repro` and `ltn_v2` similarly move up. The Ax6-vs-same-ω comparison from the previous entry is untouched — neither `ltn_anat_*` nor `ltn_ax6_*` was ever saturated, so "Ax6 roughly doubles Bot lift" still holds exactly.
+- **Resolves the deferred CE-vs-focal question: false alarm.** `ltn_repro` (CE + base axioms) was flagged as the worst fair-loop variant based on its saturated blended score. Cleanly measured it's mid-pack (macro 0.5751), between the control and the old fixed-ω axiom variants — plain CE isn't demonstrably a poor loss choice here.
+- **The clean control is stronger than previously measured**, which raises the bar the axioms have to clear: even with zero axioms, the custom loop already gets 1.5x lift on Bot. Ax6's honest accounting against the *best* baseline is +0.7–1.1x Bot lift for a ~0.07–0.09 macro cost — a real, worthwhile, but not free trade, not a wash against a weak control as it looked before this correction.
+- **`ltn_anat_w2p0`'s collapse is confirmed genuine, not a saturation artefact** — PR-AUC is rank-based and threshold-independent, so it only moves under log-odds rescoring when tie blocks were corrupting the ranking (true for the other 3). It stays at 0.0348 here, meaning the ω=2.0 model's weights actually degenerated rather than merely underflowing its output scores.
+- **The aux-head retrain didn't reproduce its own Bot number** — 0.8x lift this run vs ~1.0x the first time, same seed and config. Most plausible explanation is ordinary single-seed noise (TF training isn't bit-deterministic across runs even with a fixed seed), which is itself a concrete argument for the still-outstanding multi-seed work before any comparative claim ships.
+
 ## 2026-07-27 (Ax6 trained — prediction confirmed, with a real tradeoff)
 
 - **TensorFlow unblocked.** Root cause was Windows Smart App Control (`VerifiedAndReputablePolicyState=1` in `HKLM\SYSTEM\CurrentControlSet\Control\CI\Policy`), rejecting TF's unsigned compiled wheels under its "Enterprise signing level" requirement. User turned it off via Windows Security; reversible without reinstall on this build (25H2, build 26200.8875, past the 26200.8116 cutoff). Not a code or environment problem.

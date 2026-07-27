@@ -41,7 +41,8 @@ PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
 
 TAGS = ["cnn_paper", "ltn_ctrl_w0", "ltn_repro", "ltn_v2",
-        "ltn_anat_w0p5", "ltn_anat_w1p0", "ltn_anat_w2p0"]
+        "ltn_anat_w0p5", "ltn_anat_w1p0", "ltn_anat_w2p0",
+        "ltn_ax6_w0p5", "ltn_ax6_w1p0", "cnn_auxhead_l0.5"]
 
 
 def load(s):
