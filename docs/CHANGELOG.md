@@ -2,6 +2,17 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (Phase 2 — symbolic pillar, fair-loop batch + training-loop speedup)
+
+- **Resolved the training-method confound.** Ran the ω=0 control under the fairness-upgraded custom loop (best-by-val-loss, LR annealing) — it lands at zd PR-AUC 0.501, vs the CNN reference's 0.599. Confirms most of the LTN-vs-CNN gap is the custom loop itself, not the axioms. All LTN numbers must be read relative to 0.501, not 0.599.
+- **Failure-anatomy ω-sweep (fixed omega, focal + both axioms):** ω=0.5 → 0.520 PR-AUC, ω=1.0 → 0.513 (both beat the control — axioms genuinely help in this band), ω=2.0 → 0.092 (sharp collapse, SAT overwhelms CE, reproduces the original full-run failure mode). Safe zone ≈ ω∈[0.5, 1.0].
+- **Adaptive ratio-mode (`ltn_v2`) undershoots the sweet spot** — nets out at ω_eff≈0.1-equivalent (0.491), close to the control rather than the fixed-sweep optimum. Flagged as a recalibration candidate.
+- **`ltn_repro` (CE + base axioms) is the worst fair-loop variant** (0.485, below the control) — isolates plain CE as a poor loss choice for this imbalance, independent of the axiom question.
+- **Aux behaviour-prediction head measured** (`scripts/cnn_auxhead_paper.py`, representation-level integration point): 0.497 zd PR-AUC, using the same `model.fit` method as the CNN reference (no loop confound) — still underperforms it, landing in the same band as the SAT variants.
+- **Assembled the Phase-2 "three symbolic integration points" table** (loss-level / representation-level / inference-level) per `conference_roadmap.md`. Inference-level (fusion) remains the expected primary performance mechanism — not yet built (Phase 4).
+- **Training-loop performance fix:** `ltn_paper.py`'s custom loop ran fully eager (~3,450 raw Python iterations/epoch), starving the CPU's 16 cores behind Python dispatch overhead (~2.6 cores observed). Rewrote the train step under `@tf.function` — required precomputing benign/attack masks as numeric arrays instead of per-batch string comparison (not graph-compatible) — plus explicit `intra_op=16`/`inter_op=2` thread config in both `ltn_paper.py` and `cnn_auxhead_paper.py`. Smoke-tested equivalent, faster per epoch; all Phase-2 results above are from the upgraded loop.
+- Full results in `outputs/metadata/runs.jsonl`. Updated STATUS.
+
 ## 2026-06-18 (Phase 1 — neural pillar + baselines)
 
 - **Retrained the CNN in-venv on the paper split** (`scripts/cnn_paper.py`) — loadable Keras-2 models, log1p transform, `metrics.py` headline. Early-stopped epoch 25, val-acc 0.997.

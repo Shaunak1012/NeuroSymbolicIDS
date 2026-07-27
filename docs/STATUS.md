@@ -1,6 +1,6 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-06-18**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-07-27**.
 
 ## ▶ RESUME HERE (next session)
 
@@ -33,16 +33,38 @@ Honest findings: XGBoost (tabular SOTA) ≈ CNN (pivot story to explanation/adap
 
 **🔄 Phase 2 IN PROGRESS (symbolic pillar).** `scripts/ltn_paper.py` (configurable: loss/axioms/omega/omega-mode, loss-ratio normalization = SAT-domination fix, ScanProbe axiom now valid) + `scripts/cnn_auxhead_paper.py` (aux behaviour head) written & smoke-tested (UNCOMMITTED).
 
-**Phase 2 results so far — zero-day PR-AUC (all LTN variants trained via custom loop):**
-| Model | zd PR-AUC | zd ROC |
-|-------|-----------|--------|
-| cnn_paper (model.fit, reference) | 0.599 | 0.855 |
-| ltn_repro (paper method: ce+Ax1/Ax2+ω=1 fixed) | 0.440 | 0.736 |
-| ltn_v2 (focal+both axioms+ω=0.1 ratio) | 0.491 | 0.735 |
+**✅ CRITICAL open question RESOLVED (2026-07-27).** Ran the ω=0 control + a fixed-ω failure-anatomy sweep, all under the fairness-upgraded custom loop. Full fair-loop comparison (zero-day-only PR-AUC):
 
-**⚠️ CRITICAL open question:** both LTN variants underperform the CNN — BUT this may be a **training-method confound** (CNN uses `model.fit` w/ LR-reduction + best-restore; LTN uses a basic custom loop, best-selected on a *saturated* 0.998 val-acc). **Running the ω=0 control now (`ltn_ctrl_w0`, background `b43macq2g`)** — custom loop, no SAT. If control ≈ 0.44-0.49 → the gap is training-method (axioms actually help: v2 0.491 > control), and I should upgrade the custom loop (add LR schedule / better model selection). If control ≈ 0.599 → axioms genuinely hurt. **Interpret v2/repro ONLY against the control, not against cnn_paper.**
+| Run | ω (mode) | zd PR-AUC | zd ROC |
+|---|---|---|---|
+| cnn_paper (reference, `model.fit`) | — | 0.599 | 0.855 |
+| ltn_ctrl_w0 (no SAT, fair loop) | 0 fixed | 0.501 | 0.739 |
+| ltn_repro (paper method: CE + base axioms) | 1.0 fixed | 0.485 | 0.738 |
+| ltn_v2 (focal + both axioms, adaptive) | 0.1 ratio | 0.491 | 0.738 |
+| **ltn_anat_w0p5** | 0.5 fixed | **0.520** | 0.765 |
+| **ltn_anat_w1p0** | 1.0 fixed | **0.513** | 0.759 |
+| ltn_anat_w2p0 | 2.0 fixed | 0.092 | 0.615 |
+| cnn_auxhead_l0.5 (aux behaviour head, `model.fit`) | — | 0.497 | 0.727 |
 
-**▶ Next actions:** (1) read `ltn_ctrl_w0` result → interpret; (2) if training-method confound, add LR-reduction to `ltn_paper.py` custom loop + re-run; (3) run aux head (`cnn_auxhead_paper.py`); (4) failure-anatomy grid (needs a *balance* axis too — vary benign_ratio); (5) commit Phase 2 + table (P2-6). **Remember the focal-loss `reshape([-1])` fix** in any new loss.
+**Interpretation:**
+1. **Training-method confound confirmed as the dominant gap.** Even the ω=0 control (no symbolic loss at all, same custom loop) sits at 0.501 vs the CNN's 0.599 — a ~0.10 gap from the custom loop alone (no LR-reduction-on-plateau restore weights, no batch-norm running-stat nuances of `model.fit`, etc.). Everything below must be read *relative to 0.501*, not 0.599.
+2. **Axioms genuinely help in a narrow band.** Fixed ω=0.5 (0.520) and ω=1.0 (0.513) both *beat* the ω=0 control — a real, non-trivial signal that the behaviour-grounded axioms (Ax3/4/5) carry useful information for zero-day detection, contradicting the pre-reset narrative that axioms only hurt.
+3. **But there's a sharp phase transition.** ω=2.0 collapses to 0.092 — SAT overwhelms CE and wrecks classification (Web Attack recall ~0%), reproducing the original full-run failure mode. The safe zone is roughly ω∈[0.5, 1.0]; ω=2.0 is firmly past the cliff.
+4. **The adaptive "ratio" omega-mode (v2) is leaving signal on the table.** It nets out at ω_eff≈0.1-equivalent (0.491), close to the *control*, not the sweet spot found by the fixed sweep (0.5–1.0). The loss-ratio normalization that fixed SAT-domination undershoots the useful axiom weight — worth recalibrating the ratio target if pursuing this loss-level path further.
+5. **CE vs focal is a separate confound.** `ltn_repro` (CE + base axioms) is the *worst* fair-loop variant (0.485), even below the ω=0 control — suggesting plain CE is a poor fit for this class-imbalanced zero-day setting independent of the axiom question.
+6. **Representation-level injection (aux-head) doesn't clearly help either.** `cnn_auxhead_l0.5` uses the *same* `model.fit` method as the CNN reference (no loop confound) yet still underperforms it (0.497 vs 0.599) — the behaviour-prediction auxiliary task alone isn't a free win, landing in the same ~0.49-0.52 band as the SAT variants.
+
+**Phase-2 "three symbolic integration points" (per [conference_roadmap.md](target/conference_roadmap.md)):**
+
+| Integration point | Method | Status | Best result (zd PR-AUC) |
+|---|---|---|---|
+| (1) Loss-level | Hybrid-LTN (SAT constraint), `scripts/ltn_paper.py` | ✅ Reproduced + anatomized | 0.520 (ω=0.5 fixed) |
+| (2) Representation-level | Aux behaviour-prediction head, `scripts/cnn_auxhead_paper.py` | ✅ Measured | 0.497 |
+| (3) Inference-level | Fusion (CNN + LTN + KG) | ❌ Not built — Phase 4 | — expected primary performance mechanism |
+
+**Performance note (2026-07-27):** `ltn_paper.py`'s custom training loop was fully eager (~3,450 raw Python iterations/epoch) and left most CPU cores idle. Rewrote the train step under `@tf.function` (masks precomputed as numeric arrays instead of per-batch string comparison, since that's not graph-compatible) + explicit `intra_op=16`/`inter_op=2` thread config in both `ltn_paper.py` and `cnn_auxhead_paper.py`. Verified numerically equivalent (same ops, same math, just compiled) and faster per epoch on CPU. All results above are from the upgraded loop.
+
+**▶ Next:** (1) commit Phase-2 work (P2-6); (2) decide whether to recalibrate the ratio-mode target given finding #4, or move on; (3) Phase 3 (autoencoder) on user's prompt. Note: failure-anatomy *balance* axis (vary benign_ratio) still TODO — follow-up candidate. **Focal-loss `reshape([-1])` fix** required in any new loss.
 
 **Key measured findings to carry forward:**
 - Leaky fusion (fit on zero-day labels) hit 0.78 (+0.11) — behaviours carry real signal, but
@@ -69,7 +91,8 @@ Honest findings: XGBoost (tabular SOTA) ≈ CNN (pivot story to explanation/adap
 | CNN (multiclass) | ✅ Verified correct | `scripts/cnn3.py` | See [cnn_current.md](implementation/cnn_current.md). Minor: double class-weighting. |
 | CNN evaluation | ✅ Working | `scripts/eval.py` | Produces PR-AUC baseline + `cnn_zeroday_eval.png`. |
 | Behaviour abstraction | ✅ Rebuilt & validated | `scripts/behavior.py` | Verified indices, vectorised, fuzzy [0,1], thresholds saved. PortScan/DDoS strongly covered. Not yet wired into LTN. See [doc](implementation/behaviour_abstraction_current.md). |
-| LTN reasoning | 🔴 Ran, underperformed (0.45 vs 0.67) | `scripts/ltn.py` | Behaviour-grounded, but SAT dominated CE ~40:1. Becomes the **"failure anatomy" headline study** (Phase 2c), not a dead end. See [doc](implementation/ltn_current.md). |
+| LTN reasoning (paper-split) | 🟡 Anatomized — narrow band beats loop control, phase-transition found | `scripts/ltn_paper.py` | Fair-loop control 0.501; axioms beat it at ω=0.5–1.0 (best 0.520); collapses at ω=2.0 (0.092). Training-method confound (custom loop vs `model.fit`) accounts for most of the gap to CNN (0.599). See STATUS "RESUME HERE" for full table + interpretation. |
+| LTN reasoning (legacy, temporal split) | 🔴 Superseded | `scripts/ltn.py` | Ran, underperformed (0.45 vs 0.67); SAT dominated CE ~40:1. Superseded by the paper-split protocol reset — see [doc](implementation/ltn_current.md). |
 | Knowledge Graph | ❌ Not built | — | Rescoped as memory + explainability corroboration. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | Decision Fusion | ❌ Not built | — | Now legitimately trainable under paper-aligned split. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | Explainability / Final Alert | ❌ Not built | — | + explanation-faithfulness measurement (Tier A). Spec: [explainability.md](target/explainability.md). |
