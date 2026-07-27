@@ -29,6 +29,15 @@ Why these behaviours (validated empirically — see __main__):
     which the volume/size behaviours miss. Flag-count based detection was tried and
     DROPPED: in CIC-IDS2017 the flag-count columns are ~0 even for real scans, so
     they carry no signal — flow structure (short duration + tiny payload) does.
+  - BeaconLike targets the actual Bot signature, found empirically via
+    scripts/skyline_oracle.py (2026-07-27): an isolated Bot-vs-benign XGBoost
+    importance scan pointed at destination port as the strongest single
+    separator (Bot overwhelmingly on 8080; benign overwhelmingly on well-known
+    service ports), vs BurstTraffic/HighVolume/LargePackets which are
+    volume-shaped, tuned for DoS/PortScan, and do not fire on Bot. A magnitude
+    ramp on the raw port number was tried FIRST and DROPPED (ROC 0.40 —
+    anti-correlated, see WELL_KNOWN_PORTS below); fixed set membership against
+    standard well-known ports is what actually separates Bot (ROC 0.887).
   - RepeatedConnections needs source/dest IP+port (dropped by preprocessing) and is
     therefore UNAVAILABLE in v1 — see KNOWN_ISSUES / target docs.
 """
@@ -42,6 +51,7 @@ import paths
 # Confirm with: python scripts/check.py
 # =============================================================
 IDX = {
+    "dst_port":      0,
     "flow_duration": 1,
     "tot_fwd_pkts":  2,
     "tot_bwd_pkts":  3,
@@ -68,10 +78,26 @@ BEHAVIOUR_NAMES = [
     "LargePackets",        # large average payload (exfil / volumetric)
     "HighEntropy",         # APPROX: high packet-size variance (NOT true Shannon entropy)
     "ScanProbe",           # short, near-empty probe flows (PortScan-like)
+    "BeaconLike",          # destination port outside the well-known service set (Bot/C2)
     "RepeatedConnections", # UNAVAILABLE without IP/port side table -> always 0.0
 ]
 
 REPEATED_CONNECTIONS_AVAILABLE = False
+
+# Fixed domain knowledge, NOT data-fitted — standard well-known service ports.
+# Deliberately not a percentile ramp: destination-port *magnitude* isn't ordinal
+# (port 8080 isn't "more" than port 443), and a magnitude ramp fit on this
+# dataset's training port distribution was tried and DROPPED — it was actively
+# anti-correlated with Bot (ROC 0.40) because CICFlowMeter's flow-direction
+# convention puts large ephemeral-looking port numbers on many ordinary benign
+# flows too. Set membership against a small, externally-defined port list
+# validated far better (ROC 0.887, PR-AUC 0.135 on Bot-vs-benign alone — see
+# scripts/skyline_oracle.py, 2026-07-27).
+WELL_KNOWN_PORTS = frozenset({
+    20, 21, 22, 23, 25, 53, 67, 68, 80, 110, 123, 143, 161, 389,
+    443, 445, 465, 587, 993, 995, 3306, 3389, 5060, 8443,
+})
+_WELL_KNOWN_PORTS_ARR = np.array(sorted(WELL_KNOWN_PORTS), dtype=np.float64)
 
 # "high-X" ramps: confidence rises as the signal rises. (lo=p50, hi=p95)
 _HIGH_SIGNALS = {
@@ -194,12 +220,18 @@ def abstract_behaviours(X_raw, thresholds=None):
     short_dur   = _ramp_low(_signal(X, "flow_duration"), *thresholds["scan_dur"])
     tiny_payload = _ramp_low(_signal(X, "_payload"),     *thresholds["scan_payload"])
 
+    # BeaconLike = destination port not in the well-known service set. Fixed
+    # domain knowledge, not fitted from data — see WELL_KNOWN_PORTS above.
+    dst_port = _col(X, "dst_port")
+    beacon_like = (~np.isin(dst_port, _WELL_KNOWN_PORTS_ARR)).astype(np.float64)
+
     out = {}
     out["BurstTraffic"]  = _ramp_high(_signal(X, "flow_pkts_s"), *thresholds["burst"])
     out["HighVolume"]    = _ramp_high(_signal(X, "_volume"),     *thresholds["volume"])
     out["LargePackets"]  = _ramp_high(_col(X, "pkt_len_mean"),   *thresholds["large_pkt"])
     out["HighEntropy"]   = _ramp_high(_col(X, "pkt_len_std"),    *thresholds["entropy"])
     out["ScanProbe"]     = short_dur * tiny_payload
+    out["BeaconLike"]    = beacon_like
     out["RepeatedConnections"] = np.zeros(X.shape[0], dtype=np.float64)  # unavailable
     return out
 

@@ -59,9 +59,11 @@ def beh_weights(Xraw):
     w3 = (b["LargePackets"] * b["HighEntropy"]).astype(np.float32)  # Ax3
     w4 = b["BurstTraffic"].astype(np.float32)                        # Ax4
     w5 = b["ScanProbe"].astype(np.float32)                           # Ax5 (valid now)
-    return np.stack([w3, w4, w5], axis=1)
+    w6 = b["BeaconLike"].astype(np.float32)                          # Ax6 (targets Bot; see skyline_oracle.py)
+    return np.stack([w3, w4, w5, w6], axis=1)
 W_tr = beh_weights(Xtr_raw)
-print(f"behaviour weights mean: Ax3={W_tr[:,0].mean():.3f} Ax4={W_tr[:,1].mean():.3f} Ax5={W_tr[:,2].mean():.3f}")
+print(f"behaviour weights mean: Ax3={W_tr[:,0].mean():.3f} Ax4={W_tr[:,1].mean():.3f} "
+      f"Ax5={W_tr[:,2].mean():.3f} Ax6={W_tr[:,3].mean():.3f}")
 
 # ---- transform + scale ----
 sc = StandardScaler().fit(features.transform(Xtr_raw, TFM))
@@ -99,7 +101,8 @@ def sat_loss(sm, is_benign, is_attack, w, p=2.0):
     if AXIOMS in ("base", "both"):
         sats += [sat_masked(pben, is_benign), sat_masked(patk, is_attack)]
     if AXIOMS in ("behaviour", "both"):
-        sats += [sat_masked(patk, w[:, 0]), sat_masked(patk, w[:, 1]), sat_masked(patk, w[:, 2])]
+        sats += [sat_masked(patk, w[:, 0]), sat_masked(patk, w[:, 1]),
+                 sat_masked(patk, w[:, 2]), sat_masked(patk, w[:, 3])]
     sat = tf.reduce_mean(tf.stack(sats))
     return tf.clip_by_value(1.0 - sat, 0.0, 1.0)
 

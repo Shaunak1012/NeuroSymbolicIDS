@@ -29,7 +29,7 @@ tf.random.set_seed(SEED); np.random.seed(SEED)
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"]); TFM = cfg["protocol"]["feature_transform"]
 LAMBDA = float(os.environ.get("AUX_LAMBDA", "0.5"))
 EPOCHS = int(os.environ.get("AUX_EPOCHS", "50")); SUBSET = int(os.environ.get("AUX_SUBSET", "0"))
-BEH = behavior.BEHAVIOUR_NAMES[:5]   # drop RepeatedConnections (constant 0)
+BEH = [n for n in behavior.BEHAVIOUR_NAMES if n != "RepeatedConnections"]  # drop the constant-0 one
 
 def load(s): return (np.load(os.path.join(PAPER, f"X_{s}.npy")),
                      np.load(os.path.join(PAPER, f"y_{s}_mc.npy"), allow_pickle=True))
