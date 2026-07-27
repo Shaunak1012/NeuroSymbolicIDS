@@ -127,23 +127,44 @@ they need the log-odds re-score (`scripts/rescore_logits.py`, blocked, see below
 7. **Deferred — CE vs focal.** `ltn_repro` (CE + base axioms) looked worst on blended
    (0.485), but it is one of the saturated runs; the comparison is unsafe until re-scored.
 
-**Phase-2 "three symbolic integration points" (per [conference_roadmap.md](target/conference_roadmap.md)):**
+**Phase-2 "three symbolic integration points" (per [conference_roadmap.md](target/conference_roadmap.md))
+— ALL THREE NOW TESTED (2026-07-27):**
 
-| Integration point | Method | Status | Best result (macro zd PR-AUC) |
-|---|---|---|---|
-| (0) Neural baseline | `scripts/cnn_paper.py` | ✅ reference | **0.6446** |
-| (1) Loss-level | Hybrid-LTN (SAT constraint), `scripts/ltn_paper.py` | ⚠️ re-score pending | 0.5552 (ω=0.5) — below baseline |
-| (2) Representation-level | Aux behaviour-prediction head, `scripts/cnn_auxhead_paper.py` | ✅ measured | 0.5744 — below baseline |
-| (3) Inference-level | Fusion (CNN + LTN + KG) | ❌ Not built — Phase 4 | — |
+| Integration point | Method | Status | Macro zd PR-AUC | Bot lift |
+|---|---|---|---|---|
+| (0) Neural baseline | `scripts/cnn_paper.py` | ✅ reference | **0.6446** | 1.7x |
+| (1) Loss-level, no targeted axiom | `ltn_ctrl_w0` / `ltn_anat_w0p5` | ✅ measured, clean | 0.6049 / 0.5552 | 1.5x / 1.1x |
+| (1) Loss-level, targeted (Ax6) | `ltn_ax6_w0p5` / `ltn_ax6_w1p0` | ✅ measured, clean | 0.5169 / 0.5316 | **2.2x / 1.8x** |
+| (2) Representation-level | Aux behaviour-prediction head | ✅ measured | 0.5814 | 0.8–1.0x (seed-noisy) |
+| (3) Inference-level | `scripts/fusion_beaconlike.py` — logistic fusion of CNN logit + BeaconLike, calibrated on known-class val only | ✅ measured | 0.6447 | 1.7x — **no change from baseline** |
 
-**Neither symbolic integration point beats the plain CNN under the corrected metric** —
-but per the oracle result (#5), that is *not* because they inject knowledge already a
-function of the input. Bot's information IS in the input; the axioms just don't encode
-Bot's actual signature. This reframes the thesis from "symbolic injection is structurally
-capped by the representation" to **"zero-day transfer is the real failure mode, and the
-current axiom set targets the wrong signature for the family that matters most."** That
-is a stronger, more actionable claim: it predicts a *targeted* axiom should move Bot,
-which is falsifiable and cheap to test (see B2 below).
+**Only loss-level injection with a targeted axiom (Ax6) moves Bot at all.** Inference-level
+fusion — the mechanism the original roadmap expected to be primary — measurably does
+**nothing**: fitted coefficients came back `[2.35, 0.02]` (base model logit, BeaconLike),
+i.e. the calibration learned to ignore the symbolic signal almost entirely.
+
+**Why, precisely — and this is the real finding, not just a null result.** The fusion
+combiner is fit on validation data, which by construction contains **no Bot flows**
+(zero-day is test-only in this protocol). BeaconLike is a signal specifically *about* the
+one class the fitting data can never contain. A non-leaky calibration cannot discover the
+value of a zero-day-specific signal — nothing in the distribution it's fit on makes that
+signal look useful. This is a structural limit of inference-time fusion for this class of
+axiom, not a tuning failure. It explains, mechanistically, why loss-level injection is not
+just *one option among three* but currently the **only** mechanism that can get a
+hand-specified zero-day signature into the model at all: training-time constraints don't
+need the value of the signal to be *discoverable* from labelled data the way a fitted
+combiner does — they impose it directly. The macro cost Ax6 pays (finding above) isn't a
+flaw to route around with fusion; on this evidence, it looks like the price of the only
+lever available.
+
+Reframes the Phase-2 thesis once more: not "symbolic injection is capped by the
+representation" (oracle result, #5, already ruled this out), and not merely "the old
+axioms targeted the wrong signature" (Ax6 already confirmed this) — but **"only
+training-time constraint injection can deliver a hand-specified zero-day signal at all;
+inference-time fusion cannot discover what it was never shown."** Whether that generalizes
+beyond this one signal/dataset is untested — a different axiom correlated with *known*
+classes too (unlike BeaconLike, which is Bot-specific) might fuse successfully; that's a
+distinct, open question, not addressed here.
 
 **Performance note (2026-07-27):** `ltn_paper.py`'s custom training loop was fully eager (~3,450 raw Python iterations/epoch) and left most CPU cores idle. Rewrote the train step under `@tf.function` (masks precomputed as numeric arrays instead of per-batch string comparison, since that's not graph-compatible) + explicit `intra_op=16`/`inter_op=2` thread config in both `ltn_paper.py` and `cnn_auxhead_paper.py`. Verified numerically equivalent (same ops, same math, just compiled) and faster per epoch on CPU.
 

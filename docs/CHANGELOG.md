@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (inference-level fusion — the third integration point tested, and why it fails)
+
+- **Checked whether Ax6 generalizes to zero-day families it wasn't designed from** (Heartbleed n=11, Infiltration n=36, SQL Injection n=21) using data already on disk from the earlier Ax6 runs. Mixed and noisy: Heartbleed and Infiltration move in the right direction (0.5x→2.9x, 0.8x→1.4x lift), SQL Injection moves the wrong way (369x→256x) — but at these sample sizes any of these could flip from one or two predictions changing. The only statistically meaningful signal remains Bot up / Web attacks down. Flagging this explicitly: Ax6 was designed by looking directly at Bot's labels (the feature-importance scan in `skyline_oracle.py`), so "Ax6 helps Bot" is a weaker zero-day-generalization claim than it might read as — it's closer to "hand-built rule works on the class it was built for" than evidence of transferable symbolic knowledge.
+- **Built and ran `scripts/fusion_beaconlike.py`** — the third of the "three symbolic integration points" from `conference_roadmap.md`, and the one never attempted before this session. Fits a small logistic combiner (CNN's attack log-odds + BeaconLike's raw score) on validation data only — the paper split's val set contains no zero-day flows by construction, so this cannot leak into the zero-day evaluation, unlike the "leaky fusion" already flagged as invalid in earlier entries.
+- **Result: fusion changes nothing.** Macro 0.6447 vs the CNN's 0.6446 alone; Bot lift 1.7x, identical to baseline. Fitted coefficients came back `[2.35, 0.02]` — the combiner learned to essentially ignore BeaconLike.
+- **This is a real, mechanistic finding, not a failed experiment.** The fusion weights are fit on validation data, which cannot contain the pattern (Bot) that makes BeaconLike valuable — a non-leaky calibration structurally cannot discover the worth of a zero-day-specific signal. This explains why loss-level injection (Ax6) is currently the *only* mechanism, of the three tested, that gets a hand-specified zero-day signature into the model at all: it imposes the constraint directly rather than requiring the data to reveal its value. Reframes the macro cost Ax6 pays from "a flaw to fix with fusion" to "the price of the only lever available" — at least for this signal.
+
 ## 2026-07-27 (log-odds re-score — resolves the deferred CE finding, strengthens the control)
 
 - **Retrained `cnn_auxhead_l0.5`** (needed the `model.save` added earlier) and ran `scripts/rescore_logits.py` across all 10 saved models now that TF is unblocked.
