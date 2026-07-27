@@ -16,6 +16,8 @@ import os
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 import tensorflow as tf
+tf.config.threading.set_intra_op_parallelism_threads(16)
+tf.config.threading.set_inter_op_parallelism_threads(2)
 from tensorflow.keras import layers, models, callbacks, Input
 import tensorflow.keras.backend as K
 from sklearn.preprocessing import StandardScaler, LabelEncoder
