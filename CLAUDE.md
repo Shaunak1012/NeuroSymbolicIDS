@@ -140,6 +140,15 @@ Full rules in [CONTRIBUTING.md](CONTRIBUTING.md). The non-negotiables:
 - **Branch + PR workflow:** feature work goes on `feat|fix|docs|chore/<topic>` branches → `gh pr create` → **merge LOCALLY** with `git merge --no-ff` then `git push origin main` (do NOT use the GitHub button / `gh pr merge` — it authors the merge commit as "Shaunak", not "Shaunak1012"). Never commit feature work straight to `main`. Full steps in [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Don't commit** gitignored artifacts or smoke-test/placeholder figures — only finalised `outputs/figures/*.png`.
 
+## Model-selection convention (user efficiency preference)
+
+**End every response with a one-line `→ Next model:` recommendation** for the upcoming step, so the user doesn't overspend on Opus for routine work. Rough guide:
+- **Opus** — hard reasoning: design decisions, debugging, result interpretation/thesis framing, research, anything ambiguous or high-stakes.
+- **Sonnet** — routine implementation: writing/running scripts, assembling tables, commits, doc updates, launching batches.
+- **Haiku** — trivial: status checks, "is the background run done?", simple lookups.
+
+The user switches models per step based on this. Keep the recommendation honest — don't default to Opus.
+
 ## Environment
 
 Windows 11, PowerShell primary shell. GitHub CLI (`gh`) v2.94 installed, authenticated as `Shaunak1012`. Git repo on branch `main`, remote `origin → github.com/Shaunak1012/NeuroSymbolicIDS`.
