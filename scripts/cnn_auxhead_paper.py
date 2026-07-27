@@ -88,6 +88,9 @@ res = metrics.evaluate(yte, patk, zero_day, fpr=0.01); metrics.print_report(res)
 TAG = f"cnn_auxhead_l{LAMBDA}"
 np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{TAG}_test.npy"), patk.astype(np.float32))
 if SUBSET == 0:
+    # persist the model — without this the run cannot be re-scored (e.g. in log-odds)
+    # without a full retrain. See scripts/rescore_logits.py.
+    model.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
     emb_model = models.Model(model.input, model.get_layer("embedding").output)
     for nm, arr in [("train", Xtr), ("test", Xte)]:
         np.save(os.path.join(paths.EMBEDDINGS, f"X_{nm}_{TAG}_emb.npy"), emb_model.predict(arr, batch_size=1024, verbose=0))
