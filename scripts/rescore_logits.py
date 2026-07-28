@@ -42,7 +42,10 @@ TFM = cfg["protocol"]["feature_transform"]
 
 TAGS = ["cnn_paper", "ltn_ctrl_w0", "ltn_repro", "ltn_v2",
         "ltn_anat_w0p5", "ltn_anat_w1p0", "ltn_anat_w2p0",
-        "ltn_ax6_w0p5", "ltn_ax6_w1p0", "cnn_auxhead_l0.5"]
+        "ltn_ax6_w0p5", "ltn_ax6_w1p0", "cnn_auxhead_l0.5",
+        "ltn_ctrl_w0_s43", "ltn_ctrl_w0_s44",
+        "ltn_ax6_w0p5_s43", "ltn_ax6_w0p5_s44",
+        "ltn_ax6_w1p0_s43", "ltn_ax6_w1p0_s44"]
 
 
 def load(s):
