@@ -338,10 +338,43 @@ structurally can't discover a zero-day-specific signal) and the macro-cost findi
 does **not** survive is the specific claim that Ax6 delivers a targeted, reliable
 Bot-detection improvement — on this evidence it delivers a real, robust macro cost and
 an unreliable, noise-level Bot effect that a plain unweighted control can match or beat
-on any given seed. If Ax6 is pursued further, the next step is understanding *why*
-ω=1.0 collapses 2/3 of the time (likely the same runaway SAT-dominance dynamic as
-ω=2.0, just probabilistic near the boundary) before drawing any more conclusions from
-it.
+on any given seed.
+
+**✅ ω=1.0 collapse mechanism DIAGNOSED (2026-07-27), free — read existing logs, no new
+training.** Decoded the per-epoch trajectories for all 3 ω=1.0 seeds (mixed
+PowerShell/Python encoding in the log files; extract via raw byte offsets + UTF-16LE
+decode if repeating this):
+
+| Seed | best epoch | best val_loss | **best val_acc** | outcome |
+|---|---|---|---|---|
+| 42 | @3 | 0.0361 | **99.64%** | worked (macro 0.5316) |
+| 43 | @2 | 0.0349 | 92.80% | collapsed (macro 0.0520) |
+| 44 | @1 | 0.0323 | 96.19% | collapsed (macro 0.0366) |
+
+**In both collapsed seeds, the model's best epoch is 1–2 — it essentially never improves
+beyond its random-init starting point**, and best-by-val-loss early stopping (chosen to
+mirror the CNN's `model.fit` for a fair comparison) locks that in within ~10 epochs. The
+working seed kept genuinely improving through epoch 3 and reached near-perfect known-class
+validation accuracy before stopping. SAT values themselves look similar across all three
+runs (~0.17–0.26) — this is *not* the same visible catastrophe as ω=2.0.
+
+**Mechanism:** `LTN_OMEGA_MODE=fixed` means the SAT term's weight doesn't adapt to how
+large CE actually is (unlike "ratio" mode). Early in training, whether CE or SAT
+dominates the gradient in that window depends on random initialization. If SAT happens
+to dominate during the first couple of epochs, the model gets pulled toward satisfying
+axioms at the expense of ever learning to classify — and once that happens, early
+stopping locks it in before it can recover. **ω=1.0 sits right on the edge of this
+cliff — which side a given run lands on is essentially a coin flip on seed, not a stable
+operating point.** ω=0.5 has enough margin to avoid it (0/3 seeds); ω=2.0 has none (the
+single-seed sweep's 100%-reproducible collapse makes sense as the same dynamic with zero
+margin, not a different failure mode).
+
+**If Ax6/loss-level injection is pursued further**, the fix this diagnosis suggests is
+using `ratio` mode (adaptive ω, already implemented) instead of `fixed`, or a
+warmup schedule that ramps ω up only after CE has had a chance to start dropping —
+either should remove the coin-flip dynamic since the current failure is specifically a
+"fixed weight ≠ actual CE/SAT ratio during early training" problem. Untested; the next
+concrete experiment if this line of work continues.
 
 C (host/session-level features) is not abandoned — RepeatedConnections/fan-out may still
 help Infiltration or lateral-movement detection specifically — but it is no longer

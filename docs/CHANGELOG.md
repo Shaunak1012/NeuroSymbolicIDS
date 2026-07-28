@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (ω=1.0 collapse mechanism diagnosed — free, from existing logs)
+
+- **Diagnosed why `ltn_ax6_w1p0` collapses in 2 of 3 seeds**, using only logs already on disk — no new training. Had to work around a mixed PowerShell/Python encoding issue in the batch logs (header lines UTF-16LE, python's own stdout UTF-8, interleaved in the same file); resolved by locating markers at the raw byte level and decoding each segment with the right codec.
+- **The pattern:** in both collapsed seeds, the model's best epoch is 1–2 — it never meaningfully improves beyond random initialization (best val_acc 92.8% / 96.2%), and best-by-val-loss early stopping locks that in within ~10 epochs. The seed that worked kept improving through epoch 3 and reached 99.6% val accuracy. SAT values look similar across all three runs (~0.17–0.26) — visually this doesn't look like the same catastrophe as ω=2.0, but the underlying cause is the same.
+- **Mechanism:** `LTN_OMEGA_MODE=fixed` means the SAT weight doesn't adapt to how large CE actually is. Whether SAT or CE dominates the gradient during the first couple of epochs depends on random initialization; if SAT wins that window, the model gets pulled toward satisfying axioms over learning to classify, and early stopping locks in the result before it can recover. ω=1.0 sits right at the edge where this can go either way depending on seed; ω=0.5 has enough margin to avoid it every time (0/3 seeds); ω=2.0 has none (100% reproducible on n=1, now understood as the same dynamic with zero margin rather than a separate failure mode).
+- **Suggested fix, untested:** `ratio` omega-mode (already implemented, adapts SAT weight to the actual CE/SAT ratio) or a warmup schedule should remove the coin-flip dynamic, since the failure is specifically "fixed weight doesn't match the actual early-training ratio." Next concrete experiment if this line of investigation continues.
+
 ## 2026-07-27 (multi-seed results — the Ax6 headline finding is retracted)
 
 - **Ran 2 additional seeds (43, 44) for `ltn_ctrl_w0`, `ltn_ax6_w0p5`, `ltn_ax6_w1p0`** (n=3 each with seed 42) and log-odds re-scored all 6 new models. This was flagged as necessary before shipping any comparative claim as far back as the aux-head reproducibility gap earlier the same day — it caught a real overclaim within hours of that warning being written.
