@@ -32,3 +32,6 @@ pyyaml==6.0.3
 
 # ── Classical baselines (Phase 1) ──
 xgboost==3.2.0
+
+# ── Live ops dashboard (scripts/dashboard_server.py) — not part of the ML pipeline ──
+psutil==6.1.0

@@ -103,7 +103,8 @@ NeuroSymbolicIDS/
     ├── archive/               ← superseded original docs
     ├── STATUS.md              ← 🔴 living: where we are
     ├── CHANGELOG.md           ← 🔴 living: dated history
-    └── KNOWN_ISSUES.md        ← 🔴 living: bugs & risks
+    ├── KNOWN_ISSUES.md        ← 🔴 living: bugs & risks
+    └── DASHBOARD.md           ← 🔴 living: "open preview" convention (see below)
 ```
 
 **Artifact locations are defined once in [`scripts/paths.py`](scripts/paths.py)** (`PROCESSED`, `MODELS`, `ARRAYS`, `EMBEDDINGS`, `PREDICTIONS`, `METADATA`, `FIGURES`). Every script imports it. To change where something is written, edit `paths.py` — don't hardcode paths in scripts.
@@ -130,6 +131,7 @@ Documentation map:
 - Keep the embedding layer name (`"embedding"`) and the saved-artifact filenames stable — many scripts reference them by name.
 - All path locations come from `scripts/paths.py`; scripts `import paths` (works because `scripts/` is on `sys.path` when you run `python scripts/<x>.py`).
 - When you change behaviour/LTN, update [STATUS.md](docs/STATUS.md) and [CHANGELOG.md](docs/CHANGELOG.md).
+- **"Open preview" means the LIVE local ops console, always.** When the user says "open preview" (or equivalent), start it via `preview_start` with `name: "phase2-dashboard"` (config in `.claude/launch.json`, runs `scripts/dashboard_server.py`) — not the static published Artifact, which is a separate, sharable-but-frozen snapshot. Full detail (what's live, what each file is for, when to update which one) in [DASHBOARD.md](docs/DASHBOARD.md).
 - **A finding from one run/seed is provisional, not fact — say so.** Confirmed failure mode (2026-07-27): three separate claims (a scoring-saturation artifact, a "beaconing" hypothesis, an axiom's Bot-detection benefit) were written up as settled before multi-seeding or independent verification, and all three had to be retracted. Write single-run results as "n=1, unverified" in STATUS/CHANGELOG, not as confirmed — the retraction is cheap to prevent and expensive to discover later.
 - **Retract in place — never silently rewrite.** When a documented finding turns out wrong, strike it through / mark it `RETRACTED` with the reasoning kept, rather than deleting or quietly correcting it. STATUS.md's 2026-07-27 entries are the reference example: every reversal is visible, dated, and explains what changed the picture. This is what makes the living docs trustworthy as a research record, not just a status board.
 - **Background jobs expected to run >10–15 min get a heartbeat monitor** (process-alive + log-growth at minimum), not fire-and-forget — this is what made the 2026-07-27 multi-hour training batches trustworthy instead of a black box. See that session's transcript for the pattern (`Monitor` tool watching `Win32_Process` + log file size).
