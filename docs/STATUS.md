@@ -1,8 +1,13 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-07-27**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-07-29**.
 
 ## ▶ RESUME HERE (next session)
+
+**2026-07-29 session: git housekeeping + live ops dashboard (tooling, not research).** No new Phase-2 findings — this session closed out process debt and built dev tooling. Summary (full detail in [CHANGELOG.md](CHANGELOG.md)):
+- Codified session-discipline learnings into `CLAUDE.md` as non-negotiables (model-selection-per-step recommendation that must not lapse, "state phase back" onboarding step, provisional-claim discipline, retract-in-place documentation, heartbeat-monitor rule for long background jobs) — PRs #14–#17.
+- Built `scripts/dashboard_server.py`, a localhost-only live ops console (CPU/RAM, git state, running training processes, log tail, `runs.jsonl` history) — PR #18. "Open preview" now means this, not the static published-Artifact snapshot; see [DASHBOARD.md](DASHBOARD.md).
+- **Phase 2 (symbolic/LTN) is unchanged and concluded for now** — see the multi-seed retraction and ratio-mode-fix sections below, both still current. **Actual next research action: Phase 3 — Knowledge Graph** (Remaining Work #3 below), not further LTN axiom work; every axiom variant tried costs macro PR-AUC with no confirmed zero-day benefit.
 
 **Major pivot decided (2026-06-18).** LTN full run finished and **underperformed** the baseline
 (PR-AUC 0.45 vs CNN 0.67). Root cause diagnosed: focal CE collapsed to ~0.0005 so the SAT term
@@ -444,9 +449,9 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | # | Item | Status | Notes |
 |---|------|--------|-------|
 | 0 | Behaviour abstraction rebuild | ✅ | Done 2026-06-18. Validated; thresholds saved. |
-| 1 | **Re-ground LTN axioms on behaviours** | 🟡 Implemented; full run in progress | Ax3=LargePkt∧HighEntropy→¬benign, Ax4=BurstTraffic→¬benign. Smoke-tested OK. Awaiting full-run metrics. |
-| 2 | Decide `RepeatedConnections` data path | ⬜ | IP/port side table from `preprocess.py`, or keep out of v1 (currently 0). Can be done alongside #1 or deferred. |
-| 3 | Knowledge Graph (NetworkX) | ⬜ | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
+| 1 | **Re-ground LTN axioms on behaviours** | ✅ Concluded (not "done" in the sense of shipping a win — see multi-seed retraction below) | Ax3–Ax6 all implemented, smoke-tested, multi-seeded. Every variant costs macro PR-AUC vs. the no-axiom control; targeted Ax6 (BeaconLike)'s apparent Bot-lift benefit did not survive multi-seeding. `ratio` omega-mode confirmed as the safe default if this line is revisited. Not pursuing further axiom variants for now. |
+| 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement if revisited. |
+| 3 | **Knowledge Graph (NetworkX)** | ⬜ **next** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | 4 | Decision Fusion | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | Explainability / Final Alert | ⬜ | 3 explanations + alert. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |

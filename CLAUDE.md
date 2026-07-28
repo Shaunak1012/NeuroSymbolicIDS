@@ -35,12 +35,12 @@ Update the **living documents** so the next session starts clean:
 | CNN + embeddings | ✅ Verified correct |
 | CNN evaluation | ✅ Working |
 | Behaviour abstraction | ✅ Rebuilt & validated (PortScan/DDoS covered) |
-| LTN reasoning | ⚠️ Runs but axioms are label tautologies — **next: re-ground on behaviours** |
-| Knowledge Graph | ❌ Not built |
+| LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted; `ratio` omega-mode fix confirmed stable |
+| Knowledge Graph | ❌ Not built — **next** |
 | Decision Fusion | ❌ Not built |
 | Explainability | ❌ Not built |
 
-**Next action (resume here):** re-ground the LTN axioms on `behavior.py` (wire it into `ltn.py`, replace label-tautology axioms with behaviour→class rules), then run the ~30–60 min CPU training. Full remaining-work list and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
+**Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted. Next real work is **Phase 3: Knowledge Graph** (item #3 in STATUS's Remaining Work table). Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
 ## Environment / venv
 
