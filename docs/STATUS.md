@@ -130,15 +130,22 @@ they need the log-odds re-score (`scripts/rescore_logits.py`, blocked, see below
 **Phase-2 "three symbolic integration points" (per [conference_roadmap.md](target/conference_roadmap.md))
 — ALL THREE NOW TESTED (2026-07-27):**
 
+⚠️ **The row-1 Ax6 numbers below are single-seed (seed 42) and were RETRACTED later the
+same day** — see "🔴 MULTI-SEED RESULTS" further down. With n=3 seeds, Ax6's mean Bot
+lift (1.7–1.9x) is *lower* than the control's (2.07x); only the macro cost survives as a
+robust finding. Table kept as originally measured for the record; do not cite the Bot-lift
+column for Ax6 without reading the retraction below.
+
 | Integration point | Method | Status | Macro zd PR-AUC | Bot lift |
 |---|---|---|---|---|
 | (0) Neural baseline | `scripts/cnn_paper.py` | ✅ reference | **0.6446** | 1.7x |
 | (1) Loss-level, no targeted axiom | `ltn_ctrl_w0` / `ltn_anat_w0p5` | ✅ measured, clean | 0.6049 / 0.5552 | 1.5x / 1.1x |
-| (1) Loss-level, targeted (Ax6) | `ltn_ax6_w0p5` / `ltn_ax6_w1p0` | ✅ measured, clean | 0.5169 / 0.5316 | **2.2x / 1.8x** |
+| (1) Loss-level, targeted (Ax6) | `ltn_ax6_w0p5` / `ltn_ax6_w1p0` | ⚠️ seed 42 only, see retraction | 0.5169 / 0.5316 | ~~2.2x / 1.8x~~ |
 | (2) Representation-level | Aux behaviour-prediction head | ✅ measured | 0.5814 | 0.8–1.0x (seed-noisy) |
 | (3) Inference-level | `scripts/fusion_beaconlike.py` — logistic fusion of CNN logit + BeaconLike, calibrated on known-class val only | ✅ measured | 0.6447 | 1.7x — **no change from baseline** |
 
-**Only loss-level injection with a targeted axiom (Ax6) moves Bot at all.** Inference-level
+**Only loss-level injection with a targeted axiom (Ax6) moves Bot at all** *(single-seed
+claim — see multi-seed retraction below; treat this paragraph as superseded)*. Inference-level
 fusion — the mechanism the original roadmap expected to be primary — measurably does
 **nothing**: fitted coefficients came back `[2.35, 0.02]` (base model logit, BeaconLike),
 i.e. the calibration learned to ignore the symbolic signal almost entirely.
@@ -224,10 +231,14 @@ reversible on this build per Microsoft, no reinstall needed). Ran `ltn_ax6_w0p5`
 | ltn_anat_w1p0 (no Ax6) | 0.5241 | 0.0369 | 1.1x |
 | **ltn_ax6_w1p0 (+Ax6)** | 0.5316 | **0.0632** | **1.8x** |
 
-**Prediction confirmed: Ax6 roughly doubles Bot's lift at both ω values.** The
+**🔴 RETRACTED same day, after multi-seeding (see the "MULTI-SEED RESULTS" section
+below) — this was single-seed luck, not a real effect. Do not cite "Ax6 doubles Bot
+lift."** Kept below for the record, with the correction directly beneath it.
+
+~~**Prediction confirmed: Ax6 roughly doubles Bot's lift at both ω values.** The
 axiom-injection mechanism is not the bottleneck — Ax3/4/5 failed to move Bot because
 they targeted the wrong signature, not because loss-level injection structurally cannot
-help. This is the strongest evidence yet for the reframed Phase-2 thesis (finding #6).
+help. This is the strongest evidence yet for the reframed Phase-2 thesis (finding #6).~~
 
 **Not free, and this is the more interesting part.** At ω=0.5, Bot's gain came with Web
 Brute Force and Web XSS *dropping* (0.779/0.696 vs 0.833/0.796 without Ax6) — macro fell
@@ -258,11 +269,11 @@ saturated):
    demonstrably poor loss choice here.
 2. **The clean control is stronger than previously measured, which raises the bar Ax6
    has to clear.** Without any axioms, the custom loop already gets 1.5x lift on Bot
-   (not ~1.0x/chance) and 0.6049 macro (not 0.5937). The Ax6-vs-same-ω-without-Ax6
-   comparison is unaffected (both runs were always clean) — "roughly doubles Bot lift"
-   still holds exactly. But against the *best* baseline, the honest accounting is: Ax6
-   buys +0.7–1.1x Bot lift for a ~0.07–0.09 macro cost, not a wash against a weak
-   control.
+   (not ~1.0x/chance) and 0.6049 macro (not 0.5937). *(True as far as it goes on seed 42
+   — but this whole "vs control" comparison turned out to need seeds, not just clean
+   scoring, to be trustworthy. See "🔴 MULTI-SEED RESULTS" further down: with n=3 the
+   control's own Bot lift ranges 1.5–2.9x, and the "roughly doubles" claim below does
+   not survive.)*
 
 `ltn_anat_w2p0` staying saturated even in log-odds space is itself informative: PR-AUC
 is rank-based and threshold-independent, so log-odds only changes it when massive tie
@@ -276,11 +287,65 @@ config; the gap is most plausibly ordinary single-seed noise (TF isn't perfectly
 deterministic across runs even with a fixed seed), which is itself the strongest
 argument yet for the still-outstanding multi-seed work.
 
-**Remaining:** 3–5 seeds + CIs still needed before any comparative claim ships — this
-session's aux-head reproducibility gap is a concrete demonstration why.
+## 🔴 MULTI-SEED RESULTS (2026-07-27) — the Ax6 "prediction confirmed" claim does not survive
+
+Ran 2 additional seeds (43, 44) for `ltn_ctrl_w0`, `ltn_ax6_w0p5`, `ltn_ax6_w1p0` — n=3
+each with the original seed 42 — and log-odds re-scored all 6 new models
+(`scripts/rescore_logits.py`, extended `TAGS`). This is exactly what the
+"still-outstanding multi-seed work" warning above was for, and it caught a real
+overclaim from earlier the same day.
+
+**Bot lift, n=3 per config:**
+
+| Config | seed42 | s43 | s44 | mean | range |
+|---|---|---|---|---|---|
+| ltn_ctrl_w0 (no axioms) | 1.5x | 1.8x | **2.9x** | **2.07x** | 1.5–2.9x |
+| ltn_ax6_w0p5 | 2.2x | 1.9x | 1.5x | 1.87x | 1.5–2.2x |
+| ltn_ax6_w1p0 | 1.8x | 1.8x | 1.5x | 1.70x | 1.5–1.8x |
+
+**Macro, n=3 per config:**
+
+| Config | seed42 | s43 | s44 | mean | range |
+|---|---|---|---|---|---|
+| ltn_ctrl_w0 | 0.6049 | 0.6029 | 0.6505 | **0.6194** | 0.603–0.651 (tight) |
+| ltn_ax6_w0p5 | 0.5169 | 0.5601 | 0.4501 | 0.5090 | 0.450–0.560 |
+| ltn_ax6_w1p0 | 0.5316 | **0.0520** | **0.0366** | **0.2067** | catastrophic, 2/3 seeds |
+
+**🔴 RETRACTED: "Ax6 roughly doubles Bot's lift."** The control's mean Bot lift (2.07x)
+is *higher* than either Ax6 variant's (1.87x, 1.70x), with heavily overlapping ranges.
+The original comparison (1.5x control vs 2.2x Ax6, both seed 42) pitted the control's
+worst seed against Ax6's best seed. That's exactly the single-seed trap the "still
+outstanding multi-seed work" note two sections up predicted — the trap it was written
+to catch is the one that caught this finding, hours after it was written.
+
+**What survives, and is now *stronger* than the single-seed version:**
+1. **Ax6 robustly costs macro.** No overlap at all between the control's range
+   (0.60–0.65) and either Ax6 config's — this holds across all 3 seeds, not a fluke.
+2. **ω=1.0 is not the "milder tradeoff" it looked like on n=1 — it's the riskier one.**
+   2 of 3 seeds collapse catastrophically (macro 0.05, 0.04; both early-stopped by
+   epoch 10) while the control never does. Seed 42's 0.5316 was the lucky outcome, not
+   the norm — the same failure mode as `ltn_anat_w2p0`'s ω=2.0 collapse, just triggered
+   stochastically at ω=1.0 rather than deterministically. ω=0.5 is comparatively more
+   stable (0/3 seeds collapse) but still consistently below control on macro.
+3. **Bot lift itself is highly seed-sensitive even with zero axioms** — the control
+   alone swings from 1.5x to 2.9x on random initialization. Any single-seed claim about
+   Bot detection on this dataset (n=1,956, but apparently still noisy at this scale)
+   needs seeds to mean anything.
+
+**Net effect on the Phase-2 thesis:** the fusion finding (inference-level fusion
+structurally can't discover a zero-day-specific signal) and the macro-cost finding
+(loss-level injection consistently trades macro for *something*) both survive. What
+does **not** survive is the specific claim that Ax6 delivers a targeted, reliable
+Bot-detection improvement — on this evidence it delivers a real, robust macro cost and
+an unreliable, noise-level Bot effect that a plain unweighted control can match or beat
+on any given seed. If Ax6 is pursued further, the next step is understanding *why*
+ω=1.0 collapses 2/3 of the time (likely the same runaway SAT-dominance dynamic as
+ω=2.0, just probabilistic near the boundary) before drawing any more conclusions from
+it.
+
 C (host/session-level features) is not abandoned — RepeatedConnections/fan-out may still
-help Infiltration or lateral-movement detection specifically — but it is no longer the
-Bot fix and should wait until B2 is tested.
+help Infiltration or lateral-movement detection specifically — but it is no longer
+motivated as a Bot fix, and B2 no longer provides positive evidence either way.
 
 **Focal-loss `reshape([-1])` fix** required in any new loss. Failure-anatomy *balance* axis
 (vary benign_ratio) still TODO.
@@ -310,7 +375,7 @@ Bot fix and should wait until B2 is tested.
 | CNN (multiclass) | ✅ Verified correct | `scripts/cnn3.py` | See [cnn_current.md](implementation/cnn_current.md). Minor: double class-weighting. |
 | CNN evaluation | ✅ Working | `scripts/eval.py` | Produces PR-AUC baseline + `cnn_zeroday_eval.png`. |
 | Behaviour abstraction | ✅ Rebuilt & validated | `scripts/behavior.py` | Verified indices, vectorised, fuzzy [0,1], thresholds saved. PortScan/DDoS strongly covered. Not yet wired into LTN. See [doc](implementation/behaviour_abstraction_current.md). |
-| LTN reasoning (paper-split) | 🟡 Anatomized — narrow band beats loop control, phase-transition found | `scripts/ltn_paper.py` | Fair-loop control 0.501; axioms beat it at ω=0.5–1.0 (best 0.520); collapses at ω=2.0 (0.092). Training-method confound (custom loop vs `model.fit`) accounts for most of the gap to CNN (0.599). See STATUS "RESUME HERE" for full table + interpretation. |
+| LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted | `scripts/ltn_paper.py` | Clean (log-odds) control macro 0.6049 (n=1) / 0.6194 (n=3 mean); every axiom variant tried (old Ax3-5, targeted Ax6) costs macro relative to control, robust across seeds. ω=2.0 always collapses; ω=1.0 collapses 2/3 seeds — not the "safe zone" it looked like on n=1. Ax6's apparent Bot-lift improvement did not survive multi-seeding (control's own Bot lift ranges 1.5–2.9x). See STATUS "RESUME HERE" → "🔴 MULTI-SEED RESULTS" for the full table + retraction. |
 | LTN reasoning (legacy, temporal split) | 🔴 Superseded | `scripts/ltn.py` | Ran, underperformed (0.45 vs 0.67); SAT dominated CE ~40:1. Superseded by the paper-split protocol reset — see [doc](implementation/ltn_current.md). |
 | Knowledge Graph | ❌ Not built | — | Rescoped as memory + explainability corroboration. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | Decision Fusion | ❌ Not built | — | Now legitimately trainable under paper-aligned split. Spec: [decision_fusion.md](target/decision_fusion.md). |
