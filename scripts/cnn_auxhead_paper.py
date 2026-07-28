@@ -16,6 +16,8 @@ import os
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 import tensorflow as tf
+tf.config.threading.set_intra_op_parallelism_threads(16)
+tf.config.threading.set_inter_op_parallelism_threads(2)
 from tensorflow.keras import layers, models, callbacks, Input
 import tensorflow.keras.backend as K
 from sklearn.preprocessing import StandardScaler, LabelEncoder
@@ -27,7 +29,7 @@ tf.random.set_seed(SEED); np.random.seed(SEED)
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"]); TFM = cfg["protocol"]["feature_transform"]
 LAMBDA = float(os.environ.get("AUX_LAMBDA", "0.5"))
 EPOCHS = int(os.environ.get("AUX_EPOCHS", "50")); SUBSET = int(os.environ.get("AUX_SUBSET", "0"))
-BEH = behavior.BEHAVIOUR_NAMES[:5]   # drop RepeatedConnections (constant 0)
+BEH = [n for n in behavior.BEHAVIOUR_NAMES if n != "RepeatedConnections"]  # drop the constant-0 one
 
 def load(s): return (np.load(os.path.join(PAPER, f"X_{s}.npy")),
                      np.load(os.path.join(PAPER, f"y_{s}_mc.npy"), allow_pickle=True))
@@ -86,6 +88,9 @@ res = metrics.evaluate(yte, patk, zero_day, fpr=0.01); metrics.print_report(res)
 TAG = f"cnn_auxhead_l{LAMBDA}"
 np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{TAG}_test.npy"), patk.astype(np.float32))
 if SUBSET == 0:
+    # persist the model — without this the run cannot be re-scored (e.g. in log-odds)
+    # without a full retrain. See scripts/rescore_logits.py.
+    model.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
     emb_model = models.Model(model.input, model.get_layer("embedding").output)
     for nm, arr in [("train", Xtr), ("test", Xte)]:
         np.save(os.path.join(paths.EMBEDDINGS, f"X_{nm}_{TAG}_emb.npy"), emb_model.predict(arr, batch_size=1024, verbose=0))

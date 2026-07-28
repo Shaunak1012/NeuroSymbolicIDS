@@ -24,13 +24,15 @@ import os
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 import tensorflow as tf
+tf.config.threading.set_intra_op_parallelism_threads(16)
+tf.config.threading.set_inter_op_parallelism_threads(2)
 from tensorflow.keras import layers, models, Input
 import tensorflow.keras.backend as K
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 import paths, config, features, behavior, metrics, tracking
 
-cfg = config.get(); SEED = cfg["seed"]
+cfg = config.get(); SEED = int(os.environ.get("LTN_SEED", cfg["seed"]))
 tf.random.set_seed(SEED); np.random.seed(SEED)
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
@@ -57,9 +59,11 @@ def beh_weights(Xraw):
     w3 = (b["LargePackets"] * b["HighEntropy"]).astype(np.float32)  # Ax3
     w4 = b["BurstTraffic"].astype(np.float32)                        # Ax4
     w5 = b["ScanProbe"].astype(np.float32)                           # Ax5 (valid now)
-    return np.stack([w3, w4, w5], axis=1)
+    w6 = b["BeaconLike"].astype(np.float32)                          # Ax6 (targets Bot; see skyline_oracle.py)
+    return np.stack([w3, w4, w5, w6], axis=1)
 W_tr = beh_weights(Xtr_raw)
-print(f"behaviour weights mean: Ax3={W_tr[:,0].mean():.3f} Ax4={W_tr[:,1].mean():.3f} Ax5={W_tr[:,2].mean():.3f}")
+print(f"behaviour weights mean: Ax3={W_tr[:,0].mean():.3f} Ax4={W_tr[:,1].mean():.3f} "
+      f"Ax5={W_tr[:,2].mean():.3f} Ax6={W_tr[:,3].mean():.3f}")
 
 # ---- transform + scale ----
 sc = StandardScaler().fit(features.transform(Xtr_raw, TFM))
@@ -86,19 +90,19 @@ def ce_loss(yt, yp):
 
 ce_fn = focal_loss if LOSS == "focal" else ce_loss
 
-def sat_loss(sm, y_str, w, p=2.0):
+def sat_loss(sm, is_benign, is_attack, w, p=2.0):
     sm = tf.clip_by_value(sm, 1e-7, 1 - 1e-7)
     pben = sm[:, benign_idx]; patk = 1.0 - pben
     def sat_masked(target, mask):   # soft-mean satisfaction of `target` weighted by mask
-        m = tf.constant(mask, tf.float32); n = tf.maximum(tf.reduce_sum(m), 1.0)
-        err = tf.pow(1.0 - target, p) * m
+        n = tf.maximum(tf.reduce_sum(mask), 1.0)
+        err = tf.pow(1.0 - target, p) * mask
         return 1.0 - tf.pow(tf.clip_by_value(tf.reduce_sum(err) / n, 0.0, 1.0), 1.0 / p)
     sats = []
     if AXIOMS in ("base", "both"):
-        sats += [sat_masked(pben, (y_str == "BENIGN").astype(np.float32)),
-                 sat_masked(patk, (y_str != "BENIGN").astype(np.float32))]
+        sats += [sat_masked(pben, is_benign), sat_masked(patk, is_attack)]
     if AXIOMS in ("behaviour", "both"):
-        sats += [sat_masked(patk, w[:, 0]), sat_masked(patk, w[:, 1]), sat_masked(patk, w[:, 2])]
+        sats += [sat_masked(patk, w[:, 0]), sat_masked(patk, w[:, 1]),
+                 sat_masked(patk, w[:, 2]), sat_masked(patk, w[:, 3])]
     sat = tf.reduce_mean(tf.stack(sats))
     return tf.clip_by_value(1.0 - sat, 0.0, 1.0)
 
@@ -116,31 +120,49 @@ def build():
 cnn = build()
 opt = tf.keras.optimizers.Adam(3e-4, clipnorm=1.0)
 BATCH = 256; n = len(Xtr); nb = int(np.ceil(n / BATCH))
-best_va, best_ep, noimp = 0.0, 0, 0; best_w = None
+is_benign_tr = (ytr == "BENIGN").astype(np.float32)
+is_attack_tr = 1.0 - is_benign_tr
+
+@tf.function
+def train_step(xb, yb, ibb, iab, wb):
+    with tf.GradientTape() as tape:
+        sm = cnn(xb, training=True); sm = tf.clip_by_value(sm, 1e-7, 1 - 1e-7)
+        ce = ce_fn(yb, sm)
+        sat = sat_loss(sm, ibb, iab, wb)
+        if OMEGA_MODE == "ratio":
+            oeff = OMEGA * tf.stop_gradient(ce) / (tf.stop_gradient(sat) + 1e-7)
+        else:
+            oeff = tf.constant(OMEGA, tf.float32)
+        total = ce + oeff * sat
+    g = tape.gradient(total, cnn.trainable_variables)
+    return total, ce, sat, g
+
+# fair training: select best by val-LOSS (val-acc saturates ~0.998), anneal LR on plateau
+best_vl, best_va, best_ep, noimp, lr_wait, best_w = 1e9, 0.0, 0, 0, 0, None
+cur_lr, MIN_LR = 3e-4, 1e-6
 print(f"\nTraining {TAG} ...")
 for ep in range(1, EPOCHS + 1):
     perm = np.random.permutation(n)
-    Xs, ye, ys, Ws = Xtr[perm], ytr_e[perm], ytr[perm], W_tr[perm]
+    Xs, ye, ib, ia, Ws = Xtr[perm], ytr_e[perm], is_benign_tr[perm], is_attack_tr[perm], W_tr[perm]
     for b in range(nb):
         s, e = b * BATCH, min((b + 1) * BATCH, n)
         xb = tf.constant(Xs[s:e]); yb = tf.constant(ye[s:e], tf.float32)
-        with tf.GradientTape() as tape:
-            sm = cnn(xb, training=True); sm = tf.clip_by_value(sm, 1e-7, 1 - 1e-7)
-            ce = ce_fn(yb, sm)
-            sat = sat_loss(sm, ys[s:e], Ws[s:e])
-            if OMEGA_MODE == "ratio":
-                oeff = OMEGA * tf.stop_gradient(ce) / (tf.stop_gradient(sat) + 1e-7)
-            else:
-                oeff = OMEGA
-            total = ce + oeff * sat
-        if tf.math.is_nan(total): continue
-        g = tape.gradient(total, cnn.trainable_variables)
+        ibb = tf.constant(ib[s:e]); iab = tf.constant(ia[s:e]); wb = tf.constant(Ws[s:e])
+        total, ce, sat, g = train_step(xb, yb, ibb, iab, wb)
+        if bool(tf.math.is_nan(total)): continue
         g, _ = tf.clip_by_global_norm([tf.where(tf.math.is_nan(x), tf.zeros_like(x), x) for x in g], 1.0)
         opt.apply_gradients(zip(g, cnn.trainable_variables))
-    va = (np.argmax(cnn(tf.constant(Xval), training=False).numpy(), 1) == yval_e).mean()
-    if va > best_va: best_va, best_ep, noimp, best_w = va, ep, 0, cnn.get_weights()
-    else: noimp += 1
-    if ep % 5 == 0 or ep == 1: print(f"  ep {ep:3d} val_acc={va:.4f} (best {best_va:.4f}@{best_ep}) ce={float(ce):.4f} sat={float(sat):.4f}")
+    vp = cnn(tf.constant(Xval), training=False).numpy()
+    va = (np.argmax(vp, 1) == yval_e).mean()
+    vl = float(ce_fn(tf.constant(yval_e, tf.float32), tf.constant(vp)))
+    if vl < best_vl - 1e-5:
+        best_vl, best_va, best_ep, noimp, lr_wait, best_w = vl, va, ep, 0, 0, cnn.get_weights()
+    else:
+        noimp += 1; lr_wait += 1
+    if lr_wait >= 3 and cur_lr > MIN_LR:   # anneal LR on val-loss plateau (mirror ReduceLROnPlateau)
+        cur_lr = max(cur_lr * 0.5, MIN_LR); opt.learning_rate.assign(cur_lr); lr_wait = 0
+    if ep % 5 == 0 or ep == 1:
+        print(f"  ep {ep:3d} vl={vl:.4f} va={va:.4f} (best_vl {best_vl:.4f}@{best_ep}) ce={float(ce):.4f} sat={float(sat):.4f} lr={cur_lr:.1e}")
     if noimp >= 8: print(f"  early stop @ {ep}"); break
 if best_w: cnn.set_weights(best_w)
 
