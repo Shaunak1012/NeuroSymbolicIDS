@@ -369,12 +369,31 @@ operating point.** ω=0.5 has enough margin to avoid it (0/3 seeds); ω=2.0 has 
 single-seed sweep's 100%-reproducible collapse makes sense as the same dynamic with zero
 margin, not a different failure mode).
 
-**If Ax6/loss-level injection is pursued further**, the fix this diagnosis suggests is
-using `ratio` mode (adaptive ω, already implemented) instead of `fixed`, or a
-warmup schedule that ramps ω up only after CE has had a chance to start dropping —
-either should remove the coin-flip dynamic since the current failure is specifically a
-"fixed weight ≠ actual CE/SAT ratio during early training" problem. Untested; the next
-concrete experiment if this line of work continues.
+**✅ FIX CONFIRMED (2026-07-27).** Re-ran the exact same 3 seeds (42, 43, 44) at
+ω=1.0 with `LTN_OMEGA_MODE=ratio` instead of `fixed` — the two seeds that collapsed
+under fixed mode (43, 44) are the direct test.
+
+| Seed | macro (log-odds) | Bot lift | fixed-mode outcome |
+|---|---|---|---|
+| 42 | 0.6051 | 3.2x | worked either way (0.5316) |
+| 43 | 0.5796 | 0.9x | **was 0.0520 catastrophic** |
+| 44 | 0.5914 | 1.3x | **was 0.0366 catastrophic** |
+| **mean** | **0.5920** | 1.8x | (fixed-mode mean: 0.2067) |
+
+**Zero collapses across all 3 seeds — the fix works exactly as diagnosed.** Tight macro
+range (0.58–0.61), both previously-catastrophic seeds now land comfortably in the working
+range. This is also, incidentally, **the best Ax6 configuration found all session on
+macro** (mean 0.5920, beating fixed ω=0.5's mean of 0.5090) — though still below the
+clean no-axiom control's mean (0.6194; ratio ω=1.0's own range 0.58–0.61 doesn't overlap
+it either, so the macro cost is real, just smaller and now free of catastrophic risk).
+
+**Does not resolve the earlier retraction.** Bot lift stays noisy (0.9–3.2x, mean 1.8x)
+and does not clearly exceed the control's own mean (2.07x) — consistent with the
+"multi-seed results" retraction above. **The fix solves the stability problem
+(ω=1.0 is now a genuinely safe operating point), not the "does Ax6 reliably help Bot"
+question — that remains unresolved/likely negative.** If loss-level injection is pursued
+further, `ratio` mode is now the clearly preferred choice over `fixed` for any ω, since
+it removes a real failure mode at essentially no measured cost.
 
 C (host/session-level features) is not abandoned — RepeatedConnections/fan-out may still
 help Infiltration or lateral-movement detection specifically — but it is no longer

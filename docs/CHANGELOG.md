@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-27 (ratio-mode fix confirmed — collapse eliminated, Bot question still unresolved)
+
+- **Tested the fix suggested by the collapse diagnosis:** re-ran seeds 42, 43, 44 at ω=1.0 with `LTN_OMEGA_MODE=ratio` instead of `fixed`. Seeds 43 and 44 are the direct test — both collapsed catastrophically under fixed mode (macro 0.0520, 0.0366).
+- **Zero collapses across all 3 seeds.** Log-odds macro: 0.6051 / 0.5796 / 0.5914 (mean 0.5920), a tight range with both previously-catastrophic seeds landing comfortably in the working range. Confirms the diagnosed mechanism precisely — adapting the SAT weight to the actual CE magnitude removes the coin-flip dynamic entirely.
+- **Also, incidentally, the best Ax6 macro found all session** (mean 0.5920, beats fixed ω=0.5's mean of 0.5090) — though still below the clean no-axiom control's mean (0.6194); the macro cost is real, just smaller and now free of catastrophic risk.
+- **Does not resolve the earlier Bot-lift retraction.** Bot lift stays noisy under ratio mode too (0.9x/3.2x/1.3x, mean 1.8x) and doesn't clearly exceed the control's own mean (2.07x) — consistent with the multi-seed retraction from earlier the same day. The fix solves stability, not whether Ax6 reliably helps Bot detection; that remains open, and the evidence so far leans negative. `ratio` mode is now the clearly preferred choice over `fixed` for any future loss-level injection work, since it removes a real failure mode at no measured cost.
+
 ## 2026-07-27 (ω=1.0 collapse mechanism diagnosed — free, from existing logs)
 
 - **Diagnosed why `ltn_ax6_w1p0` collapses in 2 of 3 seeds**, using only logs already on disk — no new training. Had to work around a mixed PowerShell/Python encoding issue in the batch logs (header lines UTF-16LE, python's own stdout UTF-8, interleaved in the same file); resolved by locating markers at the raw byte level and decoding each segment with the right codec.
