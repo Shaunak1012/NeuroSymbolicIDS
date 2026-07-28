@@ -2,6 +2,19 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-29 (live local ops dashboard — "open preview" now means real-time, not a static snapshot)
+
+- **Built `scripts/dashboard_server.py`**: a localhost-only (127.0.0.1, not network-exposed) Python HTTP server, stdlib `http.server` + `psutil`. Polls real machine state every 4s — CPU/RAM, git branch + uncommitted-file count, running training processes (matched against known pipeline scripts, reporting PID/CPU/mem/elapsed), the tail of whichever `outputs/*.log` file changed most recently (decoded leniently to survive the mixed UTF-8/UTF-16LE issue below), and the full `runs.jsonl` run history.
+- **The Reconnect button reflects genuine connectivity**, not a decorative re-render: if a poll fails, the LIVE badge flips to a red "stalled" state and the button forces an immediate retry.
+- Added `.claude/launch.json` (`preview_start` config: `"phase2-dashboard"`) and `docs/DASHBOARD.md` documenting the convention, file responsibilities, and when to update the live server vs. the static Artifact.
+- **Superseded the earlier static-Artifact-only dashboard** (a published claude.ai Artifact, `phase2_console.html`) built and validated (colorblind-safe palette via `validate_palette.js`) the same day as the housekeeping below — that snapshot still exists for sharing outside a session, but "open preview" no longer means it.
+- Added `psutil==6.1.0` to `requirements.txt`, marked dashboard-only (not part of the ML pipeline). PR #18.
+
+## 2026-07-29 (session-discipline non-negotiables codified into CLAUDE.md — git housekeeping)
+
+- Merged PRs #14–#17 from the previous session's work: a **model-selection convention** (recommend Opus/Sonnet/Haiku per step so the user doesn't overspend on Opus for routine work; explicitly marked as must-not-lapse after it silently stopped appearing mid-session once), a **"state phase back"** onboarding step (forces confirming STATUS.md's state actually landed, not just got read), and four new **working-convention non-negotiables**: provisional-claim discipline (a finding from one run/seed is "n=1, unverified," not fact — directly motivated by the Ax6 Bot-lift retraction below), retract-in-place documentation (strike through, don't silently rewrite — STATUS's 2026-07-27 entries are the reference example), a heartbeat-monitor requirement for any background job expected to run >10–15 min, and the PowerShell mixed-encoding pitfall (now also in [KNOWN_ISSUES.md](KNOWN_ISSUES.md)).
+- These are process fixes, not research results — no component status changed.
+
 ## 2026-07-27 (ratio-mode fix confirmed — collapse eliminated, Bot question still unresolved)
 
 - **Tested the fix suggested by the collapse diagnosis:** re-ran seeds 42, 43, 44 at ω=1.0 with `LTN_OMEGA_MODE=ratio` instead of `fixed`. Seeds 43 and 44 are the direct test — both collapsed catastrophically under fixed mode (macro 0.0520, 0.0366).
