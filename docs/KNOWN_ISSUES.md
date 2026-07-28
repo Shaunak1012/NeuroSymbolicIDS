@@ -26,6 +26,9 @@ No payload bytes available; only approximable via packet-length variance. Decide
 ### [OPEN] Dead fuzzy operators in `ltn.py`
 `fuzzy_and`, `fuzzy_not`, `fuzzy_forall` defined but never used. Either use them in real axioms or remove to avoid implying functionality that isn't there.
 
+### [OPEN] PowerShell `*>>` batch logs are mixed-encoding
+When a PowerShell script redirects a Python subprocess's output with `*>> $log` (used for all the multi-job training batches), the resulting log file mixes **UTF-8** (Python's own `print`/stdout, passed through unchanged) with **UTF-16LE** (PowerShell's own `Add-Content` header lines), interleaved in the same file with no marker. Naive single-encoding reads (`iconv -f UTF-16LE`, plain `Get-Content`) either garble the UTF-8 portions into CJK-looking mojibake or silently truncate. Cost real time 3 separate times in the 2026-07-27 session before the workaround was written down. **Fix (workaround, not a real fix):** locate section markers by searching the raw bytes for both `text.encode('utf-8')` and `text.encode('utf-16-le')`, then decode each segment with whichever codec matched. A real fix would mean not mixing `Add-Content` (PowerShell-native) with `*>>` redirection of a Python child process in the same log file — e.g. write batch headers via the Python side (`print` to the same log) instead of PowerShell `Add-Content`, so the whole file is one encoding.
+
 ### [OPEN] Double class-weighting in `cnn3.py`
 Both `class_weight=` in `fit()` and focal-loss `alpha` weight imbalance, compounding the effect. Pick one. Not incorrect, but worth tuning. Detail: [cnn_current.md](implementation/cnn_current.md).
 

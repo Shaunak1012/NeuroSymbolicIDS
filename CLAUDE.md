@@ -17,6 +17,7 @@ Input is **CIC-IDS2017 flow-feature CSVs** (70 numeric features/flow). The "Raw 
 1. Read **[docs/STATUS.md](docs/STATUS.md)** — current component status, priorities, open decisions, last results.
 2. Skim **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)** — what's broken and why.
 3. Check recent **[docs/CHANGELOG.md](docs/CHANGELOG.md)** entries.
+4. **State it back, briefly, before starting work** — one line naming the current phase and what's blocking or next (per STATUS's "RESUME HERE"). This is a forcing function, not a formality: reading the files silently doesn't confirm the state actually landed. If the one-liner doesn't match what STATUS.md says, that's a sign it wasn't really absorbed — reread before proceeding.
 Then proceed with the task.
 
 ## ⚡ Last thing every session
@@ -129,6 +130,10 @@ Documentation map:
 - Keep the embedding layer name (`"embedding"`) and the saved-artifact filenames stable — many scripts reference them by name.
 - All path locations come from `scripts/paths.py`; scripts `import paths` (works because `scripts/` is on `sys.path` when you run `python scripts/<x>.py`).
 - When you change behaviour/LTN, update [STATUS.md](docs/STATUS.md) and [CHANGELOG.md](docs/CHANGELOG.md).
+- **A finding from one run/seed is provisional, not fact — say so.** Confirmed failure mode (2026-07-27): three separate claims (a scoring-saturation artifact, a "beaconing" hypothesis, an axiom's Bot-detection benefit) were written up as settled before multi-seeding or independent verification, and all three had to be retracted. Write single-run results as "n=1, unverified" in STATUS/CHANGELOG, not as confirmed — the retraction is cheap to prevent and expensive to discover later.
+- **Retract in place — never silently rewrite.** When a documented finding turns out wrong, strike it through / mark it `RETRACTED` with the reasoning kept, rather than deleting or quietly correcting it. STATUS.md's 2026-07-27 entries are the reference example: every reversal is visible, dated, and explains what changed the picture. This is what makes the living docs trustworthy as a research record, not just a status board.
+- **Background jobs expected to run >10–15 min get a heartbeat monitor** (process-alive + log-growth at minimum), not fire-and-forget — this is what made the 2026-07-27 multi-hour training batches trustworthy instead of a black box. See that session's transcript for the pattern (`Monitor` tool watching `Win32_Process` + log file size).
+- **Known pitfall: PowerShell `*>>` redirect of a Python subprocess produces a mixed-encoding log file** — part UTF-8 (Python's own stdout), part UTF-16LE (PowerShell's own `Add-Content` lines), interleaved in the same file. Naive `iconv`/`Get-Content` reads garble or truncate. Fix: locate markers by raw byte offset (search both UTF-8 and UTF-16LE encodings of the string), then decode each segment with the codec that matches. Hit 3 times in the 2026-07-27 session before this was written down — don't rediscover it.
 
 ## Git & commit conventions (MANDATORY — see [CONTRIBUTING.md](CONTRIBUTING.md))
 
