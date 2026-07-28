@@ -149,6 +149,8 @@ Full rules in [CONTRIBUTING.md](CONTRIBUTING.md). The non-negotiables:
 
 The user switches models per step based on this. Keep the recommendation honest — don't default to Opus.
 
+**Non-negotiable: this line does not lapse.** Confirmed failure mode (2026-07-27 session): the line quietly stopped appearing partway through a long session — specifically during stretches of many consecutive tool-call-heavy turns (background-job heartbeat monitoring, git housekeeping) where the response was mostly tool output and the trailing recommendation got dropped. Include `→ Next model: ...` on **every** response with user-visible text, including one-line heartbeat acknowledgements and routine status updates — not just on responses that "feel like" a natural decision point. If a run of near-identical short updates makes the line feel redundant, that repetition is fine; silently dropping it is the failure being guarded against here.
+
 ## Environment
 
 Windows 11, PowerShell primary shell. GitHub CLI (`gh`) v2.94 installed, authenticated as `Shaunak1012`. Git repo on branch `main`, remote `origin → github.com/Shaunak1012/NeuroSymbolicIDS`.
