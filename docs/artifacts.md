@@ -2,6 +2,94 @@
 
 This file catalogs every generated file, its shape/size, and what produced it.
 
+> **Two artifact generations coexist on disk.** The **paper-split** artifacts (current — everything
+> below the "Paper-split artifacts" heading) are what all reported results use. The **temporal-split**
+> artifacts (legacy, the rest of this file) are from the superseded protocol and are kept only for the
+> secondary hard-mode comparison. Filenames disambiguate them: paper-split models and predictions
+> carry a run tag (`cnn_paper`, `ltn_ctrl_w0`, `ltn_ax6_ratio_w1p0_s43`, …), legacy ones do not
+> (`model_multiclass.keras`, `y_prob_test.npy`).
+
+## Paper-split artifacts (current)
+
+### `data/processed/paper/` — the split itself (`paths.PAPER`)
+
+| File | Shape | Produced by |
+|---|---|---|
+| `X_{train,val,test}.npy` | (883,796 / 110,475 / 114,658, **68**) float32 | `preprocess_paper.py` |
+| `y_{train,val,test}_mc.npy` | (N,) string class labels | `preprocess_paper.py` |
+| `y_{train,val,test}_bin.npy` | (N,) 0/1 | `preprocess_paper.py` |
+| `meta_{train,val,test}.csv` | (N, 7) Flow ID / Source+Dest IP / Ports / Protocol / Timestamp | `preprocess_paper.py` |
+| `known_classes.npy` | (9,) str | `preprocess_paper.py` |
+| `zero_day_classes.npy` | (6,) str | `preprocess_paper.py` |
+| `split_report.txt` | text | `preprocess_paper.py` |
+
+> `meta_*.csv` is aligned **row-for-row** with the corresponding `X_*.npy`. This is what unblocks
+> `RepeatedConnections`, source-level response replay, and any IP/time-aware Knowledge Graph work.
+
+### Models (`models/`)
+
+| Pattern | Produced by |
+|---|---|
+| `cnn_paper.keras`, `cnn_paper_best.keras` | `cnn_paper.py` |
+| `scaler_paper.pkl`, `label_encoder_paper.pkl` | `cnn_paper.py` |
+| `cnn_auxhead_l0.5.keras` | `cnn_auxhead_paper.py` |
+| `ltn_ctrl_w0{,_s43,_s44}.keras` | `ltn_paper.py` — no-axiom control, 3 seeds |
+| `ltn_anat_w{0p5,1p0,2p0}.keras` | `ltn_paper.py` — ω-sweep, old axioms |
+| `ltn_ax6_w{0p5,1p0}{,_s43,_s44}.keras` | `ltn_paper.py` — Ax6, fixed ω, 3 seeds |
+| `ltn_ax6_ratio_w1p0_s{42,43,44}.keras` | `ltn_paper.py` — Ax6, **ratio** ω-mode, 3 seeds |
+| `ltn_repro.keras`, `ltn_v2.keras` | `ltn_paper.py` — reproduction + v2 variants |
+
+### Embeddings (`outputs/embeddings/`)
+
+| File | Shape | Model |
+|---|---|---|
+| `X_{train,val,test}_cnn_paper_emb.npy` | (N, 64) | `cnn_paper.py` |
+| `X_{train,test}_cnn_auxhead_l0.5_emb.npy` | (N, 64) | `cnn_auxhead_paper.py` |
+
+> ⚠️ The aux-head has **no `X_val_` embedding** — only train and test were saved. Any downstream
+> stage that needs a validation embedding (e.g. fitting a fusion combiner or clustering calibration)
+> must use the `cnn_paper` embeddings, which do have all three.
+
+### Predictions / fusion channels (`outputs/predictions/`)
+
+Naming: `y_prob_<run-tag>_test.npy` (P(attack)) and `y_prob_<run-tag>_logodds_test.npy`
+(log-odds re-score from `rescore_logits.py`).
+
+| Channel | Source |
+|---|---|
+| `y_prob_cnn_paper_test.npy` | `cnn_paper.py` — the reference |
+| `y_prob_{xgboost,random_forest,isolation_forest}_test.npy` | `baselines.py` |
+| `y_prob_{msp,mahalanobis}_test.npy` | `novelty.py` |
+| `y_prob_ltn_*_test.npy` | `ltn_paper.py` (one per run/seed) |
+| `y_prob_fusion_{cnn_beaconlike,cnn_allbehaviours}_test.npy` | `fusion_beaconlike.py` |
+| `y_prob_xgboost_oracle_test.npy` | `skyline_oracle.py` |
+| `y_prob_smoke_*_test.npy` | ⚠️ **smoke-test debris** — undertrained, not results. Safe to delete. |
+
+> **Prefer the `_logodds_` variant where it exists.** Plain `y_prob_*` scores can be float32-saturated
+> (`ltn_ctrl_w0`: 99.25% of benign flows at exactly 0.0), which corrupts rank-based metrics. See
+> [scripts_reference.md](scripts_reference.md#scriptsrescore_logitspy).
+
+### Metadata (`outputs/metadata/`)
+
+| File | Contents |
+|---|---|
+| `runs.jsonl` | One JSON line per run — the self-assembling ablation table (`tracking.py`) |
+| `behaviour_thresholds.npy` | Fuzzy ramp percentile pairs (`behavior.py`) |
+| `cnn_paper_history.pkl` | Per-epoch training history (`cnn_paper.py`) |
+
+> ⚠️ `runs.jsonl` contains entries from **two metrics schemas**. Records written before the
+> 2026-07-27 `metrics.py` rewrite carry only `zd_pr_auc` (the blended, size-weighted number);
+> later records carry per-family PR-AUC + macro. `random_forest` is one of the old-schema entries and
+> has no macro score. Check for the per-family keys before comparing rows.
+
+---
+
+## Legacy temporal-split artifacts
+
+> ⚠️ **Everything below this line is from the superseded temporal split.** Shapes reference the
+> temporal row counts (train 1,666,532 / test 1,161,344) and "9 classes / 4 zero-day", which do not
+> describe the current protocol. Retained for provenance.
+
 ## Where everything lives
 
 Artifacts are organised into subfolders (locations defined in [`scripts/paths.py`](../scripts/paths.py)). The per-category tables below list filenames; use this map for the folder each lands in:
@@ -100,11 +188,19 @@ These are produced by `cnn3.py` after encoding and splitting:
 
 ## Behaviour Artifacts (.npy)
 
-| File | Type | Size | Produced By |
-|------|------|------|-------------|
-| `behaviour_thresholds.npy` | dict (object array) | 522 B | ⚠️ **NOT generated by any current script** |
+| File | Type | Location | Produced By |
+|------|------|----------|-------------|
+| `behaviour_thresholds.npy` | dict (object array) | `outputs/metadata/` | `behavior.py` (`save_thresholds()`) |
 
-> **Correction:** No script in the pipeline calls `compute_thresholds()` or writes `behaviour_thresholds.npy`. If the file exists in the repo it is a stale leftover. `behavior.py`'s `load_thresholds()` always falls back to hardcoded defaults. See [behaviour_abstraction_current.md](implementation/behaviour_abstraction_current.md). Intended keys (if it were generated): `high_traffic`, `large_packets`, `high_rate`, `high_variance`, `high_mean`, `bursty_iat`.
+> **Correction (2026-07-29): the previous note on this row was wrong and is retracted.** It read
+> *"NOT generated by any current script … if the file exists it is a stale leftover … `load_thresholds()`
+> always falls back to hardcoded defaults."* That was accurate before the 2026-06-18 rebuild but has
+> been false ever since. `behavior.py` now exposes `compute_thresholds()` / `save_thresholds()`, running
+> `python scripts/behavior.py` regenerates the file, and it is **present** at
+> `outputs/metadata/behaviour_thresholds.npy` (verified 2026-07-29).
+>
+> Keys are percentile pairs for the 7 fuzzy behaviours (not the old boolean-flag names) — see
+> [behaviour_abstraction_current.md](implementation/behaviour_abstraction_current.md).
 
 ### LTN extra outputs (also produced by `ltn.py`)
 
