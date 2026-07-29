@@ -7,7 +7,19 @@
 **2026-07-29 session: git housekeeping + live ops dashboard (tooling, not research).** No new Phase-2 findings — this session closed out process debt and built dev tooling. Summary (full detail in [CHANGELOG.md](CHANGELOG.md)):
 - Codified session-discipline learnings into `CLAUDE.md` as non-negotiables (model-selection-per-step recommendation that must not lapse, "state phase back" onboarding step, provisional-claim discipline, retract-in-place documentation, heartbeat-monitor rule for long background jobs) — PRs #14–#17.
 - Built `scripts/dashboard_server.py`, a localhost-only live ops console (CPU/RAM, git state, running training processes, log tail, `runs.jsonl` history) — PR #18. "Open preview" now means this, not the static published-Artifact snapshot; see [DASHBOARD.md](DASHBOARD.md).
-- **Phase 2 (symbolic/LTN) is unchanged and concluded for now** — see the multi-seed retraction and ratio-mode-fix sections below, both still current. **Actual next research action: Phase 3 — Knowledge Graph** (Remaining Work #3 below), not further LTN axiom work; every axiom variant tried costs macro PR-AUC with no confirmed zero-day benefit.
+- **Phase 2 (symbolic/LTN) is unchanged and concluded for now** — see the multi-seed retraction and ratio-mode-fix sections below, both still current. **Next research action is the Knowledge Graph** (Remaining Work #3 below), not further LTN axiom work; every axiom variant tried costs macro PR-AUC with no confirmed zero-day benefit.
+
+> ⚠️ **Phase-number correction (2026-07-29).** This line previously read *"Phase 3 — Knowledge
+> Graph."* That was a **numbering collision**: the canonical scheme
+> ([conference_roadmap.md §1b](target/conference_roadmap.md)) has **Phase 3 = anomaly pillar
+> (benign-only autoencoder)** and **Phase 4 = Knowledge Graph** — which is also what this document's
+> own Component Status table and a comment in `cnn_auxhead_paper.py` already said. The KG is
+> **Phase 4**.
+>
+> **This was not cosmetic: it was about to skip Phase 3 entirely.** The autoencoder is ~1 hour of
+> work and is ranked Tier-1 "⭐ highest leverage" in [enhancements.md](target/enhancements.md)
+> specifically because it closes the "why not just an autoencoder?" reviewer objection. **Decide it
+> before starting the KG** — see [Open Decisions](#open-decisions).
 
 **Major pivot decided (2026-06-18).** LTN full run finished and **underperformed** the baseline
 (PR-AUC 0.45 vs CNN 0.67). Root cause diagnosed: focal CE collapsed to ~0.0005 so the SAT term
@@ -416,6 +428,47 @@ motivated as a Bot fix, and B2 no longer provides positive evidence either way.
 **Compute:** **CPU** (Ryzen 9 9950X3D). GPU (RTX 5080 / Blackwell) deferred. For long runs use
 `python -u` so progress is live and completion is caught reliably (last run's notification was missed).
 
+## 🟢 PHASE-4 (Knowledge Graph) READINESS — audited 2026-07-29
+
+Full review, with tables and caveats, at the top of
+[target/knowledge_graph.md](target/knowledge_graph.md). Summary:
+
+**Green — inputs verified present and aligned:**
+`X_{train,val,test}_cnn_paper_emb.npy` (883,796 / 110,475 / 114,658 × 64, all three splits) ·
+`meta_{train,val,test}.csv` with IP/port/timestamp, row-aligned · `networkx` 3.2.1 and
+`python-louvain` 0.16 installed and importable · test set is 114,658 flows, so the spec's
+"1.1M nodes will blow up" risk no longer applies.
+
+**Green — empirical pre-check, better than predicted (n=2 seeds, provisional):**
+Clustering `cnn_paper` train embeddings and applying to test, **Bot forms a ~90%-pure cluster at
+k≥200, stable across seeds**, capturing ~34% of Bot. This is the family that defeated every Phase-2
+intervention, and it *does* have seed-stable geometric structure in the embedding space. Web Attack
+Brute Force reaches ~65% purity at 90% recall. Not a detection result — a viability result.
+
+**🔴 Three assumptions in the KG spec no longer hold — decide before coding:**
+1. **Scope contradiction.** `knowledge_graph.md` calls the KG the *"primary zero-day signal"*;
+   `conference_roadmap.md` Phase 4 says *"corroboration + reasoning paths, not primary detector."*
+   The roadmap is canonical and better supported — see #2.
+2. **The fusion path for a "primary detector" is already measured to fail.** A non-leaky combiner
+   must be fit on validation data, which under this protocol **cannot contain zero-day flows by
+   construction**. `fusion_beaconlike.py` ran exactly this and got coefficients `[2.35, 0.02]` —
+   the combiner ignored the symbolic channel; macro unchanged (0.6447 vs 0.6446).
+   **`s_kg` should be expected to hit the identical wall.** `decision_fusion.md`'s own prescribed
+   remedy ("train the fuser on a val split that includes zero-day examples") is **impossible here**
+   and is now struck through in that document with the three real options.
+3. **"Temporal decay" has no clean time axis.** The paper split is stratified-random across all 5
+   days; there is no train→test time arrow. Options: decay over flow-count in timestamp-sorted order
+   within test · drop decay for v1 · or run the adaptive story on the temporal split as a secondary
+   result. "Adaptive" is in the project title, so option 2 has a write-up cost.
+
+**🔴 The single most important untested quantity:** the spec flags an "emerging pattern" partly by
+*"weak or no `associated_with` edges to known AttackType"*. But **25 of 50 clusters were already
+>90% benign in training**, and 100% of Bot / Web-BF / Infiltration / Heartbleed test flows landed in
+benign-dominated clusters. So that criterion will fire on the zero-day families **and on a large
+number of ordinary benign clusters**. **Measure the false-positive rate of "unexplained cluster"
+first** — the discriminative work has to come from the growth-rate and behaviour-co-occurrence
+criteria, not from "unexplained" alone. Build that measurement before building the graph.
+
 ## Environment
 
 ✅ **Ready.** `.venv/` at repo root — Python 3.11.9, TF 2.15.1 (Keras 2), numpy 1.26.4, + networkx / python-louvain / shap. CPU mode (no GPU). Pinned in `requirements.txt`. Use `.venv\Scripts\python.exe`. See [CLAUDE.md](../CLAUDE.md#environment--venv).
@@ -450,9 +503,10 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 |---|------|--------|-------|
 | 0 | Behaviour abstraction rebuild | ✅ | Done 2026-06-18. Validated; thresholds saved. |
 | 1 | **Re-ground LTN axioms on behaviours** | ✅ Concluded (not "done" in the sense of shipping a win — see multi-seed retraction below) | Ax3–Ax6 all implemented, smoke-tested, multi-seeded. Every variant costs macro PR-AUC vs. the no-axiom control; targeted Ax6 (BeaconLike)'s apparent Bot-lift benefit did not survive multi-seeding. `ratio` omega-mode confirmed as the safe default if this line is revisited. Not pursuing further axiom variants for now. |
-| 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement if revisited. |
-| 3 | **Knowledge Graph (NetworkX)** | ⬜ **next** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
-| 4 | Decision Fusion | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
+| 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | **Unblocked, not blocked** — `meta_{train,val,test}.csv` now carry IP/port/timestamp aligned row-for-row. No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement. Wiring it is a choice, not a data problem. |
+| 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ⬜ **decide first** | ~1h. Tier-1 "highest leverage" in [enhancements.md](target/enhancements.md); closes the "why not an autoencoder?" objection. Nearly skipped by a phase-number collision — see the correction box at the top. |
+| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | ⬜ **next build** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). ⚠️ **Read the "Phase-4 readiness review" at the top of that spec before starting** — 3 of its original assumptions no longer hold, and there are 2 design decisions to make first. |
+| 4 | Decision Fusion — canonical Phase 5 | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | Explainability / Final Alert | ⬜ | 3 explanations + alert. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
 
@@ -469,6 +523,8 @@ Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 | KG clustering | Static (fit once on train embeddings) | If drift observed |
 | Decay "time" | Flow-count (reproducible) | — |
 | Compute (CPU vs GPU) | **CPU** (Ryzen 9 9950X3D) | GPU (RTX 5080/Blackwell) deferred — needs WSL2 + CUDA 12.8 + newer TF + Keras 3 migration. Revisit if training volume grows (multi-seed/sweeps/cross-dataset). |
+| **Run the Phase-3 autoencoder before the KG?** | ⬜ **UNDECIDED — raised 2026-07-29** | Was never actually decided; it was skipped by a phase-number collision. ~1h. Evidence cuts both ways: IsolationForest is dreadful overall (macro 0.0628) but ties the CNN on Bot (0.0571 vs 0.0591), so an AE's result is genuinely unpredictable. Recommendation: **run it** — cheap, and it closes a named reviewer objection. |
+| **Omega mode for any future LTN work** | **`ratio`** (already the code default) | Settled 2026-07-27: `fixed` collapses 2/3 seeds at ω=1.0, deterministically at ω=2.0; `ratio` eliminated the collapse at no measured cost. Do not use `fixed` without a stated reason. |
 
 ## Last Measured Results
 
