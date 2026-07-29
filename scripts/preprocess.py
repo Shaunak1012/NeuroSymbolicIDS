@@ -24,7 +24,7 @@ import pandas as pd
 
 import paths
 
-RAW = os.path.join(paths.ROOT, "data", "raw_csv_full")
+RAW = paths.RAW_CSV_FULL
 
 TRAIN_FILES = ["Monday-WorkingHours.pcap_ISCX.csv",
                "Tuesday-WorkingHours.pcap_ISCX.csv",
