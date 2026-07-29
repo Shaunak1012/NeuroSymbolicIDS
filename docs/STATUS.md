@@ -428,6 +428,124 @@ motivated as a Bot fix, and B2 no longer provides positive evidence either way.
 **Compute:** **CPU** (Ryzen 9 9950X3D). GPU (RTX 5080 / Blackwell) deferred. For long runs use
 `python -u` so progress is live and completion is caught reliably (last run's notification was missed).
 
+## 🔴 EARLIER-PHASE AUDIT (2026-07-29) — 5 open concerns, FIXES NOT YET IMPLEMENTED
+
+> **Status: findings recorded, awaiting go-ahead. Nothing here has been actioned.**
+> Retrospective audit of Phases 0–2 run at session end. Ordered by severity.
+> ⚠️ **Resolve C2 before citing any Phase-2 headline** — it may overturn one.
+
+### C1 — 17% of test rows are exact duplicates of training rows
+
+CIC-IDS2017 is duplicate-heavy (`preprocess.py` deliberately keeps duplicates) and the paper split is
+**stratified random**, so identical feature vectors land on both sides. Measured by hashing every row:
+
+| Class | test rows that are exact copies of a train row |
+|---|---:|
+| PortScan | **58.3%** |
+| SSH-Patator | **48.6%** |
+| FTP-Patator | 29.6% |
+| DoS Hulk | 25.3% |
+| BENIGN | 6.9% |
+| **all 6 zero-day classes** | **0.0%** |
+
+Train is 13.5% internally duplicated, test 7.0%; 11,848 distinct vectors appear in both.
+
+**✅ The headline zero-day metric is SAFE** — zero-day classes are test-only by construction, so they
+cannot overlap train. **🔴 What is contaminated is the ~0.98 "overall binary PR-AUC"**: PortScan at
+58% overlap is substantially a lookup, not detection. Known in the literature (Engelen et al. 2021).
+
+**Proposed fix (not implemented):** do **not** de-duplicate — that changes the protocol and breaks
+comparability with the base paper. Instead **report both**: overall PR-AUC as-is plus a
+"unique-flows-only" variant, and state the duplicate rate explicitly. One evaluation pass, no
+retraining. Converts a reviewer vulnerability into a rigor point.
+
+### C2 — 🔴 The baseline every Phase-2 conclusion rests on is single-seed
+
+`cnn_paper` is **n=1 (seed 42)**. The LTN control was multi-seeded; the baseline it is compared
+against was not. All classical baselines (xgboost, random_forest, isolation_forest, msp,
+mahalanobis) are also n=1.
+
+**The control's macro across 3 seeds spans 0.6029–0.6505. The CNN's 0.6446 falls INSIDE that
+interval.** Therefore this document's claim — *"Neither variant beats the plain CNN's 0.6446 macro —
+the neural baseline still wins in aggregate"* — **is not established.** It compares a point estimate
+against a distribution, which is the same single-seed error that produced the Ax6 retraction.
+
+**Proposed fix (not implemented):** run 2 more `cnn_paper` seeds (~2 CNN trainings). **Highest
+value-per-hour experiment currently available** — it either confirms the headline or overturns it.
+
+### C3 — The macro metric counts one signal twice
+
+`fam_web_attack_brute_force_pr_auc` and `fam_web_attack_xss_pr_auc` correlate at **r = +0.992**
+across 60 runs (same Thursday-morning campaign, same tool, same target). So
+`macro = mean(Bot, WebBF, XSS)` is really ⅓ Bot + ⅔ *one* web signal — the weighting is an artifact
+of how many web sub-labels CIC-IDS2017 happens to define.
+
+**Hypothesis tested and REFUTED:** predicted this biased the metric against Bot-targeted
+interventions (Ax6 helps Bot, hurts web). Regrouping to `mean(Bot, mean(WebBF, XSS))` **preserved
+the ordering exactly**:
+
+| config | macro as reported | macro regrouped |
+|---|---:|---:|
+| cnn_paper (n=1) | 0.6446 | 0.4982 |
+| LTN control w0 (n=3) | 0.6194 | 0.4824 |
+| Ax6 ratio ω=1.0 (n=3) | 0.5920 | 0.4596 |
+| Ax6 fixed ω=0.5 (n=3) | 0.5091 | 0.3977 |
+
+**The macro-cost finding is robust to this** — a genuine strengthening. But absolute values shift by
+~0.15, so the *number* is label-granularity-dependent.
+**Proposed fix (not implemented):** report regrouped macro as a robustness row.
+
+### C4 — The feature transform was selected on the contaminated metric
+
+`config.yaml` pins `feature_transform: log1p` citing *"signed-log1p beat raw 0.980 vs 0.965 PR-AUC."*
+That **0.980 is the overall binary metric** — the one inflated by C1's duplicate leakage, and the one
+`metrics.py` explicitly says "can never masquerade as the result." The transform was **never A/B'd on
+macro zero-day PR-AUC**, the actual headline.
+**Proposed fix (not implemented):** re-run the A/B on the headline metric (2 trainings). log1p may
+well still win — but the current justification cites the wrong number.
+
+### C5 — Two metadata defects in `runs.jsonl`
+
+1. `rescore_logits.py` writes `seed: 42` for **every** `_logodds` entry, including the s43/s44 models
+   — the seed field is wrong on 8 rows.
+2. Several entries are duplicated 3× from repeated rescoring runs (`cnn_paper_logodds` appears 3×).
+   Naive aggregation double-counts.
+
+**Proposed fix (not implemented):** propagate the source model's seed; dedupe on write.
+
+---
+
+## 🔑 THE FUSION WALL — proposed fix (not implemented)
+
+**The problem.** A fitted combiner cannot learn to weight a zero-day-specific signal, because the
+validation set contains no zero-day flows *by construction*. `fusion_beaconlike.py` returned
+coefficients `[2.35, 0.02]` — it learned to ignore the symbolic channel. This blocks the KG's
+intended contribution path too (see the Phase-4 readiness section below).
+
+**Proposed fix — Leave-One-Class-Out (LOCO): manufacture synthetic zero-day from known classes.**
+
+Hide one **known** attack class (e.g. PortScan) from CNN training entirely, retrain, and that class
+becomes a genuine synthetic zero-day in validation — a class the model provably never saw. Fit the
+fusion combiner on *that*. Rotate across the 8 known attack classes.
+
+This gives the combiner exactly what it lacked: examples of *"the CNN is confused because this class
+is novel, and here is what the symbolic channel said."* That regime is **transferable**, unlike a
+class-specific fact. **It does not leak** — Bot / Web×3 / Infiltration / Heartbleed are never touched.
+It is the standard open-set-recognition remedy, and it upgrades the finding from a dead end to a
+contribution: *"inference-time fusion fails naively; here is the protocol that repairs it."*
+
+- **Cheap first probe (recommended):** hold out **PortScan only** — 1 retrain. If the BeaconLike
+  coefficient moves off 0.02, the approach is alive and the full rotation is justified.
+- **Full version:** 8 retrains.
+
+**Complementary alternative — conformal / benign-only calibration.** Calibrate each channel as a
+p-value against the **benign** distribution only, then combine via Fisher's method. Requires **no
+attack labels at all**, so the zero-day gap never arises. ~No training cost. Weaker if channels are
+correlated, but a genuinely independent second shot.
+
+**Recommended order if approved:** C2 (2 seeds — may overturn a headline) → LOCO probe (1 retrain —
+unblocks fusion) → C1 + C3 reporting variants (no training) → C4 → C5.
+
 ## 🟢 PHASE-4 (Knowledge Graph) READINESS — audited 2026-07-29
 
 Full review, with tables and caveats, at the top of

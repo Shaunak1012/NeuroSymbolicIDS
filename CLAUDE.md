@@ -46,6 +46,10 @@ Update the **living documents** so the next session starts clean:
 
 **Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted.
 
+🔴 **STOP — read the "EARLIER-PHASE AUDIT" section at the top of [STATUS.md](docs/STATUS.md) before doing anything else.** A retrospective audit on 2026-07-29 found **5 open concerns**, findings recorded but **no fixes implemented — they await the user's go-ahead. Do not implement them unprompted.** In particular **C2: the reference baseline `cnn_paper` (0.6446) is n=1 while the LTN control is n=3 and spans 0.6029–0.6505 — an interval that contains 0.6446.** So the standing claim "neither variant beats the plain CNN" is not established. Two more CNN seeds resolve it. Also proposed there: a **Leave-One-Class-Out fix for the fusion wall** (hide a known attack class to manufacture synthetic zero-day for the combiner) — the cheap probe is 1 retrain.
+
+**Recommended order once approved:** C2 (2 seeds) → LOCO fusion probe (1 retrain) → C1/C3 reporting variants (no training) → C4 → C5.
+
 ⚠️ **Before starting the KG, resolve one open decision:** run the **benign-only autoencoder** (canonical Phase 3, ~1h) or explicitly skip it? It was never actually decided — it was about to be skipped by a phase-number collision (STATUS used "Phase 3" for the KG while the canonical roadmap uses Phase 3 = autoencoder, Phase 4 = KG). It is ranked Tier-1 "highest leverage" because it closes the "why not just an autoencoder?" reviewer objection. Then build the **Knowledge Graph (canonical Phase 4)**.
 
 **Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).

@@ -2,6 +2,55 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-29 (earlier-phase audit — 5 open concerns + a proposed fix for the fusion wall)
+
+> **Findings only. No fixes implemented — all await go-ahead.** Full detail in
+> [STATUS.md](STATUS.md) → "Earlier-phase audit"; tracked individually in
+> [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+
+- **Verified no records were lost in the same-day documentation rewrite.** Audited every deleted line
+  across 24 files: all 23 dated CHANGELOG headers preserved (+1 new), every retracted claim preserved
+  **verbatim inside `~~strikethrough~~`** with its retraction box. Two genuine losses were found and
+  restored: the caveat that the **temporal CNN baseline (0.6689) may itself have been hampered by the
+  focal-loss bug** (research-relevant — it is the denominator in "LTN 0.4529 vs CNN 0.6689", and a
+  clean baseline would make the LTN deficit *larger*; never retrained, still unquantified), and the
+  concrete `.gitignore` failure detail. Process note: both losses came from full-file `Write`
+  rewrites — avoid that on record-bearing files.
+- **🔴 Found 17% duplicate leakage between train and test.** CIC-IDS2017 is duplicate-heavy and the
+  paper split is stratified random, so 19,513 / 114,658 test rows have an exact feature-vector twin
+  in train — PortScan **58.3%**, SSH-Patator **48.6%**, DoS Hulk 25.3%, BENIGN 6.9%. **All 6 zero-day
+  classes measure 0.0%**, so the headline macro zero-day metric is safe; what is contaminated is the
+  ~0.98 overall binary PR-AUC. Proposed: report a unique-flows-only variant alongside, rather than
+  de-duplicating (which would break base-paper comparability).
+- **🔴 Found the reference baseline is single-seed while its comparators are not.** `cnn_paper`
+  (0.6446) is n=1; the LTN control is n=3 and spans **0.6029–0.6505** — an interval that *contains*
+  0.6446. STATUS's claim "neither variant beats the plain CNN, the neural baseline still wins in
+  aggregate" therefore compares a point estimate against a distribution — the same error class that
+  produced the Ax6 retraction. Two more CNN seeds would confirm or overturn it.
+- **Tested and REFUTED a hypothesis of my own.** Web Brute Force and Web XSS correlate at
+  **r = +0.992** across 60 runs, so the macro counts one web signal twice (⅓ Bot, ⅔ web). Predicted
+  this biased the metric against Bot-targeted interventions like Ax6. Regrouping to
+  `mean(Bot, mean(WebBF, XSS))` **preserved the ordering exactly** (0.4982 > 0.4824 > 0.4596 >
+  0.3977) — the macro-cost finding is robust, and now more so. Absolute values shift ~0.15.
+- **Found the feature transform was selected on the contaminated metric.** `log1p` is pinned citing
+  "0.980 vs 0.965", which is the overall binary number — inflated by the duplicate leakage above and
+  explicitly forbidden by `metrics.py` as an optimisation target. Never A/B'd on macro zero-day PR-AUC.
+- **Found two `runs.jsonl` metadata defects:** `rescore_logits.py` stamps `seed: 42` on every
+  `_logodds` row including s43/s44-derived ones (wrong on 8 rows), and repeated rescoring runs left
+  triplicate entries.
+- **🔑 Proposed a fix for the fusion wall — Leave-One-Class-Out.** The wall: a fitted combiner cannot
+  learn to weight a zero-day-specific signal because validation contains no zero-day flows by
+  construction (`[2.35, 0.02]`), and the KG feeds fusion the same way. The fix: **manufacture
+  synthetic zero-day from known classes** — hide one known attack class from CNN training, retrain,
+  and that class becomes a genuine novel class in validation; fit the combiner there and rotate over
+  the 8 known classes. Gives the combiner the missing *regime* ("CNN confused by novelty + what the
+  symbolic channel said"), which transfers, unlike a class-specific fact. Does not leak — the 6 real
+  zero-day families are never touched. Cheap probe: hold out PortScan only, **1 retrain**; if the
+  BeaconLike coefficient moves off 0.02 the approach is alive. Complementary alternative: conformal
+  benign-only p-value calibration (Fisher combination), which needs no attack labels at all.
+  This would upgrade the result from a dead end to *"inference-time fusion fails naively, and here is
+  the protocol that repairs it."*
+
 ## 2026-07-29 (documentation audit — reference tier reconciled with reality before Phase 4)
 
 Full read-through of all 27 project `.md` files. The **living tier** (STATUS / CHANGELOG /
