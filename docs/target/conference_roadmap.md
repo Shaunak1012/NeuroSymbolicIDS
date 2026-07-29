@@ -37,6 +37,42 @@ mode), full concept-bottleneck redesign (scope), post-hoc rule overrides (measur
 Verdict: **not flawed, misaligned.** We ran a harder exam with a broken loss balance on a
 different modality. Fix the protocol, then compete.
 
+## 1b. ⚠️ CANONICAL PHASE NUMBERING (added 2026-07-29 — read before using the word "Phase")
+
+**The numbering in §2 below is canonical.** Three incompatible schemes were in circulation and one
+of them caused a real scoping error (see the box beneath the table).
+
+| Canonical (this doc) | Content | `roadmap_gap_analysis.md` legacy | Status |
+|---|---|---|---|
+| **Phase 0** | Protocol reset — paper split, config, tracking | (n/a — predates it) | ✅ done |
+| **Phase 1** | Neural pillar + baselines + free novelty | Phase A (partial) | ✅ done |
+| **Phase 2** | Symbolic pillar — LTN, axioms, failure anatomy, aux head | Phase A (partial) | ✅ concluded |
+| **Phase 3** | **Anomaly pillar — benign-only autoencoder** | (not in that scheme) | ⬜ **decision needed** |
+| **Phase 4** | **Knowledge Graph + explainability** | Phase B + D | ⬜ next build |
+| **Phase 5** | Fusion + rigor (seeds, significance, calibration, latency) | Phase C + E | ⬜ |
+| **Phase 6** | Cross-dataset (CIC-IDS2018) | (not in that scheme) | ⬜ |
+| **Phase 7** | Paper + reproducibility artifact | (not in that scheme) | ⬜ |
+| **Phase R** | Response engine (solo, last) | (not in that scheme) | ⬜ |
+
+> 🔴 **The collision this resolves, and the work it nearly lost.**
+> `STATUS.md` was calling the Knowledge Graph **"Phase 3"** while *its own component table* — and this
+> roadmap, and a comment in `cnn_auxhead_paper.py` — used **Phase 3 = anomaly pillar / autoencoder**
+> and **Phase 4 = KG**. The number was reused, not reassigned by a decision.
+>
+> **Consequence:** the benign-only autoencoder was on track to be silently skipped. It is not a minor
+> item — [enhancements.md](enhancements.md) ranks it **Tier 1, "⭐ highest leverage"**, on the grounds
+> that *"reviewers will ask 'why not just an autoencoder?' … Without this, the thesis has an
+> unanswered baseline"*, and §3 Tier-S #3 of this document lists it among the
+> "baselines that could beat us — included". Estimated cost: **~1 hour.**
+>
+> **This is now an explicit open decision, not a default.** The one datum that bears on it:
+> `IsolationForest` (the unsupervised baseline that *does* exist) scored macro **0.0628** — far worse
+> than every supervised channel — *but* **0.0571 on Bot, statistically indistinguishable from the
+> CNN's 0.0591.** So the unsupervised family is dreadful overall yet competitive on the one family
+> that actually matters. That makes the autoencoder result genuinely unpredictable, which is an
+> argument for running it rather than assuming it. Logged in
+> [STATUS.md → Open Decisions](../STATUS.md#open-decisions).
+
 ## 2. Build plan v1.2 (agreed order)
 
 Each phase ends in a publishable-quality artifact, so stopping early still yields a complete project.

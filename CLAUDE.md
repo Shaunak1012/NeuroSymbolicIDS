@@ -10,7 +10,9 @@
 3. an **adaptive Knowledge Graph** (memory of emerging patterns),
 fused into an explainable benign/malicious alert.
 
-Input is **CIC-IDS2017 flow-feature CSVs** (70 numeric features/flow). The "Raw PCAP" boxes in the architecture diagram are conceptual; payload-level processing is future work.
+Input is **CIC-IDS2017 flow-feature CSVs** (**68** numeric features/flow — not 70; several frozen docs still say 70 and are banner-marked). The "Raw PCAP" boxes in the architecture diagram are conceptual; payload-level processing is future work.
+
+**Reality check on the goal above:** as of Phase 2, the symbolic pillar does **not** beat the neural baseline — every symbolic injection point tried (loss-level, representation-level, inference-level) costs macro zero-day PR-AUC or changes nothing. The project's current contribution is the *anatomy of why*. Don't write or reason as though the fusion story is established.
 
 ## ⚡ First thing every session
 
@@ -31,16 +33,22 @@ Update the **living documents** so the next session starts clean:
 
 | Component | Status |
 |-----------|--------|
-| Preprocessing | ✅ Working |
-| CNN + embeddings | ✅ Verified correct |
-| CNN evaluation | ✅ Working |
-| Behaviour abstraction | ✅ Rebuilt & validated (PortScan/DDoS covered) |
+| Preprocessing (+ IP/timestamp meta side-table) | ✅ Working |
+| Paper-aligned split | ✅ Working |
+| CNN + embeddings | ✅ Verified correct — macro zd PR-AUC **0.6446** (the number to beat) |
+| Classical baselines + novelty channels | ✅ Working (XGBoost, RF, IsoForest, MSP, Mahalanobis) |
+| Behaviour abstraction | ✅ Rebuilt & validated — **7 behaviours incl. `BeaconLike`**. ⚠️ Validation tables were measured on the *temporal* split, where PortScan/DDoS were zero-day; they are **known classes** now, so "PortScan/DDoS strongly covered" is not evidence for the current protocol |
 | LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted; `ratio` omega-mode fix confirmed stable |
-| Knowledge Graph | ❌ Not built — **next** |
-| Decision Fusion | ❌ Not built |
+| Anomaly pillar (autoencoder) — canonical **Phase 3** | ❌ Not built — ⬜ **decision needed first** |
+| Knowledge Graph — canonical **Phase 4** | ❌ Not built — **next build** |
+| Decision Fusion — Phase 5 | ❌ Not built |
 | Explainability | ❌ Not built |
 
-**Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted. Next real work is **Phase 3: Knowledge Graph** (item #3 in STATUS's Remaining Work table). Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
+**Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted.
+
+⚠️ **Before starting the KG, resolve one open decision:** run the **benign-only autoencoder** (canonical Phase 3, ~1h) or explicitly skip it? It was never actually decided — it was about to be skipped by a phase-number collision (STATUS used "Phase 3" for the KG while the canonical roadmap uses Phase 3 = autoencoder, Phase 4 = KG). It is ranked Tier-1 "highest leverage" because it closes the "why not just an autoencoder?" reviewer objection. Then build the **Knowledge Graph (canonical Phase 4)**.
+
+**Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
 ## Environment / venv
 
@@ -61,16 +69,22 @@ A working virtualenv lives at **`.venv/`** (Python 3.11.9, TensorFlow 2.15.1 / K
 
 Run from the project root, in order, **using the venv interpreter**. Each step consumes the previous step's artifacts (organised under `data/processed/`, `models/`, `outputs/` — see `scripts/paths.py`).
 
+**Current pipeline (paper-aligned split — this is what all reported results use):**
+
 ```bash
-python scripts/preprocess.py   # 1. clean CSVs → features_*.csv, labels_*.npy
-python scripts/cnn3.py         # 2. train CNN → model_*.keras, X_*_emb.npy, history.pkl
-python scripts/eval.py         # 3. baseline metrics → y_prob_test*.npy, cnn_zeroday_eval.png
-python scripts/ltn.py          # 4. hybrid-LTN → ltn_model_*.keras, ltn_eval.png
+python scripts/preprocess.py        # 1. clean raw_csv_full → 68 features + meta_*.csv side-table
+python scripts/preprocess_paper.py  # 2. paper split → data/processed/paper/
+python scripts/cnn_paper.py         # 3. neural pillar → cnn_paper*.keras, embeddings, channel
+python scripts/baselines.py         # 4. XGBoost / RandomForest / IsolationForest
+python scripts/novelty.py           # 5. MSP + Mahalanobis (post-hoc, no retraining)
+python scripts/ltn_paper.py         # 6. symbolic pillar (configured by LTN_* env vars)
 ```
 
-Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/visual.py` (preprocessing impact).
+**Legacy temporal-split pipeline** (`preprocess.py → cnn3.py → eval.py → ltn.py`) still runs but is **superseded** — it produced the 0.4529-vs-0.6689 LTN underperformance and was replaced by the protocol reset. Kept only as a secondary "hard mode" result. Don't use it for new work.
 
-Dependencies: `numpy pandas scikit-learn tensorflow matplotlib seaborn`.
+Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
+
+**All 22 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -81,13 +95,24 @@ NeuroSymbolicIDS/
 ├── requirements.txt           ← pinned dependencies
 ├── .venv/                     ← Python 3.11 virtualenv (not committed)
 │
-├── scripts/                   ← pipeline code
+├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
+│
+├── scripts/                   ← 22 scripts — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
-│   └── preprocess, cnn3, eval, behavior, ltn, visual, check
+│   ├── config, features, tracking, metrics        ← infrastructure
+│   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
+│   │   baselines, novelty, behavior, ltn_paper,
+│   │   cnn_auxhead_paper
+│   ├── skyline_oracle, rescore_logits,            ← analysis / one-off
+│   │   fusion_beaconlike
+│   ├── cnn3, eval, ltn                            ← LEGACY (superseded)
+│   └── dashboard_server, visual, check            ← utilities
 │
 ├── data/
-│   ├── raw_csv/               ← CIC-IDS2017 input CSVs (not committed)
-│   └── processed/             ← clean_*, features_*, labels_*
+│   ├── raw_csv_full/          ← CIC-IDS2017 GeneratedLabelledFlows (not committed)
+│   ├── raw_csv/               ← legacy ML-CVE variant (superseded)
+│   └── processed/
+│       └── paper/             ← the paper split + meta_*.csv (IP/port/timestamp)
 ├── models/                    ← *.keras + scaler/encoder *.pkl
 ├── outputs/
 │   ├── arrays/                ← X_test.npy, y_train/val/test
@@ -116,12 +141,15 @@ Documentation map:
 
 ## Key facts to not get wrong
 
-- **Train/test split is temporal.** Train = Mon+Tue+Wed; Test = Thu+Fri.
-- **Zero-day classes** (test only, never trained): Web Attacks, Infiltration, **Bot**, PortScan, DDoS. Bot is **not** a training class.
-- **Train classes** (~8): BENIGN, FTP-Patator, SSH-Patator, DoS Hulk/GoldenEye/slowloris/Slowhttptest, Heartbleed. `n_classes` is computed dynamically from the data — don't hardcode.
+- **The split is the paper-aligned one** (`config.yaml`, `preprocess_paper.py`): 9 known classes stratified 80/10/10, benign under-sampled 1:1. Train 883,796 / val 110,475 / test 114,658. *The temporal split (Mon–Wed / Thu–Fri) is the superseded secondary protocol.*
+- **Zero-day classes are the 6 rare families** (test only, never trained): **Bot**, Heartbleed, Infiltration, Web Attack Brute Force / XSS / Sql Injection. Bot is **not** a training class — this exact fact was once documented wrong from a summary; verify against `config.yaml`.
+- **⚠️ PortScan and DDoS are KNOWN, trained-on classes** under the current protocol. Any claim of the form "the behaviours strongly cover PortScan/DDoS, so the symbolic approach works" is measuring the temporal split and does not transfer.
+- **68 features**, not 70. Verify with `check.py`.
+- **Only 3 zero-day families are adequately powered** (Bot n=1,956, Web Brute Force, Web XSS). Heartbleed (n=11), Infiltration (n=36) and SQL Injection (n=21) are excluded from the macro metric — never report them to 4 decimal places.
+- **The headline metric is macro zero-day PR-AUC**, not the blended "benign vs all unknowns" number — the blend is a size-weighted mixture that reorders the ranking. `metrics.py` enforces this.
 - Test flows of unseen classes are encoded as **−1** (zero-day marker).
 - The embedding layer is named **`"embedding"`** — downstream extraction depends on this name.
-- CNN ~0% recall on zero-day is **intended** — it's the honest baseline the symbolic stages must beat.
+- CNN ~chance recall on zero-day is **intended** — it's the honest baseline the symbolic stages must beat. As of Phase 2, **nothing has beaten it.**
 
 ## Working conventions
 
