@@ -153,6 +153,15 @@ custom loop was unaffected (it passes `(batch,)` directly). **Any new loss funct
 same `reshape([-1])`.** Also fixed alongside: callback monitors (`val_sparse_categorical_accuracy`)
 that had silently disabled early-stopping and checkpointing.
 
+> ⚠️ **Open caveat on a published baseline number — do not lose this when writing up.**
+> The **old temporal CNN baseline (0.6689 PR-AUC) may itself have been hampered by this bug**, since
+> it was trained with the broken focal loss. That baseline is the denominator in the headline legacy
+> comparison *"LTN 0.4529 vs CNN 0.6689"* — if the CNN was handicapped, the LTN's deficit against a
+> clean baseline would be **larger**, not smaller. The temporal CNN has **never been retrained with
+> the fixed loss**, so this remains unquantified. Either retrain it before citing that comparison, or
+> state the caveat explicitly in the write-up. (The LTN custom loop was unaffected, so the *direction*
+> of the comparison is not in doubt — only its magnitude.)
+
 ### [FIXED 2026-06-18] Behaviour abstraction was dead code
 `scripts/behavior.py` had misaligned feature indices (`RATE_FEATURES=[5,6,7]` actually pointed at
 packet-length fields), was never imported, and never generated thresholds. **Rebuilt:** verified
@@ -178,8 +187,15 @@ only Python 3.9–3.11; on 3.12+ the install fails confusingly. Low priority (th
 works), but the original issue is not fully closed.
 
 ### [FIXED 2026-06-18] `.gitignore` did not match real artifact locations
-Rewritten to directory-based ignores matching the reorganised layout; `outputs/figures/` is
-intentionally tracked. Verified no large binaries were ever committed.
+**What was wrong:** the old `.gitignore` only ignored `data/raw_pcaps/`, `data/processed/*.npy` and
+`data/processed/chunks*/` — paths belonging to the **abandoned payload pipeline**, which never
+existed on disk. Meanwhile the real pipeline wrote large artifacts to the **repo root**
+(`X_test.npy` ~600 MB, `X_*_emb.npy` ~300 MB each, `*.keras`, `*.pkl`, `clean_*.csv`,
+`features_*.csv`, `*.png`) — **none of which were ignored.** Risk was committing hundreds of MB of
+binaries.
+**Fix:** rewritten to directory-based ignores matching the reorganised layout; `outputs/figures/` is
+intentionally tracked. Git history was checked — only `.gitignore` and an old `preprocess_friday.py`
+had ever been tracked, so **no large binaries were ever actually committed.**
 
 ### [FIXED 2026-06-18] Unused binary split vars in `cnn3.py`
 `y_train_b` / `y_val_b` computed but not used downstream. Removed.
