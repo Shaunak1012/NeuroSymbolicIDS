@@ -1,6 +1,24 @@
 # Neuro-Symbolic Approach
 
-> ⚠️ **Accuracy banner.** This document describes the *intended* neuro-symbolic design. The **current code does not actually implement it**: `behavior.py` is orphaned (never imported, thresholds never generated), and the LTN axioms in `ltn.py` are label tautologies rather than behaviour-grounded rules. For the verified current state see [implementation/behaviour_abstraction_current.md](implementation/behaviour_abstraction_current.md) and [implementation/ltn_current.md](implementation/ltn_current.md). For the corrected target design see [target/behaviour_abstraction.md](target/behaviour_abstraction.md).
+> ⚠️ **FROZEN (banner replaced 2026-07-29). The previous banner on this file was itself stale** —
+> it warned that `behavior.py` was orphaned dead code and that the LTN axioms were label
+> tautologies. **Both were fixed on 2026-06-18** and the warning was left standing for over a year
+> of project time. It is preserved in git history; it is not the current state.
+>
+> What *is* true: **the vocabulary in this document no longer exists in code.** The flags described
+> below (`high_traffic`, `large_packets`, `high_rate`, `high_variance`, `high_mean`, `bursty_iat`)
+> and the compound patterns (`scan_pattern`, `exfil_pattern`, `covert_pattern`) were **deleted** in
+> the 2026-06-18 rebuild. They were replaced by 7 named, fuzzy `[0,1]` behaviours:
+> `BurstTraffic`, `HighVolume`, `LargePackets`, `HighEntropy`, `ScanProbe`, `BeaconLike`,
+> `RepeatedConnections`. The feature-group index table below is also wrong — the old indices were
+> measured to be badly misaligned (`RATE_FEATURES=[5,6,7]` actually pointed at packet-length
+> fields) and that is precisely why the module was rebuilt.
+>
+> The **fuzzy-logic semantics section (product t-norm) is still accurate** and remains the
+> operator set used by `ltn_paper.py`.
+>
+> **Current behaviour module → [implementation/behaviour_abstraction_current.md](implementation/behaviour_abstraction_current.md).
+> Current axioms and results → [STATUS.md](STATUS.md).**
 
 ## Motivation
 

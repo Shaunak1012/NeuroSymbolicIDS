@@ -1,6 +1,21 @@
 # Models
 
-> **Accuracy note:** This file describes intended design. For the line-by-line verified state of the source, see [implementation/cnn_current.md](implementation/cnn_current.md) and [implementation/ltn_current.md](implementation/ltn_current.md). The LTN as currently coded has a conceptual flaw (axioms are label tautologies) — see that audit.
+> ⚠️ **FROZEN (banner added 2026-07-29) — the LTN half of this file is two generations out of date.**
+>
+> **The CNN section is still substantially accurate** — `cnn_paper.py` uses the same architecture and
+> the same focal loss on the paper split (differences: it consumes `data/processed/paper/`, applies the
+> signed-log1p transform first, and the focal-loss `reshape([-1])` bug documented in
+> [KNOWN_ISSUES](KNOWN_ISSUES.md) is fixed). Input width is **68**, not 70.
+>
+> **The Hybrid-LTN section is superseded twice over.** The Ax1–Ax4 table below shows the original
+> **label-tautology** axioms (`DoS flows → attack`, `Patator flows → attack`), which restate the
+> supervised target and were replaced on 2026-06-18 with behaviour-grounded axioms. That
+> replacement (`ltn.py`) then *ran and underperformed*, and was itself superseded by
+> `ltn_paper.py`, whose axiom set is Ax1/Ax2 (label anchors) + Ax3 (LargePackets∧HighEntropy),
+> Ax4 (BurstTraffic), Ax5 (ScanProbe), Ax6 (BeaconLike), configurable by env var.
+> The adaptive-ω rule described below is also not what current code defaults to —
+> `ltn_paper.py` defaults to `LTN_OMEGA_MODE=ratio` (loss-ratio normalization).
+> **Current axiom set and results → [STATUS.md](STATUS.md); source of truth is `scripts/ltn_paper.py`.**
 >
 > The CNN architecture diagram below shows Dropout after BatchNorm/MaxPool for brevity; in the source (`cnn3.py`) Conv blocks are `Conv→BN→MaxPool` and the two Dropout layers (0.4, 0.3) sit after the Dense(64) and Dense(32) layers respectively.
 
