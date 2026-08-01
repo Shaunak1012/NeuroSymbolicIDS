@@ -1,5 +1,12 @@
 # Pipeline Execution Guide
 
+> ⚠️ **FROZEN (banner added 2026-07-29) — this is the legacy temporal-split run order.**
+> The current pipeline is in [README.md → Quick Start](../README.md#quick-start) and
+> [scripts_reference.md](scripts_reference.md). The four steps below still execute, but they
+> produce the **superseded** temporal-split artifacts; no reported result uses them.
+> The "Expected baseline: PR-AUC ~0.45–0.55" figure at Step 3 is a stale temporal-split
+> estimate — current numbers are in [STATUS.md](STATUS.md) and [README](../README.md#key-results).
+
 ## Prerequisites
 
 ```bash

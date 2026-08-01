@@ -1,5 +1,17 @@
 # Dataset: CIC-IDS2017
 
+> ⚠️ **FROZEN (banner added 2026-07-29) — documents the legacy temporal split only.**
+> The **current protocol is the paper-aligned split** defined in [`config.yaml`](../config.yaml)
+> and built by `scripts/preprocess_paper.py`: 9 known classes (BENIGN + 8 attacks **including
+> PortScan and DDoS**) stratified 80/10/10, benign under-sampled to 1:1, and **6 rare classes**
+> (Bot, Heartbleed, Infiltration, Web Attack ×3) held out as zero-day in test only.
+> Under that protocol the zero-day table below is wrong — PortScan and DDoS are *trained on*.
+>
+> Also outdated here: the data source is now `data/raw_csv_full/` (the **GeneratedLabelledFlows**
+> variant, which retains Flow ID / IP / Port / Timestamp), not `data/raw_csv/` (MachineLearningCVE);
+> and the feature count is **68**, not ~70. Row counts and the 8-file listing remain accurate.
+> **Current state → [STATUS.md](STATUS.md).**
+
 **Source**: Canadian Institute for Cybersecurity  
 **URL**: https://www.unb.ca/cic/datasets/ids-2017.html  
 **Format**: 8 CSV files, one per capture day/session  

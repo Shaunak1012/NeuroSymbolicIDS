@@ -2,7 +2,25 @@
 
 **Explainable & Adaptive Neuro-Symbolic Intrusion Detection System (CIC-IDS2017)**
 
-This document describes the *full intended* system. For what is currently implemented, see the [implemented docs](../architecture.md) and the [gap analysis](roadmap_gap_analysis.md).
+This document describes the *full intended* system — it is a **target**, so being ahead of the
+implementation is by design. Two corrections as of **2026-07-29**:
+
+> ⚠️ **1. The behaviour vocabulary in the diagram is not the implemented one.** The diagram lists
+> `HighEntropy` / `BurstTraffic` / `RepeatedConnections` / **`ProtocolAnomalies`**. `ProtocolAnomalies`
+> was **built, measured, and dropped** — in CIC-IDS2017 the TCP flag-count columns are ~0 even for
+> real scans, and the flag-based behaviour fired on 45% of benign traffic vs 0% of attacks. It was
+> replaced by `ScanProbe` (short duration × tiny payload), which scores 0.955 on PortScan.
+> The implemented set is 7 behaviours — see
+> [behaviour_abstraction_current.md](../implementation/behaviour_abstraction_current.md).
+>
+> ⚠️ **2. "LTN reasoning ✅ implemented" is true but should not be read as "working".** It is built
+> and measured; the measurement is that **it does not improve zero-day detection** — every axiom
+> variant tried costs macro PR-AUC versus a no-axiom control, across 3 seeds. The pipeline diagram
+> below shows LTN feeding Decision Fusion as a value-adding signal; that is the *hypothesis*, and it
+> is currently unsupported. See [STATUS.md](../STATUS.md).
+
+For what is currently implemented, see the [implemented docs](../architecture.md) and the [gap analysis](roadmap_gap_analysis.md).
+Phase numbering is canonical in [conference_roadmap.md §1b](conference_roadmap.md).
 
 ## Vision
 

@@ -1,5 +1,30 @@
 # NeuroSymbolic-IDS: Comprehensive Project Documentation
 
+> # 🔴 ARCHIVED — SUPERSEDED, CONTAINS KNOWN ERRORS. DO NOT CITE.
+>
+> **Banner added 2026-07-29.** This is the original May-2026 documentation, kept only for
+> provenance. It was superseded by the structured `docs/` tree on 2026-06-18 and describes a system
+> that no longer exists. **Specific known errors in this file:**
+>
+> 1. **Bot is listed as training class #9** (§Dataset Overview, "Training Attack Types (9 classes)").
+>    **Bot is a zero-day class** — it has never been a training class under either protocol. This
+>    exact error is named in [CLAUDE.md](../../CLAUDE.md) as a confirmed failure mode, because it was
+>    propagated from a summary rather than verified against source.
+> 2. **The `ltn.py` described here is a post-hoc rule engine** with 6 confidence-weighted rules
+>    (A1–A5, B1) that flip CNN predictions at inference. That design was **replaced entirely** by a
+>    Logic Tensor Network with a differentiable SAT loss during training. Post-hoc rule overrides
+>    were later measured and scored **−0.16**.
+> 3. **`utils/config.py` is documented as the configuration hub.** It was **deleted** as dead code
+>    from an abandoned raw-PCAP pipeline; it was imported by nothing. It is the origin of the
+>    "1500 bytes payload" boxes in the architecture diagram.
+> 4. **"Expected LTN improvements" (PR-AUC 0.60–0.75, recall 40–60%) are projections, not results.**
+>    The actual measured result was PR-AUC **0.4529 vs the CNN's 0.6689** — the LTN *underperformed*.
+> 5. Feature count (~70), row counts, and the behaviour flag vocabulary
+>    (`high_traffic`/`scan_pattern`/…) are all stale. Real count is **68**; the flag vocabulary was
+>    deleted in the 2026-06-18 behaviour rebuild.
+>
+> **Current state → [docs/STATUS.md](../STATUS.md).**
+
 **Project Status**: Capstone Research Initiative  
 **Date Generated**: May 2026  
 **Objective**: Neuro-Symbolic Intrusion Detection System for Zero-Day Attack Detection  

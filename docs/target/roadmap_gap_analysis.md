@@ -1,5 +1,21 @@
 # Roadmap & Gap Analysis
 
+> ⚠️ **PARTIALLY SUPERSEDED (banner added 2026-07-29).**
+>
+> **The "Phase A–E" scheme below is retired.** It is one of three competing phase numberings that
+> were in circulation; the **canonical scheme is Phase 0–7 + R** in
+> [conference_roadmap.md §1b](conference_roadmap.md), which carries the full mapping table. Roughly:
+> A→Phases 1–2, B→Phase 4 (KG), C→Phase 5 (fusion), D→Phase 4 (explainability), E→Phases 5+7.
+> **Do not cite "Phase B" — say "Phase 4 (KG)".**
+>
+> **The "Built vs. Planned" table below is also out of date.** `behaviour abstraction` is no longer
+> "⚠️ Partial" (rebuilt and validated 2026-06-18, 7 fuzzy behaviours); `LTN reasoning ✅ Built` is
+> true but misleading — it was built, measured, and **found not to help** (every axiom variant costs
+> macro PR-AUC). Gap #2 (`RepeatedConnections` needs IP/port) is **resolved at the data level** —
+> the meta side-tables exist. **Current component status → [STATUS.md](../STATUS.md).**
+>
+> The **Ablation Plan** and **Risks** sections at the end remain useful and are not superseded.
+
 What is built today vs. the [target architecture](target_architecture.md), and the plan to close the gap.
 
 ## Built vs. Planned

@@ -37,6 +37,42 @@ mode), full concept-bottleneck redesign (scope), post-hoc rule overrides (measur
 Verdict: **not flawed, misaligned.** We ran a harder exam with a broken loss balance on a
 different modality. Fix the protocol, then compete.
 
+## 1b. ⚠️ CANONICAL PHASE NUMBERING (added 2026-07-29 — read before using the word "Phase")
+
+**The numbering in §2 below is canonical.** Three incompatible schemes were in circulation and one
+of them caused a real scoping error (see the box beneath the table).
+
+| Canonical (this doc) | Content | `roadmap_gap_analysis.md` legacy | Status |
+|---|---|---|---|
+| **Phase 0** | Protocol reset — paper split, config, tracking | (n/a — predates it) | ✅ done |
+| **Phase 1** | Neural pillar + baselines + free novelty | Phase A (partial) | ✅ done |
+| **Phase 2** | Symbolic pillar — LTN, axioms, failure anatomy, aux head | Phase A (partial) | ✅ concluded |
+| **Phase 3** | **Anomaly pillar — benign-only autoencoder** | (not in that scheme) | ✅ **done 2026-08-02** (n=3) |
+| **Phase 4** | **Knowledge Graph + explainability** | Phase B + D | 🔴 **blocked — representation decision** |
+| **Phase 5** | Fusion + rigor (seeds, significance, calibration, latency) | Phase C + E | ⬜ |
+| **Phase 6** | Cross-dataset (CIC-IDS2018) | (not in that scheme) | ⬜ |
+| **Phase 7** | Paper + reproducibility artifact | (not in that scheme) | ⬜ |
+| **Phase R** | Response engine (solo, last) | (not in that scheme) | ⬜ |
+
+> 🔴 **The collision this resolves, and the work it nearly lost.**
+> `STATUS.md` was calling the Knowledge Graph **"Phase 3"** while *its own component table* — and this
+> roadmap, and a comment in `cnn_auxhead_paper.py` — used **Phase 3 = anomaly pillar / autoencoder**
+> and **Phase 4 = KG**. The number was reused, not reassigned by a decision.
+>
+> **Consequence:** the benign-only autoencoder was on track to be silently skipped. It is not a minor
+> item — [enhancements.md](enhancements.md) ranks it **Tier 1, "⭐ highest leverage"**, on the grounds
+> that *"reviewers will ask 'why not just an autoencoder?' … Without this, the thesis has an
+> unanswered baseline"*, and §3 Tier-S #3 of this document lists it among the
+> "baselines that could beat us — included". Estimated cost: **~1 hour.**
+>
+> **This is now an explicit open decision, not a default.** The one datum that bears on it:
+> `IsolationForest` (the unsupervised baseline that *does* exist) scored macro **0.0628** — far worse
+> than every supervised channel — *but* **0.0571 on Bot, statistically indistinguishable from the
+> CNN's 0.0591.** So the unsupervised family is dreadful overall yet competitive on the one family
+> that actually matters. That makes the autoencoder result genuinely unpredictable, which is an
+> argument for running it rather than assuming it. Logged in
+> [STATUS.md → Open Decisions](../STATUS.md#open-decisions).
+
 ## 2. Build plan v1.2 (agreed order)
 
 Each phase ends in a publishable-quality artifact, so stopping early still yields a complete project.
@@ -46,7 +82,7 @@ Each phase ends in a publishable-quality artifact, so stopping early still yield
 | **0 — Protocol reset** | Paper-aligned split (8 major attacks incl. PortScan/DDoS in train; Bot/Web×3/Infiltration/Heartbleed as zero-day; stratified 80/10/10; benign under-sampled). Keep temporal as secondary. Persist **IP/timestamp side-table** (unblocks RepeatedConnections + response replay). `log1p` A/B on heavy-tailed features. **Set up experiment tracking (TensorBoard/MLflow) + `config.yaml` NOW.** Decide corrected-labels (Engelen 2021). | ~1 session |
 | **1 — Neural pillar + free novelty** | Retrain CNN in our venv (fixes Keras-3 model mismatch). Add post-hoc **Mahalanobis on embeddings** + **energy/max-logit** novelty scores. Add classical baselines: **XGBoost, Random Forest, Isolation Forest**. | ~2h CPU |
 | **2 — Symbolic pillar, done right** | (a) Faithful paper reproduction (Ax1+Ax2, plain CE, ω=1). (b) LTN v2 with **loss-ratio normalization** (SAT scaled to a fixed fraction of CE magnitude — the fix for the diagnosed instability) + ScanProbe axiom, now trainable. (c) **Failure-anatomy grid**: ω × loss-type × balance → phase-transition plot. (d) **Auxiliary behaviour-prediction head** — multi-label head predicting the 6 fuzzy behaviours from the shared embedding (representation-level symbolic injection; doesn't fight CE; makes embeddings behaviour-aware for the KG). | ~3–4h CPU |
-| **3 — Anomaly pillar** | Benign-only **autoencoder** → reconstruction-error score (zero-day-legitimate, no attack labels). | ~1h |
+| **3 — Anomaly pillar** ✅ **DONE 2026-08-02** | Benign-only **autoencoder** → reconstruction-error score (zero-day-legitimate, no attack labels). **Delivered:** `scripts/autoencoder_paper.py`, n=3 seeds, logged as a fusion channel. **Result:** most reliable Bot channel measured (3.8× [3.2–4.8]) and near-perfect on Heartbleed/Infiltration, but fails on web attacks — establishing a **double dissociation** vs the CNN with non-overlapping seed ranges on every family. Mechanism unexplained (a proposed account was pre-registered, tested and falsified). | ~1h → **actual ~4h incl. multi-seeding + 2 follow-up experiments** |
 | **4 — KG memory + explainability** | NetworkX clusters/decay/emerging patterns as **corroboration + reasoning paths** (not primary detector). HITL becomes a demo. | ~1–2 sessions |
 | **5 — Fusion + rigor** | Interpretable logistic fusion over all signals (legitimately trainable under new split). Calibration + **abstain**. Latency benchmark. **3–5 seeds + significance tests.** Full ablation. | ~1 session + reruns |
 | **6 — Cross-dataset** | Train 2017 → test **CSE-CIC-IDS2018** (free, AWS Open Data; same CICFlowMeter features → behaviours transfer). **Go/no-go decided at Phase-5 exit.** | ~1 session + download |

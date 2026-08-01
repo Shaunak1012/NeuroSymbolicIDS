@@ -23,8 +23,16 @@ re-run inference from the saved .keras models.
 Writes `y_prob_{tag}_logodds_test.npy` and logs each run as `{tag}_logodds`.
 NOTE: `cnn_auxhead_l0.5` has no saved model (cnn_auxhead_paper.py never calls
 model.save) and is therefore skipped — it needs a retrain to be re-scored.
+
+FIXED 2026-08-02 (see docs/KNOWN_ISSUES.md, C5): every logged entry used to be
+stamped with `cfg["seed"]` (always the config default, 42) regardless of which
+seed's model was actually being rescored -- wrong on every `_s43`/`_s44` tag.
+Seed is now parsed from the `_s<seed>` suffix already used by every multi-seed
+tag in this codebase (cnn_paper_s43, ltn_ctrl_w0_s43, ...), falling back to the
+config default only for unsuffixed tags.
 """
 import os
+import re
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 import tensorflow as tf
@@ -46,7 +54,19 @@ TAGS = ["cnn_paper", "ltn_ctrl_w0", "ltn_repro", "ltn_v2",
         "ltn_ctrl_w0_s43", "ltn_ctrl_w0_s44",
         "ltn_ax6_w0p5_s43", "ltn_ax6_w0p5_s44",
         "ltn_ax6_w1p0_s43", "ltn_ax6_w1p0_s44",
-        "ltn_ax6_ratio_w1p0_s42", "ltn_ax6_ratio_w1p0_s43", "ltn_ax6_ratio_w1p0_s44"]
+        "ltn_ax6_ratio_w1p0_s42", "ltn_ax6_ratio_w1p0_s43", "ltn_ax6_ratio_w1p0_s44",
+        "cnn_paper_s43", "cnn_paper_s44"]  # added 2026-08-02 for STATUS audit C2
+# NOTE: re-running this full list re-scores everything and appends a fresh
+# runs.jsonl entry per tag every time -- do not run it just to add one new tag
+# (see KNOWN_ISSUES C5, "runs.jsonl mixes... duplicated 3x"). Temporarily scope
+# TAGS to only the new tag(s), run, then restore this list -- as done 2026-08-02
+# for cnn_paper_s43/s44.
+
+
+def tag_seed(tag):
+    """Parse the seed from a `..._s<seed>` tag suffix; else the config default."""
+    m = re.search(r"_s(\d+)$", tag)
+    return int(m.group(1)) if m else cfg["seed"]
 
 
 def load(s):
@@ -104,6 +124,6 @@ for tag in TAGS:
           f"[{s.min():.1f}, {s.max():.1f}], {len(np.unique(s)):,} distinct)")
     metrics.print_report(res)
     tracking.log_run(f"{tag}_logodds",
-                     {"protocol": "paper", "scoring": "logodds", "seed": cfg["seed"]},
+                     {"protocol": "paper", "scoring": "logodds", "seed": tag_seed(tag)},
                      metrics.flatten(res))
     print()

@@ -6,7 +6,15 @@
 
 ## Tier 1 — high value, strengthens the core thesis
 
-### 1. Unsupervised anomaly-detection baseline ⭐ highest leverage
+### 1. Unsupervised anomaly-detection baseline ⭐ highest leverage — ✅ **DONE 2026-08-02**
+
+> **Delivered as canonical Phase 3** (`scripts/autoencoder_paper.py`, n=3 seeds). The objection this
+> item exists to answer — *"why not just an autoencoder?"* — is now answered with a number, and the
+> answer is more interesting than either "we beat it" or "it beats us": **the autoencoder and the CNN
+> form a double dissociation**, each winning decisively on families where the other fails, with
+> non-overlapping seed ranges. The AE is the most reliable Bot channel measured (3.8× chance) while
+> being far worse on macro (0.0970 vs 0.6399). Full results: [STATUS.md](../STATUS.md) →
+> "Last Measured Results". The original text below is preserved as the motivation.
 Zero-day detection is fundamentally an anomaly-detection problem, so reviewers will ask "why not just an autoencoder / Isolation Forest / one-class SVM?" Add one (autoencoder reconstruction error trained on benign-only is the natural fit) as a comparison column in the ablation. If neuro-symbolic beats it → headline result; if not → learned early. Without this, the thesis has an unanswered baseline.
 
 ### 2. Multi-seed runs with variance

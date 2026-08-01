@@ -1,8 +1,114 @@
 # Knowledge Graph (Adaptive Memory)
 
-> **Status: not yet built.** This document is the design spec.
+> **Status: not yet built.** This document is the design spec. **Canonical Phase 4**
+> (not "Phase 3" — see [conference_roadmap.md §1b](conference_roadmap.md)).
 
-The Knowledge Graph (KG) is the system's *adaptive memory*. It accumulates associations between observed flows, their abstracted behaviours, and clusters of CNN embeddings. Edges carry weights that **decay over time**, so stale associations fade and recently-reinforced ones dominate. The KG's primary job is to surface **emerging patterns** — recurring structures not tied to any known attack class — which is the system's zero-day signal.
+---
+
+## ⚠️ READ FIRST — Phase-4 readiness review (2026-07-29)
+
+This spec was written **before the protocol reset** and three of its assumptions no longer hold.
+Resolve these before writing code; none is fatal, but each changes what gets built.
+
+### 1. 🔴 Scope contradiction: is the KG a detector or not?
+
+This document says the KG's *"primary job … is the system's zero-day signal."*
+[conference_roadmap.md](conference_roadmap.md) Phase 4 says the opposite —
+*"corroboration + reasoning paths (**not primary detector**)."*
+**The roadmap is canonical and the more defensible position**, because the fusion path a "primary
+detector" would need has already been measured to fail (see
+[decision_fusion.md](decision_fusion.md#special-handling-zero-day--emerging-flows): a non-leaky
+combiner cannot discover the value of a zero-day-specific signal; `fusion_beaconlike.py` returned
+coefficients `[2.35, 0.02]` and zero macro change). **Build the KG for corroboration + explanation,
+and evaluate it on its own terms** — not by whether it moves PR-AUC through a fitted fuser.
+
+### 2. ⚠️ The zero-day target changed shape completely
+
+The "emerging pattern" mechanism was designed when zero-day meant **PortScan (158,804 flows) +
+DDoS (128,025)** — huge, dense, structurally distinctive families under the temporal split.
+Under the paper split **both are known, trained-on classes.** Zero-day is now **4,183 flows total**
+(1.7% of test) across 6 families, only **3 adequately powered**: Bot (1,956), Web Attack Brute Force
+(1,507), Web Attack XSS (652). "Detect the large emerging cluster" is a materially harder problem
+than the one this spec was written for.
+
+### 3. ⚠️ "Temporal decay" has no clean time axis under this split
+
+The paper split is a **stratified random 80/10/10 across all 5 capture days** — there is no time
+arrow between train and test. The decay model (`w·exp(−λ·Δt)`) and the "rolling, self-forgetting
+memory" framing assume one. Timestamps *do* exist (`meta_*.csv`), so ordering within a split is
+possible, but train/val/test are interleaved in wall-clock time. **Pick one before building:**
+(a) decay over flow-count in timestamp-sorted order *within test*; (b) drop decay for v1 and build a
+static graph; (c) evaluate the adaptive/decay story on the **temporal** split as a secondary result,
+where the time arrow is genuine. Note that "Adaptive" is in the project title — option (b) has a
+write-up cost.
+
+### 4. 🔴 Empirical pre-check — RETRACTED 2026-08-02, the substrate is CNN-seed-dependent
+
+> **The "viable, better than expected" conclusion below is retracted.** It varied only the
+> **clustering** seed on a **fixed seed-42 embedding**. Varying the **CNN seed** — the representation
+> the KG is actually built on — gives Bot cluster purity **87.9% / 86.6% / 44.4%** at k=200
+> (**43.4 pp spread**), versus 2.6 pp when only the clustering seed moves.
+> **The instability is specific to Bot**: Web BF and XSS move only 0.7–2.5 pp. Seed 44 is
+> independently confirmed bad — Mahalanobis Bot 0.0413 (1.2×, chance) on the same embedding — while
+> its classification is unremarkable (macro 0.6396).
+> **Decide the representation before writing `kg.py`** (ensemble across seeds · raw features ·
+> the AE's benign-trained 16-d bottleneck · accept-and-publish the variance).
+> Full analysis: [STATUS.md](../STATUS.md) → "PHASE-4 BLOCKER".
+
+### ~~4. ✅ Empirical pre-check: the clustering substrate is viable — better than expected~~
+
+Ran before committing to the phase: MiniBatchKMeans on 200k `cnn_paper` train embeddings, applied to
+test, sweeping k ∈ {50,100,200,400,800} × 2 seeds. Measures, for each powered zero-day family, its
+single best cluster — **purity** (what fraction of that cluster is the family) and **recall** (what
+fraction of the family that one cluster captures).
+
+| k | Bot | Web Attack BF | Web Attack XSS |
+|---:|---|---|---|
+| 50 | p=23–25% r=44–50% | p=38–62% r=75–89% | p=17–28% r=75–91% |
+| 100 | p=75–81% r=34% | p=52–53% r=89% | p=24% r=92–93% |
+| **200** | **p=88–91% r=34%** | p=62–66% r=90% | p=28–30% r=94% |
+| 400 | p=82–90% r=34% | p=63–65% r=90% | p=28–29% r=94% |
+| 800 | p=91–92% r=25–32% | p=66–67% r=90% | p=30% r=94% |
+
+**Bot — the family that defeated every Phase-2 intervention — forms a ~90%-pure cluster at k≥200,
+stable across both seeds.** Web BF reaches ~65% purity at 90% recall. XSS stays impure (~30%),
+consistent with it sharing a region with Web BF.
+
+**What this does and does not license:**
+- ✅ `Cluster` nodes are a *meaningful* object here. There is real, seed-stable structure to hang a
+  graph on. This was not obvious — it is the same 64-dim space in which Bot scores at chance (1.7×).
+- ⚠️ **Recall caps at ~34% for Bot.** One cluster holds a third of Bot. The KG's realistic
+  contribution is **precision-oriented** (high-confidence flagging of a subset), not recall.
+- 🔴 **Purity here is measured with test labels — an oracle view, and therefore an upper bound.**
+  A real KG must decide "this cluster is unexplained/emerging" from *unlabelled* structure. At k=50,
+  **25 of 50 clusters were already >90% benign in training**, and 100% of Bot/Web-BF/Heartbleed/
+  Infiltration flows landed in benign-dominated clusters. So the spec's criterion
+  *"weak or no `associated_with` edges to known AttackType"* will flag these clusters — **but it will
+  also flag a large number of ordinary benign clusters.** The **false-positive rate of "unexplained
+  cluster" is the untested quantity**, and it is the thing that decides whether this works.
+- **Therefore the discriminative work must come from criteria #1 (growth) and #3 (suspicious
+  behaviour co-occurrence) in the detection procedure below — not from #2 (unexplained) alone.**
+  Design the emerging-pattern rule accordingly, and measure its FPR first.
+
+> **Provenance/caveats:** MiniBatchKMeans (not the KMeans/DBSCAN this spec suggests), 200k train
+> subsample, 2 seeds, k not tuned by any criterion. **n=2 seeds — provisional, not confirmed.**
+> Purity/recall are geometric measures, *not* detection metrics. Reproduce and extend before citing.
+
+### 5. Minor, but will bite
+
+- **`RepeatedConnections` is constant 0.0** and is column 6 of `behaviour_matrix`. It will create a
+  `Behaviour` node with no meaningful edges. Filter it, or wire it up first — the IP/port side-tables
+  now exist (`meta_*.csv`), so it is unblocked, just unwired.
+- **`BeaconLike` is binary (0.0/1.0), not graded.** As an `exhibits` edge weight it produces a
+  bimodal distribution, not a spread. Any weight-thresholding logic must account for that.
+- **Use the `cnn_paper` embeddings, not the aux-head ones** — the aux-head has **no `X_val_`
+  embedding** saved, and it underperformed the plain CNN (0.5744 vs 0.6446) anyway.
+- **Scale is no longer a concern.** The spec worries about 1.1M flow nodes; the paper-split test set
+  is **114,658** flows. Materialising every test flow as a node is tractable.
+
+---
+
+The Knowledge Graph (KG) is the system's *adaptive memory*. It accumulates associations between observed flows, their abstracted behaviours, and clusters of CNN embeddings. Edges carry weights that **decay over time**, so stale associations fade and recently-reinforced ones dominate. The KG's ~~primary~~ job is to surface **emerging patterns** — recurring structures not tied to any known attack class — which is ~~the system's zero-day signal~~ *a corroboration and explanation signal; see the scope note above*.
 
 ## Recommended Implementation: NetworkX
 

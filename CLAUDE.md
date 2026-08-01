@@ -10,7 +10,9 @@
 3. an **adaptive Knowledge Graph** (memory of emerging patterns),
 fused into an explainable benign/malicious alert.
 
-Input is **CIC-IDS2017 flow-feature CSVs** (70 numeric features/flow). The "Raw PCAP" boxes in the architecture diagram are conceptual; payload-level processing is future work.
+Input is **CIC-IDS2017 flow-feature CSVs** (**68** numeric features/flow — not 70; several frozen docs still say 70 and are banner-marked). The "Raw PCAP" boxes in the architecture diagram are conceptual; payload-level processing is future work.
+
+**Reality check on the goal above:** as of Phase 2, the symbolic pillar does **not** beat the neural baseline — every symbolic injection point tried (loss-level, representation-level, inference-level) costs macro zero-day PR-AUC or changes nothing. The project's current contribution is the *anatomy of why*. Don't write or reason as though the fusion story is established.
 
 ## ⚡ First thing every session
 
@@ -31,16 +33,38 @@ Update the **living documents** so the next session starts clean:
 
 | Component | Status |
 |-----------|--------|
-| Preprocessing | ✅ Working |
-| CNN + embeddings | ✅ Verified correct |
-| CNN evaluation | ✅ Working |
-| Behaviour abstraction | ✅ Rebuilt & validated (PortScan/DDoS covered) |
+| Preprocessing (+ IP/timestamp meta side-table) | ✅ Working |
+| Paper-aligned split | ✅ Working |
+| CNN + embeddings | ✅ Verified correct — macro zd PR-AUC **0.6446** (the number to beat) |
+| Classical baselines + novelty channels | ✅ Working (XGBoost, RF, IsoForest, MSP, Mahalanobis) |
+| Behaviour abstraction | ✅ Rebuilt & validated — **7 behaviours incl. `BeaconLike`**. ⚠️ Validation tables were measured on the *temporal* split, where PortScan/DDoS were zero-day; they are **known classes** now, so "PortScan/DDoS strongly covered" is not evidence for the current protocol |
 | LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted; `ratio` omega-mode fix confirmed stable |
-| Knowledge Graph | ❌ Not built — **next** |
-| Decision Fusion | ❌ Not built |
+| Anomaly pillar (autoencoder) — canonical **Phase 3** | ❌ Not built — ⬜ **decision needed first** |
+| Knowledge Graph — canonical **Phase 4** | ❌ Not built — **next build** |
+| Decision Fusion — Phase 5 | ❌ Not built |
 | Explainability | ❌ Not built |
 
-**Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted. Next real work is **Phase 3: Knowledge Graph** (item #3 in STATUS's Remaining Work table). Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
+**Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted.
+
+🟡 **Read the "EARLIER-PHASE AUDIT" section near the top of [STATUS.md](docs/STATUS.md) before doing anything else.** A retrospective audit on 2026-07-29 found **5 open concerns**. **C2 is now RESOLVED (2026-08-02)** — `cnn_paper` is n=3 (mean 0.6399, range 0.6353–0.6446) and its full range sits inside the LTN control's range (0.6029–0.6505, also n=3); "the neural baseline wins" is not currently supportable without a proper significance test (not yet run). **C1, C3, C4, C5 remain findings-only — no fixes implemented, they await the user's go-ahead. Do not implement them unprompted.**
+
+✅ **Phase 3 (benign-only autoencoder) is BUILT AND RUN (2026-08-02)** — and the interpretation I first wrote for it was **tested the same day and largely falsified.** Read the **red box at the top of "🧪 PHASE 3 RESULTS"** in STATUS before citing anything from this phase.
+
+Short version of what is actually established (all n=3): the AE is a **raw-space distance-from-benign detector** (`corr = +0.732`), and it is **the most reliable Bot channel measured** — mean **3.8×** [3.2–4.8] vs Mahalanobis **3.0×** [1.2–4.3] and the CNN's **1.3×** [0.7–1.7]. It is excellent on Heartbleed (103×) / Infiltration (145×), which are the **underpowered** families `metrics.py` excludes. Note the "0.0000 recall on web attacks" split I first reported was a **threshold artifact**, not a categorical difference — on lift the AE is 3.8×/3.9×/4.7× across Bot/WebBF/XSS.
+
+🔴 **Do NOT repeat the "modality analogue" mechanism** (that web attacks transfer because they resemble FTP/SSH-Patator). `scripts/modality_analysis.py` falsified it: their nearest known attack is **DoS Hulk**, and **Bot sits closer to benign (7.28) than the web attacks do (8.84)** — the opposite of the claim. The supporting +0.933 correlation was **circular** (measured in the CNN's own embedding space, where it just restates the CNN's log-odds; in raw space it is −0.388). (A)/(B) complementarity survives as an *empirical pattern*; the *explanation* is open.
+
+✅ **AE multi-seeded (n=3) — the (A)/(B) complementarity is now ESTABLISHED as a double dissociation.** CNN vs AE ranges **do not overlap on any family**: AE wins Bot **2.9×** (0.1314 vs 0.0446), CNN wins Web BF **8.8×** and XSS **17.4×**. First cleanly multi-seeded comparative result in the project — the pattern the falsified modality account was invented to explain is itself **real**; only the explanation died. Caveat: both are weak on Bot in absolute terms (3.8× vs 1.3× chance), so this is a robust *relative* difference, not a solved problem.
+
+🔴 **PHASE-4 BLOCKER (2026-08-02) — read before writing any KG code.** The pre-check's "Bot forms a ~90%-pure cluster, stable across seeds" is **retracted**: it varied only the *clustering* seed on a *fixed* seed-42 embedding. Varying the **CNN seed** gives Bot purity **87.9% / 86.6% / 44.4%** (43.4 pp spread) while Web BF/XSS stay stable (0.7–2.5 pp). **The CNN's embedding geometry w.r.t. Bot is a seed lottery**, independently confirmed by Mahalanobis (seed 44: 1.2×, chance) — even though classification is flat across seeds (macro spread 0.009). So the KG would cluster *stably* on the families the CNN already handles, and *unstably* on the one family where it would matter. **Decide the representation first** (ensemble seeds · raw features · the AE's benign-trained 16-d bottleneck · accept-and-publish the variance). See STATUS "PHASE-4 BLOCKER".
+
+**Recommended order:** ~~C2~~ ✅ → ~~Phase 3 AE~~ ✅ → ~~modality test~~ ✅ (falsified) → ~~multi-seed AE~~ ✅ (dissociation established) → ~~train-vs-score decomposition~~ ✅ (retracted "Mahalanobis 4.3×") → ~~re-check KG substrate across CNN seeds~~ ✅ (found the blocker) → **next: (a) decide the KG representation question above; (b) why is the CNN specifically so bad on Bot** — the oracle result (0.0314 → 0.9764 with ~1,000 labels) proves the information *is* in the features, so it's an unexplained transfer failure; **(c)** C1/C3 reporting variants (no training) → C4 → C5. **LOCO/fusion-repair stays deprioritized**, and the per-flow "router" idea rested on the falsified modality mechanism — not motivated as-is.
+
+🧭 **Read the "THESIS REFRAMING" section at the top of [STATUS.md](docs/STATUS.md).** Argued 2026-07-29 from existing evidence (no new runs): every Phase-2 null shares **one** structural cause — a mechanism fitted on data that lacks zero-day cannot transfer to zero-day. That covers the LTN axioms, the aux head, the fitted fusion, *and* the KG's planned `s_kg` path. The split is **(A)** learn-what-attacks-look-like (needs attack examples, cannot reach novel classes) vs **(B)** learn-what-normal-looks-like (needs only benign, reaches novel classes by construction). The project invested in (A); the Bot evidence favours (B). ⚠️ **The "Mahalanobis 4.3×" figure originally cited here is RETRACTED — that was seed 42, the best of 3; n=3 mean is 3.0× (range 1.2–4.3×).** Corrected n=3 Bot lifts: **AE 3.8×** [3.2–4.8] · Mahalanobis 3.0× [1.2–4.3] · CNN 1.3× [0.7–1.7] · MSP 1.3×. **This reframing was subsequently TESTED (2026-08-02): the (A)/(B) complementarity is confirmed as a double dissociation, but the *modality-analogue mechanism* proposed for it was falsified.** See the boxes at the top of STATUS.
+
+⚠️ **Phase 3 (benign-only autoencoder, ~1h) is now the load-bearing next experiment, not a checkbox.** It is a pure (B) method and the direct test of the reframing. It was never actually decided — it was about to be skipped by a phase-number collision (STATUS used "Phase 3" for the KG while the canonical roadmap uses Phase 3 = autoencoder, Phase 4 = KG). **Very likely run it before the KG (canonical Phase 4).**
+
+**Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
 ## Environment / venv
 
@@ -61,16 +85,22 @@ A working virtualenv lives at **`.venv/`** (Python 3.11.9, TensorFlow 2.15.1 / K
 
 Run from the project root, in order, **using the venv interpreter**. Each step consumes the previous step's artifacts (organised under `data/processed/`, `models/`, `outputs/` — see `scripts/paths.py`).
 
+**Current pipeline (paper-aligned split — this is what all reported results use):**
+
 ```bash
-python scripts/preprocess.py   # 1. clean CSVs → features_*.csv, labels_*.npy
-python scripts/cnn3.py         # 2. train CNN → model_*.keras, X_*_emb.npy, history.pkl
-python scripts/eval.py         # 3. baseline metrics → y_prob_test*.npy, cnn_zeroday_eval.png
-python scripts/ltn.py          # 4. hybrid-LTN → ltn_model_*.keras, ltn_eval.png
+python scripts/preprocess.py        # 1. clean raw_csv_full → 68 features + meta_*.csv side-table
+python scripts/preprocess_paper.py  # 2. paper split → data/processed/paper/
+python scripts/cnn_paper.py         # 3. neural pillar → cnn_paper*.keras, embeddings, channel
+python scripts/baselines.py         # 4. XGBoost / RandomForest / IsolationForest
+python scripts/novelty.py           # 5. MSP + Mahalanobis (post-hoc, no retraining)
+python scripts/ltn_paper.py         # 6. symbolic pillar (configured by LTN_* env vars)
 ```
 
-Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/visual.py` (preprocessing impact).
+**Legacy temporal-split pipeline** (`preprocess.py → cnn3.py → eval.py → ltn.py`) still runs but is **superseded** — it produced the 0.4529-vs-0.6689 LTN underperformance and was replaced by the protocol reset. Kept only as a secondary "hard mode" result. Don't use it for new work.
 
-Dependencies: `numpy pandas scikit-learn tensorflow matplotlib seaborn`.
+Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
+
+**All 22 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -81,13 +111,24 @@ NeuroSymbolicIDS/
 ├── requirements.txt           ← pinned dependencies
 ├── .venv/                     ← Python 3.11 virtualenv (not committed)
 │
-├── scripts/                   ← pipeline code
+├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
+│
+├── scripts/                   ← 22 scripts — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
-│   └── preprocess, cnn3, eval, behavior, ltn, visual, check
+│   ├── config, features, tracking, metrics        ← infrastructure
+│   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
+│   │   baselines, novelty, behavior, ltn_paper,
+│   │   cnn_auxhead_paper
+│   ├── skyline_oracle, rescore_logits,            ← analysis / one-off
+│   │   fusion_beaconlike
+│   ├── cnn3, eval, ltn                            ← LEGACY (superseded)
+│   └── dashboard_server, visual, check            ← utilities
 │
 ├── data/
-│   ├── raw_csv/               ← CIC-IDS2017 input CSVs (not committed)
-│   └── processed/             ← clean_*, features_*, labels_*
+│   ├── raw_csv_full/          ← CIC-IDS2017 GeneratedLabelledFlows (not committed)
+│   ├── raw_csv/               ← legacy ML-CVE variant (superseded)
+│   └── processed/
+│       └── paper/             ← the paper split + meta_*.csv (IP/port/timestamp)
 ├── models/                    ← *.keras + scaler/encoder *.pkl
 ├── outputs/
 │   ├── arrays/                ← X_test.npy, y_train/val/test
@@ -116,12 +157,15 @@ Documentation map:
 
 ## Key facts to not get wrong
 
-- **Train/test split is temporal.** Train = Mon+Tue+Wed; Test = Thu+Fri.
-- **Zero-day classes** (test only, never trained): Web Attacks, Infiltration, **Bot**, PortScan, DDoS. Bot is **not** a training class.
-- **Train classes** (~8): BENIGN, FTP-Patator, SSH-Patator, DoS Hulk/GoldenEye/slowloris/Slowhttptest, Heartbleed. `n_classes` is computed dynamically from the data — don't hardcode.
+- **The split is the paper-aligned one** (`config.yaml`, `preprocess_paper.py`): 9 known classes stratified 80/10/10, benign under-sampled 1:1. Train 883,796 / val 110,475 / test 114,658. *The temporal split (Mon–Wed / Thu–Fri) is the superseded secondary protocol.*
+- **Zero-day classes are the 6 rare families** (test only, never trained): **Bot**, Heartbleed, Infiltration, Web Attack Brute Force / XSS / Sql Injection. Bot is **not** a training class — this exact fact was once documented wrong from a summary; verify against `config.yaml`.
+- **⚠️ PortScan and DDoS are KNOWN, trained-on classes** under the current protocol. Any claim of the form "the behaviours strongly cover PortScan/DDoS, so the symbolic approach works" is measuring the temporal split and does not transfer.
+- **68 features**, not 70. Verify with `check.py`.
+- **Only 3 zero-day families are adequately powered** (Bot n=1,956, Web Brute Force, Web XSS). Heartbleed (n=11), Infiltration (n=36) and SQL Injection (n=21) are excluded from the macro metric — never report them to 4 decimal places.
+- **The headline metric is macro zero-day PR-AUC**, not the blended "benign vs all unknowns" number — the blend is a size-weighted mixture that reorders the ranking. `metrics.py` enforces this.
 - Test flows of unseen classes are encoded as **−1** (zero-day marker).
 - The embedding layer is named **`"embedding"`** — downstream extraction depends on this name.
-- CNN ~0% recall on zero-day is **intended** — it's the honest baseline the symbolic stages must beat.
+- CNN ~chance recall on zero-day is **intended** — it's the honest baseline the symbolic stages must beat. As of Phase 2, **nothing has beaten it.**
 
 ## Working conventions
 
@@ -136,6 +180,7 @@ Documentation map:
 - **Retract in place — never silently rewrite.** When a documented finding turns out wrong, strike it through / mark it `RETRACTED` with the reasoning kept, rather than deleting or quietly correcting it. STATUS.md's 2026-07-27 entries are the reference example: every reversal is visible, dated, and explains what changed the picture. This is what makes the living docs trustworthy as a research record, not just a status board.
 - **Background jobs expected to run >10–15 min get a heartbeat monitor** (process-alive + log-growth at minimum), not fire-and-forget — this is what made the 2026-07-27 multi-hour training batches trustworthy instead of a black box. See that session's transcript for the pattern (`Monitor` tool watching `Win32_Process` + log file size).
 - **Known pitfall: PowerShell `*>>` redirect of a Python subprocess produces a mixed-encoding log file** — part UTF-8 (Python's own stdout), part UTF-16LE (PowerShell's own `Add-Content` lines), interleaved in the same file. Naive `iconv`/`Get-Content` reads garble or truncate. Fix: locate markers by raw byte offset (search both UTF-8 and UTF-16LE encodings of the string), then decode each segment with the codec that matches. Hit 3 times in the 2026-07-27 session before this was written down — don't rediscover it.
+- **Known pitfall: `ps aux` on Windows Git-Bash can give a false "process died" reading for one poll tick**, even while the process is running normally (2026-08-01, heartbeat-monitoring `cnn_paper.py`: `ps` missed it at epoch 2, training resumed and completed fine seconds later). Don't gate a heartbeat monitor's failure decision on a single `ps` miss — use **log-growth staleness over several consecutive polls** as the authoritative dead/hung signal; `ps` is advisory only.
 
 ## Git & commit conventions (MANDATORY — see [CONTRIBUTING.md](CONTRIBUTING.md))
 

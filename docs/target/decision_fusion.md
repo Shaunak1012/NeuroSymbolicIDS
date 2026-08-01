@@ -48,9 +48,38 @@ A shallow neural fuser is explicitly **not recommended** — the marginal accura
 
 ## Special Handling: Zero-Day / Emerging Flows
 
-When `s_cnn` is low (CNN has never seen the attack) but `s_kg` is high (KG flags an emerging pattern), the fused score should still raise an alert. The fixed-weight scheme handles this naturally as long as `w_kg` is non-trivial; the learned fuser should be trained on data that includes zero-day examples in the validation split so it learns to trust `s_kg` in this regime.
+When `s_cnn` is low (CNN has never seen the attack) but `s_kg` is high (KG flags an emerging pattern), the fused score should still raise an alert. The fixed-weight scheme handles this naturally as long as `w_kg` is non-trivial; ~~the learned fuser should be trained on data that includes zero-day examples in the validation split so it learns to trust `s_kg` in this regime.~~
 
-This is the crux of the whole system: **the KG and LTN signals carry the cases the CNN alone misses.**
+> 🔴 **The struck remedy is IMPOSSIBLE under the current protocol (flagged 2026-07-29). Read this
+> before building the fusion stage — it invalidates the default plan, not just a detail.**
+>
+> **The paper-aligned split's validation set contains no zero-day flows by construction** — all 6
+> rare families are held out to test only. So a fuser "trained on a validation split that includes
+> zero-day examples" cannot be built without leaking the test set. This is not a data-collection
+> gap that more effort fixes; it is what "zero-day" *means* in this protocol.
+>
+> **This was already measured, not merely feared.** `scripts/fusion_beaconlike.py` ran exactly this
+> experiment for the symbolic channel: a logistic combiner over (CNN attack log-odds + BeaconLike),
+> fit on known-class validation only. Result: **macro 0.6447 vs the CNN's 0.6446 alone — nothing.**
+> Fitted coefficients `[2.35, 0.02]`: the combiner learned to ignore the symbolic signal entirely.
+> The mechanism is structural — a non-leaky calibration is fit on data that cannot contain the class
+> that makes the signal valuable, so it has no way to discover that the signal is worth weighting.
+>
+> **Expect `s_kg` to hit the identical wall**, for the identical reason, if it is combined by a
+> *fitted* combiner. The three options, none free:
+> 1. **Fixed hand-set weights only** (Phase-1 scheme above). Honest and auditable, but `w_kg` is then
+>    an assumption, not a learned result — and the ablation must be framed accordingly.
+> 2. **Fit on the temporal split**, where zero-day families (PortScan/DDoS) *are* present in a
+>    legitimate held-out period, then transfer the weights. Introduces a protocol-transfer assumption.
+> 3. **Don't fuse the KG as a score at all** — use it for corroboration and explanation, and evaluate
+>    it on its own terms (emerging-pattern precision/recall, explanation faithfulness). This is what
+>    [conference_roadmap.md](conference_roadmap.md) Phase 4 already says: *"corroboration + reasoning
+>    paths (not primary detector)."*
+>
+> **Decide which before writing `fusion.py`.** Option 3 is the current roadmap's stated intent and is
+> the only one not already measured to fail.
+
+This is the crux of the whole system: **the KG and LTN signals are supposed to carry the cases the CNN alone misses.** As of Phase 2 that remains a hypothesis — no symbolic channel has yet been shown to add anything the CNN did not already have.
 
 ## Outputs
 

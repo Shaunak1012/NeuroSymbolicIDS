@@ -1,7 +1,22 @@
-# LTN — Current Implementation
+# LTN — Legacy Implementation (`scripts/ltn.py`, temporal split)
+
+> 🔴 **SUPERSEDED (updated 2026-07-29). This documents the legacy temporal-split LTN, which ran,
+> underperformed, and was replaced.** It is retained as the historical record of the re-grounding
+> fix. **The current symbolic pillar is [`scripts/ltn_paper.py`](../../scripts/ltn_paper.py)** —
+> paper split, 6 configurable axioms (Ax1–Ax6), `ratio` omega-mode by default.
+> **Current axioms and results → [STATUS.md](../STATUS.md).**
 
 **File:** `scripts/ltn.py`
-**Verdict:** ✅ Re-grounded on behaviours (2026-06-18). The core flaw (label-tautology axioms) is fixed. Full-training results pending the first complete run.
+**Verdict:** 🔴 Superseded. The core flaw it fixed (label-tautology axioms) *was* genuinely fixed,
+but the resulting model **underperformed the CNN baseline** on the full run and the whole protocol
+was then reset.
+
+**Result of the "pending" run (completed 2026-06-18):** PR-AUC **0.4529 vs the CNN's 0.6689**
+(−0.22). Early-stopped ~epoch 10; validation accuracy declined after epoch 2. Per-family:
+PortScan 0.36→0.16, DDoS 0.67→0.64. **Root cause:** focal CE collapsed to ~0.0005 while the SAT
+term stayed O(0.1), so SAT dominated the gradient roughly **40:1**. The base paper avoided this by
+using balanced data + plain CE + ω=1, which keeps SAT gentle relative to a much larger CE.
+This diagnosis is what motivated `ratio` omega-mode (loss-ratio normalization) in `ltn_paper.py`.
 
 This documents `ltn.py` **as it stands after the re-grounding**. For the prior broken state, see [CHANGELOG](../CHANGELOG.md).
 
@@ -60,6 +75,22 @@ Verified: pipeline runs end-to-end, no NaNs, behaviour axioms compute and are sa
 3. Axiom weighting `(2·Ax1 + 2·Ax2 + Ax3 + Ax4)/6` is hand-set (no ablation yet).
 4. Separate `scaler_ltn.pkl` from the CNN's scaler — keep in mind for fusion.
 
-## Results
+## Results — ✅ complete (2026-06-18), not pending
 
-> ⏳ **Pending the first full training run** (in progress). Fill in PR-AUC / ROC-AUC / per-family zero-day recall vs the CNN baseline (0.6689 PR-AUC) when complete. Recorded in [STATUS.md](../STATUS.md#last-measured-results).
+> The "⏳ pending the first full training run" note that stood here until 2026-07-29 was stale by
+> more than a year of project time. The run finished the same day this doc was written.
+
+| Metric | CNN baseline (temporal) | Hybrid-LTN (`ltn.py`) | Δ |
+|---|---:|---:|---:|
+| Binary PR-AUC (zero-day) | 0.6689 | **0.4529** | **−0.216** |
+| PortScan per-family | 0.36 | 0.16 | −0.20 |
+| DDoS per-family | 0.67 | 0.64 | −0.03 |
+
+Early-stopped ~epoch 10; val accuracy peaked at epoch 2 then declined — the signature of the SAT
+term overwhelming a collapsed focal CE (~40:1). Post-hoc fusion investigation on these outputs:
+**leaky** logistic fusion (fit on zero-day-labelled test half) reached 0.78, but the honest
+**label-free** parameter-free fusion scored **−0.16** — behaviours carry real signal, unsupervised
+transfer to zero-day was the wall. Both figures predate the paper split and the corrected
+per-family/macro metric; they are not comparable to current numbers.
+
+Superseded by the protocol reset. See [STATUS.md](../STATUS.md) for what replaced it.

@@ -2,54 +2,92 @@
 
 A hybrid intrusion detection system that combines a 1D Convolutional Neural Network with symbolic rule-based reasoning (Logic Tensor Networks) to detect zero-day network attacks.
 
-Trained on the [CIC-IDS2017](https://www.unb.ca/cic/datasets/ids-2017.html) dataset. The CNN learns from known attack families; symbolic rules extend coverage to unseen (zero-day) attack types at inference time.
+Trained on the [CIC-IDS2017](https://www.unb.ca/cic/datasets/ids-2017.html) dataset. The CNN learns
+from known attack families; the symbolic pillar is an attempt to extend coverage to unseen
+(zero-day) attack types.
+
+> **Honest framing.** "Symbolic rules extend coverage to zero-day attacks" is the *hypothesis under
+> test*, not a demonstrated result. As of Phase 2 it does **not** hold on this dataset: every
+> symbolic injection point tried (loss-level, representation-level, inference-level) either costs
+> macro zero-day PR-AUC or changes nothing. The project's contribution is currently the *anatomy of
+> why* — see [Key Results](#key-results) and [docs/STATUS.md](docs/STATUS.md).
 
 ## Quick Start
 
+Use the venv interpreter (`.venv\Scripts\python.exe`) from the project root. This is the
+**current (paper-aligned) pipeline** — the protocol all reported results use:
+
 ```bash
-# 1. Preprocess raw CSVs
+# 1. Clean raw CSVs -> 68 features + IP/timestamp meta side-table
 python scripts/preprocess.py
 
-# 2. Train CNN and extract embeddings
-python scripts/cnn3.py
+# 2. Re-slice into the paper-aligned split (stratified 80/10/10, 6 zero-day classes test-only)
+python scripts/preprocess_paper.py
 
-# 3. Evaluate CNN baseline (zero-day recall, PR-AUC)
-python scripts/eval.py
+# 3. Train the CNN on the paper split -> models, embeddings, fusion channel
+python scripts/cnn_paper.py
 
-# 4. Train Hybrid-LTN model (neuro-symbolic fusion)
-python scripts/ltn.py
+# 4. Classical + anomaly baselines (XGBoost / RandomForest / IsolationForest)
+python scripts/baselines.py
+
+# 5. Free open-set novelty channels (MSP + Mahalanobis) from the trained CNN
+python scripts/novelty.py
+
+# 6. Symbolic pillar — configurable hybrid CE + omega*SAT trainer
+python scripts/ltn_paper.py
 ```
+
+<details>
+<summary><strong>Legacy temporal-split pipeline</strong> (superseded 2026-06-18 — kept as secondary "hard mode")</summary>
+
+```bash
+python scripts/preprocess.py   # then:
+python scripts/cnn3.py
+python scripts/eval.py
+python scripts/ltn.py          # underperformed (0.45 vs 0.67 PR-AUC); see STATUS
+```
+
+The temporal split (train Mon–Wed / test Thu–Fri) made PortScan and DDoS zero-day, which turned out
+to be a much harder and *misaligned* protocol versus the base paper. It is retained for a secondary
+robustness result, not as the main track. Docs describing it are banner-marked as frozen.
+</details>
 
 ## Documentation
 
-### Implemented (current state)
+> **Read the living docs first.** The reference docs below are a mix of current and frozen;
+> every frozen one carries a dated banner at the top saying so. When a reference doc and
+> [STATUS.md](docs/STATUS.md) disagree, **STATUS wins** — it is the only file guaranteed current.
+
+### Living / dynamic docs (updated every session) — start here
 
 | File | Contents |
 |------|----------|
-| [docs/architecture.md](docs/architecture.md) | System design, data flow diagram |
-| [docs/dataset.md](docs/dataset.md) | CIC-IDS2017 dataset, classes, split strategy |
-| [docs/pipeline.md](docs/pipeline.md) | Step-by-step pipeline execution guide |
-| [docs/models.md](docs/models.md) | CNN architecture, LTN hybrid loss, hyperparameters |
-| [docs/neuro_symbolic.md](docs/neuro_symbolic.md) | Symbolic behaviour extraction and fuzzy logic axioms |
-| [docs/artifacts.md](docs/artifacts.md) | Catalog of all saved files (.npy, .keras, .pkl, .csv) |
-| [docs/scripts_reference.md](docs/scripts_reference.md) | Per-script purpose, inputs, and outputs |
-
-### Implementation audits (verified current state, incl. bugs)
-
-| File | Contents |
-|------|----------|
-| [docs/implementation/cnn_current.md](docs/implementation/cnn_current.md) | CNN — verified correct, minor notes |
-| [docs/implementation/behaviour_abstraction_current.md](docs/implementation/behaviour_abstraction_current.md) | Behaviour module — ❌ orphaned/dead code |
-| [docs/implementation/ltn_current.md](docs/implementation/ltn_current.md) | LTN — ⚠️ axioms are label tautologies |
-
-### Living / dynamic docs (updated every session)
-
-| File | Contents |
-|------|----------|
-| [docs/STATUS.md](docs/STATUS.md) | Current component status, priorities, decisions, results |
-| [docs/CHANGELOG.md](docs/CHANGELOG.md) | Dated history of changes |
-| [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | Bug & risk tracker |
+| [docs/STATUS.md](docs/STATUS.md) | 🔴 Current state, results, retractions, what's next |
+| [docs/CHANGELOG.md](docs/CHANGELOG.md) | 🔴 Dated history of changes |
+| [docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) | 🔴 Bug & risk tracker |
+| [docs/DASHBOARD.md](docs/DASHBOARD.md) | 🔴 Live ops console + the "open preview" convention |
 | [CLAUDE.md](CLAUDE.md) | Session onboarding guide (read first each session) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Git identity, commit conventions, branch/PR workflow (mandatory) |
+
+### Reference docs
+
+| File | Contents | Currency |
+|------|----------|----------|
+| [docs/scripts_reference.md](docs/scripts_reference.md) | Per-script purpose, inputs, and outputs | ✅ current |
+| [docs/artifacts.md](docs/artifacts.md) | Catalog of all saved files (.npy, .keras, .pkl, .csv) | ✅ current |
+| [docs/architecture.md](docs/architecture.md) | System design, data flow diagram | ⚠️ frozen (temporal split) |
+| [docs/dataset.md](docs/dataset.md) | CIC-IDS2017 dataset, classes, split strategy | ⚠️ frozen (temporal split) |
+| [docs/pipeline.md](docs/pipeline.md) | Step-by-step pipeline execution guide | ⚠️ frozen (temporal split) |
+| [docs/models.md](docs/models.md) | CNN architecture, LTN hybrid loss, hyperparameters | ⚠️ frozen (pre-fix axioms) |
+| [docs/neuro_symbolic.md](docs/neuro_symbolic.md) | Symbolic behaviour extraction and fuzzy logic axioms | ⚠️ frozen (pre-rebuild) |
+
+### Implementation audits (line-by-line source verification)
+
+| File | Contents | Currency |
+|------|----------|----------|
+| [docs/implementation/cnn_current.md](docs/implementation/cnn_current.md) | CNN — ✅ verified correct, minor notes | ✅ current |
+| [docs/implementation/behaviour_abstraction_current.md](docs/implementation/behaviour_abstraction_current.md) | Behaviour module — ✅ rebuilt & validated, 7 behaviours | ✅ current |
+| [docs/implementation/ltn_current.md](docs/implementation/ltn_current.md) | Legacy `ltn.py` — 🔴 ran, underperformed, superseded | ⚠️ historical |
 
 ### Target architecture (what we're building toward)
 
@@ -73,19 +111,40 @@ NeuroSymbolicIDS/
 ├── requirements.txt           # Pinned deps (Python 3.11 / TF 2.15)
 ├── .gitignore
 │
-├── scripts/                   # Pipeline code (run in order)
+├── config.yaml                # central experiment/protocol config
+│
+├── scripts/                   # see docs/scripts_reference.md for all 22
 │   ├── paths.py               #   ← central path config (all I/O locations)
-│   ├── preprocess.py
-│   ├── cnn3.py
-│   ├── eval.py
-│   ├── behavior.py
-│   ├── ltn.py
+│   ├── config.py              #   ← loads config.yaml
+│   ├── features.py            #   ← shared signed-log1p transform
+│   ├── tracking.py            #   ← appends runs.jsonl
+│   ├── metrics.py             #   ← the standard eval suite (per-family + macro)
+│   │
+│   ├── preprocess.py          # CURRENT pipeline ──────────────
+│   ├── preprocess_paper.py    #   paper-aligned split
+│   ├── cnn_paper.py           #   neural pillar
+│   ├── baselines.py           #   XGBoost / RF / IsolationForest
+│   ├── novelty.py             #   MSP + Mahalanobis
+│   ├── behavior.py            #   7 fuzzy behaviours
+│   ├── ltn_paper.py           #   symbolic pillar (configurable)
+│   ├── cnn_auxhead_paper.py   #   representation-level injection
+│   │
+│   ├── skyline_oracle.py      # analysis ──────────────────────
+│   ├── rescore_logits.py      #   log-odds re-scoring
+│   ├── fusion_beaconlike.py   #   inference-level fusion
+│   │
+│   ├── cnn3.py                # LEGACY temporal split ─────────
+│   ├── eval.py                #   (superseded, kept for the
+│   ├── ltn.py                 #    secondary hard-mode result)
+│   │
+│   ├── dashboard_server.py    # live local ops console
 │   ├── visual.py
 │   └── check.py
 │
 ├── data/
-│   ├── raw_csv/               # CIC-IDS2017 input CSVs (gitignored)
-│   └── processed/             # clean_*, features_*, labels_* (gitignored)
+│   ├── raw_csv_full/          # CIC-IDS2017 GeneratedLabelledFlows (gitignored)
+│   └── processed/
+│       └── paper/             # the paper-aligned split + meta side-tables
 │
 ├── models/                    # *.keras + scaler/encoder *.pkl (gitignored)
 │
@@ -104,6 +163,71 @@ NeuroSymbolicIDS/
 
 ## Key Results
 
-- **CNN baseline**: ~5–15% recall on zero-day attacks, PR-AUC ~0.45–0.55
-- **Hybrid-LTN**: Improves zero-day recall via symbolic axioms applied during training
-- **Symbolic flags**: 6 atomic behaviour flags + 3 compound patterns (scan, exfiltration, covert)
+> Measured on the **paper-aligned split** (`data/processed/paper/`), which is the protocol all
+> current results use. Headline metric is **macro zero-day PR-AUC** — the mean over adequately
+> powered unseen families (Bot, Web Brute Force, Web XSS; n≥100). Underpowered families
+> (Heartbleed n=11, Infiltration n=36, SQL Injection n=21) are excluded rather than reported to
+> false precision. Full tables, provenance, and retractions in [docs/STATUS.md](docs/STATUS.md).
+
+All figures below are **mean over 3 seeds (42/43/44), log-odds scored**, with the seed range given —
+single-seed numbers have repeatedly proven unsafe in this project (three retractions to date).
+
+| Channel | family | macro zero-day PR-AUC | Bot PR-AUC | Bot lift | Web BF | XSS |
+|---------|:---:|----------------------:|-----------:|---------:|-------:|------:|
+| **CNN** (`cnn_paper.py`) | A | **0.6399** [0.6353, 0.6446] | 0.0446 [0.0241, 0.0591] | 1.3× | **0.9226** | **0.9524** |
+| LTN, no axioms (control) | A | 0.6194 [0.6029, 0.6505] | 0.0712 [0.0528, 0.0985] | 2.1× | 0.8889 | 0.8982 |
+| MSP (softmax novelty) | A/B | 0.5884 [0.5694, 0.6123] | 0.0448 [0.0245, 0.0591] | 1.3× | 0.8719 | 0.8485 |
+| Mahalanobis (embedding distance) | B | 0.3777 [0.3363, 0.4585] | 0.1030 [0.0413, 0.1467] | 3.0× | 0.5840 | 0.4462 |
+| **Autoencoder** (`autoencoder_paper.py`) | B | 0.0970 [0.0894, 0.1014] | **0.1314** [0.1078, 0.1647] | **3.8×** | 0.1048 | 0.0547 |
+
+*(A) = trained on known attacks · (B) = trained on benign only.* XGBoost, RandomForest and
+IsolationForest exist but are **n=1 and predate the metrics rewrite**, so they carry no per-family
+breakdown and are omitted here rather than quoted at false precision.
+
+**The central result — a double dissociation between (A) and (B) methods.** CNN and autoencoder seed
+ranges do **not overlap on any family**: the AE wins Bot **2.9×**, the CNN wins Web Brute Force
+**8.8×** and XSS **17.4×**. Each method wins decisively where the other fails, which rules out
+"one is simply better" and establishes genuine functional specialisation. **The mechanism is
+unexplained** — a proposed "modality analogue" account was pre-registered, tested, and falsified.
+
+**What the symbolic pillar actually showed (Phase 2, concluded):**
+
+- **Symbolic axioms do *not* currently improve on the neural baseline.** Every axiom variant tried
+  (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, and this holds across 3 seeds with
+  non-overlapping ranges. An earlier claim that a targeted Bot axiom "roughly doubles Bot lift" was
+  **retracted** after multi-seeding — it compared the control's worst seed against the axiom's best.
+- **Inference-time fusion of a zero-day-specific symbolic signal is structurally impossible here.**
+  A non-leaky combiner must be fit on validation data, which by construction contains no zero-day
+  flows — so it cannot discover the value of a signal that is only useful on the class it never sees.
+  Fitted coefficients came back `[2.35, 0.02]`: the combiner learned to ignore the symbolic channel.
+- **Bot's signal is present in the 68 per-flow features.** An oracle test (reveal ~1,000 labelled Bot
+  flows to XGBoost, held-out eval) lifts Bot PR-AUC from 0.031 to **0.976**. The near-chance
+  never-seen score is a zero-day *transfer* failure of the closed-set classifier, not an
+  information-theoretic limit.
+- **Behaviours:** 7 named fuzzy behaviours in `behavior.py` (`BurstTraffic`, `HighVolume`,
+  `LargePackets`, `HighEntropy`, `ScanProbe`, `BeaconLike`, `RepeatedConnections`). The last is
+  always 0.0 pending wiring to the IP/port side table.
+
+**What the anomaly pillar showed (Phase 3, concluded):**
+
+- **A benign-only autoencoder is the most reliable Bot channel measured** — 3.8× chance
+  [3.2–4.8], versus Mahalanobis 3.0× [1.2–4.3] and the CNN's 1.3× [0.7–1.7]. It uses **no attack
+  labels at all**, in training or model selection, so it is zero-day-legitimate by construction.
+- **It is near-perfect on the structurally extreme rare families** — Heartbleed 1.0000 recall,
+  Infiltration 0.8611 — but both are underpowered (n=11, n=36) and excluded from the macro.
+- **It fails on web attacks** (0.1048 / 0.0547 vs the CNN's 0.9226 / 0.9524), which is what makes
+  the dissociation a dissociation rather than a ranking.
+- **Changing the scoring rule alone does not help.** MSP — novelty-style scoring on the CNN's own
+  softmax — lands at Bot 0.0448 vs the CNN's 0.0446. The dissociation is driven by *what a model
+  trains on*, not by how its score is computed, and forms a monotonic frontier across
+  (A-train/A-score) → (A/B) → (A/B) → (B/B).
+
+**Reproducibility note.** Every comparative claim above is n=3 seeds with ranges reported. Three
+findings have been **retracted** after multi-seeding exposed them as single-seed artifacts (a
+symbolic axiom's Bot benefit, "Mahalanobis 4.3× on Bot", and a Knowledge-Graph clustering-stability
+result). Retractions are preserved in place with their reasoning in
+[docs/STATUS.md](docs/STATUS.md) and [docs/CHANGELOG.md](docs/CHANGELOG.md) rather than deleted.
+
+**Status:** Phases 0–3 complete (protocol reset · neural pillar + baselines · symbolic pillar ·
+anomaly pillar). Phase 4 (Knowledge Graph) is **blocked on a representation decision** — see
+[docs/STATUS.md](docs/STATUS.md) → "PHASE-4 BLOCKER". Decision Fusion and Explainability are not built.

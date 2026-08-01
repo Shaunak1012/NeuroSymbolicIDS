@@ -1,5 +1,16 @@
 # System Architecture
 
+> ⚠️ **FROZEN (banner added 2026-07-29) — describes the legacy temporal-split pipeline.**
+> This document was written before the 2026-06-18 protocol reset and describes
+> `preprocess.py → cnn3.py → eval.py → ltn.py` on the **temporal split** (train Mon–Wed /
+> test Thu–Fri) as the system. That pipeline is superseded: all current results come from the
+> **paper-aligned split** (`preprocess_paper.py → cnn_paper.py → ltn_paper.py`).
+> Known inaccuracies below: feature count is **68**, not 70; the "4 fuzzy logic axioms" referred to
+> in the `ltn.py` box are the pre-fix label-tautology set (current code has 6, Ax1–Ax6, configurable);
+> PortScan/DDoS are **known** classes under the current protocol, not zero-day; and the flow
+> `cnn3 → eval → ltn` is not how any current result was produced.
+> **Current state → [STATUS.md](STATUS.md).**
+
 ## Overview
 
 NeuroSymbolic-IDS is a two-stage detection pipeline:

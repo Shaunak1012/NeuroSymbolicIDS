@@ -5,11 +5,16 @@ cnn_paper.py — Phase 1 neural pillar. Trains the 1D CNN on the PAPER-aligned s
 
 Smoke test:  CNN_SUBSET=50000 CNN_EPOCHS=2 python scripts/cnn_paper.py
 
-Outputs:
-  models/cnn_paper_best.keras  models/scaler_paper.pkl  models/label_encoder_paper.pkl
-  outputs/embeddings/X_{train,val,test}_cnn_paper_emb.npy
-  outputs/predictions/y_prob_cnn_paper_test.npy   (P(attack))
-  outputs/metadata/cnn_paper_history.pkl
+Multi-seed (added 2026-07-30, for STATUS "earlier-phase audit" C2 — the reference
+baseline was n=1 while the LTN control it's compared against was n=3):
+  CNN_SEED=43 python scripts/cnn_paper.py    # writes cnn_paper_s43.* — does NOT
+  CNN_SEED=44 python scripts/cnn_paper.py    # touch the original seed-42 artifacts
+
+Outputs (TAG defaults to "cnn_paper" at the config seed, "cnn_paper_s<seed>" otherwise):
+  models/<TAG>_best.keras  models/scaler_paper<_suffix>.pkl  models/label_encoder_paper<_suffix>.pkl
+  outputs/embeddings/X_{train,val,test}_<TAG>_emb.npy
+  outputs/predictions/y_prob_<TAG>_test.npy   (P(attack))
+  outputs/metadata/<TAG>_history.pkl
 """
 import os
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
@@ -24,13 +29,21 @@ from sklearn.utils.class_weight import compute_class_weight
 import paths, config, features, metrics, tracking
 
 cfg = config.get()
-SEED = cfg["seed"]
+_DEFAULT_SEED = cfg["seed"]
+SEED = int(os.environ.get("CNN_SEED", _DEFAULT_SEED))
 tf.random.set_seed(SEED); np.random.seed(SEED)
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
 
 EPOCHS = int(os.environ.get("CNN_EPOCHS", "50"))
 SUBSET = int(os.environ.get("CNN_SUBSET", "0"))
+
+# TAG default preserves the original "cnn_paper" filenames exactly when SEED is the
+# config default (42) -- so the existing reference model/embeddings are never at risk
+# of being overwritten by a differently-seeded run. Other seeds get an _s<seed> suffix,
+# matching the ltn_paper.py convention (ltn_ctrl_w0_s43, etc.).
+TAG = os.environ.get("CNN_TAG", "cnn_paper" if SEED == _DEFAULT_SEED else f"cnn_paper_s{SEED}")
+print(f"CONFIG: seed={SEED} tag={TAG}")
 
 # ---- load paper split ----
 def load(split):
@@ -97,7 +110,7 @@ model = build(nfeat, n_classes)
 model.compile(optimizer=tf.keras.optimizers.Adam(3e-4), loss=focal(alpha),
               metrics=["sparse_categorical_accuracy"])
 
-best_path = os.path.join(paths.MODELS, "cnn_paper_best.keras")
+best_path = os.path.join(paths.MODELS, f"{TAG}_best.keras")
 cbs = [
     callbacks.EarlyStopping(monitor="val_sparse_categorical_accuracy", patience=8, restore_best_weights=True, mode="max"),
     callbacks.ReduceLROnPlateau(monitor="val_sparse_categorical_accuracy", factor=0.5, patience=3, min_lr=1e-6, mode="max"),
@@ -114,18 +127,20 @@ p_attack = 1.0 - y_prob[:, benign_idx]
 res = metrics.evaluate(y_te, p_attack, zero_day, fpr=0.01)
 metrics.print_report(res)
 
-# ---- save ----
-model.save(os.path.join(paths.MODELS, "cnn_paper.keras"))
-with open(os.path.join(paths.MODELS, "scaler_paper.pkl"), "wb") as f: pickle.dump(scaler, f)
-with open(os.path.join(paths.MODELS, "label_encoder_paper.pkl"), "wb") as f: pickle.dump(le, f)
-np.save(os.path.join(paths.PREDICTIONS, "y_prob_cnn_paper_test.npy"), p_attack)
-with open(os.path.join(paths.METADATA, "cnn_paper_history.pkl"), "wb") as f: pickle.dump(hist.history, f)
+# ---- save (all paths keyed by TAG so a differently-seeded run never overwrites
+#             the seed-42 reference model/embeddings/scaler/encoder) ----
+model.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
+scaler_suffix = "" if TAG == "cnn_paper" else f"_{TAG.split('cnn_paper_', 1)[-1]}"
+with open(os.path.join(paths.MODELS, f"scaler_paper{scaler_suffix}.pkl"), "wb") as f: pickle.dump(scaler, f)
+with open(os.path.join(paths.MODELS, f"label_encoder_paper{scaler_suffix}.pkl"), "wb") as f: pickle.dump(le, f)
+np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{TAG}_test.npy"), p_attack)
+with open(os.path.join(paths.METADATA, f"{TAG}_history.pkl"), "wb") as f: pickle.dump(hist.history, f)
 emb = models.Model(model.input, model.get_layer("embedding").output)
 for nm, arr in [("train", X_tr), ("val", X_val), ("test", X_te)]:
-    np.save(os.path.join(paths.EMBEDDINGS, f"X_{nm}_cnn_paper_emb.npy"), emb.predict(arr, batch_size=1024, verbose=0))
+    np.save(os.path.join(paths.EMBEDDINGS, f"X_{nm}_{TAG}_emb.npy"), emb.predict(arr, batch_size=1024, verbose=0))
 
 if SUBSET == 0:
-    tracking.log_run("cnn_paper", {"protocol": "paper", "transform": TFM, "seed": SEED, "epochs": EPOCHS},
+    tracking.log_run(TAG, {"protocol": "paper", "transform": TFM, "seed": SEED, "epochs": EPOCHS},
                      metrics.flatten(res))
-    print("\nlogged to runs.jsonl")
-print("DONE (cnn_paper)")
+    print(f"\nlogged {TAG} to runs.jsonl")
+print(f"DONE ({TAG})")

@@ -5,7 +5,14 @@ Instead of a logic *constraint* fighting the classification loss (LTN/SAT), we a
 second head that PREDICTS the fuzzy behaviours from the shared embedding. This is a
 well-behaved auxiliary/multi-task loss — it shapes the representation to be
 behaviour-aware without competing with classification, and the resulting embeddings
-directly benefit the KG (Phase 4).
+were intended to directly benefit the KG (canonical Phase 4).
+
+MEASURED OUTCOME (2026-07-27): this does NOT help. macro zero-day PR-AUC 0.5744 vs
+the plain CNN's 0.6446 — same model.fit training method, neither run saturated, so
+it is a clean comparison. Bot lift also failed to reproduce across two runs at the
+same seed (1.0x then 0.8x). NOTE for any KG work that wants these embeddings: only
+X_train_ and X_test_ were saved, there is NO X_val_ aux-head embedding. Prefer the
+cnn_paper embeddings, which have all three splits.
 
   loss = focal(class) + LAMBDA * BCE(behaviour)
 
