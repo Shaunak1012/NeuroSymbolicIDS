@@ -59,14 +59,21 @@ Documented in the literature (Engelen et al. 2021), so a dataset-familiar review
 base-paper comparability. Report both the as-is and a unique-flows-only variant, stating the
 duplicate rate. One evaluation pass, no retraining. See [STATUS.md](STATUS.md) → "Earlier-phase audit".
 
-### [OPEN 2026-07-29] 🔴 The reference baseline is single-seed while its comparators are not
-`cnn_paper` (macro **0.6446**) is **n=1, seed 42**; so are xgboost, random_forest, isolation_forest,
-msp and mahalanobis. Only the LTN variants were multi-seeded. **The LTN control's macro spans
-0.6029–0.6505 across 3 seeds, and 0.6446 falls inside that interval** — so the claim "neither variant
-beats the plain CNN, the neural baseline still wins in aggregate" compares a point estimate against a
-distribution. This is the same error class that produced the Ax6 Bot-lift retraction.
-**Fix (proposed, NOT implemented):** 2 additional `cnn_paper` seeds (~2 trainings). Highest
-value-per-hour experiment available — confirms or overturns a headline.
+### [RESOLVED 2026-08-02] 🔴 → 🟡 The reference baseline was single-seed while its comparators were not
+`cnn_paper` (macro **0.6446**) was **n=1, seed 42** while the LTN control it was compared against was
+n=3 (range 0.6029–0.6505, containing 0.6446) — the same error class that produced the Ax6 Bot-lift
+retraction. **Ran seeds 43 and 44** (`CNN_SEED=43/44 python scripts/cnn_paper.py`, using new
+multi-seed support that never touches the seed-42 reference artifacts — verified by hash), then
+log-odds rescored both for a clean comparison.
+
+**Result: `cnn_paper` n=3, mean 0.6399, range 0.6353–0.6446. The LTN control's n=3 range
+(0.6029–0.6505) fully contains the CNN's range.** So the original concern was well-founded — this is
+**not resolved to "CNN confirmed,"** it is resolved to **"no clean winner at n=3; a proper
+significance test (paired bootstrap / Wilcoxon on per-flow scores, per conference_roadmap Tier-S #2)
+is required before either baseline can be cited as beating the other."** That test is not yet run —
+new open item. Full numbers and interpretation in [STATUS.md](STATUS.md) → "EARLIER-PHASE AUDIT" C2.
+
+xgboost, random_forest, isolation_forest, msp, mahalanobis remain n=1 — not addressed this pass.
 
 ### [OPEN 2026-07-29] The macro metric counts one signal twice
 `fam_web_attack_brute_force_pr_auc` and `fam_web_attack_xss_pr_auc` correlate at **r = +0.992** across
@@ -85,11 +92,27 @@ macro zero-day PR-AUC, the actual headline.
 **Fix (proposed, NOT implemented):** re-run the A/B on the headline metric (2 trainings). log1p may
 still win; the issue is that the current justification cites the wrong number.
 
-### [OPEN 2026-07-29] `rescore_logits.py` records the wrong seed
-Every `_logodds` entry in `runs.jsonl` is written with `seed: 42`, including entries derived from the
-s43 / s44 models — the seed field is wrong on 8 rows. Additionally several entries are duplicated 3×
-from repeated rescoring runs (`cnn_paper_logodds` appears 3 times), so naive aggregation
-double-counts. **Fix (proposed, NOT implemented):** propagate the source model's seed; dedupe on write.
+### [FIXED 2026-08-02] `rescore_logits.py` recorded the wrong seed on every multi-seed entry
+Every `_logodds` entry was written with `seed: 42` regardless of which seed's model was actually being
+rescored — wrong on 8 pre-existing rows (`ltn_ctrl_w0_s43_logodds`, `ltn_ax6_*_s43/s44_logodds`,
+`ltn_ax6_ratio_w1p0_s43/s44_logodds`). **Caught live** while rescoring the two new C2 seeds: the fix
+was needed to avoid writing 2 more wrong entries on top of the existing 8. **Fix:** seed is now parsed
+from the tag's `_s<N>` suffix (`tag_seed()`), falling back to the config default only for unsuffixed
+tags. Verified: `cnn_paper_s43_logodds` / `cnn_paper_s44_logodds` now correctly show `seed: 43` /
+`seed: 44`. Cross-checked that STATUS's already-published LTN-control range (0.6029–0.6505) was
+itself unaffected — it must have been read by run name, not the buggy field, when first computed.
+
+**Still open — deliberately not touched:** the **8 pre-existing rows still carry the wrong seed
+value in `runs.jsonl`.** Not corrected in place, because `runs.jsonl` is an append-only research log
+and silently rewriting past entries would violate the project's own retract-in-place convention.
+Any code reading `runs.jsonl` for those 8 rows **must group by run name (tag), not by `params.seed`**,
+until/unless a deliberate, logged correction pass is run.
+
+**Also still open:** several entries remain duplicated 3× from repeated full re-runs of
+`rescore_logits.py` (e.g. `cnn_paper_logodds` appears 3 times) — the code fix above does not dedupe
+existing rows, and the 2026-08-02 rescore was deliberately scoped to only the 2 new tags specifically
+to avoid adding a 4th copy of the other 17 (see the note now in `rescore_logits.py` itself: don't run
+the full `TAGS` list just to add one new tag — temporarily scope `TAGS`, run, restore).
 
 ### [OPEN] `runs.jsonl` mixes two incompatible metric schemas
 Records written before the 2026-07-27 `metrics.py` rewrite carry only `zd_pr_auc` (the blended

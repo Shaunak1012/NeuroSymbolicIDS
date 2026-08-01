@@ -1,8 +1,17 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-07-29**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-08-02**.
 
 ## ▶ RESUME HERE (next session)
+
+**2026-08-02 session: C2 resolved, Phase 3 (autoencoder) built.** `cnn_paper` is now n=3
+(seeds 42/43/44, log-odds rescored) — mean 0.6399, range 0.6353–0.6446, and **the CNN's entire
+range sits inside the LTN control's range** (0.6029–0.6505, also n=3). "The neural baseline wins"
+is not supportable at this n without a proper significance test — flagged, not yet run. Also found
+and fixed a real bug while doing this: `rescore_logits.py` was stamping every multi-seed rescore
+with the wrong seed (always 42). Full detail in the "EARLIER-PHASE AUDIT" → C2 section below.
+`scripts/autoencoder_paper.py` is built (benign-only, dense encoder/decoder) and is the direct
+falsification test of the THESIS REFRAMING further down — **not yet run**, next action.
 
 **2026-07-29 session: git housekeeping + live ops dashboard (tooling, not research).** No new Phase-2 findings — this session closed out process debt and built dev tooling. Summary (full detail in [CHANGELOG.md](CHANGELOG.md)):
 - Codified session-discipline learnings into `CLAUDE.md` as non-negotiables (model-selection-per-step recommendation that must not lapse, "state phase back" onboarding step, provisional-claim discipline, retract-in-place documentation, heartbeat-monitor rule for long background jobs) — PRs #14–#17.
@@ -518,11 +527,12 @@ This is consistent with [conference_roadmap.md](target/conference_roadmap.md) Ti
 the experiment that could falsify it — if a benign-only AE also lands at chance on Bot, the (A)/(B)
 split is not the right account and this section should be retracted in place.
 
-## 🔴 EARLIER-PHASE AUDIT (2026-07-29) — 5 open concerns, FIXES NOT YET IMPLEMENTED
+## 🟡 EARLIER-PHASE AUDIT (2026-07-29) — 5 open concerns; C2 RESOLVED 2026-08-02, C1/C3/C4/C5 still open
 
-> **Status: findings recorded, awaiting go-ahead. Nothing here has been actioned.**
-> Retrospective audit of Phases 0–2 run at session end. Ordered by severity.
-> ⚠️ **Resolve C2 before citing any Phase-2 headline** — it may overturn one.
+> **C2 is done** (2 CNN seeds run + rescored, see below) — resolved to "no clean winner at n=3,
+> needs a significance test," not to "CNN confirmed." **C1, C3, C4, C5 remain findings-only,
+> awaiting go-ahead** — nothing on those four has been actioned.
+> Retrospective audit of Phases 0–2 opened 2026-07-29. Ordered by severity.
 
 ### C1 — 17% of test rows are exact duplicates of training rows
 
@@ -549,19 +559,57 @@ comparability with the base paper. Instead **report both**: overall PR-AUC as-is
 "unique-flows-only" variant, and state the duplicate rate explicitly. One evaluation pass, no
 retraining. Converts a reviewer vulnerability into a rigor point.
 
-### C2 — 🔴 The baseline every Phase-2 conclusion rests on is single-seed
+### C2 — ✅ RESOLVED 2026-08-02 — the baseline is now n=3, matching the LTN control
 
-`cnn_paper` is **n=1 (seed 42)**. The LTN control was multi-seeded; the baseline it is compared
-against was not. All classical baselines (xgboost, random_forest, isolation_forest, msp,
-mahalanobis) are also n=1.
+> **Findings only when opened this morning; ran the 2 seeds and closed it out same day.** Both new
+> seeds trained clean (exit code 0, no crashes — see the false "process died" heartbeat note in
+> KNOWN_ISSUES, which was a monitoring artifact, not a training failure). Multi-seed support was
+> added to `cnn_paper.py` first (`CNN_SEED`/`CNN_TAG` env vars, mirroring `ltn_paper.py`'s existing
+> convention) so the run would **never touch the seed-42 reference artifacts** — verified by hash
+> before and after: all 9 reference files (model, scaler, encoder, embeddings, history) byte-identical.
 
-**The control's macro across 3 seeds spans 0.6029–0.6505. The CNN's 0.6446 falls INSIDE that
-interval.** Therefore this document's claim — *"Neither variant beats the plain CNN's 0.6446 macro —
-the neural baseline still wins in aggregate"* — **is not established.** It compares a point estimate
-against a distribution, which is the same single-seed error that produced the Ax6 retraction.
+**Ran seeds 43 and 44**, then log-odds-rescored both (`rescore_logits.py`) for a clean
+apples-to-apples comparison against the seed-42 reference, which is itself a log-odds number.
+While doing this, found and fixed the exact bug flagged as C5 below: `rescore_logits.py` stamped
+every rescored entry with the config-default seed (42) regardless of which seed's model was
+actually being rescored — silently wrong on 8 pre-existing rows, and would have been wrong on these
+2 new ones too. Fixed to parse the seed from the tag's `_s<N>` suffix. **Re-running the fix surfaced
+that STATUS's already-published LTN-control range (0.6029–0.6505) was itself correct** — it must
+have been read by run name rather than the buggy field — but the bug was live and uncaught until now.
 
-**Proposed fix (not implemented):** run 2 more `cnn_paper` seeds (~2 CNN trainings). **Highest
-value-per-hour experiment currently available** — it either confirms the headline or overturns it.
+**Result — CNN (`cnn_paper`), n=3, log-odds:**
+
+| seed | macro zd PR-AUC |
+|---|---:|
+| 42 | 0.6446 |
+| 43 | 0.6353 |
+| 44 | 0.6396 |
+| **mean** | **0.6399** |
+| **range** | **0.6353 – 0.6446** |
+
+**Compared to the LTN control (`ltn_ctrl_w0`), n=3, log-odds: mean 0.6194, range 0.6029–0.6505.**
+
+**🔴 The CNN's entire 3-seed range sits inside the LTN control's range.** This is stronger evidence
+for the original concern than the preliminary single-point check — not one number falling in an
+interval, but two full 3-seed distributions overlapping almost completely (CNN's range is a strict
+subset of the LTN control's).
+
+**What this does and does not establish:**
+- The point-estimate means still favour the CNN (0.6399 vs 0.6194, Δ=0.0205).
+- **But at n=3 each, with this much overlap, "the neural baseline wins" is not a supportable claim
+  without a proper significance test.** The LTN control's own seed-to-seed spread (0.048) is larger
+  than the gap between the two means. This is exactly the class of claim
+  [conference_roadmap.md](target/conference_roadmap.md) Tier-S #2 ("statistical honesty as a weapon
+  — paired bootstrap / Wilcoxon on per-flow scores") already flags as required before shipping.
+- **What DOES survive:** the axiom variants' macro cost relative to the control is far larger than
+  this seed noise (Ax6 fixed ω=0.5 mean 0.5091, ratio ω=1.0 mean 0.5920 — both well outside either
+  range above), so that finding is unaffected. What is now unsupported is specifically the framing
+  "CNN beats every LTN variant including the plain control" — the control-vs-CNN comparison needs a
+  real test, not eyeballed means.
+
+**Next step (not yet done): a proper paired significance test** (bootstrap or Wilcoxon on per-flow
+scores, matching Tier-S #2) is the correct way to close this, rather than more seeds alone. Not
+scheduled — flag for the next research session.
 
 ### C3 — The macro metric counts one signal twice
 
@@ -605,36 +653,42 @@ well still win — but the current justification cites the wrong number.
 
 ---
 
-## 🔑 THE FUSION WALL — proposed fix (not implemented)
+## 🔑 THE FUSION WALL — LOCO refuted for BeaconLike; deprioritized per the reframing above
 
 **The problem.** A fitted combiner cannot learn to weight a zero-day-specific signal, because the
 validation set contains no zero-day flows *by construction*. `fusion_beaconlike.py` returned
 coefficients `[2.35, 0.02]` — it learned to ignore the symbolic channel. This blocks the KG's
 intended contribution path too (see the Phase-4 readiness section below).
 
-**Proposed fix — Leave-One-Class-Out (LOCO): manufacture synthetic zero-day from known classes.**
+**Leave-One-Class-Out (LOCO) was proposed as a fix, then refuted for `BeaconLike` before any
+compute was spent (2026-07-29) — see the full table in
+[KNOWN_ISSUES.md](KNOWN_ISSUES.md#high).** BeaconLike fires on **97.6% of PortScan and 0.0% of every
+other known attack** (every other known attack targets a well-known port). A rotation is therefore
+predictably null: 7 of 8 folds teach the combiner the channel is worthless, and the PortScan fold
+teaches it the channel is valuable *for the wrong reason* (scanning, not C2 beaconing). **The
+originally-recommended "cheap probe: hold out PortScan first" was the single fold guaranteed to
+produce a false positive** — do not run it.
 
-Hide one **known** attack class (e.g. PortScan) from CNN training entirely, retrain, and that class
-becomes a genuine synthetic zero-day in validation — a class the model provably never saw. Fit the
-fusion combiner on *that*. Rotate across the 8 known attack classes.
-
-This gives the combiner exactly what it lacked: examples of *"the CNN is confused because this class
-is novel, and here is what the symbolic channel said."* That regime is **transferable**, unlike a
-class-specific fact. **It does not leak** — Bot / Web×3 / Infiltration / Heartbleed are never touched.
-It is the standard open-set-recognition remedy, and it upgrades the finding from a dead end to a
-contribution: *"inference-time fusion fails naively; here is the protocol that repairs it."*
-
-- **Cheap first probe (recommended):** hold out **PortScan only** — 1 retrain. If the BeaconLike
-  coefficient moves off 0.02, the approach is alive and the full rotation is justified.
-- **Full version:** 8 retrains.
+**The deeper result:** no known class in CIC-IDS2017 beacons, so a synthetic zero-day exercising
+BeaconLike in a Bot-like way cannot be constructed from this known-class pool. LOCO itself is not
+broken — it just needs a **modality-general** channel (Mahalanobis/MSP, which respond to any
+structurally novel class), not a class-specific axiom. Revised proposal, still not implemented:
+free Mahalanobis-8-of-9-classes probe (no retraining) → if promising, real LOCO on novelty channels,
+folds size-matched to the zero-day regime (rare known classes, not PortScan).
 
 **Complementary alternative — conformal / benign-only calibration.** Calibrate each channel as a
-p-value against the **benign** distribution only, then combine via Fisher's method. Requires **no
-attack labels at all**, so the zero-day gap never arises. ~No training cost. Weaker if channels are
-correlated, but a genuinely independent second shot.
+p-value against the **benign** distribution only, then combine via Fisher's method (or Simes —
+BeaconLike is a function of `Destination Port`, a CNN input feature, so channels are not independent
+and Fisher's assumption doesn't hold cleanly). Requires **no attack labels at all**. ~No training cost.
 
-**Recommended order if approved:** C2 (2 seeds — may overturn a headline) → LOCO probe (1 retrain —
-unblocks fusion) → C1 + C3 reporting variants (no training) → C4 → C5.
+⚠️ **Priority note (per the THESIS REFRAMING above): all LOCO/fusion-repair work targets an
+(A)-family method** (learn-what-attacks-look-like). **The evidence favours (B)-family methods**
+(learn-what-normal-looks-like) — Mahalanobis 4.3×, IsolationForest 1.7× while never seeing an attack.
+**Run the Phase-3 autoencoder before returning to this.**
+
+**Recommended order:** ~~C2~~ **✅ done** (see above) → **Phase 3 autoencoder** (tests the reframing
+directly) → re-decide the KG's role → C1 + C3 reporting variants (no training) → C4 → C5 →
+Mahalanobis-LOCO probe if the autoencoder result still motivates fusion repair.
 
 ## 🟢 PHASE-4 (Knowledge Graph) READINESS — audited 2026-07-29
 

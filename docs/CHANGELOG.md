@@ -2,6 +2,41 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (C2 resolved — CNN baseline is n=3, overlaps the LTN control; Phase 3 built)
+
+- **Added multi-seed support to `cnn_paper.py`** (`CNN_SEED`/`CNN_TAG` env vars, mirroring
+  `ltn_paper.py`'s existing `LTN_SEED`/`LTN_TAG` convention). TAG defaults to the original
+  `cnn_paper` filenames unchanged at the config seed (42), and to `cnn_paper_s<seed>` otherwise, so a
+  differently-seeded run can never overwrite the reference model/scaler/encoder/embeddings. Verified
+  by hash before and after: all 9 reference artifacts byte-identical post-run.
+- **Ran seeds 43 and 44** in the background with a heartbeat monitor. One false alarm during
+  monitoring — see the separate entry below — training itself completed cleanly both times (exit
+  code 0). Seed 43: macro 0.6355 (raw) / 0.6353 (log-odds). Seed 44: macro 0.6396 / 0.6396.
+- **Found and fixed a real bug in `rescore_logits.py` while rescoring the new seeds**: every
+  `_logodds` entry was stamped with the config-default seed (42) regardless of which seed's model was
+  actually rescored — wrong on 8 pre-existing rows. Fixed to parse the seed from the tag's `_s<N>`
+  suffix. The 8 already-wrong historical rows were deliberately left as-is (append-only log,
+  retract-in-place convention) — anything reading them must group by run name, not `params.seed`.
+  Cross-checked that STATUS's already-published LTN-control range was unaffected by this bug (it must
+  have been read by name originally).
+- **C2 resolved: `cnn_paper` is now n=3 (log-odds), mean 0.6399, range 0.6353–0.6446 — and this
+  range sits entirely inside the LTN control's n=3 range (0.6029–0.6505).** Stronger evidence for the
+  original concern than the single-point check that opened it: not one number falling in an interval,
+  but two full 3-seed distributions overlapping almost completely. **Resolved to "no clean winner at
+  this n, needs a proper significance test" — not to "CNN confirmed."** The axiom-cost finding
+  (Ax6 variants well outside both ranges) is unaffected and survives as the one comparison this data
+  can actually support.
+- **Built `scripts/autoencoder_paper.py` — canonical Phase 3.** Benign-only, dense encoder/decoder
+  (68→48→32→16→32→48→68), trained and model-selected using zero attack labels, scored by
+  reconstruction MSE. This is the direct falsification test of the 2026-07-29 thesis reframing: if it
+  also lands at chance on Bot, that reframing is wrong and must be retracted in place. Not yet run.
+- **Found and documented a Windows Git-Bash monitoring pitfall**: a `ps aux`-based liveness check
+  reported the seed-43 training process dead at epoch 2 — no error, no traceback, training had
+  actually continued normally and completed minutes later. `ps` enumeration under MSYS2's
+  WINPID-mapped process listing can miss a live process for a single poll tick. Fixed the live
+  monitor (and recorded the convention) to require sustained **log-growth staleness** across several
+  consecutive polls before declaring a job dead or hung; a single `ps` miss is now advisory only.
+
 ## 2026-07-29 (thesis reframing — the Phase-2 nulls share one structural cause)
 
 > **Reinterpretation of existing measurements. No new runs. Phase 3 has NOT started** — verified: no
