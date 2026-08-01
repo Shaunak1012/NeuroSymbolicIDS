@@ -776,9 +776,11 @@ has no known-class analogue." Measured, not hypothesised: `fusion_beaconlike.py`
 
 **This also gives the Knowledge Graph its first genuinely well-motivated job.** "Is this flow in a
 region of embedding space with no known-class analogue?" is exactly a **clustering / density
-question answerable without labels** — and the Phase-4 pre-check already found the structure exists
-(Bot forms a ~90%-pure cluster at k≥200, stable across seeds). That is a *routing* signal, not a
-detection signal, and routing is what this architecture actually needs.
+question answerable without labels** — and the Phase-4 pre-check found the structure exists
+(Bot forms a ~90%-pure cluster at k≥200). ⚠️ **That structure was later shown to be CNN-seed-dependent
+(87.9% / 86.6% / 44.4% across seeds — see "PHASE-4 BLOCKER"), so it is not a dependable foundation
+as-is.** The routing idea also rested on the modality mechanism, which was falsified. Both caveats
+apply; treat this paragraph as a hypothesis with two known problems, not a plan.
 
 **Status: promising and mechanically coherent, but n=1 and the modality account is an
 interpretation, not a measured quantity.** The concrete next test is to **measure** modality
@@ -949,7 +951,69 @@ and Fisher's assumption doesn't hold cleanly). Requires **no attack labels at al
 directly) → re-decide the KG's role → C1 + C3 reporting variants (no training) → C4 → C5 →
 Mahalanobis-LOCO probe if the autoencoder result still motivates fusion repair.
 
-## 🟢 PHASE-4 (Knowledge Graph) READINESS — audited 2026-07-29
+## 🔴 PHASE-4 BLOCKER (2026-08-02) — the KG's clustering premise does not survive CNN reseeding
+
+> **The "Bot forms a ~90%-pure cluster, stable across 2 seeds" result below (2026-07-29) was
+> measuring the wrong thing, and I flagged it, re-ran it, and it broke.** The original test varied
+> only the **clustering** seed on a **fixed seed-42 embedding**. It never varied the CNN seed — i.e.
+> it measured k-means stability, not stability of the *representation the KG would be built on*.
+
+**Re-run varying the CNN seed (clustering seed held at 42), `scripts/kg_precheck.py` Part 1:**
+
+| k | family | purity across CNN seeds 42/43/44 | spread |
+|---|---|---|---:|
+| 200 | **Bot** | **87.9% · 86.6% · 44.4%** | **43.4 pp** |
+| 200 | Web Attack Brute Force | 62.4% · 64.9% · 64.8% | 2.5 pp |
+| 200 | Web Attack XSS | 28.1% · 29.4% · 27.8% | 1.6 pp |
+| 400 | **Bot** | **82.2% · 91.1% · 62.7%** | **28.3 pp** |
+| 400 | Web Attack Brute Force | 65.2% · 67.0% · 65.5% | 1.7 pp |
+| 400 | Web Attack XSS | 29.4% · 30.1% · 29.5% | 0.7 pp |
+
+For contrast, varying only the **clustering** seed on a fixed embedding (the original test, Part 2)
+gives Bot purity 87.9% vs 90.5% at k=200 — **spread 2.6 pp.** So clustering is stable; **the
+embedding is not.**
+
+**Three things make this serious rather than merely noisy:**
+
+1. **The instability is specific to Bot.** Web BF and XSS purity are rock-stable across CNN seeds
+   (0.7–2.5 pp). So this is not "clustering is generally seed-sensitive" — it is
+   **"the CNN's embedding geometry *with respect to Bot* is a seed lottery."**
+2. **Two independent measures agree, and agree on which seed is bad.** Seed 44 is worst on *both*
+   cluster purity (44.4%) and Mahalanobis Bot PR-AUC (0.0413, 1.2× — chance), while its
+   classification is completely unremarkable:
+
+   | seed | CNN macro | CNN Bot | Mahalanobis Bot | KG Bot purity (k=200) |
+   |---|---:|---:|---:|---:|
+   | 42 | 0.6446 | 0.0591 | 0.1467 | 87.9% |
+   | 43 | 0.6353 | 0.0241 | 0.1210 | 86.6% |
+   | 44 | 0.6396 | 0.0507 | **0.0413** | **44.4%** |
+
+   **Classification is flat (macro spread 0.009); open-set geometry is not.** A CNN can be equally
+   good at its training task and produce an embedding that does or does not isolate Bot.
+3. **The KG's value proposition inverts.** It clusters *stably* on web attacks — which the CNN
+   already handles at 0.92–0.95, so clustering adds nothing there — and *unstably* on Bot, the one
+   family where a memory/novelty mechanism would actually earn its place.
+
+**Implication for Phase 4 as specified:** a KG built on one CNN's embeddings inherits that seed's
+lottery ticket. On seed 42 the pre-check looks like a green light; on seed 44 the same procedure
+yields a 44%-pure blob. **Do not build on a single embedding.**
+
+**Options (none implemented, none decided):**
+- **Ensemble across CNN seeds** — cluster a concatenation/average of several seeds' embeddings, or
+  require a cluster to reproduce across seeds before promoting it to a KG node. Most faithful to the
+  spec, costs n× embeddings (already have 3).
+- **Cluster raw features instead** — no training, so no seed lottery at all. Loses the learned
+  representation, but the Phase-3 modality work showed raw-space distance is a real signal
+  (`corr = +0.732` with AE error).
+- **Cluster the autoencoder's 16-d bottleneck** — benign-only-trained, and the AE proved the most
+  *stable* Bot channel (spread 1.5× vs Mahalanobis's 3.6×). Untested for clustering; plausible.
+- **Accept and report the variance** — build on one seed but publish the seed-sensitivity as a
+  finding rather than hiding it. Cheapest, and honest.
+
+**This does not kill Phase 4** — it kills "clustering CNN embeddings is a solid foundation" as an
+unexamined assumption. Decide the representation question before writing `kg.py`.
+
+## 🟢 PHASE-4 (Knowledge Graph) READINESS — audited 2026-07-29 (⚠️ point 4 superseded by the blocker above)
 
 Full review, with tables and caveats, at the top of
 [target/knowledge_graph.md](target/knowledge_graph.md). Summary:
@@ -960,11 +1024,18 @@ Full review, with tables and caveats, at the top of
 `python-louvain` 0.16 installed and importable · test set is 114,658 flows, so the spec's
 "1.1M nodes will blow up" risk no longer applies.
 
-**Green — empirical pre-check, better than predicted (n=2 seeds, provisional):**
+~~**Green — empirical pre-check, better than predicted (n=2 seeds, provisional):**
 Clustering `cnn_paper` train embeddings and applying to test, **Bot forms a ~90%-pure cluster at
 k≥200, stable across seeds**, capturing ~34% of Bot. This is the family that defeated every Phase-2
 intervention, and it *does* have seed-stable geometric structure in the embedding space. Web Attack
-Brute Force reaches ~65% purity at 90% recall. Not a detection result — a viability result.
+Brute Force reaches ~65% purity at 90% recall. Not a detection result — a viability result.~~
+
+> 🔴 **RETRACTED 2026-08-02 — "stable across seeds" was measuring the wrong variable.** The two seeds
+> varied were **clustering** seeds on a **fixed seed-42 embedding**; the CNN seed was never varied.
+> Re-running across CNN seeds gives Bot purity **87.9% / 86.6% / 44.4%** at k=200 — a **43.4 pp
+> spread**, versus 2.6 pp when only the clustering seed moves. The ~90% figure is seed-42's lottery
+> ticket. Web BF/XSS purity *is* stable across CNN seeds (0.7–2.5 pp), so the instability is specific
+> to Bot. **See "PHASE-4 BLOCKER" above.**
 
 **🔴 Three assumptions in the KG spec no longer hold — decide before coding:**
 1. **Scope contradiction.** `knowledge_graph.md` calls the KG the *"primary zero-day signal"*;

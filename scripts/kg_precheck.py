@@ -40,37 +40,72 @@ import paths
 P = paths.PAPER
 E = paths.EMBEDDINGS
 
-Etr = np.load(os.path.join(E, "X_train_cnn_paper_emb.npy"))
 ytr = np.load(os.path.join(P, "y_train_mc.npy"), allow_pickle=True)
-Ete = np.load(os.path.join(E, "X_test_cnn_paper_emb.npy"))
 yte = np.load(os.path.join(P, "y_test_mc.npy"), allow_pickle=True)
 
 FAMS = ["Bot", "Web Attack Brute Force", "Web Attack XSS"]  # the powered zero-day families
-rng = np.random.RandomState(0)
-idx = rng.choice(len(Etr), size=200_000, replace=False)
-Xs, ys = Etr[idx], ytr[idx]
+# CNN seeds whose embeddings we test. CRITICAL (2026-08-02): the original version of
+# this script varied only the CLUSTERING seed on a FIXED seed-42 embedding, and
+# reported "stable across 2 seeds" -- which measured clustering stability, NOT
+# stability of the embedding itself across CNN training runs. Those are different
+# claims, and the train-vs-score decomposition found the CNN's open-set geometry is
+# far less seed-stable than its classification (Mahalanobis Bot swings 3.6x across
+# these same seeds while CNN macro moves 0.009). This now varies BOTH.
+CNN_SEEDS = [(42, ""), (43, "_s43"), (44, "_s44")]
 
-print(f"{'k':>5s} {'seed':>5s} | " + " | ".join(f"{f[:18]:>18s}" for f in FAMS))
-print("      purity of the family's OWN best cluster (what frac of that cluster is this family)")
-print("-" * 88)
 
+def measure(Etr, ytr, Ete, K, clust_seed, sub_rng=0):
+    rng = np.random.RandomState(sub_rng)
+    idx = rng.choice(len(Etr), size=min(200_000, len(Etr)), replace=False)
+    km = MiniBatchKMeans(n_clusters=K, random_state=clust_seed, n_init=5,
+                         batch_size=4096).fit(Etr[idx])
+    te_lab = km.predict(Ete)
+    out = {}
+    for fam in FAMS:
+        m = yte == fam
+        counts = np.bincount(te_lab[m], minlength=K)
+        best = counts.argmax()
+        tot = (te_lab == best).sum()
+        out[fam] = (counts[best] / tot if tot else 0.0, counts[best] / m.sum())
+    return out
+
+
+print("=" * 96)
+print("PART 1 -- vary the CNN SEED (the embedding itself), clustering seed FIXED at 42")
+print("=" * 96)
+print(f"{'CNN seed':>9s} {'k':>5s} | " + " | ".join(f"{f[:20]:>20s}" for f in FAMS))
+print("-" * 96)
+part1 = {}
+for K in (200, 400):
+    for cnn_seed, sfx in CNN_SEEDS:
+        Etr = np.load(os.path.join(E, f"X_train_cnn_paper{sfx}_emb.npy"))
+        Ete = np.load(os.path.join(E, f"X_test_cnn_paper{sfx}_emb.npy"))
+        r = measure(Etr, ytr, Ete, K, clust_seed=42)
+        part1[(K, cnn_seed)] = r
+        cells = [f"p={r[f][0]:5.1%} r={r[f][1]:5.1%}" for f in FAMS]
+        print(f"{cnn_seed:9d} {K:5d} | " + " | ".join(f"{c:>20s}" for c in cells))
+    print("-" * 96)
+
+print("\nSPREAD ACROSS CNN SEEDS (this is the number that matters for Phase 4):")
+for K in (200, 400):
+    for f in FAMS:
+        ps = [part1[(K, s)][f][0] for s, _ in CNN_SEEDS]
+        rs = [part1[(K, s)][f][1] for s, _ in CNN_SEEDS]
+        print(f"  k={K:3d} {f:24s} purity {min(ps):5.1%}-{max(ps):5.1%} "
+              f"(spread {max(ps)-min(ps):5.1%}) | recall {min(rs):5.1%}-{max(rs):5.1%}")
+
+print("\n" + "=" * 96)
+print("PART 2 -- ORIGINAL TEST for comparison: vary only the CLUSTERING seed, CNN seed FIXED at 42")
+print("=" * 96)
+Etr = np.load(os.path.join(E, "X_train_cnn_paper_emb.npy"))
+Ete = np.load(os.path.join(E, "X_test_cnn_paper_emb.npy"))
+print(f"{'k':>5s} {'clust':>6s} | " + " | ".join(f"{f[:20]:>20s}" for f in FAMS))
+print("-" * 96)
 for K in (50, 100, 200, 400, 800):
-    for seed in (42, 43):
-        km = MiniBatchKMeans(n_clusters=K, random_state=seed, n_init=5,
-                             batch_size=4096).fit(Xs)
-        te_lab = km.predict(Ete)
-        row = []
-        for fam in FAMS:
-            m = yte == fam
-            labs = te_lab[m]
-            counts = np.bincount(labs, minlength=K)
-            best = counts.argmax()
-            # purity: of ALL test flows assigned to that cluster, what frac are this family?
-            tot_in_best = (te_lab == best).sum()
-            purity = counts[best] / tot_in_best if tot_in_best else 0.0
-            recall = counts[best] / m.sum()
-            row.append(f"p={purity:5.1%} r={recall:5.1%}")
-        print(f"{K:5d} {seed:5d} | " + " | ".join(f"{c:>18s}" for c in row))
+    for cs in (42, 43):
+        r = measure(Etr, ytr, Ete, K, clust_seed=cs)
+        cells = [f"p={r[f][0]:5.1%} r={r[f][1]:5.1%}" for f in FAMS]
+        print(f"{K:5d} {cs:6d} | " + " | ".join(f"{c:>20s}" for c in cells))
 
 print("""
 p = purity of that family's single best cluster (frac of the cluster that IS the family)

@@ -42,7 +42,20 @@ static graph; (c) evaluate the adaptive/decay story on the **temporal** split as
 where the time arrow is genuine. Note that "Adaptive" is in the project title — option (b) has a
 write-up cost.
 
-### 4. ✅ Empirical pre-check: the clustering substrate is viable — better than expected
+### 4. 🔴 Empirical pre-check — RETRACTED 2026-08-02, the substrate is CNN-seed-dependent
+
+> **The "viable, better than expected" conclusion below is retracted.** It varied only the
+> **clustering** seed on a **fixed seed-42 embedding**. Varying the **CNN seed** — the representation
+> the KG is actually built on — gives Bot cluster purity **87.9% / 86.6% / 44.4%** at k=200
+> (**43.4 pp spread**), versus 2.6 pp when only the clustering seed moves.
+> **The instability is specific to Bot**: Web BF and XSS move only 0.7–2.5 pp. Seed 44 is
+> independently confirmed bad — Mahalanobis Bot 0.0413 (1.2×, chance) on the same embedding — while
+> its classification is unremarkable (macro 0.6396).
+> **Decide the representation before writing `kg.py`** (ensemble across seeds · raw features ·
+> the AE's benign-trained 16-d bottleneck · accept-and-publish the variance).
+> Full analysis: [STATUS.md](../STATUS.md) → "PHASE-4 BLOCKER".
+
+### ~~4. ✅ Empirical pre-check: the clustering substrate is viable — better than expected~~
 
 Ran before committing to the phase: MiniBatchKMeans on 200k `cnn_paper` train embeddings, applied to
 test, sweeping k ∈ {50,100,200,400,800} × 2 seeds. Measures, for each powered zero-day family, its

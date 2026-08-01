@@ -2,6 +2,39 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (Phase-4 blocker — the KG's clustering premise breaks under CNN reseeding)
+
+- **Acted on the warning raised by the train-vs-score decomposition and it broke the pre-check.**
+  Extended `scripts/kg_precheck.py` to vary the **CNN seed** (the embedding itself), not just the
+  clustering seed, and re-ran.
+- **🔴 RETRACTED: "Bot forms a ~90%-pure cluster, stable across 2 seeds."** The two seeds originally
+  varied were **clustering** seeds on a **fixed seed-42 embedding** — that measured k-means
+  stability, never the stability of the representation the KG would actually be built on.
+
+  | k | family | purity across CNN seeds 42/43/44 | spread |
+  |---|---|---|---:|
+  | 200 | **Bot** | **87.9% · 86.6% · 44.4%** | **43.4 pp** |
+  | 200 | Web BF | 62.4% · 64.9% · 64.8% | 2.5 pp |
+  | 200 | XSS | 28.1% · 29.4% · 27.8% | 1.6 pp |
+  | 400 | **Bot** | **82.2% · 91.1% · 62.7%** | **28.3 pp** |
+
+  Varying only the *clustering* seed on a fixed embedding gives Bot 87.9% vs 90.5% — spread 2.6 pp.
+  **Clustering is stable; the embedding is not.**
+- **The instability is specific to Bot.** Web BF and XSS purity move 0.7–2.5 pp across CNN seeds. So
+  this is not general seed-sensitivity — the CNN's embedding geometry *with respect to Bot* is a
+  seed lottery.
+- **Two independent measures agree on which seed is bad.** Seed 44 is worst on both cluster purity
+  (44.4%) and Mahalanobis Bot PR-AUC (0.0413, 1.2× ≈ chance), while its classification is
+  unremarkable (macro 0.6396 vs 0.6446/0.6353). **Classification is flat across seeds; open-set
+  geometry is not.**
+- **The KG's value proposition inverts:** it clusters *stably* on web attacks — which the CNN already
+  handles at 0.92–0.95, so clustering adds nothing — and *unstably* on Bot, the one family where a
+  memory/novelty mechanism would earn its place.
+- **Does not kill Phase 4**; kills "clustering CNN embeddings is a solid foundation" as an unexamined
+  assumption. Four options recorded (ensemble across seeds · cluster raw features · cluster the AE's
+  16-d benign-trained bottleneck · accept and publish the variance). **None implemented, none
+  decided** — the representation question should be settled before `kg.py` is written.
+
 ## 2026-08-02 (train-vs-score decomposition — and "Mahalanobis 4.3×" is retracted)
 
 - **Added `NOVELTY_SEED` to `novelty.py`** and recomputed MSP + Mahalanobis from all three CNN seeds.
