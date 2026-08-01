@@ -2,6 +2,30 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (Phase 3 closed out — canonical results table, docs squared, branch merged)
+
+Housekeeping pass to leave the repository in a clean state before Phase 4 begins in a new session.
+
+- **Established a single canonical results table** (STATUS → "Last Measured Results") and made every
+  other document quote it. It replaces a `_TBD_` placeholder that had stood since project start and
+  still referenced the superseded `eval.py`/`ltn.py` pipeline. All figures are **n=3 mean with seed
+  range**; channels that are n=1 or predate the metrics rewrite (`xgboost`, `random_forest`,
+  `isolation_forest`) are explicitly listed as **not citable for comparison** rather than quoted.
+- **Added an "established vs retracted" ledger** to the same section, so the status of every
+  comparative claim is visible in one place: 2 established, 1 explicitly *not* established
+  (CNN vs LTN control — needs a significance test), 3 retracted.
+- **Refreshed README** with the Phase-3 results, the double-dissociation finding, and a
+  reproducibility note stating plainly that three findings have been retracted after multi-seeding.
+  Removed the stale "Mahalanobis 4.3×" row.
+- **Marked Phase 3 complete** in `conference_roadmap.md` (both the canonical phase table and the
+  build-plan row, with actual vs estimated effort) and in `enhancements.md` item #1, whose stated
+  purpose — answer *"why not just an autoencoder?"* — is now discharged with a number.
+- **Moved smoke-test artifacts out of the fusion-channel namespace** into
+  `outputs/predictions/_smoke_archive/` with an explanatory README. Moved, **not deleted**, per the
+  project rule that artifacts are never destroyed. 62 real channels remain, none of them smoke.
+- **Tracked the Phase-4 blocker in KNOWN_ISSUES**, which had only been recorded in STATUS — the same
+  living-docs drift that made the 2026-07-29 reference-tier audit necessary in the first place.
+
 ## 2026-08-02 (Phase-4 blocker — the KG's clustering premise breaks under CNN reseeding)
 
 - **Acted on the warning raised by the train-vs-score decomposition and it broke the pre-check.**

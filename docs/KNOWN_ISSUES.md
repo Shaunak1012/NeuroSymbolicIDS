@@ -269,12 +269,16 @@ Both `class_weight=` in `fit()` **and** the focal-loss `alpha` weight imbalance,
 effect. Not incorrect, but the effect multiplies — pick one when tuning.
 Detail: [cnn_current.md](implementation/cnn_current.md).
 
-### [OPEN] Smoke-test artifacts pollute `outputs/predictions/`
-`y_prob_smoke_test.npy`, `y_prob_smoke_perf_test.npy`, `y_prob_smoke_ax6_test.npy`,
-`y_prob_smoke_seed43_test.npy`, `y_prob_smoke_test_test.npy` are undertrained debris from
-`LTN_SUBSET`/`CNN_SUBSET` smoke runs, sitting in the same directory and naming space as real fusion
-channels. Risk: one gets picked up as a channel. Safe to delete; better, write smoke output to a
-`smoke/` subdirectory.
+### [FIXED 2026-08-02] Smoke-test artifacts polluted `outputs/predictions/`
+Five undertrained outputs from `LTN_SUBSET`/`CNN_SUBSET` smoke runs
+(`y_prob_smoke{,_perf,_ax6,_seed43,_test}_test.npy`) sat in the same directory and the same
+`y_prob_*_test.npy` namespace as real fusion channels, where one could plausibly be picked up as a
+channel. **Fix:** moved to `outputs/predictions/_smoke_archive/` with a README explaining what they
+are. **Moved, not deleted** — per the project rule that artifacts are not destroyed, even worthless
+ones. 62 real channels remain in the namespace, none of them smoke.
+**Still open (minor):** the smoke path in `ltn_paper.py`/`cnn_paper.py` will recreate them in
+`outputs/predictions/` on the next `*_SUBSET` run — a proper fix would write smoke output to the
+archive subdirectory directly.
 
 ### [OPEN] TensorFlow can be blocked by Windows Smart App Control
 `import tensorflow` fails with `ImportError: DLL load failed … An Application Control policy has

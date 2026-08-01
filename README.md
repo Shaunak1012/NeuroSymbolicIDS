@@ -169,13 +169,26 @@ NeuroSymbolicIDS/
 > (Heartbleed n=11, Infiltration n=36, SQL Injection n=21) are excluded rather than reported to
 > false precision. Full tables, provenance, and retractions in [docs/STATUS.md](docs/STATUS.md).
 
-| Channel | macro zero-day PR-AUC | Bot PR-AUC | Bot lift vs chance |
-|---------|----------------------:|-----------:|-------------------:|
-| CNN (`cnn_paper.py`) | **0.6446** | 0.0591 | 1.7× |
-| XGBoost | 0.6372 | 0.0608 | 1.8× |
-| LTN, no axioms (control, n=3 seeds) | 0.6194 | — | 2.07× (range 1.5–2.9×) |
-| Mahalanobis (open-set distance) | 0.4585 | **0.1467** | **4.3×** |
-| Isolation Forest | 0.0628 | 0.0571 | 1.7× |
+All figures below are **mean over 3 seeds (42/43/44), log-odds scored**, with the seed range given —
+single-seed numbers have repeatedly proven unsafe in this project (three retractions to date).
+
+| Channel | family | macro zero-day PR-AUC | Bot PR-AUC | Bot lift | Web BF | XSS |
+|---------|:---:|----------------------:|-----------:|---------:|-------:|------:|
+| **CNN** (`cnn_paper.py`) | A | **0.6399** [0.6353, 0.6446] | 0.0446 [0.0241, 0.0591] | 1.3× | **0.9226** | **0.9524** |
+| LTN, no axioms (control) | A | 0.6194 [0.6029, 0.6505] | 0.0712 [0.0528, 0.0985] | 2.1× | 0.8889 | 0.8982 |
+| MSP (softmax novelty) | A/B | 0.5884 [0.5694, 0.6123] | 0.0448 [0.0245, 0.0591] | 1.3× | 0.8719 | 0.8485 |
+| Mahalanobis (embedding distance) | B | 0.3777 [0.3363, 0.4585] | 0.1030 [0.0413, 0.1467] | 3.0× | 0.5840 | 0.4462 |
+| **Autoencoder** (`autoencoder_paper.py`) | B | 0.0970 [0.0894, 0.1014] | **0.1314** [0.1078, 0.1647] | **3.8×** | 0.1048 | 0.0547 |
+
+*(A) = trained on known attacks · (B) = trained on benign only.* XGBoost, RandomForest and
+IsolationForest exist but are **n=1 and predate the metrics rewrite**, so they carry no per-family
+breakdown and are omitted here rather than quoted at false precision.
+
+**The central result — a double dissociation between (A) and (B) methods.** CNN and autoencoder seed
+ranges do **not overlap on any family**: the AE wins Bot **2.9×**, the CNN wins Web Brute Force
+**8.8×** and XSS **17.4×**. Each method wins decisively where the other fails, which rules out
+"one is simply better" and establishes genuine functional specialisation. **The mechanism is
+unexplained** — a proposed "modality analogue" account was pre-registered, tested, and falsified.
 
 **What the symbolic pillar actually showed (Phase 2, concluded):**
 
@@ -195,4 +208,26 @@ NeuroSymbolicIDS/
   `LargePackets`, `HighEntropy`, `ScanProbe`, `BeaconLike`, `RepeatedConnections`). The last is
   always 0.0 pending wiring to the IP/port side table.
 
-**Status:** Phases 0–2 complete. Knowledge Graph, Decision Fusion, and Explainability are not built.
+**What the anomaly pillar showed (Phase 3, concluded):**
+
+- **A benign-only autoencoder is the most reliable Bot channel measured** — 3.8× chance
+  [3.2–4.8], versus Mahalanobis 3.0× [1.2–4.3] and the CNN's 1.3× [0.7–1.7]. It uses **no attack
+  labels at all**, in training or model selection, so it is zero-day-legitimate by construction.
+- **It is near-perfect on the structurally extreme rare families** — Heartbleed 1.0000 recall,
+  Infiltration 0.8611 — but both are underpowered (n=11, n=36) and excluded from the macro.
+- **It fails on web attacks** (0.1048 / 0.0547 vs the CNN's 0.9226 / 0.9524), which is what makes
+  the dissociation a dissociation rather than a ranking.
+- **Changing the scoring rule alone does not help.** MSP — novelty-style scoring on the CNN's own
+  softmax — lands at Bot 0.0448 vs the CNN's 0.0446. The dissociation is driven by *what a model
+  trains on*, not by how its score is computed, and forms a monotonic frontier across
+  (A-train/A-score) → (A/B) → (A/B) → (B/B).
+
+**Reproducibility note.** Every comparative claim above is n=3 seeds with ranges reported. Three
+findings have been **retracted** after multi-seeding exposed them as single-seed artifacts (a
+symbolic axiom's Bot benefit, "Mahalanobis 4.3× on Bot", and a Knowledge-Graph clustering-stability
+result). Retractions are preserved in place with their reasoning in
+[docs/STATUS.md](docs/STATUS.md) and [docs/CHANGELOG.md](docs/CHANGELOG.md) rather than deleted.
+
+**Status:** Phases 0–3 complete (protocol reset · neural pillar + baselines · symbolic pillar ·
+anomaly pillar). Phase 4 (Knowledge Graph) is **blocked on a representation decision** — see
+[docs/STATUS.md](docs/STATUS.md) → "PHASE-4 BLOCKER". Decision Fusion and Explainability are not built.

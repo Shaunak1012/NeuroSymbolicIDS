@@ -1120,14 +1120,38 @@ Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 
 ## Last Measured Results
 
-> Fill in after running `eval.py` / `ltn.py`. (Not yet recorded in this doc.)
+> **Canonical results table — last updated 2026-08-02.** Supersedes the `_TBD_` placeholder that
+> stood here from project start (it referenced the legacy `eval.py`/`ltn.py` pipeline, superseded
+> 2026-06-18). All figures are **mean over seeds 42/43/44, log-odds scored**, on the paper-aligned
+> split, with seed range in brackets. Headline metric is **macro zero-day PR-AUC** over the three
+> adequately powered families (Bot n=1,956 · Web BF n=1,507 · Web XSS n=652).
+> Regenerate with: `python scripts/rescore_logits.py` then read `outputs/metadata/runs.jsonl`.
 
-| Metric | CNN baseline | Hybrid-LTN |
-|--------|-------------|------------|
-| Binary PR-AUC | _TBD_ | _TBD_ |
-| Binary ROC-AUC | _TBD_ | _TBD_ |
-| FNR (missed attacks) | _TBD_ | _TBD_ |
-| Zero-day recall (avg) | _TBD_ | _TBD_ |
+| Channel | family | n | macro zd PR-AUC | Bot | Bot lift | Web BF | XSS |
+|---|:---:|:---:|---|---|---:|---:|---:|
+| **CNN** `cnn_paper` | A | 3 | **0.6399** [0.6353, 0.6446] | 0.0446 [0.0241, 0.0591] | 1.3× | **0.9226** | **0.9524** |
+| LTN control `ltn_ctrl_w0` | A | 3 | 0.6194 [0.6029, 0.6505] | 0.0712 [0.0528, 0.0985] | 2.1× | 0.8889 | 0.8982 |
+| MSP | A/B | 3 | 0.5884 [0.5694, 0.6123] | 0.0448 [0.0245, 0.0591] | 1.3× | 0.8719 | 0.8485 |
+| Mahalanobis | B | 3 | 0.3777 [0.3363, 0.4585] | 0.1030 [0.0413, 0.1467] | 3.0× | 0.5840 | 0.4462 |
+| **Autoencoder** `autoencoder_paper` | B | 3 | 0.0970 [0.0894, 0.1014] | **0.1314** [0.1078, 0.1647] | **3.8×** | 0.1048 | 0.0547 |
+
+*(A) trained on known attacks · (B) trained on benign only.*
+
+**Not multi-seeded (n=1) and therefore not citable for comparison:** `xgboost`, `random_forest`,
+`isolation_forest`. All three also predate the 2026-07-27 `metrics.py` rewrite, so their
+`runs.jsonl` entries carry only the blended `zd_pr_auc` and **no per-family or macro breakdown**.
+Re-run `baselines.py` before using them in any table. Tracked in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+
+**Established comparative findings:**
+
+| claim | status | evidence |
+|---|---|---|
+| CNN vs Autoencoder is a **double dissociation** | ✅ **established** | ranges do not overlap on any family; AE wins Bot 2.9×, CNN wins Web BF 8.8× / XSS 17.4× |
+| Every LTN axiom variant costs macro vs the no-axiom control | ✅ established | non-overlapping ranges, n=3 |
+| "The neural baseline beats the LTN control" | ❌ **not established** | CNN range [0.6353, 0.6446] sits *inside* control range [0.6029, 0.6505]; needs a significance test |
+| "Ax6 roughly doubles Bot lift" | 🔴 **retracted** | single-seed artifact; control's own mean lift is higher |
+| "Mahalanobis 4.3× — best Bot channel" | 🔴 **retracted** | seed 42 only; n=3 mean is 3.0×, seed 44 at chance |
+| "Bot forms a stable ~90%-pure cluster" | 🔴 **retracted** | varied clustering seed, not CNN seed; 87.9/86.6/**44.4**% across CNN seeds |
 
 ## Session Log Pointer
 
