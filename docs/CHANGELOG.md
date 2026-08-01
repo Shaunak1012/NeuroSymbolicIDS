@@ -2,6 +2,42 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (Phase 3 RUN — the autoencoder result refines the thesis rather than confirming it)
+
+- **Ran `scripts/autoencoder_paper.py` (canonical Phase 3).** Converged cleanly, 50 epochs, exit 0,
+  zero attack labels used in training *or* model selection. **n=1 (seed 42) — provisional.**
+- **The stated falsification condition was NOT met, so the 2026-07-29 reframing survives on Bot** —
+  but it was **too strong as written and is now refined in place, not retracted.** The AE scored
+  **Bot PR-AUC 0.1217 (3.6× chance)**, the second-best Bot result ever measured here (behind only
+  Mahalanobis at 4.3×). Both top-2 Bot channels are (B)-family, as predicted.
+- **But the AE collapses on web attacks**: macro **0.1000** vs the CNN's 0.6399, with **exactly
+  0.0000 recall** on Web Brute Force, XSS *and* SQL Injection at 1% FPR — while catching
+  **Heartbleed at 1.0000 recall** and **Infiltration at 0.8611**. That is a categorical split, not a
+  performance gradient, and it refutes "the project is investing in (A) on a structurally (B)
+  problem" as a blanket claim.
+- **The refined account — modality analogue, not method family.** Web attacks are *structurally
+  normal*: HTTP to port 80, indistinguishable from ordinary browsing in the 68 flow features (what
+  makes them malicious is payload content, which this feature set lacks), so a benign-trained
+  autoencoder reconstructs them perfectly and 0.0000 recall is the honest expected result. The CNN
+  nonetheless scores 0.92–0.96 on them **not** by solving zero-day detection but by
+  **within-modality transfer** — Web Brute Force resembles FTP-Patator/SSH-Patator, which *are*
+  training classes. Bot has no such analogue (independently established: `BeaconLike` fires on 97.6%
+  of PortScan and **0.0% of every other known attack** — no known class beacons), so every
+  supervised method sits at 1.5–1.8× and only distance/reconstruction methods win.
+  **Governing variable: does the unseen class share a behavioural modality with some known class?**
+  Yes → (A) wins. No → (B) wins. Neither family dominates; they are complementary.
+- **This makes the fusion wall the central architectural problem rather than a side issue.** Each
+  family covers exactly what the other misses, so the system needs a per-flow **router** — and the
+  router is precisely what cannot be *fitted*, since any combiner is calibrated on validation data
+  containing no zero-day flows (`fusion_beaconlike.py` → `[2.35, 0.02]`).
+- **It also gives the Knowledge Graph its first well-motivated job.** "Is this flow in a region with
+  no known-class analogue?" is a clustering/density question answerable **without labels**, and the
+  Phase-4 pre-check already showed the structure exists (Bot forms a ~90%-pure cluster at k≥200,
+  stable across seeds). That is a *routing* signal, not a detection signal.
+- **Flagged as interpretation, not measurement.** The modality account explains every prior null and
+  is predictive, but has not been measured. Concrete next test: compute each zero-day family's
+  embedding distance to the nearest known-class centroid and check it predicts which family wins.
+
 ## 2026-08-02 (C2 resolved — CNN baseline is n=3, overlaps the LTN control; Phase 3 built)
 
 - **Added multi-seed support to `cnn_paper.py`** (`CNN_SEED`/`CNN_TAG` env vars, mirroring

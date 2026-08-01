@@ -4,14 +4,28 @@
 
 ## ▶ RESUME HERE (next session)
 
-**2026-08-02 session: C2 resolved, Phase 3 (autoencoder) built.** `cnn_paper` is now n=3
-(seeds 42/43/44, log-odds rescored) — mean 0.6399, range 0.6353–0.6446, and **the CNN's entire
-range sits inside the LTN control's range** (0.6029–0.6505, also n=3). "The neural baseline wins"
-is not supportable at this n without a proper significance test — flagged, not yet run. Also found
-and fixed a real bug while doing this: `rescore_logits.py` was stamping every multi-seed rescore
-with the wrong seed (always 42). Full detail in the "EARLIER-PHASE AUDIT" → C2 section below.
-`scripts/autoencoder_paper.py` is built (benign-only, dense encoder/decoder) and is the direct
-falsification test of the THESIS REFRAMING further down — **not yet run**, next action.
+**2026-08-02 session: C2 resolved, Phase 3 RUN — and it reframed the architecture.**
+
+1. **C2 closed.** `cnn_paper` is now n=3 (seeds 42/43/44, log-odds) — mean 0.6399, range
+   0.6353–0.6446, and **the CNN's entire range sits inside the LTN control's range** (0.6029–0.6505,
+   also n=3). "The neural baseline wins" is **not supportable at this n** without a significance
+   test (paired bootstrap / Wilcoxon — flagged, not yet run). Also fixed a real bug found en route:
+   `rescore_logits.py` stamped every multi-seed rescore with the wrong seed.
+2. **🧪 Phase 3 (benign-only autoencoder) RUN — see "PHASE 3 RESULTS" below.** The headline is not
+   the macro (0.1000, far below the CNN). It is the **shape** of the result: the AE catches
+   Heartbleed at **1.0000 recall** and Infiltration at **0.8611**, gets the 2nd-best Bot number ever
+   measured (**3.6×**), and scores **exactly 0.0000 recall on every web attack.**
+3. **That categorical split produced a better thesis.** The governing variable is **not** (A) vs (B)
+   method family — it is **whether the unseen class shares a behavioural modality with a known
+   class.** Web attacks resemble the Patator brute-force classes that *are* in training, so the CNN
+   transfers (0.92–0.96); Bot/Infiltration/Heartbleed have no known-class analogue, so every
+   supervised method sits at chance and only distance/reconstruction methods work. **The two
+   families are complementary, and the system needs a per-flow router** — which is exactly what the
+   fusion wall prevents being *fitted*, and exactly the job the KG could do **without labels**.
+
+**Next action:** the modality account is an interpretation, not yet a measurement. The concrete test
+is to measure each zero-day family's embedding-space distance to the nearest known-class centroid
+and check it predicts which family wins. Also outstanding: multi-seed the AE (n=1 today).
 
 **2026-07-29 session: git housekeeping + live ops dashboard (tooling, not research).** No new Phase-2 findings — this session closed out process debt and built dev tooling. Summary (full detail in [CHANGELOG.md](CHANGELOG.md)):
 - Codified session-discipline learnings into `CLAUDE.md` as non-negotiables (model-selection-per-step recommendation that must not lapse, "state phase back" onboarding step, provisional-claim discipline, retract-in-place documentation, heartbeat-monitor rule for long background jobs) — PRs #14–#17.
@@ -523,9 +537,106 @@ limit — it is a **transfer** limit specific to fitted, closed-set methods. (B)
 This is consistent with [conference_roadmap.md](target/conference_roadmap.md) Tier-S #1
 ("failure-anatomy study as science") — it sharpens that plan rather than replacing it.
 
-**⚠️ Status of this reframing: argued from existing evidence, NOT yet tested.** The autoencoder is
+~~**⚠️ Status of this reframing: argued from existing evidence, NOT yet tested.** The autoencoder is
 the experiment that could falsify it — if a benign-only AE also lands at chance on Bot, the (A)/(B)
-split is not the right account and this section should be retracted in place.
+split is not the right account and this section should be retracted in place.~~
+
+> ✅ **TESTED 2026-08-02 (Phase 3). The stated falsification condition was NOT met — the reframing
+> survives on Bot, but is TOO STRONG as written and is refined below.**
+>
+> The benign-only autoencoder scored **Bot PR-AUC 0.1217 (3.6× chance)** — *not* chance, and the
+> second-best Bot result ever measured here, behind only Mahalanobis (4.3×). Both top-2 Bot channels
+> are (B)-family. That part of the account holds.
+>
+> **But the AE's macro is 0.1000 vs the CNN's 0.6399 — it collapses on Web attacks** (Web BF 0.1168,
+> XSS 0.0615, both at **0.0000 recall** @1% FPR, vs the CNN's 0.9194/0.9554). So "the project is
+> investing in (A) on a structurally (B) problem" is **not right as a blanket claim.** Neither family
+> dominates; they are **complementary, and which one wins is family-dependent.**
+>
+> **See "🧪 PHASE 3 RESULTS" below for the refined account** — the governing variable is not (A) vs (B)
+> but **whether the unseen class shares a behavioural modality with some known class.**
+
+## 🧪 PHASE 3 RESULTS (2026-08-02) — benign-only autoencoder. ✅ BUILT & RUN.
+
+`scripts/autoencoder_paper.py`. Dense 68→48→32→16→32→48→68, trained **and model-selected using zero
+attack labels** (benign-only train + benign-only val), scored by per-row reconstruction MSE.
+Converged cleanly (50 epochs, val_loss 0.0039, exit 0). **n=1 (seed 42) — provisional, not
+multi-seeded.** Given C2's finding that seed variance is large enough to swallow a 0.02 macro gap,
+**do not treat any small difference below as established** without repeat seeds.
+
+| channel | family | macro | Bot | Bot lift | Web BF | XSS |
+|---|---|---:|---:|---:|---:|---:|
+| CNN `cnn_paper` | A | **0.6446** | 0.0591 | 1.7× | **0.9194** | **0.9554** |
+| XGBoost | A | 0.6372 | 0.0608 | 1.8× | 0.9484 | 0.9023 |
+| MSP *(B-scoring on an A-model)* | A/B | 0.6123 | 0.0591 | 1.7× | 0.8864 | 0.8913 |
+| LTN control w0 | A | 0.6049 | 0.0528 | 1.5× | 0.8749 | 0.8869 |
+| Mahalanobis | B | 0.4585 | **0.1467** | **4.3×** | 0.6830 | 0.5457 |
+| **Autoencoder (new)** | **B** | **0.1000** | **0.1217** | **3.6×** | 0.1168 | 0.0615 |
+| IsolationForest | B | 0.0628 | 0.0571 | 1.7× | 0.0861 | 0.0451 |
+
+**Recall @1% FPR is the decisive column, and it is unusually clean:**
+
+| family | n | AE recall @1% FPR |
+|---|---:|---:|
+| Heartbleed | 11 | **1.0000** |
+| Infiltration | 36 | **0.8611** |
+| Bot | 1,956 | 0.0082 |
+| Web Attack Brute Force | 1,507 | **0.0000** |
+| Web Attack XSS | 652 | **0.0000** |
+| Web Attack Sql Injection | 21 | **0.0000** |
+
+(Heartbleed/Infiltration/SQLi are underpowered — direction is informative, magnitudes are not.)
+
+### The refined account — modality analogue, not (A) vs (B)
+
+The autoencoder catches **Heartbleed and Infiltration almost perfectly** and misses **every web
+attack entirely**. That is not a performance gradient, it is a categorical split, and it has a
+mechanical explanation:
+
+- **Web attacks are structurally normal.** They are HTTP requests to port 80. In the 68 flow
+  features they look like ordinary web browsing — what makes them malicious is *payload content*,
+  which this feature set does not contain. A benign-trained autoencoder reconstructs them perfectly,
+  so reconstruction error carries no signal. **0.0000 recall is the honest, expected result.**
+- **The CNN nonetheless scores 0.92–0.96 on them** — despite never training on them — because
+  **Web Brute Force resembles FTP-Patator and SSH-Patator, which ARE known training classes.**
+  Same behavioural modality (repeated authentication attempts). The CNN is not solving zero-day
+  detection here; it is doing **within-modality transfer** from a known class.
+- **Bot has no such analogue.** Independently established: `BeaconLike` (destination port ∉
+  well-known set) fires on **97.6% of PortScan and 0.0% of every other known attack** — i.e. no
+  known class beacons. With nothing to transfer from, every (A) method sits at 1.5–1.8×, and the
+  distance/reconstruction methods win (Mahalanobis 4.3×, AE 3.6×).
+
+**So the governing variable is not the method family. It is whether the unseen class shares a
+behavioural modality with some known class:**
+
+| | shares modality with a known class | no known-class analogue |
+|---|---|---|
+| **examples** | Web BF/XSS (≈ Patator brute-force) | Bot, Infiltration, Heartbleed |
+| **(A) supervised/closed-set** | ✅ **wins** (0.92–0.96) | ❌ chance (1.5–1.8×) |
+| **(B) distance/reconstruction** | ❌ fails (0.06–0.12) | ✅ **wins** (3.6–4.3×) |
+
+This **supersedes the blanket "(B) is the right family" claim** in the reframing above, explains
+every Phase-2 null, and is *predictive* rather than descriptive — it says which method to use when.
+
+### Why this makes the fusion wall the central problem, not a side issue
+
+The two families are **complementary, not competing** — each covers exactly what the other misses.
+A correct system routes per-flow by modality. But **the router cannot be fitted**, for precisely the
+reason documented in "THE FUSION WALL" below: any fitted combiner is calibrated on validation data
+that contains no zero-day flows, so it can never learn "trust the distance channel when this flow
+has no known-class analogue." Measured, not hypothesised: `fusion_beaconlike.py` → `[2.35, 0.02]`.
+
+**This also gives the Knowledge Graph its first genuinely well-motivated job.** "Is this flow in a
+region of embedding space with no known-class analogue?" is exactly a **clustering / density
+question answerable without labels** — and the Phase-4 pre-check already found the structure exists
+(Bot forms a ~90%-pure cluster at k≥200, stable across seeds). That is a *routing* signal, not a
+detection signal, and routing is what this architecture actually needs.
+
+**Status: promising and mechanically coherent, but n=1 and the modality account is an
+interpretation, not a measured quantity.** The concrete next test is to **measure** modality
+similarity between each zero-day family and the known classes (e.g. embedding-space distance to
+nearest known-class centroid) and check it predicts which family wins. That would convert the story
+from a plausible narrative into a falsifiable law.
 
 ## 🟡 EARLIER-PHASE AUDIT (2026-07-29) — 5 open concerns; C2 RESOLVED 2026-08-02, C1/C3/C4/C5 still open
 
@@ -752,7 +863,7 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 | Knowledge Graph | ❌ Not built | — | Rescoped as memory + explainability corroboration. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | Decision Fusion | ❌ Not built | — | Now legitimately trainable under paper-aligned split. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | Explainability / Final Alert | ❌ Not built | — | + explanation-faithfulness measurement (Tier A). Spec: [explainability.md](target/explainability.md). |
-| Anomaly pillar (autoencoder) | ❌ Not built | — | Phase 3 — benign-only reconstruction error. |
+| Anomaly pillar (autoencoder) | ✅ **Built & run 2026-08-02** | `scripts/autoencoder_paper.py` | Canonical Phase 3. Benign-only reconstruction error, zero attack labels used. macro 0.1000, **Bot 3.6× (2nd best measured)**, but **0.0000 recall on all web attacks**. Produced the modality-analogue refinement — see "PHASE 3 RESULTS". n=1, not multi-seeded. |
 | Response engine (IPS) | ❌ Not built | — | Phase R (Shaunak solo, last). Temporal-replay containment. |
 
 **Direction:** targeting top-tier publication — see [conference_roadmap.md](target/conference_roadmap.md) for plan v1.2 + the Tier-S/A/B "godly" agenda.
@@ -766,7 +877,7 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 0 | Behaviour abstraction rebuild | ✅ | Done 2026-06-18. Validated; thresholds saved. |
 | 1 | **Re-ground LTN axioms on behaviours** | ✅ Concluded (not "done" in the sense of shipping a win — see multi-seed retraction below) | Ax3–Ax6 all implemented, smoke-tested, multi-seeded. Every variant costs macro PR-AUC vs. the no-axiom control; targeted Ax6 (BeaconLike)'s apparent Bot-lift benefit did not survive multi-seeding. `ratio` omega-mode confirmed as the safe default if this line is revisited. Not pursuing further axiom variants for now. |
 | 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | **Unblocked, not blocked** — `meta_{train,val,test}.csv` now carry IP/port/timestamp aligned row-for-row. No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement. Wiring it is a choice, not a data problem. |
-| 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ⬜ **decide first** | ~1h. Tier-1 "highest leverage" in [enhancements.md](target/enhancements.md); closes the "why not an autoencoder?" objection. Nearly skipped by a phase-number collision — see the correction box at the top. |
+| 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ✅ **DONE 2026-08-02** | Ran. Closes the "why not an autoencoder?" objection with a number, and produced the modality-analogue refinement that reframes the whole architecture. Was nearly skipped by a phase-number collision. **Follow-up (not scheduled): multi-seed it (n=1 today), and measure modality similarity to test the refined account.** |
 | 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | ⬜ **next build** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). ⚠️ **Read the "Phase-4 readiness review" at the top of that spec before starting** — 3 of its original assumptions no longer hold, and there are 2 design decisions to make first. |
 | 4 | Decision Fusion — canonical Phase 5 | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | Explainability / Final Alert | ⬜ | 3 explanations + alert. Spec: [explainability.md](target/explainability.md). |
