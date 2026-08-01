@@ -185,6 +185,23 @@ calibrate each channel as a p-value against the **benign** distribution only, co
 method. Needs **no attack labels at all**, so the zero-day gap never arises; ~no training cost.
 Weaker if channels are correlated, but an independent second shot.
 
+### [OPEN 2026-08-02] 🔴 PHASE-4 BLOCKER — the CNN embedding's open-set geometry is a seed lottery
+The KG is specified to cluster `cnn_paper` embeddings. Bot cluster purity across **CNN seeds**
+42/43/44 at k=200 is **87.9% / 86.6% / 44.4% — a 43.4 pp spread**; at k=400, 82.2% / 91.1% / 62.7%.
+Varying only the *clustering* seed on a fixed embedding moves it 2.6 pp, so **clustering is stable
+and the embedding is not.** The instability is **specific to Bot** — Web BF and XSS move 0.7–2.5 pp.
+Independently confirmed: seed 44 is worst on both cluster purity and Mahalanobis Bot PR-AUC (0.0413,
+1.2× ≈ chance), while its *classification* is unremarkable (macro 0.6396 vs 0.6446/0.6353).
+**Equally good classifiers produce embeddings that do or do not isolate Bot.**
+
+Consequence: the KG would cluster *stably* on the families the CNN already handles (web attacks,
+0.92–0.95) and *unstably* on the one family where a memory/novelty mechanism would earn its place.
+**Fix (proposed, NOT implemented — a design decision, not a bug fix):** choose the representation
+before writing `kg.py` — (a) ensemble across CNN seeds / require a cluster to reproduce before
+promoting it to a node; (b) cluster raw features (no training, no lottery); (c) cluster the
+autoencoder's benign-trained 16-d bottleneck (the AE was the most *stable* Bot channel, spread 1.5×);
+(d) accept and publish the variance. Full analysis: [STATUS.md](STATUS.md) → "PHASE-4 BLOCKER".
+
 ### [OPEN] Behaviour validation tables were measured on the superseded temporal split
 `behavior.py`'s built-in validation, and the coverage table in
 [behaviour_abstraction_current.md](implementation/behaviour_abstraction_current.md), report PortScan
