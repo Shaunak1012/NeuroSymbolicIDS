@@ -15,17 +15,25 @@
    the macro (0.1000, far below the CNN). It is the **shape** of the result: the AE catches
    Heartbleed at **1.0000 recall** and Infiltration at **0.8611**, gets the 2nd-best Bot number ever
    measured (**3.6×**), and scores **exactly 0.0000 recall on every web attack.**
-3. **That categorical split produced a better thesis.** The governing variable is **not** (A) vs (B)
-   method family — it is **whether the unseen class shares a behavioural modality with a known
-   class.** Web attacks resemble the Patator brute-force classes that *are* in training, so the CNN
-   transfers (0.92–0.96); Bot/Infiltration/Heartbleed have no known-class analogue, so every
-   supervised method sits at chance and only distance/reconstruction methods work. **The two
-   families are complementary, and the system needs a per-flow router** — which is exactly what the
-   fusion wall prevents being *fitted*, and exactly the job the KG could do **without labels**.
+3. **I then proposed a "modality analogue" explanation for that split — and tested it the same day
+   with `scripts/modality_analysis.py`. It was largely FALSIFIED.** Predictions were written into
+   the script before running. The named mechanism (Web attacks transfer because they resemble
+   FTP/SSH-Patator) is wrong — their nearest known attack is **DoS Hulk**, not a Patator class. And
+   **Bot turns out to sit *closer* to benign (7.28) than the web attacks do (8.84)**, so "Bot is a
+   structural outlier the AE catches" is backwards. Worse, my "categorical split" came from reading
+   **recall@1%FPR instead of lift**: on lift the AE is comparably weak across *all* powered families
+   (Bot 3.6×, Web BF 4.4×, XSS 5.3×). **See the red box in "PHASE 3 RESULTS" below for the full
+   correction.**
+4. **What survives:** (A)/(B) complementarity as an *empirical pattern*; the AE confirmed as a
+   raw-space distance-from-benign detector (`corr = +0.732`); the AE as the best Bot channel after
+   Mahalanobis — though 3.6× vs the CNN's 1.7× is **two weak methods**, not a win. The mechanism
+   explaining any of it is **open**.
 
-**Next action:** the modality account is an interpretation, not yet a measurement. The concrete test
-is to measure each zero-day family's embedding-space distance to the nearest known-class centroid
-and check it predicts which family wins. Also outstanding: multi-seed the AE (n=1 today).
+**Next action:** the fusion/router idea rested on the falsified mechanism and should **not** be built
+on it as-is. Cheapest real steps now: **multi-seed the AE** (n=1 today, and C2 just showed seed noise
+can swallow gaps this size), and treat "why is the CNN so bad on Bot specifically" as the open
+question — the oracle result (0.0314 → 0.9764 with ~1,000 labels) says the information is present, so
+this is a transfer failure with no established explanation.
 
 **2026-07-29 session: git housekeeping + live ops dashboard (tooling, not research).** No new Phase-2 findings — this session closed out process debt and built dev tooling. Summary (full detail in [CHANGELOG.md](CHANGELOG.md)):
 - Codified session-discipline learnings into `CLAUDE.md` as non-negotiables (model-selection-per-step recommendation that must not lapse, "state phase back" onboarding step, provisional-claim discipline, retract-in-place documentation, heartbeat-monitor rule for long background jobs) — PRs #14–#17.
@@ -587,7 +595,54 @@ multi-seeded.** Given C2's finding that seed variance is large enough to swallow
 
 (Heartbleed/Infiltration/SQLi are underpowered — direction is informative, magnitudes are not.)
 
-### The refined account — modality analogue, not (A) vs (B)
+### 🔴 THE ACCOUNT BELOW WAS TESTED THE SAME DAY AND LARGELY FALSIFIED — read this box first
+
+> **Tested 2026-08-02 by `scripts/modality_analysis.py`, with all four predictions written into the
+> script before it was run. Result: the specific mechanism is wrong and the "categorical split"
+> framing over-read a threshold statistic.** Kept below unedited as the record; corrections here.
+>
+> **① The named mechanism is FALSIFIED.** I claimed Web Brute Force transfers because it resembles
+> **FTP/SSH-Patator** (shared "repeated authentication attempts" modality). It does not. In raw
+> feature space the nearest known attack to Web BF is **DoS Hulk (80%)** and to XSS **DoS Hulk (96%)**
+> — not a Patator class. DoS Hulk is an HTTP flood, so any shared modality is *"HTTP traffic to a web
+> server on port 80,"* **not** brute-force authentication. The story was plausible and wrong.
+>
+> **② "Bot is structurally anomalous, web attacks are structurally normal" is BACKWARDS.**
+> Median Mahalanobis distance from the benign manifold in raw space:
+> **Bot 7.28** · Web BF 8.86 · XSS 8.84 · BENIGN(reference) 6.10 · Infiltration 23.25 · Heartbleed 34.25.
+> **Bot sits closer to benign than the web attacks do.** So "the AE catches Bot because Bot is a
+> structural outlier" cannot be the mechanism — Bot is not an outlier.
+>
+> **③ The "categorical split" was an artifact of reading recall@1%FPR instead of lift.** On lift, the
+> AE is **comparably weak on all three powered families — Bot 3.6×, Web BF 4.4×, XSS 5.3×** — and web
+> attacks are actually *higher* than Bot. The dramatic-looking "0.0000 recall on web attacks vs Bot"
+> compares two numbers that are both effectively zero (Bot's recall was 0.0082 = 16 of 1,956 flows).
+> **There is no categorical split in the AE's behaviour across powered families.**
+> The AE's genuinely striking numbers are on **Heartbleed (103×) and Infiltration (145×)** — which are
+> exactly the underpowered families (n=11, n=36) that `metrics.py` excludes from the macro on purpose.
+>
+> **④ The one prediction that held, once measured correctly: the AE *is* a raw-space
+> distance-from-benign detector.** `corr(d_benign_raw, AE reconstruction error) = +0.732` across
+> zero-day flows. (My first pass measured this in *embedding* space and got +0.069 — a design error
+> on my part, since the AE reconstructs raw features; the geometrically matched test confirms the
+> mechanism.)
+>
+> **⑤ The strongest-looking evidence for the account was circular and is discarded.**
+> `corr(margin, CNN−AE advantage)` = **+0.933 in CNN embedding space** but **−0.388 in raw space**
+> — opposite sign. The embedding-space figure is near-tautological: `margin` there correlates
+> **+0.863** with the CNN's own attack log-odds, i.e. it largely restates the CNN's decision rather
+> than predicting it. **In the unbiased space the account is not supported.**
+>
+> **What actually survives:** the AE is a legitimately distinct channel (raw distance-from-benign),
+> it is the best Bot channel after Mahalanobis (3.6× vs 4.3×) though both are weak in absolute terms,
+> and it is excellent on structurally extreme rare classes. **Why the AE beats the CNN on Bot is not
+> "the AE is good at Bot" — it is that the CNN is unusually bad at Bot (1.7×).** Two weak methods.
+>
+> **Net:** the (A)/(B) complementarity observation stands as an empirical pattern; the *modality
+> analogue* explanation for it does **not** currently have support, and should not be written into
+> any paper draft as a mechanism. Full numbers: `outputs/metadata/modality_analysis.json`.
+
+### ~~The refined account — modality analogue, not (A) vs (B)~~ (superseded by the box above)
 
 The autoencoder catches **Heartbleed and Infiltration almost perfectly** and misses **every web
 attack entirely**. That is not a performance gradient, it is a categorical split, and it has a

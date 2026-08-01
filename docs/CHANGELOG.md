@@ -2,6 +2,43 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (modality test — falsifies the same-day Phase-3 interpretation)
+
+- **Built and ran `scripts/modality_analysis.py`** to test the "modality analogue" account proposed
+  hours earlier. **All four predictions were written into the script before it was run**, and the
+  design deliberately guarded against circularity three ways: repeat every measurement in **raw
+  feature space** (untrained by any model), report **which** known class is nearest (a named,
+  falsifiable prediction), and test **per-flow** rather than across only 6 families.
+- **🔴 The account was largely falsified — and the guards are what caught it.**
+  - **Named mechanism wrong.** Web Brute Force / XSS do **not** sit nearest FTP/SSH-Patator (the
+    claimed shared "brute-force authentication" modality). Their nearest known attack in raw space is
+    **DoS Hulk — 80% and 96% respectively.** DoS Hulk is an HTTP flood, so any shared modality is
+    "HTTP traffic on port 80", not brute force.
+  - **Direction backwards.** Median raw distance from the benign manifold: **Bot 7.28**, Web BF 8.86,
+    XSS 8.84, BENIGN 6.10, Infiltration 23.25, Heartbleed 34.25. **Bot is closer to benign than the
+    web attacks are** — so "the AE catches Bot because Bot is structurally anomalous" cannot hold.
+  - **The "categorical split" was a threshold artifact.** It came from recall@1%FPR (Bot 0.0082 vs
+    web 0.0000 — both effectively zero). On **lift**, the AE is comparably weak across all powered
+    families: **Bot 3.6×, Web BF 4.4×, XSS 5.3×** — web attacks are *higher* than Bot. The AE's
+    genuinely large numbers (Heartbleed 103×, Infiltration 145×) are on the two families
+    `metrics.py` excludes as underpowered (n=11, n=36).
+  - **The best-looking evidence was circular.** `corr(margin, CNN−AE advantage)` = **+0.933 in CNN
+    embedding space** but **−0.388 in raw space**. The embedding figure is near-tautological —
+    `margin` correlates **+0.863** with the CNN's own log-odds there, restating its decision rather
+    than predicting it. Discarded.
+- **One prediction held, after correcting my own test design.** The AE *is* a raw-space
+  distance-from-benign detector: `corr(d_benign_raw, AE error) = +0.732` on zero-day flows. My first
+  pass measured this in embedding space (+0.069) — wrong geometry, since the AE reconstructs raw
+  features. Both numbers recorded.
+- **Net effect on the thesis:** (A)/(B) complementarity survives as an *empirical pattern*; the
+  modality-analogue *explanation* for it does not, and must not go into a paper draft as a mechanism.
+  The fusion/router proposal rested on that mechanism and is accordingly no longer motivated as-is.
+  The open question is now sharper and more honest: **why is the CNN specifically so bad on Bot**,
+  given the oracle result proves the information is present in the features?
+- Corrected the Phase-3 interpretation **in place** in STATUS (red box above the original text, which
+  is preserved unedited) rather than rewriting it, per the project's retract-in-place convention.
+  Full numbers: `outputs/metadata/modality_analysis.json`.
+
 ## 2026-08-02 (Phase 3 RUN — the autoencoder result refines the thesis rather than confirming it)
 
 - **Ran `scripts/autoencoder_paper.py` (canonical Phase 3).** Converged cleanly, 50 epochs, exit 0,
