@@ -35,13 +35,14 @@ Update the **living documents** so the next session starts clean:
 |-----------|--------|
 | Preprocessing (+ IP/timestamp meta side-table) | ✅ Working |
 | Paper-aligned split | ✅ Working |
-| CNN + embeddings | ✅ Verified correct — macro zd PR-AUC **0.6446** (the number to beat) |
-| Classical baselines + novelty channels | ✅ Working (XGBoost, RF, IsoForest, MSP, Mahalanobis) |
+| CNN + embeddings | ✅ Verified correct — **n=3**, macro zd PR-AUC **0.6399** [0.6353, 0.6446] |
+| Classical baselines | ⚠️ Working but **n=1 and old metrics schema** (XGBoost, RF, IsoForest) — no per-family/macro recorded, **not citable for comparison**; re-run `baselines.py` |
+| Novelty channels (MSP, Mahalanobis) | ✅ **n=3** — MSP macro 0.5884, Mahalanobis 0.3777. ⚠️ "Mahalanobis 4.3× on Bot" is **retracted** (seed 42 only); n=3 mean is **3.0×**, seed 44 at chance |
 | Behaviour abstraction | ✅ Rebuilt & validated — **7 behaviours incl. `BeaconLike`**. ⚠️ Validation tables were measured on the *temporal* split, where PortScan/DDoS were zero-day; they are **known classes** now, so "PortScan/DDoS strongly covered" is not evidence for the current protocol |
 | LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted; `ratio` omega-mode fix confirmed stable |
-| Anomaly pillar (autoencoder) — canonical **Phase 3** | ❌ Not built — ⬜ **decision needed first** |
-| Knowledge Graph — canonical **Phase 4** | ❌ Not built — **next build** |
-| Decision Fusion — Phase 5 | ❌ Not built |
+| Anomaly pillar (autoencoder) — canonical **Phase 3** | ✅ **BUILT & RUN 2026-08-02, n=3** — `scripts/autoencoder_paper.py`. macro 0.0970, **best Bot channel measured (3.8×)**, fails on web attacks → **double dissociation** vs the CNN |
+| Knowledge Graph — canonical **Phase 4** | ❌ Not built — 🔴 **BLOCKED on a representation decision** (CNN embedding geometry is a seed lottery; see STATUS "PHASE-4 BLOCKER") |
+| Decision Fusion — Phase 5 | ❌ Not built — ⚠️ a *fitted* combiner is structurally blocked (see "THE FUSION WALL") |
 | Explainability | ❌ Not built |
 
 **Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted.
@@ -94,7 +95,12 @@ python scripts/cnn_paper.py         # 3. neural pillar → cnn_paper*.keras, emb
 python scripts/baselines.py         # 4. XGBoost / RandomForest / IsolationForest
 python scripts/novelty.py           # 5. MSP + Mahalanobis (post-hoc, no retraining)
 python scripts/ltn_paper.py         # 6. symbolic pillar (configured by LTN_* env vars)
+python scripts/autoencoder_paper.py # 7. anomaly pillar — benign-only autoencoder (Phase 3)
 ```
+
+Multi-seed anything trainable via `CNN_SEED` / `LTN_SEED` / `AE_SEED` / `NOVELTY_SEED` — each writes
+`<name>_s<seed>` artifacts and never touches the seed-42 originals. **Treat any n=1 number as
+provisional**; three findings have already been retracted as single-seed artifacts.
 
 **Legacy temporal-split pipeline** (`preprocess.py → cnn3.py → eval.py → ltn.py`) still runs but is **superseded** — it produced the 0.4529-vs-0.6689 LTN underperformance and was replaced by the protocol reset. Kept only as a secondary "hard mode" result. Don't use it for new work.
 
@@ -113,14 +119,15 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 22 scripts — see docs/scripts_reference.md
+├── scripts/                   ← 26 scripts — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
 │   │   baselines, novelty, behavior, ltn_paper,
-│   │   cnn_auxhead_paper
+│   │   cnn_auxhead_paper, autoencoder_paper
 │   ├── skyline_oracle, rescore_logits,            ← analysis / one-off
-│   │   fusion_beaconlike
+│   │   fusion_beaconlike, modality_analysis,
+│   │   kg_precheck, audit_leakage
 │   ├── cnn3, eval, ltn                            ← LEGACY (superseded)
 │   └── dashboard_server, visual, check            ← utilities
 │

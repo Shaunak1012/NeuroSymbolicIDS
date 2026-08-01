@@ -3,17 +3,22 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-07-29** (22 scripts).
+> Last verified against source: **2026-08-02** (26 scripts).
 
 ## Map
 
 | Group | Scripts |
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
-| **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` |
+| **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`audit_leakage`** |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
+
+**Multi-seed convention.** Every trainable script takes a `<PREFIX>_SEED` env var and writes
+`<name>_s<seed>` artifacts, leaving the config-default (seed 42) filenames untouched:
+`CNN_SEED` · `LTN_SEED` · `AE_SEED` · `NOVELTY_SEED`. Given three retractions caused by single-seed
+results, **treat any n=1 number as provisional.**
 
 ---
 
@@ -150,7 +155,10 @@ Produces loadable **Keras-2** models.
 `models/label_encoder_paper.pkl`, `outputs/embeddings/X_{train,val,test}_cnn_paper_emb.npy`,
 `outputs/predictions/y_prob_cnn_paper_test.npy`, `outputs/metadata/cnn_paper_history.pkl`.
 
-**Result**: macro zero-day PR-AUC **0.6446** — the number every later stage is measured against.
+**Result** (n=3, seeds 42/43/44): macro zero-day PR-AUC **0.6399** [0.6353, 0.6446] — the reference
+every later stage is measured against. ⚠️ The single figure **0.6446 is seed 42 only** and appears
+throughout older entries; quote the n=3 mean and range instead. Multi-seed with
+`CNN_SEED=43 python scripts/cnn_paper.py` (writes `cnn_paper_s43*`, never touches seed-42 artifacts).
 
 ## `scripts/baselines.py`
 
@@ -254,9 +262,76 @@ produce embeddings that directly benefit the Knowledge Graph.
 saturated, so this is a clean comparison. **The aux head does not help.** Bot lift was also not
 reproducible across two runs at the same seed (1.0× then 0.8×).
 
+## `scripts/autoencoder_paper.py`
+
+**Purpose**: **Canonical Phase 3 — the anomaly pillar.** A benign-only reconstruction-error detector,
+and the project's only (B)-family channel that is trained rather than derived.
+
+Dense (not Conv1D) autoencoder, 68→48→32→16→32→48→68, trained **and model-selected on benign rows
+only** — no attack label is used anywhere, including in early stopping, which is what makes it
+zero-day-legitimate by construction. Scored by per-row reconstruction MSE (high = anomalous).
+Scaler is fit on all of train, matching `baselines.py`'s convention so the channel is directly
+comparable to IsolationForest.
+
+**Config**: `AE_SEED` · `AE_EPOCHS` (50) · `AE_SUBSET` (0 = full) · `AE_TAG`.
+**Smoke test**: `AE_SUBSET=50000 AE_EPOCHS=3 python scripts/autoencoder_paper.py`
+**Multi-seed**: `AE_SEED=43 python scripts/autoencoder_paper.py` → `autoencoder_paper_s43*`.
+
+**Result** (n=3): macro **0.0970** [0.0894, 0.1014] — far below the CNN — but **Bot 3.8×
+[3.2–4.8], the most reliable Bot channel measured**, plus near-perfect recall on Heartbleed (1.0000)
+and Infiltration (0.8611). It fails on web attacks (0.1048 / 0.0547 vs the CNN's 0.9226 / 0.9524).
+CNN and AE seed ranges **do not overlap on any family** — a **double dissociation**. The mechanism is
+unexplained: a proposed "modality analogue" account was pre-registered, tested, and falsified.
+
 ---
 
 # Analysis / one-off
+
+## `scripts/modality_analysis.py`
+
+**Purpose**: Test the proposed "modality analogue" explanation for the CNN-vs-autoencoder double
+dissociation — *does a zero-day family's similarity to some known class predict which method wins?*
+
+All four predictions are written into the script **before** it runs, with three explicit guards
+against circularity: every measurement is repeated in **raw feature space** (untrained by any model),
+the **named** nearest known class is reported (a falsifiable prediction), and tests are **per-flow**
+rather than across only 6 families. Measures tied-covariance Mahalanobis distances to known-class
+centroids: `d_benign`, `d_attack`, and `margin = d_benign − d_attack`.
+
+**Result: the account was largely falsified, and the guards are what caught it.** The named mechanism
+was wrong (web attacks sit nearest **DoS Hulk**, not Patator); the direction was backwards (**Bot is
+closer to benign than the web attacks are**); and the strongest supporting correlation (+0.933) was
+**circular** — measured in the CNN's own embedding space, where it merely restates the CNN's
+log-odds; in raw space it is −0.388. One prediction survived: the AE **is** a raw-space
+distance-from-benign detector (`corr = +0.732`). Writes `outputs/metadata/modality_analysis.json`.
+
+## `scripts/kg_precheck.py`
+
+**Purpose**: **Phase-4 viability test — run before writing any KG code.** The KG spec treats a dense
+cluster with weak links to known attack types as its zero-day mechanism; this asks whether zero-day
+families actually form usable clusters in the representation the KG would be built on.
+
+**Part 1** varies the **CNN seed** (the embedding itself); **Part 2** varies only the **clustering**
+seed, for contrast. That distinction is the whole point — the original version varied only the
+clustering seed and reported "stable across 2 seeds", which measured k-means stability, not the
+stability of the representation.
+
+**Result: this is the current Phase-4 blocker.** Bot cluster purity across CNN seeds is
+**87.9% / 86.6% / 44.4%** at k=200 (43.4 pp spread) versus 2.6 pp when only the clustering seed
+moves. The instability is **specific to Bot** — web families move 0.7–2.5 pp — and is independently
+confirmed by Mahalanobis (seed 44 at chance) even though classification is flat across seeds.
+
+## `scripts/audit_leakage.py`
+
+**Purpose**: Measure exact-duplicate overlap between the paper split's train and test sets, per class.
+CIC-IDS2017 is duplicate-heavy, `preprocess.py` deliberately keeps duplicates, and the paper split is
+**stratified random** — so identical feature vectors can land on both sides. A documented criticism of
+this dataset (Engelen et al. 2021) that a reviewer will check.
+
+**Result**: **19,513 / 114,658 test rows (17.0%)** have an exact feature-vector twin in train —
+PortScan **58.3%**, SSH-Patator **48.6%**, DoS Hulk 25.3%, BENIGN 6.9%. **All six zero-day classes
+measure 0.0%** (test-only by construction), so the macro zero-day headline is unaffected; what is
+contaminated is the ~0.98 overall binary PR-AUC. Seed-independent — a property of the split.
 
 ## `scripts/skyline_oracle.py`
 

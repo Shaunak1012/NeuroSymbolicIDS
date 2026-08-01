@@ -35,7 +35,14 @@ python scripts/novelty.py
 
 # 6. Symbolic pillar — configurable hybrid CE + omega*SAT trainer
 python scripts/ltn_paper.py
+
+# 7. Anomaly pillar — benign-only autoencoder (Phase 3)
+python scripts/autoencoder_paper.py
 ```
+
+> **Multi-seed anything trainable** with `CNN_SEED` / `LTN_SEED` / `AE_SEED` / `NOVELTY_SEED`. Each
+> writes `<name>_s<seed>` artifacts and leaves the seed-42 originals untouched. Three findings in
+> this project have been retracted as single-seed artifacts — **treat any n=1 number as provisional.**
 
 <details>
 <summary><strong>Legacy temporal-split pipeline</strong> (superseded 2026-06-18 — kept as secondary "hard mode")</summary>
