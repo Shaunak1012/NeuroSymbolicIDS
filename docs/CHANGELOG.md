@@ -2,6 +2,27 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (post-merge audit — found and recorded a recurring process defect)
+
+- **Audited what `origin/main` actually serves rather than trusting the merge, and found real drift.**
+  Four documents still described pre-Phase-3 state. Most seriously, **`CLAUDE.md`'s component table
+  still read "Anomaly pillar: ❌ Not built — decision needed first"** after Phase 3 had been built,
+  run and multi-seeded — and `CLAUDE.md` is the file auto-loaded into every session, so it was the
+  worst possible place for it. `STATUS.md`'s table had been updated; this one was missed.
+  Also: STATUS Open Decisions still asked "run the autoencoder?" (done), Remaining Work called the KG
+  an unblocked "next build" (it is blocked), and `scripts_reference.md` documented 22 of 26 scripts.
+- **Root-caused it as a process defect and tracked it, rather than just patching the symptom.**
+  Component status is written out independently in 4+ files, and the end-of-session checklist said
+  "flip component statuses" without naming which ones — so it is satisfied by updating whichever
+  table happens to be in front of you. **The same failure has now occurred twice in two sessions**
+  (2026-07-29 caught it in the target docs; 2026-08-02 in `CLAUDE.md`).
+- **Recorded the fix as an actionable issue:** make STATUS's Component Status the single source of
+  truth and reduce the others to pointers, keep `conference_roadmap §1b` as the canonical *phase
+  numbering* table, name the exact files in the checklist, and verify with a one-line grep that
+  should hit one file rather than four. **Not implemented** — flagged to be done before Phase 4
+  starts changing statuses. Interim mitigation added to `CLAUDE.md`: the checklist now names all
+  four files explicitly and includes the verification command.
+
 ## 2026-08-02 (Phase 3 closed out — canonical results table, docs squared, branch merged)
 
 Housekeeping pass to leave the repository in a clean state before Phase 4 begins in a new session.

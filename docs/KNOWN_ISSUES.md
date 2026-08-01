@@ -202,6 +202,39 @@ promoting it to a node; (b) cluster raw features (no training, no lottery); (c) 
 autoencoder's benign-trained 16-d bottleneck (the AE was the most *stable* Bot channel, spread 1.5×);
 (d) accept and publish the variance. Full analysis: [STATUS.md](STATUS.md) → "PHASE-4 BLOCKER".
 
+### [OPEN 2026-08-02] 🔁 Component status is duplicated across 3+ files — a recurring source of drift
+**This is a process defect, and it has now caused the same error twice in two sessions.**
+
+Component/phase status is written out independently in at least four places:
+`CLAUDE.md` ("Current state" table) · `docs/STATUS.md` ("Component Status" + "Remaining Work" +
+"Open Decisions") · `docs/target/roadmap_gap_analysis.md` ("Built vs. Planned") ·
+`docs/target/target_architecture.md` ("Component Status Summary"), plus the phase table in
+`docs/target/conference_roadmap.md §1b`.
+
+**Observed failures, both the same shape — update one table, miss the parallel one:**
+1. **2026-07-29** — the reference-tier audit found `roadmap_gap_analysis` and `target_architecture`
+   still listing behaviour abstraction as "⚠️ Partial" and the LTN as plainly "✅ Built", long after
+   both had changed. That audit is what created most of this file.
+2. **2026-08-02** — after Phase 3 was built, run and multi-seeded, `STATUS.md`'s component table was
+   updated but **`CLAUDE.md`'s still said "Anomaly pillar: ❌ Not built — decision needed first."**
+   `CLAUDE.md` is auto-loaded into every session, so it was the single worst place to leave stale.
+   Caught only by an explicit post-merge audit, not by the normal workflow.
+
+**Why it recurs:** the end-of-session checklist in `CLAUDE.md` says "flip component statuses" without
+naming *which files*, so it is satisfied by updating whichever table the author is looking at.
+
+**Fix (proposed, NOT implemented — do this before Phase 4 status starts changing):**
+- Make **`docs/STATUS.md` → "Component Status" the single source of truth.** It is already the most
+  detailed and the most reliably updated.
+- Replace the tables in `CLAUDE.md`, `roadmap_gap_analysis.md` and `target_architecture.md` with a
+  one-line pointer to it. `CLAUDE.md` may keep a *minimal* "you are here" line (current phase +
+  what's blocking) since it is the onboarding file — but not a full component table that can rot.
+- Keep `conference_roadmap.md §1b` as the canonical **phase-numbering** table (a different thing from
+  component status) and cross-link the two explicitly.
+- Add a line to `CLAUDE.md`'s end-of-session checklist naming exactly which file to update.
+- Cheap verification afterwards: `grep -rn "Not built\|✅ Built\|⬜" --include=*.md .` should return
+  hits from **one** file, not four.
+
 ### [OPEN] Behaviour validation tables were measured on the superseded temporal split
 `behavior.py`'s built-in validation, and the coverage table in
 [behaviour_abstraction_current.md](implementation/behaviour_abstraction_current.md), report PortScan

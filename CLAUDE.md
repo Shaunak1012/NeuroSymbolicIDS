@@ -29,6 +29,21 @@ Update the **living documents** so the next session starts clean:
 - **CHANGELOG.md** — add a dated entry for what changed (newest first).
 - **KNOWN_ISSUES.md** — open new issues, mark fixed ones.
 
+⚠️ **Component status is currently duplicated across 4+ files, and updating one while missing another
+has caused the same drift error twice** (2026-07-29 and 2026-08-02 — the second left this very file
+claiming Phase 3 was "not built" after it had been built, run and multi-seeded). **Until that is
+fixed, changing any component's status means updating ALL of:** `docs/STATUS.md` (Component Status ·
+Remaining Work · Open Decisions) · **this file's "Current state" table** · `docs/target/roadmap_gap_analysis.md` ·
+`docs/target/target_architecture.md`. Verify with:
+
+```bash
+grep -rn "Not built\|✅ Built\|⬜" --include=*.md . | grep -v .venv
+```
+
+**The real fix — collapse these to a single source — is a tracked issue in
+[KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) with a concrete plan. Worth doing before Phase 4 starts
+changing statuses.**
+
 ## Current state (snapshot — authoritative version in STATUS.md)
 
 | Component | Status |
