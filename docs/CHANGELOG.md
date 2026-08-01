@@ -2,6 +2,44 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (train-vs-score decomposition — and "Mahalanobis 4.3×" is retracted)
+
+- **Added `NOVELTY_SEED` to `novelty.py`** and recomputed MSP + Mahalanobis from all three CNN seeds.
+  Free — both are post-hoc functions of a trained CNN, no retraining. Seed-42 outputs reproduced
+  **byte-identically**, confirming determinism and leaving the original record intact.
+- **Purpose: decompose the double dissociation.** MSP and Mahalanobis are the informative middle
+  cases — both computed from an **(A)-trained** model but using **(B)-style** scoring. If they
+  pattern with the CNN, the dissociation is driven by *what the model is trained on*; if with the
+  autoencoder, by *how the score is computed*.
+
+  | channel | train | score | macro | Bot mean [range] | lift | Web BF | XSS |
+  |---|---|---|---:|---|---:|---:|---:|
+  | CNN softmax | A | A | 0.6399 | 0.0446 [0.024, 0.059] | 1.3× | 0.9226 | 0.9524 |
+  | MSP | A | B | 0.5884 | 0.0448 [0.024, 0.059] | 1.3× | 0.8719 | 0.8485 |
+  | Mahalanobis | A | B | 0.3777 | 0.1030 [0.041, 0.147] | 3.0× | 0.5840 | 0.4462 |
+  | Autoencoder | B | B | 0.0970 | 0.1314 [0.108, 0.165] | 3.8× | 0.1048 | 0.0547 |
+
+- **Changing the scoring function alone buys nothing.** MSP lands at Bot 0.0448 vs the CNN's 0.0446 —
+  indistinguishable. So the Bot failure is *not* "the signal is there but argmax discards it."
+- **The dissociation is a monotonic frontier, not a binary split.** Moving A/A → A/B → A/B → B/B, Bot
+  rises (0.045 → 0.045 → 0.103 → 0.131) while Web BF and XSS fall monotonically. No channel is at
+  both ends. Position on the frontier is governed mainly by **what the model trains on**.
+- **🔴 RETRACTED: "Mahalanobis gets 4.3× on Bot, the best Bot channel."** Seed 42 = 0.1467 (4.3×),
+  seed 43 = 0.1210 (3.5×), **seed 44 = 0.0413 (1.2×, essentially chance)**. Mean **3.0×**, best-to-worst
+  spread **3.6×**. The 4.3× figure was the best of three seeds and has been load-bearing — quoted in
+  the thesis reframing, README, CLAUDE.md and KNOWN_ISSUES as the headline evidence that (B) methods
+  work on Bot. **Third single-seed overclaim in this project** (after Ax6 and C2). Corrected at every
+  forward-looking citation; dated historical entries left intact per retract-in-place.
+- **The autoencoder is the better and far more stable (B) channel:** 3.8× [3.2–4.8], spread 1.5×,
+  versus Mahalanobis 3.0× [1.2–4.3], spread 3.6×. (Ranges overlap, so "AE > Mahalanobis" is not
+  established — but "AE is more reliable" is.)
+- **⚠️ New Phase-4 warning: the CNN's classification is seed-stable while its embedding's open-set
+  geometry is not.** Across the same three seeds CNN macro moves 0.009 (0.6353–0.6446) while
+  Mahalanobis-on-its-embedding swings **3.6×** on Bot. The KG is specified to cluster these
+  embeddings, and the Phase-4 pre-check's "Bot forms a ~90%-pure cluster, stable across 2 seeds"
+  measured **clustering stability on a fixed seed-42 embedding**, *not* stability of the embedding
+  across CNN seeds. Different claims — **re-run that pre-check across CNN seeds before building on it.**
+
 ## 2026-08-02 (AE multi-seeded — the (A)/(B) complementarity is established as a double dissociation)
 
 - **Ran autoencoder seeds 43 and 44** (`AE_SEED`, seed-42 artifacts untouched, both exit 0).

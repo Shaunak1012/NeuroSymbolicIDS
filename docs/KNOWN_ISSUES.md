@@ -165,7 +165,10 @@ leak — the 6 real zero-day families are never touched.
 
 **Revised proposal (NOT implemented):** apply LOCO to **modality-general** channels, not
 class-specific axioms. Mahalanobis/MSP respond to *any* structurally novel class, so all 8 folds
-exercise them — and Mahalanobis already has the best measured Bot lift (4.3×). Size-match the folds to
+exercise them. (⚠️ The "Mahalanobis has the best Bot lift, 4.3×" premise originally written here is
+**retracted** — that was seed 42, best of 3; n=3 mean is 3.0×, range 1.2–4.3×, and the autoencoder is
+both higher at 3.8× and far more stable. The argument for using a *modality-general* channel rather
+than a class-specific axiom still stands.) Size-match the folds to
 the zero-day regime by holding out the **rare** known classes (Slowhttptest 550, slowloris 580,
 SSH-Patator 589), not the large distinctive ones.
 - **Free probe, no training:** fit the Mahalanobis class-conditional Gaussians on 8 of 9 known classes

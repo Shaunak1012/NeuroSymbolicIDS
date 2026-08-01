@@ -59,7 +59,10 @@ domain knowledge, not fitted to this dataset.**
 | port-magnitude ramp — **dropped** | 0.400 | 0.034 | ~1.0× (anti-correlated) |
 | **well-known-port membership — kept** | **0.887** | **0.135** | **~4.0×** |
 
-Comparable to Mahalanobis's 4.3× on Bot — a real, non-tautological signal *standalone*.
+Comparable to Mahalanobis's Bot lift — a real, non-tautological signal *standalone*.
+(⚠️ That comparison was originally written against "Mahalanobis 4.3×", which is **retracted** — that
+was seed 42, best of 3; the n=3 mean is **3.0×**, range 1.2–4.3×. BeaconLike's standalone ~4.0× is
+therefore *at or above* Mahalanobis's average, which does not change the conclusion below.)
 
 > 🔴 **But it does not help the trained model.** Wired into `ltn_paper.py` as **Ax6**, it was
 > initially reported to "roughly double Bot lift" — **that claim is RETRACTED.** Across 3 seeds the

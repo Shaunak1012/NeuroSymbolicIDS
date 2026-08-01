@@ -175,8 +175,11 @@ only — **no TensorFlow**, so these run even when TF is unavailable.
 
 - **MSP** — `1 − max softmax` (Hendrycks & Gimpel 2017 baseline) → macro 0.6123
 - **Mahalanobis** — min distance to per-class Gaussians in the 64-dim embedding space, shared
-  covariance → macro 0.4585, but **Bot PR-AUC 0.1467 (4.3× chance)** — the single best Bot channel
-  measured, and the only one that is a *distance* method rather than a closed-set classifier.
+  covariance. ⚠️ **n=3 corrected: macro 0.3777, Bot 0.1030 (3.0× chance, range 1.2–4.3×).** The
+  widely-quoted "Bot 0.1467 / 4.3×" was **seed 42 only, the best of three** — retracted 2026-08-02.
+  It is *not* the best Bot channel; the autoencoder is both higher (3.8×) and far more stable
+  (spread 1.5× vs Mahalanobis's 3.6×). Still notable as a *distance* method on an attack-trained
+  representation. **Multi-seed support: `NOVELTY_SEED=43 python scripts/novelty.py`.**
 
 Run after `cnn_paper.py`.
 
