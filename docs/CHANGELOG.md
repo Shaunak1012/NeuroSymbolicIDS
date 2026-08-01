@@ -2,6 +2,48 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-07-29 (thesis reframing — the Phase-2 nulls share one structural cause)
+
+> **Reinterpretation of existing measurements. No new runs. Phase 3 has NOT started** — verified: no
+> autoencoder script, no AE model, no AE entry in `runs.jsonl`. Everything this session was
+> pre-Phase-3 (documentation, readiness analysis, retrospective audit).
+
+- **Refuted the LOCO fusion fix proposed earlier the same day — before spending any compute on it.**
+  Measured how `BeaconLike` actually fires per class: **PortScan 97.6%, every other known attack
+  0.0%, BENIGN 22.7%** (each non-PortScan known attack targets a well-known port, so the signal is
+  silent on them). A leave-one-class-out rotation is therefore **predictably null**: 7 of 8 folds
+  teach the combiner the channel is worthless, and the 1 PortScan fold teaches it the channel is
+  valuable *for the wrong reason* (port scanning, not C2 beaconing on 8080). The specifically
+  recommended "cheap probe: hold out PortScan first" was **the worst available choice** — the one
+  fold guaranteed to produce a false positive and validate an approach that would then fail.
+- **The refutation is a better result than the fix would have been:** you cannot manufacture a
+  synthetic zero-day that exercises BeaconLike in a Bot-like way, because **no known class in
+  CIC-IDS2017 beacons.** LOCO is not broken — the known-class pool does not span the behavioural
+  modalities of the unknown classes, so the fusion failure is not repairable by protocol alone.
+- **Reframed the Phase-2 nulls as one structural fact rather than five failures.** Prompted by the
+  question "if val contains no zero-day by construction, is the training premise flawed?" The
+  protocol is **sound** — absence of zero-day from train/val is the *definition* of the problem, and
+  putting Bot in validation would make the metric meaningless. What is flawed is the buried
+  assumption that **a mechanism fitted on data can transfer to classes absent from that data**. That
+  assumption underlies the LTN axioms, the aux head, the fitted fusion, *and* the KG's planned
+  `s_kg` path — which is why all four fail identically.
+- **Named the split that follows: (A) learn-what-attacks-look-like** (needs attack examples, cannot
+  reach novel classes) **vs (B) learn-what-normal-looks-like** (needs only benign, reaches novel
+  classes by construction). The project invested in (A) on a structurally (B) problem. **The existing
+  Bot evidence already said so:** Mahalanobis **4.3×**, IsolationForest **1.7× while never seeing a
+  single attack**, versus the CNN's 1.7× and every LTN variant's noisy 1–2×. The IsolationForest
+  observation has been in STATUS since 2026-07-27; its significance was not drawn out until now.
+  The oracle result (0.0314 → **0.9764** with ~1,000 labels) confirms this is a *transfer* limit of
+  closed-set methods, not an information-theoretic one.
+- **Consequence: the Phase-3 autoencoder is promoted from reviewer-objection checkbox to the
+  load-bearing next experiment.** It is a pure (B) method, ~1h, and the direct falsification test of
+  the reframing — if a benign-only AE also lands at chance on Bot, the (A)/(B) account is wrong and
+  the reframing must be retracted in place. LOCO/fusion-repair work is deprioritized accordingly.
+- **Proposed thesis statement (not yet adopted):** *"Closed-set supervised learning cannot transfer to
+  novel classes regardless of where symbolic knowledge is injected — loss-, representation- and
+  inference-level all fail for one shared structural reason. Open-set/distance methods reach the same
+  families without labels."* Consistent with conference_roadmap Tier-S #1; sharpens it, not replaces it.
+
 ## 2026-07-29 (earlier-phase audit — 5 open concerns + a proposed fix for the fusion wall)
 
 > **Findings only. No fixes implemented — all await go-ahead.** Full detail in

@@ -112,16 +112,47 @@ the same way and should be expected to hit the same wall.
 `decision_fusion.md`'s own prescribed remedy ("train the fuser on a val split that includes zero-day
 examples") is **impossible here** and is struck through in that document.
 
-**Fix (proposed, NOT implemented) — Leave-One-Class-Out (LOCO):** manufacture synthetic zero-day from
-*known* classes. Hide one known attack class (e.g. PortScan) from CNN training entirely, retrain, and
-that class becomes a genuine novel class in validation. Fit the combiner on that; rotate over the 8
-known attack classes. Gives the combiner the missing regime — *"CNN is confused because this class is
-novel, and here is what the symbolic channel said"* — which is **transferable**, unlike a
-class-specific fact. **Does not leak**: the 6 real zero-day families are never touched. This is the
-standard open-set-recognition remedy and upgrades the finding from a dead end into a contribution.
-- Cheap probe: hold out PortScan only, **1 retrain**. If the BeaconLike coefficient moves off 0.02,
-  the approach is alive and the full rotation is justified.
+**Proposed fix — Leave-One-Class-Out (LOCO):** manufacture synthetic zero-day from *known* classes.
+Hide one known attack class from CNN training entirely, retrain, and that class becomes a genuine
+novel class in validation. Fit the combiner on that; rotate over the 8 known attack classes. Does not
+leak — the 6 real zero-day families are never touched.
+
+> 🔴 **REFUTED for `BeaconLike` (2026-07-29), before any compute was spent.** Measured how BeaconLike
+> actually fires per class:
+>
+> | Known class | BeaconLike fires |
+> |---|---:|
+> | **PortScan** | **97.6%** |
+> | DoS Hulk · DDoS · GoldenEye · FTP-Patator · SSH-Patator · slowloris · Slowhttptest | **0.0%** |
+> | BENIGN | 22.7% |
+>
+> Every known attack except PortScan targets a well-known port (80/21/22), so BeaconLike is silent on
+> them. **The rotation is therefore predictably null:** 7 of 8 folds hold out a class where the signal
+> fires 0% → the combiner learns it is worthless; the 1 PortScan fold shows 97.6% → learns it is
+> valuable **for the wrong reason** (port *scanning*, not C2 *beaconing* on 8080). Pooled, this
+> reproduces `[2.35, ~0]`.
+>
+> **The originally-recommended "cheap probe: hold out PortScan first" was the worst possible choice**
+> — the single fold guaranteed to yield a false positive.
+>
+> **The deeper result, which is more publishable than the fix would have been:** you cannot
+> manufacture a synthetic zero-day that exercises BeaconLike in a Bot-like way, because **no known
+> class in CIC-IDS2017 beacons.** LOCO is not broken — the known-class pool does not span the
+> behavioural modalities of the unknown classes. So the fusion failure is not fixable by protocol alone.
+
+**Revised proposal (NOT implemented):** apply LOCO to **modality-general** channels, not
+class-specific axioms. Mahalanobis/MSP respond to *any* structurally novel class, so all 8 folds
+exercise them — and Mahalanobis already has the best measured Bot lift (4.3×). Size-match the folds to
+the zero-day regime by holding out the **rare** known classes (Slowhttptest 550, slowloris 580,
+SSH-Patator 589), not the large distinctive ones.
+- **Free probe, no training:** fit the Mahalanobis class-conditional Gaussians on 8 of 9 known classes
+  instead of 9; class *k* becomes novel to the distance model without retraining the CNN. Optimistic
+  (the embedding still saw class *k*) but it establishes whether the regime is learnable at all.
 - Full version: 8 retrains.
+
+⚠️ **Priority note:** per the thesis reframing in [STATUS.md](STATUS.md), all LOCO work is an attempt
+to repair an **(A)-family** method (learn-what-attacks-look-like). The evidence favours **(B)-family**
+methods (learn-what-normal-looks-like). **Run the Phase-3 autoencoder first.**
 
 **Complementary alternative (proposed, NOT implemented) — conformal / benign-only calibration:**
 calibrate each channel as a p-value against the **benign** distribution only, combine via Fisher's

@@ -428,6 +428,96 @@ motivated as a Bot fix, and B2 no longer provides positive evidence either way.
 **Compute:** **CPU** (Ryzen 9 9950X3D). GPU (RTX 5080 / Blackwell) deferred. For long runs use
 `python -u` so progress is live and completion is caught reliably (last run's notification was missed).
 
+## 🧭 THESIS REFRAMING (2026-07-29) — the Phase-2 nulls share one structural cause
+
+> **This is a reinterpretation of existing measurements, not a new experiment.** No new runs were
+> made. Every number cited below was already in this document; what is new is the account of *why*
+> they all point the same way. Recorded as analysis — the discriminating experiment (Phase 3) has
+> **not** been run.
+
+**The question that prompted it:** if validation contains no zero-day flows by construction, is the
+whole training premise flawed — the model can never know what a zero-day looks like?
+
+**Answer: the protocol is sound; the *method family* is misallocated.**
+
+### What is NOT flawed
+
+The absence of zero-day from train/val **is the definition of the problem**, not a defect in it. Put
+Bot in validation and it is no longer zero-day — it is a held-out known class, and the resulting
+number is meaningless. Every open-set recognition protocol has this property. The CNN's chance-level
+Bot recall is *correct and intended* — the honest baseline. **Do not "fix" this by changing the split.**
+
+### What IS flawed — and it is one thing, not five
+
+The buried assumption is that **a mechanism which must be *fitted on data* can transfer to classes
+absent from that data.** It cannot. That assumption underlies every Phase-2 intervention:
+
+| Intervention | Result | Fitted on data lacking zero-day? |
+|---|---|---|
+| LTN axioms, loss-level (Ax3–Ax6) | costs macro, all variants, n=3 | yes |
+| Aux behaviour head, representation-level | 0.5744 vs 0.6446 | yes |
+| Logistic fusion, inference-level | `[2.35, 0.02]`, no change | yes |
+| *(proposed)* KG `s_kg` → Decision Fusion | not built | yes — **same wall** |
+
+**These were not five independent tuning failures. They are one structural fact encountered five
+times.** That is the Phase-2 finding, now derived rather than merely observed.
+
+### The distinction that rescues the project
+
+- **(A) Learn what attacks look like, then match.** Requires attack examples. *Cannot* reach a novel
+  class, by construction. → CNN, LTN axioms, aux head, fitted fusion.
+- **(B) Learn what *normal* looks like, flag deviation.** Requires only benign/known data. Reaches
+  novel classes *by construction*. → Mahalanobis, MSP, IsolationForest, **autoencoder**.
+
+**The project has been investing in (A) on a problem that is structurally (B). The existing evidence
+already says so** — on Bot, the family that matters:
+
+| Method | Family | Bot lift |
+|---|---|---:|
+| **Mahalanobis** (distance from known-class Gaussians) | **B** | **4.3×** |
+| XGBoost | A | 1.8× |
+| CNN (`cnn_paper`) | A | 1.7× |
+| **IsolationForest** — *never sees a single attack* | **B** | 1.7× |
+| every LTN axiom variant | A | ~1–2×, seed-noisy |
+
+The best Bot channel measured is a (B) method. IsolationForest — unsupervised, macro 0.063, dreadful
+overall — **ties the CNN on Bot despite 884K labelled training flows.** That observation has been in
+this document since 2026-07-27 under "supervision buys nothing on the family that matters"; its
+significance was not drawn out until now.
+
+### Why this does not mean Bot is undetectable
+
+The skyline oracle settles it: revealing ~1,000 labelled Bot flows lifts Bot PR-AUC **0.0314 →
+0.9764**. The information is fully present in the 68 features. This was never an information-theoretic
+limit — it is a **transfer** limit specific to fitted, closed-set methods. (B) methods do not have it.
+
+### Consequences
+
+1. **🔴 The Phase-3 autoencoder is promoted from "answer a reviewer objection" to a load-bearing
+   experiment.** It is a pure (B) method — the one family with demonstrated traction on Bot — costs
+   ~1h, and was nearly deleted by a phase-number collision. It is now the **discriminating test of
+   the reframed thesis**, and should very likely run before the KG.
+2. **The KG's value proposition needs re-examination in this light.** As specified it feeds a fitted
+   fusion stage (an (A)-shaped consumer). Its *clustering/distance* aspect is (B)-shaped and may be
+   the part worth keeping — consistent with the Phase-4 readiness review below.
+3. **LOCO / fusion-repair work drops down the priority list** — it is an attempt to repair (A). See
+   the refutation in [KNOWN_ISSUES.md](KNOWN_ISSUES.md): BeaconLike fires on **97.6% of PortScan and
+   0.0% of every other known attack**, so a leave-one-class-out rotation is predictably null for it.
+
+### Proposed thesis statement (not yet adopted — for discussion)
+
+> *Closed-set supervised learning cannot transfer to novel classes regardless of where symbolic
+> knowledge is injected — loss-level, representation-level and inference-level all fail, for one
+> shared structural reason. Open-set/distance methods reach the same families without labels. We show
+> when, why, and by how much.*
+
+This is consistent with [conference_roadmap.md](target/conference_roadmap.md) Tier-S #1
+("failure-anatomy study as science") — it sharpens that plan rather than replacing it.
+
+**⚠️ Status of this reframing: argued from existing evidence, NOT yet tested.** The autoencoder is
+the experiment that could falsify it — if a benign-only AE also lands at chance on Bot, the (A)/(B)
+split is not the right account and this section should be retracted in place.
+
 ## 🔴 EARLIER-PHASE AUDIT (2026-07-29) — 5 open concerns, FIXES NOT YET IMPLEMENTED
 
 > **Status: findings recorded, awaiting go-ahead. Nothing here has been actioned.**
