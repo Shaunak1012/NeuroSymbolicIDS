@@ -195,6 +195,21 @@ consumer that does not filter it** — including, prospectively, the KG.
 
 ## Medium
 
+### [OPEN 2026-08-01] `ps aux` liveness checks are flaky on Windows Git-Bash — false "process died" reads
+While heartbeat-monitoring the C2 seed sweep (`cnn_paper.py` background training), a `ps aux | grep -c
+"[c]nn_paper.py"` liveness check reported `proc_alive=0` and the monitor declared the process dead at
+epoch 2 — no traceback, no error, log simply stopped growing for one poll tick. Checked immediately
+after: the process was still running (`ps -ef` showed it, PID matched the launch), and the log resumed
+growing within 15 seconds, training completed epochs 3, 4, 5 normally. **The process never died — the
+`ps` enumeration missed it for a single poll under MSYS2/Git-Bash's WINPID-mapped process listing**,
+plausibly during a Windows I/O syscall (checkpoint save) that briefly makes the process invisible to
+that particular `ps` invocation.
+**Fix (applied):** treat **log-growth staleness** (no new bytes for N consecutive polls) as the
+authoritative dead/hung signal, not a single `ps` miss. `ps` output can still be logged as an advisory
+data point but must not trigger an early exit on its own. Require sustained staleness (this session
+used 12 ticks × 90s = 18 min) before declaring failure, matching how genuinely stuck runs actually
+behave (they stop writing to the log, they don't intermittently vanish from `ps`).
+
 ### [OPEN] PowerShell `*>>` batch logs are mixed-encoding
 When a PowerShell script redirects a Python subprocess's output with `*>> $log`, the resulting file
 mixes **UTF-8** (Python's own stdout, passed through) with **UTF-16LE** (PowerShell's `Add-Content`
