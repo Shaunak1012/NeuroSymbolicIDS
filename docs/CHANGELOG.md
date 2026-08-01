@@ -2,6 +2,32 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-02 (AE multi-seeded — the (A)/(B) complementarity is established as a double dissociation)
+
+- **Ran autoencoder seeds 43 and 44** (`AE_SEED`, seed-42 artifacts untouched, both exit 0).
+  AE n=3: macro mean **0.0970** [0.0894, 0.1014] · Bot mean **0.1314** [0.1078, 0.1647].
+- **🎯 CNN vs AE ranges do not overlap on ANY family at n=3 each** — the first cleanly-established
+  multi-seeded comparative result in this project. (Contrast C2, where CNN-vs-LTN-control *did*
+  overlap and therefore established nothing.)
+
+  | family | CNN (A) mean [range] | AE (B) mean [range] | winner | ratio |
+  |---|---|---|---|---|
+  | Bot | 0.0446 [0.0241, 0.0591] | **0.1314** [0.1078, 0.1647] | **AE** | **2.9×** |
+  | Web BF | **0.9226** [0.9194, 0.9288] | 0.1048 [0.0928, 0.1168] | **CNN** | **8.8×** |
+  | XSS | **0.9524** [0.9485, 0.9554] | 0.0547 [0.0468, 0.0615] | **CNN** | **17.4×** |
+  | macro | **0.6399** | 0.0970 | **CNN** | 6.6× |
+
+- **This is a double dissociation, which is a stronger claim than "method X is better."** Each method
+  wins decisively where the other fails, with non-touching seed ranges — ruling out noise, "the AE is
+  just weaker" (it beats the CNN 2.9× on Bot), and "the CNN is just better" (it loses on Bot while
+  winning 8.8–17.4× on web attacks). **The complementarity that the falsified modality account was
+  invented to explain is itself real** — the pattern survived; only the explanation died.
+- **Honest scope:** both methods remain weak in absolute terms on Bot (0.13 vs 0.045, chance 0.034),
+  so "AE wins on Bot" means 3.8× chance vs 1.3× chance — a robust relative difference, not a solved
+  problem. And the mechanism is now **openly unknown**, which is where it should stay until measured.
+- Also notable and unexplained: on the underpowered families the AE reaches **121.8×** (Infiltration)
+  and **125.3×** (Heartbleed) mean lift, versus the CNN's 1.4× and 0.5×. Direction only (n=36, n=11).
+
 ## 2026-08-02 (modality test — falsifies the same-day Phase-3 interpretation)
 
 - **Built and ran `scripts/modality_analysis.py`** to test the "modality analogue" account proposed

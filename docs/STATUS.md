@@ -24,16 +24,20 @@
    **recall@1%FPR instead of lift**: on lift the AE is comparably weak across *all* powered families
    (Bot 3.6×, Web BF 4.4×, XSS 5.3×). **See the red box in "PHASE 3 RESULTS" below for the full
    correction.**
-4. **What survives:** (A)/(B) complementarity as an *empirical pattern*; the AE confirmed as a
-   raw-space distance-from-benign detector (`corr = +0.732`); the AE as the best Bot channel after
-   Mahalanobis — though 3.6× vs the CNN's 1.7× is **two weak methods**, not a win. The mechanism
-   explaining any of it is **open**.
+4. **Then multi-seeded the AE (n=3) — and the complementarity came back ESTABLISHED.** CNN vs AE
+   ranges **do not overlap on any family**: AE wins Bot **2.9×** (0.1314 vs 0.0446), CNN wins
+   Web BF **8.8×** and XSS **17.4×**. That is a **double dissociation** — the first cleanly
+   multi-seeded comparative result in the project, and a stronger claim than "one method is better."
+   **The pattern is real; only the explanation was wrong.**
 
-**Next action:** the fusion/router idea rested on the falsified mechanism and should **not** be built
-on it as-is. Cheapest real steps now: **multi-seed the AE** (n=1 today, and C2 just showed seed noise
-can swallow gaps this size), and treat "why is the CNN so bad on Bot specifically" as the open
-question — the oracle result (0.0314 → 0.9764 with ~1,000 labels) says the information is present, so
-this is a transfer failure with no established explanation.
+**Where this leaves the project:** a robust, reproducible functional specialisation between (A) and
+(B) methods, with **no established mechanism** — the modality account was falsified, and the
+per-flow "router" idea rested on it, so that is no longer motivated as-is. Open questions, in order
+of value: **(a) why is the CNN specifically so bad on Bot** (the oracle result — 0.0314 → 0.9764
+with ~1,000 labels — proves the information *is* in the features, so this is a transfer failure with
+no explanation); **(b)** whether the double dissociation can be exploited at all given the fusion
+wall; **(c)** whether Mahalanobis (n=1, Bot 0.1467) behaves like the AE under multi-seeding, which
+would strengthen "(B)-family" from two data points to a genuine family claim.
 
 **2026-07-29 session: git housekeeping + live ops dashboard (tooling, not research).** No new Phase-2 findings — this session closed out process debt and built dev tooling. Summary (full detail in [CHANGELOG.md](CHANGELOG.md)):
 - Codified session-discipline learnings into `CLAUDE.md` as non-negotiables (model-selection-per-step recommendation that must not lapse, "state phase back" onboarding step, provisional-claim discipline, retract-in-place documentation, heartbeat-monitor rule for long background jobs) — PRs #14–#17.
@@ -595,7 +599,42 @@ multi-seeded.** Given C2's finding that seed variance is large enough to swallow
 
 (Heartbleed/Infiltration/SQLi are underpowered — direction is informative, magnitudes are not.)
 
-### 🔴 THE ACCOUNT BELOW WAS TESTED THE SAME DAY AND LARGELY FALSIFIED — read this box first
+### ✅ AE MULTI-SEEDED (n=3, 2026-08-02) — the complementarity is now ESTABLISHED as a double dissociation
+
+> Ran AE seeds 43 and 44 (`AE_SEED=43/44`, seed-42 artifacts untouched). **This is the first
+> cleanly-established, multi-seeded comparative result in the project** — every prior head-to-head was
+> either single-seed or had overlapping ranges (cf. C2, where CNN-vs-LTN-control *did* overlap and so
+> established nothing).
+
+**CNN (A) vs Autoencoder (B), n=3 each, per family — ranges do NOT overlap on any of them:**
+
+| family | CNN (A) mean [range] | AE (B) mean [range] | winner | ratio |
+|---|---|---|---|---|
+| **Bot** | 0.0446 [0.0241, 0.0591] · 1.3× | **0.1314** [0.1078, 0.1647] · 3.8× | **AE (B)** | **2.9×** |
+| Web Attack Brute Force | **0.9226** [0.9194, 0.9288] · 34.7× | 0.1048 [0.0928, 0.1168] · 3.9× | **CNN (A)** | **8.8×** |
+| Web Attack XSS | **0.9524** [0.9485, 0.9554] · 81.4× | 0.0547 [0.0468, 0.0615] · 4.7× | **CNN (A)** | **17.4×** |
+| macro | **0.6399** [0.6353, 0.6446] | 0.0970 [0.0894, 0.1014] | **CNN (A)** | 6.6× |
+
+AE underpowered families (n=11/36 — direction only): Infiltration **121.8× mean lift**,
+Heartbleed **125.3× mean lift**, both far above anything the CNN achieves on them (1.4×, 0.5×).
+
+**This is a double dissociation, and that is a stronger claim than "one method is better."** Each
+method wins *decisively* on families where the other fails, with seed ranges that do not touch. It
+rules out the boring explanations — not noise (n=3, no overlap), not "the AE is simply weaker"
+(it beats the CNN 2.9× on Bot), not "the CNN is simply better" (it loses 2.9× on Bot while winning
+8.8–17.4× on web attacks). **The (A)/(B) complementarity is real.**
+
+**What remains unexplained is WHY** — the modality-analogue mechanism proposed for it was tested and
+falsified the same day (red box immediately below). So the current honest position is: *a robust,
+reproducible functional specialisation with no established mechanism.* That is a legitimate and
+publishable state, and notably it is **exactly the kind of result the fusion wall makes hard to
+exploit** — the two channels provably cover different families, but no fitted combiner can learn to
+route between them (`fusion_beaconlike.py` → `[2.35, 0.02]`).
+
+⚠️ Both methods remain **weak in absolute terms on Bot** (0.13 and 0.045, chance 0.034). "AE wins on
+Bot" means 3.8× chance vs 1.3× chance — a robust *relative* difference, not a solved problem.
+
+### 🔴 THE MECHANISM PROPOSED FOR THE ABOVE WAS TESTED AND LARGELY FALSIFIED — read this box too
 
 > **Tested 2026-08-02 by `scripts/modality_analysis.py`, with all four predictions written into the
 > script before it was run. Result: the specific mechanism is wrong and the "categorical split"
