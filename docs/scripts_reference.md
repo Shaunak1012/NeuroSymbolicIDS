@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-03** (29 scripts).
+> Last verified against source: **2026-08-03** (30 scripts).
 
 ## Map
 
@@ -11,7 +11,8 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** |
+| **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
 
@@ -338,6 +339,50 @@ confirmed by Mahalanobis (seed 44 at chance) even though classification is flat 
 
 ⚠️ **Read alongside `bot_failure_analysis.py`**, which explains *why* this instability exists: the
 CNN's Bot ranking is noise (cross-seed ρ = −0.090), so clustering it is clustering noise.
+
+## `scripts/kg_readiness.py`
+
+**Purpose**: the two measurements that **gate Phase 4**. Run after `kg_precheck.py`, before writing
+any KG code. Four predictions pre-registered in the script.
+
+**Part A — which representation should the KG cluster?**
+
+| representation | Bot purity across seeds (k=200) | spread |
+|---|---|---:|
+| CNN embedding 64-d | 87.9 / 86.6 / 44.4 % | 43.4 pp |
+| AE bottleneck 16-d | 82.0 / 74.1 / 29.9 % | **52.1 pp** |
+| **Raw features 68-d** | **77.6 %** (80.6 % at k=400) | **no training lottery** |
+
+✅ **Raw features win.** 🔴 **The AE bottleneck was the standing recommendation and was rejected by
+this measurement** — its reproducible Bot *ranking* (ρ=0.827) did not transfer to cluster stability.
+**Rank stability ≠ cluster stability.**
+
+**Part B — does "unexplained cluster" discriminate anything?** 🚨 **No.** Lift over the base rate is
+**≤ 1.00× across 3 representations × 3 thresholds** — at or below chance, i.e. anti-correlated.
+118 of 200 clusters contain zero known-attack training flows, so the criterion flags ~59,000 of
+~59,400 benign+zero-day test flows. **The KG's specified zero-day mechanism does not work**, which
+resolves the spec's scope contradiction empirically: corroboration + explainability, not primary
+detection. The spec's other two criteria (growth rate, behaviour co-occurrence) remain **untested**.
+
+Part B deliberately uses **train labels only** for the criterion and test labels only for scoring —
+an honest simulation of the real mechanism, unlike Part A's oracle-style purity upper bound.
+
+**Writes** `outputs/metadata/kg_readiness.json`, and caches
+`outputs/embeddings/X_{train,test}_ae_bottleneck{,_s43,_s44}.npy`.
+
+## `scripts/repair_runs_log.py`
+
+**Purpose**: one-shot, auditable repair of `runs.jsonl`. **Dry-run by default**; `--apply` to write.
+
+Fixes wrong seeds (re-derived from each tag's `_s<N>` suffix), removes **exact** duplicates, and
+stamps every row with a schema version. Safe to run now — and deliberately *not* run before
+2026-08-03 — because `runs.jsonl` is version-controlled, so git supplies the audit trail the
+append-only rule was protecting.
+
+⚠️ **Only exact duplicates are removed** (identical name, params *and* every metric). Eight
+duplicated names are preserved because their content genuinely differs — six old/new metric-schema
+pairs plus `ltn_repro` and `ltn_v2`, which are distinct training runs with identical configs. The
+script asserts no run name disappears and refuses to write if one would.
 
 ## `scripts/significance.py`
 

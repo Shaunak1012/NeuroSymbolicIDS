@@ -287,6 +287,23 @@ calibrate each channel as a p-value against the **benign** distribution only, co
 method. Needs **no attack labels at all**, so the zero-day gap never arises; ~no training cost.
 Weaker if channels are correlated, but an independent second shot.
 
+### [RESOLVED 2026-08-03] 🔴 → ✅ PHASE-4 BLOCKER — resolved by measuring alternatives, not by fixing the CNN
+The blocker below stands as measured. It is resolved by **not clustering a learned representation
+at all**: `kg_readiness.py` measured cluster purity for all candidate representations and
+**raw features win** — Bot purity 77.6 % (k=200) / 80.6 % (k=400), competitive with the CNN's good
+seeds, far above its worst (44.4 %), with **no training-seed lottery** (residual k-means seed
+sensitivity ~2.6 pp).
+
+🔴 **The AE bottleneck — which STATUS recommended earlier the same day — was measured and REJECTED**:
+Bot-purity spread **52.1 pp**, the *worst* of all options. The recommendation had reasoned from the
+AE's reproducible Bot *ranking* (ρ=0.827). **Rank stability ≠ cluster stability.**
+
+⚠️ **A larger finding came out of the same run: the KG's specified detection mechanism does not
+work at all** — "unexplained cluster" scores lift ≤ 1.00× (at or below chance) across every
+representation and threshold. See [STATUS.md](STATUS.md) → "PHASE-4 READINESS MEASURED".
+
+**Original blocker, kept for the record:**
+
 ### [OPEN 2026-08-02] 🔴 PHASE-4 BLOCKER — the CNN embedding's open-set geometry is a seed lottery
 The KG is specified to cluster `cnn_paper` embeddings. Bot cluster purity across **CNN seeds**
 42/43/44 at k=200 is **87.9% / 86.6% / 44.4% — a 43.4 pp spread**; at k=400, 82.2% / 91.1% / 62.7%.
@@ -373,6 +390,20 @@ Named honestly in code and docs, but it is packet-length **standard deviation**,
 of the payload — flow features contain no payload bytes. Any axiom or explanation phrased as
 "high entropy ⇒ encryption/obfuscation" is overclaiming. Either keep the approximation and always
 qualify it, or rename to `PacketSizeVariance`.
+
+### [MITIGATED 2026-08-03] `RepeatedConnections` / `BeaconLike` reach consumers unguarded
+Both issues below are real and unchanged, but the *downstream* risk they posed to Phase 4 is now
+handled explicitly rather than by a doc note. `behavior.py` gained (additively — the frozen
+7-column `behaviour_matrix()` and `BEHAVIOUR_NAMES` are untouched, so every Phase-2 LTN result
+remains valid):
+
+- **`BEHAVIOUR_KIND`** — declares each behaviour as `graded` / `binary` / `constant`, so a consumer
+  can check rather than assume continuity.
+- **`active_behaviour_names()` / `active_behaviour_indices()` / `active_behaviour_matrix()`** — drop
+  constant columns automatically. If the IP/port side-table is ever wired in, flipping
+  `REPEATED_CONNECTIONS_AVAILABLE` re-includes the column with no consumer change.
+
+`knowledge_graph.md` now instructs the KG to use `active_behaviour_matrix()`.
 
 ### [OPEN] `BeaconLike` is binary, not fuzzy
 It returns exactly 0.0 or 1.0 (`~np.isin(dst_port, WELL_KNOWN_PORTS)`), unlike the other six graded
