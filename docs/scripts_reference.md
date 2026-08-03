@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-03** (30 scripts).
+> Last verified against source: **2026-08-03** (32 scripts).
 
 ## Map
 
@@ -13,6 +13,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
 | **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) |
+| **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
 
@@ -369,6 +370,45 @@ an honest simulation of the real mechanism, unlike Part A's oracle-style purity 
 
 **Writes** `outputs/metadata/kg_readiness.json`, and caches
 `outputs/embeddings/X_{train,test}_ae_bottleneck{,_s43,_s44}.npy`.
+
+## `scripts/timeline.py`
+
+**Purpose**: correct CIC-IDS2017 timestamp reconstruction. ⚠️ **Use this for any temporal work —
+never parse `meta_*.csv` timestamps directly.**
+
+Naive `pd.to_datetime` is **silently wrong twice**: (1) dates are **D/M/YYYY**, so default parsing
+turns "3/7/2017" into March 7 and scatters a 5-day capture across three months; (2) the clock is
+**12-hour with no AM/PM** — observed hours are exactly {1..5, 8..12}, which map onto an 08:00–17:00
+workday, so without correction 1 PM sorts *before* 9 AM and any ordering/growth/decay is meaningless.
+
+The reconstruction is **validated against the published capture schedule**, not fitted: Web BF
+Thu 09:15–10:00 · XSS Thu 10:15–10:35 · Bot Fri 09:34–12:59 · PortScan Fri 13:06–15:23 · DDoS
+Fri 15:56–16:16. `parse()` raises rather than guessing if the date/hour pattern doesn't match.
+
+API: `load_timestamps(split)` → row-aligned `pd.Series`; `time_order(split)` → chronological index.
+
+## `scripts/kg_criteria.py`
+
+**Purpose**: the **last Phase-4 gate** — do the KG's other two emerging-pattern criteria work, now
+that "unexplained cluster" is measured dead? Three predictions pre-registered.
+
+| criterion | result | status |
+|---|---|---|
+| **#1 Growth / burstiness** | **lift 5.94× [5.66, 6.11] (n=3), ~81 % recall** | ✅ **works — robust** |
+| #2 Unexplained cluster *(from `kg_readiness`)* | ≤ 1.00× | 🔴 dead |
+| #3 Behaviour co-occurrence | 2.81× at 1.5 % recall; cluster-level ≤ 1.35× | ⚠️ weak |
+| #1 ∧ #3 | lift 1.73–11.57×, precision 0.12–0.81 | 🔴 not established |
+
+🔴 **The conjunction's seed-42 result (11.57× lift, 81.4 % precision) is a single-seed artifact** —
+the script's own multi-seed section demotes it. **Fifth such trap in this project, first one caught
+before publication.** Do not cite it.
+
+⚠️ **External-validity caveat:** growth works substantially because CIC-IDS2017's attacks are
+scripted into fixed windows. A real network with continuous low-rate C2 would not produce it.
+
+Both criteria are computed **without labels** — growth from cluster ids + timestamps, co-occurrence
+calibrated on benign training flows only. Labels score the result, never define it.
+**Writes** `outputs/metadata/kg_criteria.json`.
 
 ## `scripts/repair_runs_log.py`
 

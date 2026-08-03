@@ -115,25 +115,38 @@ which measurement you mean.)
 now version-controlled) · C4 ✅ annotated in `config.yaml` (not fixed — the log1p A/B still cites the
 contaminated metric) · **C1 and C3 remain findings-only. Do not implement them unprompted.**
 
-🚨 **PHASE-4 READINESS MEASURED (2026-08-03) — read before writing any KG code.**
+✅ **PHASE 4 IS READY TO START — all gates measured (2026-08-03). Not started.**
 
-**The KG's specified zero-day mechanism DOES NOT WORK.** `scripts/kg_readiness.py` measured the
-"unexplained cluster" criterion (weak/no `associated_with` edges to a known AttackType) honestly —
-train-labels-only criterion, scored against test — and it returns **lift ≤ 1.00× over the base rate
-across 3 representations × 3 thresholds.** Best case is exactly chance; everything else is *below*
-it. **118 of 200 clusters have zero known-attack training flows**, so it flags ~59,000 of ~59,400
-benign+zero-day test flows. **Do not build a primary detector on it.** This empirically resolves the
-spec's scope contradiction in the roadmap's favour: **the KG is corroboration + explainability.**
-The spec's other two criteria (**growth rate**, **behaviour co-occurrence**) are **untested** and are
-now the gating question for any KG detection role.
+Phase 4 is now **fully specified by measurement**, not by the original spec:
+- **Representation: RAW FEATURES.** Bot purity 77.6 % (k=200) / 80.6 % (k=400), no training-seed
+  lottery. 🔴 The AE bottleneck was recommended, then measured and **rejected** (52.1 pp spread,
+  worst of all options) — **rank stability ≠ cluster stability.**
+- **Scope: CORROBORATION + EXPLAINABILITY, not primary detection.** The spec's "unexplained
+  cluster" criterion scores **lift ≤ 1.00× — at or below chance.** The scope contradiction with
+  `conference_roadmap.md` is resolved empirically; the roadmap was right.
+- **Emerging-pattern rule: GROWTH RATE ONLY.** Of the spec's three criteria, only cluster
+  growth/burstiness survives: **lift 5.94× [5.66, 6.11] (n=3), ~81 % recall.** "Unexplained" is
+  dead; behaviour co-occurrence is weak (2.81× at 1.5 % recall, cluster-level ≤ 1.35×) and worth
+  keeping only as an *explanation* attribute.
+- **Decay: KEPT (adaptive).** Decision logged 2026-08-03 — time = flow-count position in true
+  chronological order.
 
-✅ **Cluster RAW FEATURES, not embeddings.** Bot purity **77.6 % (k=200) / 80.6 % (k=400)**,
-competitive with the CNN's good seeds, far above its worst (44.4 %), no training-seed lottery
-(residual k-means sensitivity ~2.6 pp).
-🔴 **The AE bottleneck was recommended and then measured and REJECTED** — spread **52.1 pp**, the
-worst of all options. The reasoning (the AE ranks Bot reproducibly, ρ=0.827) did not transfer:
-**rank stability ≠ cluster stability.** A confident, cheap-to-test recommendation that was wrong —
-measure before recommending.
+⚠️ **Two caveats that must reach the write-up.**
+① **Growth works substantially because CIC-IDS2017's attacks are scripted into fixed windows**
+(Bot Fri 09:34–12:59, Web BF Thu 09:15–10:00, XSS Thu 10:15–10:35). A real network with continuous
+low-rate C2 would not produce this signal — and Bot's real signature is persistence, not bursts.
+② **"Temporal burstiness of a raw-feature cluster" does not need a knowledge graph.** The KG's
+justification must rest on explanation/corroboration, not on this detection number. A reviewer will
+say this; say it first.
+
+🔴 **Do NOT cite "the conjunction gives 81 % precision."** That was clustering-seed 42 only; n=3
+gives lift 1.73–11.57× and precision 0.122–0.814. **Fifth single-seed trap in this project, and the
+first caught before publication** — multi-seed *before* writing, always.
+
+⏱️ **Use `timeline.py` for ANY temporal work — never parse `meta_*.csv` timestamps directly.**
+Two silent defects: dates are **D/M/YYYY** (naive parsing scatters the 5-day capture across
+March/June/July) and the clock is **12-hour with no AM/PM** (so 1 PM sorts before 9 AM).
+`timeline.parse()` corrects both and validates against the published capture schedule.
 
 🧩 **Use `behavior.active_behaviour_matrix()`** in any KG code, not the raw 7-column matrix:
 `RepeatedConnections` is constant 0.0 (dead edge type / divide-by-zero risk) and `BeaconLike` is
@@ -191,7 +204,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 30 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
+**All 32 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -204,7 +217,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 30 scripts — see docs/scripts_reference.md
+├── scripts/                   ← 32 scripts — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
