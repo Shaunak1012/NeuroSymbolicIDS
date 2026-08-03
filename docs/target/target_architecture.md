@@ -117,16 +117,15 @@ The KG updates on a different cadence than per-flow neural inference. A flow's d
 
 ## Component Status Summary
 
-| Component | Status |
-|-----------|--------|
-| Preprocessing (flow features) | ✅ Implemented |
-| 1D CNN + embeddings | ✅ Implemented |
-| LTN reasoning (SAT loss, 4 axioms) | ✅ Implemented |
-| Behaviour abstraction | ⚠️ Partial (different vocabulary — see gap analysis) |
-| Knowledge Graph (adaptive memory) | ❌ Not built |
-| KG reasoning | ❌ Not built |
-| Decision Fusion | ❌ Not built |
-| Explainability (3 explanations) | ❌ Not built |
-| Final Alert assembly | ❌ Not built |
-
-See [roadmap_gap_analysis.md](roadmap_gap_analysis.md) for the build plan.
+> 🔑 **This table was REMOVED on 2026-08-03 — deliberately, not lost.**
+>
+> **Component status now lives in exactly one place:
+> [docs/STATUS.md](../STATUS.md) → "Component Status".**
+>
+> This was one of four independent copies of the same information, and the duplication caused the
+> same drift error in three consecutive sessions. This copy was stale in the usual way — it still
+> read `Behaviour abstraction ⚠️ Partial` and `LTN reasoning ✅ Implemented` with no indication that
+> the LTN had been measured and found *not to help*.
+>
+> See [roadmap_gap_analysis.md](roadmap_gap_analysis.md) for the build plan and
+> [conference_roadmap.md §1b](conference_roadmap.md) for canonical phase numbering.

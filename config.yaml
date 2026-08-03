@@ -15,7 +15,15 @@ protocol:
   val_frac: 0.10
   test_frac: 0.10
   benign_ratio: 1.0           # benign : known-attack count (1.0 = balanced, paper-faithful)
-  feature_transform: log1p    # A/B (Phase 0.3): signed-log1p beat raw 0.980 vs 0.965 PR-AUC. Apply sign(x)*log1p(|x|) before scaling.
+  # Apply sign(x)*log1p(|x|) before scaling.
+  # (!) JUSTIFICATION IS KNOWN-WEAK (issue C4, flagged 2026-07-29, still open 2026-08-03).
+  # The original A/B (Phase 0.3) cited "signed-log1p beat raw 0.980 vs 0.965 PR-AUC" — but that
+  # 0.980 is the OVERALL BINARY metric, which is (a) inflated by the 17% train/test duplicate
+  # overlap documented in KNOWN_ISSUES C1, and (b) the metric metrics.py explicitly forbids as an
+  # optimisation target. The transform has NEVER been A/B'd on macro zero-day PR-AUC, the actual
+  # headline. log1p may well still win; the point is that the number quoted here does not support it.
+  # Fix = re-run the A/B on the headline metric (2 trainings). Do not cite 0.980 as evidence.
+  feature_transform: log1p
 
 # 8 known attacks + BENIGN = 9 known classes (kept in train/val/test)
 known_attacks:

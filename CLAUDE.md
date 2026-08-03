@@ -12,7 +12,7 @@ fused into an explainable benign/malicious alert.
 
 Input is **CIC-IDS2017 flow-feature CSVs** (**68** numeric features/flow — not 70; several frozen docs still say 70 and are banner-marked). The "Raw PCAP" boxes in the architecture diagram are conceptual; payload-level processing is future work.
 
-**Reality check on the goal above:** as of Phase 2, the symbolic pillar does **not** beat the neural baseline — every symbolic injection point tried (loss-level, representation-level, inference-level) costs macro zero-day PR-AUC or changes nothing. The project's current contribution is the *anatomy of why*. Don't write or reason as though the fusion story is established.
+**Reality check on the goal above:** as of Phase 2, the symbolic pillar does **not** beat the neural baseline — every symbolic injection point tried (loss-level, representation-level, inference-level) costs macro zero-day PR-AUC or changes nothing. The project's current contribution is the *anatomy of why*, and as of 2026-08-03 that anatomy has a **mechanism**: a closed-set discriminative model learns only the features that separate the classes it is trained on, so a novel class is reachable exactly to the extent its signature overlaps that basis — and *unreachable and unstable* otherwise (Bot: 0/8 feature overlap, cross-seed rank ρ = −0.090). Don't write or reason as though the fusion story is established.
 
 ## ⚡ First thing every session
 
@@ -24,61 +24,114 @@ Then proceed with the task.
 
 ## ⚡ Last thing every session
 
-Update the **living documents** so the next session starts clean:
-- **STATUS.md** — flip component statuses, update priorities & "Last Measured Results."
-- **CHANGELOG.md** — add a dated entry for what changed (newest first).
-- **KNOWN_ISSUES.md** — open new issues, mark fixed ones.
+Update the **living documents** so the next session starts clean. These are the *only* three files
+that record project state — nothing else needs touching:
+- **[docs/STATUS.md](docs/STATUS.md)** — flip statuses in **"Component Status"** (the single source
+  of truth), update **"Remaining Work"**, **"Open Decisions"** and **"Last Measured Results."**
+- **[docs/CHANGELOG.md](docs/CHANGELOG.md)** — add a dated entry for what changed (newest first).
+- **[docs/KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md)** — open new issues, mark fixed ones.
 
-⚠️ **Component status is currently duplicated across 4+ files, and updating one while missing another
-has caused the same drift error twice** (2026-07-29 and 2026-08-02 — the second left this very file
-claiming Phase 3 was "not built" after it had been built, run and multi-seeded). **Until that is
-fixed, changing any component's status means updating ALL of:** `docs/STATUS.md` (Component Status ·
-Remaining Work · Open Decisions) · **this file's "Current state" table** · `docs/target/roadmap_gap_analysis.md` ·
-`docs/target/target_architecture.md`. Verify with:
+If a *result* changed, it must also be reproducible from `outputs/metadata/runs.jsonl` (now
+version-controlled) — a number quoted in a doc with no logged run behind it is a defect, and there
+have been three.
+
+✅ **Component status now has ONE home (fixed 2026-08-03).** Change it in
+**[docs/STATUS.md](docs/STATUS.md) → "Component Status"** and nowhere else. This file,
+`docs/target/roadmap_gap_analysis.md` and `docs/target/target_architecture.md` used to carry
+parallel tables; they now point at STATUS instead. Phase *numbering* (a different thing) stays
+canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md).
+
+> **Why this rule exists.** The duplication caused the same drift error three times — 2026-07-29
+> (target docs stale), 2026-08-02 (this file claimed Phase 3 was "not built" after it had been built,
+> run and multi-seeded), and 2026-08-03 (STATUS's *own* table still said the autoencoder was n=1 with
+> "0.0000 recall on web attacks", both superseded the previous day). The checklist said "flip
+> component statuses" without naming files, so it was satisfied by updating whichever table you
+> happened to be looking at. Verify there is still only one table:
 
 ```bash
-grep -rn "Not built\|✅ Built\|⬜" --include=*.md . | grep -v .venv
+grep -rln "^| Component | Status" --include=*.md . | grep -v .venv
 ```
 
-**The real fix — collapse these to a single source — is a tracked issue in
-[KNOWN_ISSUES.md](docs/KNOWN_ISSUES.md) with a concrete plan. Worth doing before Phase 4 starts
-changing statuses.**
+## Current state (one-line pointer — full table in STATUS.md)
 
-## Current state (snapshot — authoritative version in STATUS.md)
+**Phases 0–3 done. Phase 4 (Knowledge Graph) is 🟡 UNBLOCKED — the representation decision is now
+evidence-backed and awaits sign-off. Phases 5–7 + R not started.**
 
-| Component | Status |
-|-----------|--------|
-| Preprocessing (+ IP/timestamp meta side-table) | ✅ Working |
-| Paper-aligned split | ✅ Working |
-| CNN + embeddings | ✅ Verified correct — **n=3**, macro zd PR-AUC **0.6399** [0.6353, 0.6446] |
-| Classical baselines | ⚠️ Working but **n=1 and old metrics schema** (XGBoost, RF, IsoForest) — no per-family/macro recorded, **not citable for comparison**; re-run `baselines.py` |
-| Novelty channels (MSP, Mahalanobis) | ✅ **n=3** — MSP macro 0.5884, Mahalanobis 0.3777. ⚠️ "Mahalanobis 4.3× on Bot" is **retracted** (seed 42 only); n=3 mean is **3.0×**, seed 44 at chance |
-| Behaviour abstraction | ✅ Rebuilt & validated — **7 behaviours incl. `BeaconLike`**. ⚠️ Validation tables were measured on the *temporal* split, where PortScan/DDoS were zero-day; they are **known classes** now, so "PortScan/DDoS strongly covered" is not evidence for the current protocol |
-| LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted; `ratio` omega-mode fix confirmed stable |
-| Anomaly pillar (autoencoder) — canonical **Phase 3** | ✅ **BUILT & RUN 2026-08-02, n=3** — `scripts/autoencoder_paper.py`. macro 0.0970, **best Bot channel measured (3.8×)**, fails on web attacks → **double dissociation** vs the CNN |
-| Knowledge Graph — canonical **Phase 4** | ❌ Not built — 🔴 **BLOCKED on a representation decision** (CNN embedding geometry is a seed lottery; see STATUS "PHASE-4 BLOCKER") |
-| Decision Fusion — Phase 5 | ❌ Not built — ⚠️ a *fitted* combiner is structurally blocked (see "THE FUSION WALL") |
-| Explainability | ❌ Not built |
+Two established results: **(1)** a **double dissociation** between the CNN (`cnn_paper.py`, n=3,
+macro **0.6399**) and the autoencoder (`autoencoder_paper.py`, n=3, macro 0.0970 but Bot **3.8×**) —
+significant on all three families, though it is a dissociation between *two models*, **not** two
+method families; **(2)** the CNN's Bot failure is **representational** — 100% of Bot flows are
+classified BENIGN, Bot's discriminative features have 0/8 overlap with the known-class task's, and
+the resulting Bot ranking is **noise** (cross-seed ρ = −0.090).
 
-**Next action (resume here):** Phase 2 (symbolic/LTN pillar) is concluded for now — every axiom variant tried (Ax3–Ax6) costs macro PR-AUC relative to the no-axiom control, robust across 3 seeds; the targeted Ax6 (BeaconLike) axiom's apparent Bot-detection benefit did not survive multi-seed validation and is retracted.
+👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
+Do not restate it here — that is exactly what kept rotting.
 
-🟡 **Read the "EARLIER-PHASE AUDIT" section near the top of [STATUS.md](docs/STATUS.md) before doing anything else.** A retrospective audit on 2026-07-29 found **5 open concerns**. **C2 is now RESOLVED (2026-08-02)** — `cnn_paper` is n=3 (mean 0.6399, range 0.6353–0.6446) and its full range sits inside the LTN control's range (0.6029–0.6505, also n=3); "the neural baseline wins" is not currently supportable without a proper significance test (not yet run). **C1, C3, C4, C5 remain findings-only — no fixes implemented, they await the user's go-ahead. Do not implement them unprompted.**
+**Next action (resume here):** **Phase 4 (Knowledge Graph) — the representation question is now
+evidence-backed and awaits sign-off.** Everything else that was blocking it is done.
 
-✅ **Phase 3 (benign-only autoencoder) is BUILT AND RUN (2026-08-02)** — and the interpretation I first wrote for it was **tested the same day and largely falsified.** Read the **red box at the top of "🧪 PHASE 3 RESULTS"** in STATUS before citing anything from this phase.
+### What changed on 2026-08-03 (read this before citing anything older)
 
-Short version of what is actually established (all n=3): the AE is a **raw-space distance-from-benign detector** (`corr = +0.732`), and it is **the most reliable Bot channel measured** — mean **3.8×** [3.2–4.8] vs Mahalanobis **3.0×** [1.2–4.3] and the CNN's **1.3×** [0.7–1.7]. It is excellent on Heartbleed (103×) / Infiltration (145×), which are the **underpowered** families `metrics.py` excludes. Note the "0.0000 recall on web attacks" split I first reported was a **threshold artifact**, not a categorical difference — on lift the AE is 3.8×/3.9×/4.7× across Bot/WebBF/XSS.
+A full audit + remediation session. It was scoped as bookkeeping, but the re-runs it required
+**overturned two documented claims and answered the last open research question.**
 
-🔴 **Do NOT repeat the "modality analogue" mechanism** (that web attacks transfer because they resemble FTP/SSH-Patator). `scripts/modality_analysis.py` falsified it: their nearest known attack is **DoS Hulk**, and **Bot sits closer to benign (7.28) than the web attacks do (8.84)** — the opposite of the claim. The supporting +0.933 correlation was **circular** (measured in the CNN's own embedding space, where it just restates the CNN's log-odds; in raw space it is −0.388). (A)/(B) complementarity survives as an *empirical pattern*; the *explanation* is open.
+🔬 **"Why does the CNN fail on Bot?" is ANSWERED** (`scripts/bot_failure_analysis.py`, 4 hypotheses
+pre-registered before running). The failure is **representational, not informational**:
+- **100% of Bot flows are classified BENIGN** (all 3 seeds, mean p(BENIGN)=0.9984) — Bot is not
+  ambiguous to the CNN, it is confidently asserted benign.
+- The features separating Bot from benign have **0/8 overlap** with those the known-class task needs.
+- So the CNN's Bot ranking is **noise**: cross-seed Spearman **ρ = −0.090**, vs 0.68–0.83 for every
+  other family. RandomForest is the same (0.068); **the autoencoder is not (0.827).**
+- **One cause, four symptoms** — this explains the Phase-4 purity lottery, the Mahalanobis Bot
+  spread, and RF's Bot swing simultaneously. Not an information limit (oracle PR-AUC 0.9988).
 
-✅ **AE multi-seeded (n=3) — the (A)/(B) complementarity is now ESTABLISHED as a double dissociation.** CNN vs AE ranges **do not overlap on any family**: AE wins Bot **2.9×** (0.1314 vs 0.0446), CNN wins Web BF **8.8×** and XSS **17.4×**. First cleanly multi-seeded comparative result in the project — the pattern the falsified modality account was invented to explain is itself **real**; only the explanation died. Caveat: both are weak on Bot in absolute terms (3.8× vs 1.3× chance), so this is a robust *relative* difference, not a solved problem.
+🔴 **The (A)/(B) thesis reframing is FALSIFIED in its strong form.** **RandomForest — a supervised
+(A)-family method — ties the autoencoder on Bot** (0.1311 vs 0.1314, paired bootstrap p=0.88) while
+beating it 0.50 on macro. "(B) methods are needed to reach Bot" is **dead**, and so is "no channel
+sits at both ends of the frontier" (RF does). ⚠️ **The CNN-vs-AE double dissociation survives and is
+now statistically significant — but it is a dissociation between two MODELS, not two FAMILIES.**
+Do not write it up as an (A)-vs-(B) result.
 
-🔴 **PHASE-4 BLOCKER (2026-08-02) — read before writing any KG code.** The pre-check's "Bot forms a ~90%-pure cluster, stable across seeds" is **retracted**: it varied only the *clustering* seed on a *fixed* seed-42 embedding. Varying the **CNN seed** gives Bot purity **87.9% / 86.6% / 44.4%** (43.4 pp spread) while Web BF/XSS stay stable (0.7–2.5 pp). **The CNN's embedding geometry w.r.t. Bot is a seed lottery**, independently confirmed by Mahalanobis (seed 44: 1.2×, chance) — even though classification is flat across seeds (macro spread 0.009). So the KG would cluster *stably* on the families the CNN already handles, and *unstably* on the one family where it would matter. **Decide the representation first** (ensemble seeds · raw features · the AE's benign-trained 16-d bottleneck · accept-and-publish the variance). See STATUS "PHASE-4 BLOCKER".
+✅ **Significance tests are RUN** (`scripts/significance.py`). **C2 closes in the CNN's favour** —
+it does beat the LTN control (+0.0204, p=0.001) despite overlapping seed ranges, because the paired
+test cancels flow-noise common to both. ⚠️ **Flow-level uncertainty only**: at n=3 the Wilcoxon
+floor is p=0.25, so **no seed-level claim in this project can reach p<0.05** — that needs n≥6 seeds.
 
-**Recommended order:** ~~C2~~ ✅ → ~~Phase 3 AE~~ ✅ → ~~modality test~~ ✅ (falsified) → ~~multi-seed AE~~ ✅ (dissociation established) → ~~train-vs-score decomposition~~ ✅ (retracted "Mahalanobis 4.3×") → ~~re-check KG substrate across CNN seeds~~ ✅ (found the blocker) → **next: (a) decide the KG representation question above; (b) why is the CNN specifically so bad on Bot** — the oracle result (0.0314 → 0.9764 with ~1,000 labels) proves the information *is* in the features, so it's an unexplained transfer failure; **(c)** C1/C3 reporting variants (no training) → C4 → C5. **LOCO/fusion-repair stays deprioritized**, and the per-flow "router" idea rested on the falsified modality mechanism — not motivated as-is.
+🔴 **A RETRACTION WAS REVERSED: "on macro the CNN beats XGBoost" is n.s. (p=0.80).** The 2026-07-27
+retraction of *"XGBoost ≈ CNN"* compared two point estimates with no test. The original claim was
+right. Lesson, symmetric to the earlier ones: **a point-estimate gap is not a result in either
+direction.**
 
-🧭 **Read the "THESIS REFRAMING" section at the top of [STATUS.md](docs/STATUS.md).** Argued 2026-07-29 from existing evidence (no new runs): every Phase-2 null shares **one** structural cause — a mechanism fitted on data that lacks zero-day cannot transfer to zero-day. That covers the LTN axioms, the aux head, the fitted fusion, *and* the KG's planned `s_kg` path. The split is **(A)** learn-what-attacks-look-like (needs attack examples, cannot reach novel classes) vs **(B)** learn-what-normal-looks-like (needs only benign, reaches novel classes by construction). The project invested in (A); the Bot evidence favours (B). ⚠️ **The "Mahalanobis 4.3×" figure originally cited here is RETRACTED — that was seed 42, the best of 3; n=3 mean is 3.0× (range 1.2–4.3×).** Corrected n=3 Bot lifts: **AE 3.8×** [3.2–4.8] · Mahalanobis 3.0× [1.2–4.3] · CNN 1.3× [0.7–1.7] · MSP 1.3×. **This reframing was subsequently TESTED (2026-08-02): the (A)/(B) complementarity is confirmed as a double dissociation, but the *modality-analogue mechanism* proposed for it was falsified.** See the boxes at the top of STATUS.
+### Standing cautions (still current)
 
-⚠️ **Phase 3 (benign-only autoencoder, ~1h) is now the load-bearing next experiment, not a checkbox.** It is a pure (B) method and the direct test of the reframing. It was never actually decided — it was about to be skipped by a phase-number collision (STATUS used "Phase 3" for the KG while the canonical roadmap uses Phase 3 = autoencoder, Phase 4 = KG). **Very likely run it before the KG (canonical Phase 4).**
+🔴 **Do NOT repeat the "modality analogue" mechanism** (that web attacks transfer because they
+resemble FTP/SSH-Patator) — falsified by `modality_analysis.py`. ✅ **The replacement IS measured**:
+the CNN assigns ~90% of Web BF/XSS flows to **`DoS slowloris`**, a known *attack* class, so their
+0.92–0.95 PR-AUC is **absorption into a known attack, not zero-day detection.** (Note this differs
+from raw-space nearest-neighbour, which is DoS Hulk — classifier behaviour ≠ raw proximity; cite
+which measurement you mean.)
+
+🟡 **Earlier-phase audit (2026-07-29):** C2 ✅ resolved · C5 ✅ addressed (counts corrected, record
+now version-controlled) · C4 ✅ annotated in `config.yaml` (not fixed — the log1p A/B still cites the
+contaminated metric) · **C1 and C3 remain findings-only. Do not implement them unprompted.**
+
+🟢 **Phase-4 blocker status: UNBLOCKED, decision pending.** The blocker measurement stands and now
+has an artifact (`outputs/metadata/kg_precheck.json`; Bot purity **87.9 / 86.6 / 44.4 %** across CNN
+seeds, 43.4 pp spread). But the Bot analysis makes the choice non-arbitrary:
+**(a) ensembling CNN seeds now looks futile** — averaging a noise ranking does not create signal;
+**(b) raw features are viable** (Bot separable at 0.9988 given labels, no training lottery);
+**(c) the AE's 16-d benign-trained bottleneck is the data-backed lean** — the only representation
+measured that ranks Bot *reproducibly* (ρ=0.827); (d) accept-and-publish remains the cheap honest
+option. **Clustering purity under (b)/(c) is still unmeasured — one `kg_precheck.py` variant settles
+it.** ⚠️ Also still unmeasured and still the single most important quantity: **the false-positive
+rate of "unexplained cluster."**
+
+**Recommended order:** ~~C2~~ ✅ → ~~Phase 3 AE~~ ✅ → ~~modality test~~ ✅ → ~~multi-seed AE~~ ✅ →
+~~train-vs-score decomposition~~ ✅ → ~~KG substrate re-check~~ ✅ → ~~significance test~~ ✅ →
+~~baselines on current schema~~ ✅ → ~~why the CNN fails on Bot~~ ✅ → **next: (a) decide the KG
+representation (measure (b)/(c) purity first — it is cheap); (b) measure the "unexplained cluster"
+false-positive rate; (c) C1/C3 reporting variants (no training) → C4.** LOCO/fusion-repair stays
+deprioritized; the per-flow "router" idea rested on the falsified modality mechanism.
 
 **Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
@@ -111,9 +164,11 @@ python scripts/baselines.py         # 4. XGBoost / RandomForest / IsolationFores
 python scripts/novelty.py           # 5. MSP + Mahalanobis (post-hoc, no retraining)
 python scripts/ltn_paper.py         # 6. symbolic pillar (configured by LTN_* env vars)
 python scripts/autoencoder_paper.py # 7. anomaly pillar — benign-only autoencoder (Phase 3)
+python scripts/significance.py      # 8. paired bootstrap over per-flow scores (no training)
 ```
 
-Multi-seed anything trainable via `CNN_SEED` / `LTN_SEED` / `AE_SEED` / `NOVELTY_SEED` — each writes
+Multi-seed anything trainable via `CNN_SEED` / `LTN_SEED` / `AE_SEED` / `NOVELTY_SEED` /
+`BASELINE_SEED` — each writes
 `<name>_s<seed>` artifacts and never touches the seed-42 originals. **Treat any n=1 number as
 provisional**; three findings have already been retracted as single-seed artifacts.
 
@@ -121,7 +176,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 22 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
+**All 28 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -134,7 +189,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 26 scripts — see docs/scripts_reference.md
+├── scripts/                   ← 28 scripts — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
