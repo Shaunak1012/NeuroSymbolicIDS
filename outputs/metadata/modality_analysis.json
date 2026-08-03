@@ -1,0 +1,118 @@
+{
+ "RAW FEATURE SPACE (68 features, log1p+scaled -- untrained by any model)": {
+  "Bot": {
+   "n": 1956,
+   "d_benign": 8.490557438278248,
+   "d_attack": 11.17129653110255,
+   "margin": -2.6263676830443305,
+   "nearest": "SSH-Patator",
+   "nearest_share": 0.3824130879345603
+  },
+  "Heartbleed": {
+   "n": 11,
+   "d_benign": 39.82188377022893,
+   "d_attack": 38.001517718606834,
+   "margin": 1.7575614878678962,
+   "nearest": "SSH-Patator",
+   "nearest_share": 1.0
+  },
+  "Infiltration": {
+   "n": 36,
+   "d_benign": 24.74054049989023,
+   "d_attack": 25.075414449707573,
+   "margin": -0.15386430301763987,
+   "nearest": "FTP-Patator",
+   "nearest_share": 0.4444444444444444
+  },
+  "Web Attack Brute Force": {
+   "n": 1507,
+   "d_benign": 10.805805173282991,
+   "d_attack": 12.488608613385408,
+   "margin": -1.6791843459737112,
+   "nearest": "DoS Hulk",
+   "nearest_share": 0.7989382879893829
+  },
+  "Web Attack Sql Injection": {
+   "n": 21,
+   "d_benign": 8.209404205750902,
+   "d_attack": 8.26165310228428,
+   "margin": -0.17649303799412053,
+   "nearest": "DoS Hulk",
+   "nearest_share": 0.38095238095238093
+  },
+  "Web Attack XSS": {
+   "n": 652,
+   "d_benign": 10.79358741594533,
+   "d_attack": 12.479678599550976,
+   "margin": -1.6853701226874556,
+   "nearest": "DoS Hulk",
+   "nearest_share": 0.9601226993865031
+  },
+  "BENIGN": {
+   "n": 55237,
+   "d_benign": 7.226433207565206,
+   "d_attack": 8.975651518063946,
+   "margin": -2.1027487815000585,
+   "nearest": "DoS Hulk",
+   "nearest_share": 0.6564078425692923
+  }
+ },
+ "CNN EMBEDDING SPACE (64-d -- trained to separate KNOWN classes)": {
+  "Bot": {
+   "n": 1956,
+   "d_benign": 13.759028381686818,
+   "d_attack": 22.003162230610414,
+   "margin": -8.2702444615186,
+   "nearest": "DoS Hulk",
+   "nearest_share": 1.0
+  },
+  "Heartbleed": {
+   "n": 11,
+   "d_benign": 17.065136132924795,
+   "d_attack": 23.912865849262204,
+   "margin": -6.8667522730516595,
+   "nearest": "DoS Hulk",
+   "nearest_share": 1.0
+  },
+  "Infiltration": {
+   "n": 36,
+   "d_benign": 12.547698556795982,
+   "d_attack": 19.618646630320917,
+   "margin": -7.50774850333079,
+   "nearest": "DoS Hulk",
+   "nearest_share": 1.0
+  },
+  "Web Attack Brute Force": {
+   "n": 1507,
+   "d_benign": 28.047758210716463,
+   "d_attack": 30.89140572963856,
+   "margin": -2.8394561607660407,
+   "nearest": "DoS Hulk",
+   "nearest_share": 1.0
+  },
+  "Web Attack Sql Injection": {
+   "n": 21,
+   "d_benign": 18.044639999055637,
+   "d_attack": 21.515972112323535,
+   "margin": -3.4617868778320684,
+   "nearest": "DoS Hulk",
+   "nearest_share": 0.9047619047619048
+  },
+  "Web Attack XSS": {
+   "n": 652,
+   "d_benign": 28.059521347374233,
+   "d_attack": 30.90025727283919,
+   "margin": -2.8365272631729823,
+   "nearest": "DoS Hulk",
+   "nearest_share": 1.0
+  },
+  "BENIGN": {
+   "n": 55237,
+   "d_benign": 6.532452731845831,
+   "d_attack": 16.313478309400473,
+   "margin": -10.01633426141502,
+   "nearest": "DoS Hulk",
+   "nearest_share": 0.9982258268913953
+  }
+ }
+}
