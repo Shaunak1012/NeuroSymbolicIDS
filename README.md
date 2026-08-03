@@ -182,20 +182,48 @@ single-seed numbers have repeatedly proven unsafe in this project (three retract
 | Channel | family | macro zero-day PR-AUC | Bot PR-AUC | Bot lift | Web BF | XSS |
 |---------|:---:|----------------------:|-----------:|---------:|-------:|------:|
 | **CNN** (`cnn_paper.py`) | A | **0.6399** [0.6353, 0.6446] | 0.0446 [0.0241, 0.0591] | 1.3× | **0.9226** | **0.9524** |
+| XGBoost † | A | 0.6372 *(deterministic)* | 0.0608 | 1.8× | 0.9484 | 0.9023 |
 | LTN, no axioms (control) | A | 0.6194 [0.6029, 0.6505] | 0.0712 [0.0528, 0.0985] | 2.1× | 0.8889 | 0.8982 |
+| **RandomForest** | A | 0.5995 [0.5682, 0.6235] | **0.1311** [0.0576, 0.1933] | **3.8×** | 0.8686 | 0.7987 |
 | MSP (softmax novelty) | A/B | 0.5884 [0.5694, 0.6123] | 0.0448 [0.0245, 0.0591] | 1.3× | 0.8719 | 0.8485 |
 | Mahalanobis (embedding distance) | B | 0.3777 [0.3363, 0.4585] | 0.1030 [0.0413, 0.1467] | 3.0× | 0.5840 | 0.4462 |
 | **Autoencoder** (`autoencoder_paper.py`) | B | 0.0970 [0.0894, 0.1014] | **0.1314** [0.1078, 0.1647] | **3.8×** | 0.1048 | 0.0547 |
+| IsolationForest | B | 0.0653 [0.0628, 0.0683] | 0.0637 [0.0571, 0.0732] | 1.9× | 0.0862 | 0.0459 |
 
-*(A) = trained on known attacks · (B) = trained on benign only.* XGBoost, RandomForest and
-IsolationForest exist but are **n=1 and predate the metrics rewrite**, so they carry no per-family
-breakdown and are omitted here rather than quoted at false precision.
+*(A) = trained on known attacks · (B) = trained on benign only.*
+† XGBoost is **deterministic** under `random_state` here (no subsampling configured), so seeds
+42/43/44 are byte-identical — n=1 with verified reproducibility, not a variance estimate.
 
-**The central result — a double dissociation between (A) and (B) methods.** CNN and autoencoder seed
-ranges do **not overlap on any family**: the AE wins Bot **2.9×**, the CNN wins Web Brute Force
-**8.8×** and XSS **17.4×**. Each method wins decisively where the other fails, which rules out
-"one is simply better" and establishes genuine functional specialisation. **The mechanism is
-unexplained** — a proposed "modality analogue" account was pre-registered, tested, and falsified.
+**Result 1 — a double dissociation between the CNN and the autoencoder.** Their seed ranges do not
+overlap on any family and a paired bootstrap confirms it (p<0.0005 each): the AE wins Bot **2.9×**,
+the CNN wins Web Brute Force **8.8×** and XSS **17.4×**. Each wins decisively where the other fails.
+
+> ⚠️ **This is a dissociation between two *models*, not two *method families*.** An earlier framing —
+> "the problem is structurally (B), so benign-only methods are needed to reach Bot" — was
+> **falsified on 2026-08-03**: RandomForest, a supervised (A)-family method, **ties the autoencoder
+> on Bot** (0.1311 vs 0.1314, p=0.88) while beating it by 0.50 on macro. You do not need a (B)
+> method to reach Bot.
+
+**Result 2 — why the CNN fails on Bot (answered 2026-08-03).** The failure is **representational,
+not informational**, and three measurements compose into the mechanism:
+
+- **100% of Bot flows are classified BENIGN** by the CNN (all 3 seeds, mean p(BENIGN)=0.9984). Bot
+  is not ambiguous to the model — it is confidently asserted benign.
+- **The features that separate Bot from benign have 0/8 overlap** with the features the known-class
+  task needs. A discriminative model learns only what separates the classes it is shown, so there is
+  no pressure to represent Bot's signature.
+- **Consequently the CNN's Bot ranking is noise**: cross-seed Spearman ρ = **−0.090**, against
+  0.68–0.83 for every other family. The autoencoder, by contrast, ranks Bot *reproducibly*
+  (ρ = 0.827).
+
+This single cause explains four previously separate symptoms — the CNN's Bot score, the Knowledge
+Graph's cluster-purity lottery, Mahalanobis's Bot spread, and RandomForest's Bot swing. It is *not*
+an information limit: given labels, Bot is separable at oracle PR-AUC **0.9988**.
+
+**Result 3 — web attacks are not being "detected".** The CNN assigns ~90% of Web Brute Force and
+XSS flows to **`DoS slowloris`**, a known *attack* class. Their 0.92–0.95 PR-AUC is misclassification
+landing on the correct side of the benign/attack binary — transfer by absorption, not zero-day
+detection.
 
 **What the symbolic pillar actually showed (Phase 2, concluded):**
 

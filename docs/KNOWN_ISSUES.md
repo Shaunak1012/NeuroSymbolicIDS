@@ -102,11 +102,24 @@ tags. Verified: `cnn_paper_s43_logodds` / `cnn_paper_s44_logodds` now correctly 
 `seed: 44`. Cross-checked that STATUS's already-published LTN-control range (0.6029–0.6505) was
 itself unaffected — it must have been read by run name, not the buggy field, when first computed.
 
-**Still open — deliberately not touched:** the **8 pre-existing rows still carry the wrong seed
-value in `runs.jsonl`.** Not corrected in place, because `runs.jsonl` is an append-only research log
-and silently rewriting past entries would violate the project's own retract-in-place convention.
-Any code reading `runs.jsonl` for those 8 rows **must group by run name (tag), not by `params.seed`**,
+**Still open — deliberately not touched:** the pre-existing rows still carry the wrong seed value in
+`runs.jsonl`. Not corrected in place, because `runs.jsonl` is an append-only research log and
+silently rewriting past entries would violate the project's own retract-in-place convention.
+Any code reading `runs.jsonl` for those rows **must group by run name (tag), not by `params.seed`**,
 until/unless a deliberate, logged correction pass is run.
+
+> 🔢 **COUNTS CORRECTED 2026-08-03 — this entry understated both defects by ~2×.** Measured directly:
+>
+> | | this entry said | actually measured |
+> |---|---|---|
+> | rows with the wrong seed | "8 rows" | **16 rows** (8 distinct *tags*, each present twice) |
+> | duplication | "several entries duplicated 3×" | **21 duplicated names, 31 redundant rows out of 88 (35% of the file)** |
+>
+> The "8" counted distinct tags, not rows — so a correction pass guided by that number would have
+> **fixed half the affected rows and left the other half wrong.** Reproduce with:
+> ```bash
+> .venv/Scripts/python.exe -c "import json,collections; rows=[json.loads(l) for l in open('outputs/metadata/runs.jsonl',encoding='utf-8') if l.strip()]; print('rows',len(rows)); print('wrong-seed rows',sum(1 for r in rows if '_s4' in r['name'] and r['params'].get('seed')==42)); c=collections.Counter(r['name'] for r in rows); print('dup names',sum(1 for v in c.values() if v>1),'extra rows',sum(v-1 for v in c.values()))"
+> ```
 
 **Also still open:** several entries remain duplicated 3× from repeated full re-runs of
 `rescore_logits.py` (e.g. `cnn_paper_logodds` appears 3 times) — the code fix above does not dedupe
@@ -114,12 +127,67 @@ existing rows, and the 2026-08-02 rescore was deliberately scoped to only the 2 
 to avoid adding a 4th copy of the other 17 (see the note now in `rescore_logits.py` itself: don't run
 the full `TAGS` list just to add one new tag — temporarily scope `TAGS`, run, restore).
 
-### [OPEN] `runs.jsonl` mixes two incompatible metric schemas
-Records written before the 2026-07-27 `metrics.py` rewrite carry only `zd_pr_auc` (the blended
-number); later records carry per-family + macro. Nothing in the file marks which is which, so a naive
-read of the run history compares incomparable numbers. **Concretely: `random_forest` has never been
-re-scored on the corrected metric** and is therefore absent from STATUS's corrected table.
-**Fix:** re-run `baselines.py` to refresh RF, and add a schema-version field to `tracking.log_run`.
+**✅ Mitigated 2026-08-03:** `runs.jsonl` is now **version-controlled** (it was gitignored, so the
+entire research record had no history or backup — see the new issue below). A bad write is now
+detectable and revertible via git, which is the practical protection the append-only rule needs.
+
+### [FIXED 2026-08-03] 🔴 The entire research record was gitignored
+`.gitignore` excluded `outputs/metadata/` wholesale, which included **`runs.jsonl` — the append-only
+log backing every number in STATUS.md.** So the research record had **no version history, no backup,
+and no way to detect a corrupting write**, even while this very file described it as an append-only
+log whose past entries must never be silently rewritten. There was nothing enforcing or preserving
+that. A `git clean` or a bad append would have silently destroyed the provenance of every published
+result; the docs' own instruction to "regenerate with `rescore_logits.py`" is not a real recovery
+path, since that needs TF plus the gitignored models and the 600 MB arrays.
+**Fix:** `outputs/metadata/` is now tracked (101 KB total — `runs.jsonl`, thresholds, the analysis
+JSONs, per-run history pickles). Also now tracked: the paper split's **protocol definition**
+(`split_report.txt`, `known_classes.npy`, `zero_day_classes.npy`, ~3 KB) which is the provenance for
+which classes are known vs zero-day. Large artifacts remain ignored.
+
+### [FIXED 2026-08-03] `kg_precheck.py` persisted nothing, so the Phase-4 blocker was prose-only
+The numbers **blocking all of Phase 4** — Bot cluster purity 87.9 / 86.6 / **44.4** % across CNN
+seeds — existed only as text in STATUS.md and CHANGELOG.md. The script contained no `json.dump`,
+no `np.save`, no `log_run`. They were unverifiable without a full re-run, and inconsistent with how
+every other measurement in this project is recorded.
+**Fix:** writes `outputs/metadata/kg_precheck.json`. Re-run 2026-08-03 — **numbers reproduce
+exactly** (k=200 spread 43.4 pp, k=400 spread 28.3 pp; Web BF 2.5 pp, XSS 1.6 pp). The stale
+"stable across seeds" claim in its docstring was also retracted in place.
+
+### [FIXED 2026-08-03] Legacy temporal artifacts shared filenames with the current protocol's
+`outputs/metadata/{class_names,zero_day_classes}.npy` were written by the superseded temporal-split
+pipeline (`cnn3.py`/`ltn.py`) under the **same basenames** the paper split uses in
+`data/processed/paper/`, with **incompatible contents**: the temporal `zero_day_classes.npy` lists
+**DDoS and PortScan as zero-day** (both are KNOWN, trained-on classes now) and omits Heartbleed;
+`class_names.npy` has 8 classes vs the paper split's 9. Names also carry mojibake
+(`Web Attack ? Brute Force`).
+**Not an active bug** — all 11 current-pipeline scripts correctly read the `paper/` copy; only
+legacy `eval.py` read the metadata one. But re-running `cnn3.py`/`ltn.py` would have silently
+overwritten it, and any *future* script reaching for the obvious-looking
+`paths.METADATA/zero_day_classes.npy` would have scored against DDoS/PortScan as if unseen.
+**Fix:** added `paths.METADATA_LEGACY` (`outputs/metadata/_legacy_temporal/`), moved the four legacy
+artifacts there with a README explaining the collision, and repointed `cnn3.py`/`ltn.py`/`eval.py`.
+**Moved, not deleted**, per the project rule.
+
+### [FIXED 2026-08-03] `config.py` read `config.yaml` with the platform default encoding
+`open(_PATH, "r")` uses cp1252 on Windows, so a single non-ASCII character anywhere in `config.yaml`
+raised `UnicodeDecodeError` and broke every script that imports `config`. Hit while annotating the
+`feature_transform` entry. **Fix:** explicit `encoding="utf-8"`.
+
+### [FIXED 2026-08-03] `runs.jsonl` mixed two incompatible metric schemas
+Records written before the 2026-07-27 `metrics.py` rewrite carried only `zd_pr_auc` (the blended
+number); later records carry per-family + macro. Nothing in the file marked which was which, so a
+naive read compared incomparable numbers. **`random_forest`, `xgboost` and `isolation_forest` had
+never been re-scored on the corrected metric** — yet STATUS's corrected table and the Phase-3 table
+both *quoted* macro figures for xgboost (0.6372) and isolation_forest (0.0628) that had **no logged
+provenance anywhere**.
+**Fix:** `baselines.py` gained `BASELINE_SEED` support and was re-run on seeds 42/43/44. All three
+now carry per-family + macro on the current schema, at n=3.
+**This was not cosmetic — it overturned a thesis-level claim.** RandomForest came back at Bot
+**0.1311** [0.0576, 0.1933], statistically tied with the autoencoder (p=0.88) while beating it 0.50
+on macro, which falsifies the strong form of the (A)/(B) reframing. See
+[STATUS.md](STATUS.md) → "THE (A)/(B) FRAMING IS FALSIFIED IN ITS STRONG FORM".
+**Still open (minor):** `tracking.log_run` has no schema-version field, so old rows remain
+identifiable only by the absence of `macro_zd_pr_auc`.
 
 ---
 
@@ -202,8 +270,30 @@ promoting it to a node; (b) cluster raw features (no training, no lottery); (c) 
 autoencoder's benign-trained 16-d bottleneck (the AE was the most *stable* Bot channel, spread 1.5×);
 (d) accept and publish the variance. Full analysis: [STATUS.md](STATUS.md) → "PHASE-4 BLOCKER".
 
-### [OPEN 2026-08-02] 🔁 Component status is duplicated across 3+ files — a recurring source of drift
-**This is a process defect, and it has now caused the same error twice in two sessions.**
+### [FIXED 2026-08-03] 🔁 Component status was duplicated across 4+ files — a recurring source of drift
+**This was a process defect, and it caused the same error THREE times in three sessions.**
+
+> ✅ **FIXED 2026-08-03, as the proposed plan below specified.** `docs/STATUS.md` →
+> "Component Status" is now the **single source of truth**, carrying a banner saying so.
+> `CLAUDE.md`'s table was replaced by a one-line "you are here" pointer; the end-of-session
+> checklist now names the exact three living docs; `roadmap_gap_analysis.md` and
+> `target_architecture.md` point at STATUS instead of restating it.
+>
+> 🔴 **The third occurrence, found by the audit that triggered this fix, is the reason the naive
+> version of the plan would have made things worse:** STATUS's own Component Status table — the one
+> nominated as canonical — was itself **the stalest table in the repo.** It still described the
+> autoencoder as `n=1 / macro 0.1000 / Bot 3.6× / 0.0000 recall on web attacks` (all four superseded
+> the previous day, 400 lines above it in the same file), cited "PortScan/DDoS strongly covered"
+> (a claim this file explicitly forbids), said the behaviours were "not yet wired into LTN" (wired
+> since 2026-07-27), and had **no rows at all** for `cnn_paper.py` / `baselines.py` / `novelty.py`,
+> pointing instead at the superseded `cnn3.py` and `eval.py`. **Collapsing to a single source
+> without first correcting it would have propagated all of that.** The table was rewritten before
+> being promoted. Verify only one table exists:
+> ```bash
+> grep -rln "^| Component | Status" --include=*.md . | grep -v .venv
+> ```
+
+**Original issue, kept for the record:**
 
 Component/phase status is written out independently in at least four places:
 `CLAUDE.md` ("Current state" table) · `docs/STATUS.md` ("Component Status" + "Remaining Work" +

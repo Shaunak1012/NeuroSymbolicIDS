@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-02** (26 scripts).
+> Last verified against source: **2026-08-03** (28 scripts).
 
 ## Map
 
@@ -11,14 +11,16 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`audit_leakage`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
 
 **Multi-seed convention.** Every trainable script takes a `<PREFIX>_SEED` env var and writes
 `<name>_s<seed>` artifacts, leaving the config-default (seed 42) filenames untouched:
-`CNN_SEED` · `LTN_SEED` · `AE_SEED` · `NOVELTY_SEED`. Given three retractions caused by single-seed
-results, **treat any n=1 number as provisional.**
+`CNN_SEED` · `LTN_SEED` · `AE_SEED` · `NOVELTY_SEED` · **`BASELINE_SEED`** (added 2026-08-03).
+Given **four** retractions caused by single-seed results, **treat any n=1 number as provisional.**
+⚠️ Note `xgboost` in `baselines.py` is **deterministic** — no subsampling is configured, so
+`random_state` has nothing to randomise and multi-seeding it produces byte-identical output.
 
 ---
 
@@ -165,14 +167,23 @@ throughout older entries; quote the n=3 mean and range instead. Multi-seed with
 **Purpose**: Classical + anomaly baselines, so "why not XGBoost / Isolation Forest?" is answered
 with numbers rather than assertion.
 
-- **XGBoost** — supervised binary (benign vs known attack), the tabular SOTA → macro **0.6372**
-- **RandomForest** — supervised binary → ⚠️ **blended 0.5643 only; never re-scored on the corrected
-  macro metric.** Its `runs.jsonl` entry predates the 2026-07-27 `metrics.py` rewrite and carries no
-  per-family breakdown, so it is absent from STATUS's corrected table. Re-run `baselines.py` to fill
-  this gap before citing RF in any comparison. Tracked in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
-- **IsolationForest** — **unsupervised**, fit on benign only (zero-day-legitimate) → macro **0.0628**
-  (but Bot 0.0571, statistically indistinguishable from the CNN's 0.0591 — supervision buys nothing
-  on the family that matters)
+✅ **All three re-run at n=3 on the current metric schema, 2026-08-03** (`BASELINE_SEED=42/43/44`),
+closing the long-standing "n=1 + old schema → not citable" gap.
+
+- **XGBoost** — supervised binary (benign vs known attack), the tabular SOTA → macro **0.6372**.
+  ⚠️ **Deterministic**: no subsampling is configured (`subsample`/`colsample_*` default to 1.0) and
+  `tree_method="hist"` is deterministic, so `random_state` has nothing to randomise — seeds 42/43/44
+  give **byte-identical** output. Treat as n=1 with verified reproducibility; its training variance
+  is *unmeasured*, not zero.
+- **RandomForest** — supervised binary → macro **0.5995** [0.5682, 0.6235], **Bot 0.1311**
+  [0.0576, 0.1933]. 🔴 **This result falsified the strong form of the (A)/(B) thesis reframing**: RF
+  is an (A)-family method yet **ties the autoencoder on Bot** (0.1314, paired bootstrap p=0.88)
+  while beating it 0.50 on macro. ⚠️ Its Bot range is the widest in the project (3.4× spread) and
+  its cross-seed Bot rank correlation is 0.068 — i.e. **noise**, same as the CNN. Never quote the
+  mean without the range; do not write "RF solves Bot."
+- **IsolationForest** — **unsupervised**, fit on benign only (zero-day-legitimate) → macro **0.0653**
+  [0.0628, 0.0683], Bot 0.0637 (1.9×) — still roughly the CNN's Bot level despite never seeing a
+  single attack.
 
 All evaluated via `metrics.py`, logged to `runs.jsonl`, saved as fusion channels. sklearn/xgboost
 only — **no TensorFlow**, so these run even when TF is unavailable.
@@ -320,6 +331,58 @@ stability of the representation.
 **87.9% / 86.6% / 44.4%** at k=200 (43.4 pp spread) versus 2.6 pp when only the clustering seed
 moves. The instability is **specific to Bot** — web families move 0.7–2.5 pp — and is independently
 confirmed by Mahalanobis (seed 44 at chance) even though classification is flat across seeds.
+
+**Writes** `outputs/metadata/kg_precheck.json` (added 2026-08-03 — before that it persisted
+**nothing**, so the numbers blocking all of Phase 4 existed only as prose in STATUS.md). Re-run
+2026-08-03: reproduces exactly.
+
+⚠️ **Read alongside `bot_failure_analysis.py`**, which explains *why* this instability exists: the
+CNN's Bot ranking is noise (cross-seed ρ = −0.090), so clustering it is clustering noise.
+
+## `scripts/significance.py`
+
+**Purpose**: paired significance tests on per-flow scores — the `conference_roadmap` Tier-S #2
+requirement, and the thing C2 was left waiting on.
+
+**Method**: stratified **paired bootstrap** over test flows (B=2000). Benign and the family are
+resampled *separately, preserving counts*, so the family's chance PR-AUC is held fixed and PR-AUC
+moves only with ranking quality. Both channels are scored on the same resampled indices (that is
+what makes it paired). Multi-seed channels collapse to their mean-over-seeds inside each replicate.
+
+**Key verdicts (2026-08-03)**: CNN **does** beat the LTN control (+0.0204, p=0.001) despite
+overlapping seed ranges · the CNN/AE double dissociation is significant on all three families
+(p<0.0005) · **RandomForest ties the autoencoder on Bot (p=0.88)** · **"CNN beats XGBoost on macro"
+is n.s. (p=0.80), reversing a 2026-07-27 retraction.**
+
+⚠️ **Estimand caveat, and it matters**: this quantifies *flow*-sampling uncertainty, treating the 3
+seeds as fixed. It does **not** convert n=3 into seed-level power — at n=3 the Wilcoxon signed-rank
+floor is p=0.25, so no seed-level claim in this project can reach p<0.05. Needs n≥6.
+
+**Writes** `outputs/metadata/significance.json`.
+
+## `scripts/bot_failure_analysis.py`
+
+**Purpose**: answer the project's last open research question — *why* does the CNN sit at chance on
+Bot when the skyline oracle proved the signal is fully present in the 68 features?
+
+**Four hypotheses were written into the script before it was run** (the pre-registration discipline
+adopted after the modality-analogue failure). Verdicts: **H1 absorption CONFIRMED** · **H3 feature
+neglect CONFIRMED** · **H2b rank instability CONFIRMED** · H2a boundary-adjacency REFUTED (Bot is
+benign-*interior*, not boundary-adjacent) · H4 raw-overlap REFUTED as predicted.
+
+**Answer — the failure is representational, not informational**: 100% of Bot flows are classified
+BENIGN across all 3 seeds (mean p(BENIGN)=0.9984); the features separating Bot from benign have
+**0/8 overlap** with those the known-class task needs; so the residual Bot ranking is **noise**
+(cross-seed ρ = **−0.090** vs 0.68–0.83 for other families). The autoencoder ranks Bot *reproducibly*
+(ρ=0.827) — which is what makes its bottleneck the data-backed choice for the Phase-4 KG.
+
+Also measured: **web attacks transfer by absorption into `DoS slowloris`** (~90% modal class), i.e.
+misclassification landing on the right side of the binary, not detection.
+
+**Anti-circularity**: feature-space claims are measured in **raw** space, never in the CNN's own
+embedding — the project was previously burned by a +0.933 correlation that became −0.388 in raw space.
+
+**Writes** `outputs/metadata/bot_failure_analysis.json`. Requires TF (loads all 3 CNN seeds).
 
 ## `scripts/audit_leakage.py`
 

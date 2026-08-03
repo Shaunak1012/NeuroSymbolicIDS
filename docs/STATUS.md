@@ -4,6 +4,32 @@
 
 ## ▶ RESUME HERE (next session)
 
+**2026-08-03 session: pre-Phase-4 remediation — and it produced three research results, not just fixes.**
+
+The session was scoped as "fix every discrepancy before Phase 4." Fixing them required re-running
+things, and the re-runs overturned two documented claims and answered the project's last open
+research question. **Read these three boxes before anything else:**
+
+1. 🔬 **"Why does the CNN fail on Bot?" is ANSWERED** — see
+   [WHY THE CNN FAILS ON BOT](#-why-the-cnn-fails-on-bot--answered-2026-08-03). All four
+   pre-registered predictions resolved. The mechanism is **representational, not
+   informational**: 100% of Bot flows are confidently classified as BENIGN, the features that
+   separate Bot from benign have **0/8 overlap** with the features the known-class task needs, and
+   consequently the CNN's Bot ranking is **noise** (cross-seed rank correlation **−0.090**, vs
+   0.68–0.83 for every other family). **This also decides the Phase-4 representation question** —
+   see Open Decisions.
+2. ✅ **Significance tests are RUN** (`scripts/significance.py`) — C2 is properly closed and the
+   double dissociation is now statistically established (p<0.0005 on all three families). **But one
+   earlier *retraction* is itself reversed: "CNN beats XGBoost on macro" is n.s. (p=0.80), so the
+   original "XGBoost ≈ CNN" claim was right and retracting it was premature.**
+3. 🔴 **The (A)/(B) thesis reframing is FALSIFIED IN ITS STRONG FORM.** Putting the classical
+   baselines on 3 seeds (a bookkeeping fix) showed **RandomForest — a supervised (A)-family method —
+   ties the autoencoder on Bot** (0.1311 vs 0.1314, p=0.88) **while beating it by 0.50 on macro.**
+   "(B) methods are needed to reach Bot" does not survive. See
+   [the (A)/(B) falsification](#-the-ab-framing-is-falsified-in-its-strong-form-2026-08-03).
+
+---
+
 **2026-08-02 session: C2 resolved, Phase 3 RUN — and it reframed the architecture.**
 
 1. **C2 closed.** `cnn_paper` is now n=3 (seeds 42/43/44, log-odds) — mean 0.6399, range
@@ -587,7 +613,13 @@ multi-seeded.** Given C2's finding that seed variance is large enough to swallow
 | **Autoencoder (new)** | **B** | **0.1000** | **0.1217** | **3.6×** | 0.1168 | 0.0615 |
 | IsolationForest | B | 0.0628 | 0.0571 | 1.7× | 0.0861 | 0.0451 |
 
-**Recall @1% FPR is the decisive column, and it is unusually clean:**
+~~**Recall @1% FPR is the decisive column, and it is unusually clean:**~~
+
+> 🔴 **RETRACTED (marked in place 2026-08-03; the substance was already falsified 2026-08-02).**
+> Recall @1% FPR is **not** the decisive column and reading it as one is exactly the error that
+> manufactured the false "categorical split" — see finding ③ in the red box below. On **lift**, the
+> AE is comparably weak across all three powered families (Bot 3.6×, Web BF 4.4×, XSS 5.3×). The
+> table below is kept as measured; interpret it as a threshold statistic, not as detection quality.
 
 | family | n | AE recall @1% FPR |
 |---|---:|---:|
@@ -944,12 +976,27 @@ and Fisher's assumption doesn't hold cleanly). Requires **no attack labels at al
 
 ⚠️ **Priority note (per the THESIS REFRAMING above): all LOCO/fusion-repair work targets an
 (A)-family method** (learn-what-attacks-look-like). **The evidence favours (B)-family methods**
-(learn-what-normal-looks-like) — Mahalanobis 4.3×, IsolationForest 1.7× while never seeing an attack.
-**Run the Phase-3 autoencoder before returning to this.**
+(learn-what-normal-looks-like) — ~~Mahalanobis 4.3×~~, IsolationForest 1.7× while never seeing an attack.
+~~**Run the Phase-3 autoencoder before returning to this.**~~
 
-**Recommended order:** ~~C2~~ **✅ done** (see above) → **Phase 3 autoencoder** (tests the reframing
+> 🔴 **Two corrections, marked in place 2026-08-03.**
+> ① **"Mahalanobis 4.3×" is RETRACTED** — seed 42 only, best of 3; n=3 mean is **3.0×**
+> (range 1.2–4.3×). This sentence was missed when the retraction was applied elsewhere;
+> KNOWN_ISSUES's parallel copy *was* corrected on 2026-08-02.
+> ② **Phase 3 is DONE** (built, run, multi-seeded 2026-08-02) — this directive pointed at
+> completed work. ③ The premise itself is now weaker: **RandomForest, an (A)-family method,
+> scores Bot 3.8× (n=3)** — matching the autoencoder. "(B) methods own Bot" does not survive
+> as a family-level claim; see "🔴 THE (A)/(B) FRAMING IS FALSIFIED IN ITS STRONG FORM".
+
+~~**Recommended order:** C2 **✅ done** (see above) → **Phase 3 autoencoder** (tests the reframing
 directly) → re-decide the KG's role → C1 + C3 reporting variants (no training) → C4 → C5 →
-Mahalanobis-LOCO probe if the autoencoder result still motivates fusion repair.
+Mahalanobis-LOCO probe if the autoencoder result still motivates fusion repair.~~
+
+> ✅ **Superseded 2026-08-03 — everything up to "re-decide the KG's role" is done.** Current order:
+> ~~C2~~ ✅ → ~~Phase 3 AE~~ ✅ → ~~multi-seed AE~~ ✅ → ~~significance test~~ ✅ (run 2026-08-03,
+> `scripts/significance.py`) → ~~C5 / runs.jsonl integrity~~ ✅ → ~~baselines on the current
+> schema~~ ✅ (n=3; surfaced the RandomForest-Bot result) → **next: decide the KG representation
+> (Phase 4)** → C1 + C3 reporting variants (no training) → C4.
 
 ## 🔴 PHASE-4 BLOCKER (2026-08-02) — the KG's clustering premise does not survive CNN reseeding
 
@@ -1069,21 +1116,230 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## 🔬 WHY THE CNN FAILS ON BOT — ANSWERED (2026-08-03)
+
+`scripts/bot_failure_analysis.py`. **Four hypotheses were written into the script before it was
+run** (the pre-registration discipline that caught the modality-analogue error). Artifact:
+`outputs/metadata/bot_failure_analysis.json`.
+
+This was the project's last open research question: the skyline oracle proved the Bot signal is
+fully present in the 68 features (PR-AUC 0.0314 → **0.9764** when ~1,000 labels are revealed), yet
+every closed-set method sits near chance. **That gap now has a measured mechanism.**
+
+### The three measurements that compose into the answer
+
+**① Bot is not "missed" — it is confidently absorbed into BENIGN. (H1: CONFIRMED, more strongly
+than predicted.)**
+
+| test family | argmax = BENIGN | mean p(BENIGN) | modal predicted class |
+|---|---:|---:|---|
+| **Bot** | **100.0 %** | **0.9984** | **BENIGN (100.0%)** |
+| Web Attack Brute Force | 10.1 % | 0.1046 | **DoS slowloris (89.8%)** |
+| Web Attack XSS | 3.1 % | 0.0413 | **DoS slowloris (92.9%)** |
+| BENIGN *(reference)* | 99.7 % | 0.9955 | BENIGN (99.7%) |
+
+Identical across all three CNN seeds (Bot 100.0 % / 100.0 % / 100.0 %). **The CNN does not find Bot
+ambiguous — it asserts benign.** *(The mean-p comparison to real benign is affected by benign's
+0.3% misclassified tail; the robust statement is the 100% argmax, which is seed-invariant.)*
+
+**This also supplies the transfer mechanism the falsified "modality analogue" story was reaching
+for — now measured rather than assumed.** Web attacks transfer *not* because the CNN detects them,
+but because it misclassifies them into **DoS slowloris**, a known *attack* class — which still
+lands on the correct side of the benign/attack binary. Their 0.92–0.95 PR-AUC is **absorption into
+a known attack**, not zero-day detection. Bot has no such absorber and falls into benign.
+⚠️ Note this is a *different* answer from `modality_analysis.py`'s raw-space nearest known attack
+(**DoS Hulk**): what the classifier actually does ≠ raw-space proximity. Both are HTTP/DoS-shaped,
+so a loose "shared HTTP modality" reading survives, but do not claim the specific class without
+citing which measurement.
+
+**② The features that separate Bot from benign are orthogonal to the ones the task teaches.
+(H3: CONFIRMED — predicted ≤2/8 overlap, measured 0/8.)**
+
+| | top-8 features |
+|---|---|
+| What the **known-class task** needs (benign vs known attack, fit on train) | Bwd Packet Length Min · Total Fwd Packets · Average Packet Size · Bwd Packet Length Std · Bwd Header Length · PSH Flag Count · Fwd Packet Length Max · Init_Win_bytes_backward |
+| What **separates Bot from benign** (oracle, held-out eval) | Bwd IAT Min · Bwd Packet Length Mean · Bwd Packet Length Max · Fwd Header Length · Destination Port · min_seg_size_forward · Init_Win_bytes_forward · Total Backward Packets |
+| **overlap** | **0 of 8** *(Web BF for contrast: 1 of 8)* |
+
+A discriminative model only learns what separates the classes it is shown. Bot's signature is
+**orthogonal to that feature set**, so there is no gradient pressure to represent it.
+
+**③ Therefore the CNN's residual Bot score is NOISE, not a weak signal. (H2b: CONFIRMED — and this
+is the sharpest number in the study.)**
+
+Spearman rank correlation *between CNN seeds*, computed within each family — "do independently
+trained models agree on which flows are most suspicious?"
+
+| channel | **Bot** | Web Attack BF | Web Attack XSS | BENIGN (ref) |
+|---|---:|---:|---:|---:|
+| CNN `cnn_paper` | **−0.090** | 0.678 | 0.830 | 0.696 |
+| RandomForest | **0.068** | 0.803 | 0.757 | 0.653 |
+| **Autoencoder** | **0.827** | 0.941 | 0.912 | 0.971 |
+
+**Both supervised models rank Bot flows essentially at random with respect to each other** (ρ ≈ 0,
+one slightly negative) while ranking every other family consistently. **The autoencoder does not
+have this problem.** Any statistic computed on a noise ranking is a lottery — which is exactly and
+independently what the Phase-4 blocker (cluster purity 87.9/86.6/**44.4**%), the Mahalanobis Bot
+spread (1.2–4.3×) and RandomForest's Bot swing (0.0576/0.1933/0.1423) all are. **One cause, four
+symptoms.**
+
+### Two hypotheses refuted, which matters for what NOT to try
+
+- **H4 — "Bot is intrinsically harder / overlaps benign in raw space." REFUTED as predicted.** Given
+  labels, Bot is as separable as the web attacks: oracle PR-AUC **0.9988** (ROC 0.9999) vs Web BF
+  0.9999 / XSS 0.9984. There is nothing intrinsically hard about Bot.
+- **H2(a) — "Bot sits near the decision boundary." REFUTED as stated.** Bot is not boundary-adjacent,
+  it is **benign-interior**: only 9.6 % of Bot flows score below the benign *median*, and its
+  AUC-vs-benign is 0.7115 (vs 0.9908 / 0.9982 for the web attacks). So a *little* signal survives —
+  enough for AUC 0.71, nowhere near enough for PR-AUC at 3.4 % prevalence. **Threshold tuning cannot
+  fix this**; the ordering itself is unreliable (see ③).
+
+### What this establishes
+
+> **The CNN's Bot failure is representational, not informational.** A closed-set discriminative model
+> learns only the features that separate the classes in its training set. Bot's discriminative
+> features are disjoint from that set (0/8), so Bot is projected into the benign region and asserted
+> benign with 100% argmax agreement across seeds. The residual score carries no reproducible
+> ordering (ρ = −0.09). **This is a general prediction about closed-set zero-day detection, not a
+> fact about Bot** — it says a novel class is detectable by an (A)-family model exactly to the
+> extent that its signature overlaps the known-class discriminative basis, and is *undetectable and
+> unstable* otherwise. That is falsifiable on other datasets and is the strongest claim this project
+> currently has.
+
+**⚠️ Scope limits, stated plainly.** n=3 seeds, one dataset, one architecture. The feature-importance
+comparison uses XGBoost as a proxy for "what the task needs" — the CNN's own attributions were not
+measured (SHAP is installed and this is the obvious follow-up). "0/8 overlap" is a top-8 cut; the
+full importance-vector correlation was not computed.
+
+## 🔴 THE (A)/(B) FRAMING IS FALSIFIED IN ITS STRONG FORM (2026-08-03)
+
+> Found while fixing a **bookkeeping** defect — the classical baselines were n=1 and on the
+> pre-2026-07-27 metric schema. Putting them on 3 seeds and the current schema produced a result
+> that contradicts a load-bearing part of the thesis reframing.
+
+**RandomForest, n=3 (new):**
+
+| channel | family | macro | Bot | Bot lift | Web BF | XSS |
+|---|:---:|---:|---:|---:|---:|---:|
+| **RandomForest** | **A** | **0.5995** [0.5682, 0.6235] | **0.1311** [0.0576, 0.1933] | **3.8×** | 0.8686 | 0.7987 |
+| Autoencoder | B | 0.0970 | 0.1314 | 3.8× | 0.1048 | 0.0547 |
+| CNN | A | 0.6399 | 0.0446 | 1.3× | 0.9226 | 0.9524 |
+
+**Paired bootstrap verdicts** (`significance.py`):
+- **RF vs AE on Bot: diff −0.0003, 95% CI [−0.0070, +0.0060], p = 0.88 → a statistical tie**, and a
+  tight one.
+- RF vs AE on macro: **+0.5025**, p < 0.0005 → RF dominates.
+- RF vs CNN on Bot: **+0.0865**, p < 0.0005 → RF beats the CNN on Bot by 2.9×.
+
+**What breaks:**
+
+1. 🔴 **"The project invested in (A) on a problem that is structurally (B)" — does not survive.**
+   RandomForest is squarely (A): supervised, trained on benign vs known attacks, never sees a Bot
+   flow. It reaches the best (B) method's Bot performance **and** keeps 0.60 macro. You do not need
+   a (B) method to reach Bot.
+2. 🔴 **"There is a monotonic trade-off frontier — no channel sits at both ends" (Finding 2 of the
+   train-vs-score decomposition) — FALSIFIED.** RF sits at both ends: AE-level on Bot, near-CNN-level
+   on web attacks. The frontier was an artifact of only having sampled four channels.
+3. ⚠️ **The double dissociation (CNN vs AE) survives and is now *significant*** — but it is a
+   dissociation between **two particular models**, not between two **method families**. Do not
+   write it up as an (A)-vs-(B) result.
+
+**What survives:** the *observation* that benign-only training reaches Bot without labels is intact
+and still interesting (the AE gets there with zero attack supervision, and — per the Bot analysis
+above — with a **stable** ranking, ρ=0.827, which neither supervised model achieves). The claim that
+it is *necessary* is dead.
+
+**Why RF succeeds where the CNN fails — consistent with the Bot analysis.** RF is an axis-aligned
+ensemble over raw features; it can split on `Destination Port` / `Init_Win_bytes_forward` for known
+classes and those splits incidentally isolate Bot. The CNN compresses to a 64-d embedding optimised
+*only* for known-class separation, discarding what it doesn't need. ⚠️ **This is a plausible account
+consistent with the evidence, not a measured mechanism** — RF's own Bot ranking is *also* unstable
+across seeds (ρ=0.068), so it is not reliably solving Bot either; its higher mean comes with a
+0.0576–0.1933 spread. **Do not write "RF solves Bot."**
+
+## ✅ SIGNIFICANCE TESTS RUN (2026-08-03) — C2 closed, one retraction reversed
+
+`scripts/significance.py` → `outputs/metadata/significance.json`. Stratified **paired bootstrap over
+test flows** (B=2000; benign and family resampled separately preserving counts, so the family's
+chance PR-AUC is held fixed and PR-AUC moves only with ranking quality). Multi-seed channels are
+collapsed to their mean-over-seeds inside each replicate.
+
+| comparison | metric | diff | 95% CI | p | verdict |
+|---|---|---:|---|---:|---|
+| **CNN vs LTN control** | macro | **+0.0204** | [+0.0082, +0.0331] | **0.001** | ✅ **SIGNIFICANT** |
+| CNN vs Autoencoder | Bot | −0.0868 | [−0.0940, −0.0800] | <0.0005 | ✅ AE wins |
+| CNN vs Autoencoder | Web BF | +0.8178 | [+0.8017, +0.8330] | <0.0005 | ✅ CNN wins |
+| CNN vs Autoencoder | XSS | +0.8977 | [+0.8734, +0.9192] | <0.0005 | ✅ CNN wins |
+| RandomForest vs Autoencoder | Bot | −0.0003 | [−0.0070, +0.0060] | 0.88 | ⬜ **tie** |
+| RandomForest vs CNN | Bot | +0.0865 | [+0.0807, +0.0926] | <0.0005 | ✅ RF wins |
+| RandomForest vs Autoencoder | macro | +0.5025 | [+0.4841, +0.5222] | <0.0005 | ✅ RF wins |
+| **CNN vs XGBoost** | macro | +0.0027 | [−0.0161, +0.0217] | **0.80** | ⬜ **n.s.** |
+| Autoencoder vs Mahalanobis | Bot | +0.0284 | [+0.0227, +0.0339] | <0.0005 | ✅ AE wins |
+
+*(p is floored at 1/B; "<0.0005" means no bootstrap replicate crossed zero.)*
+
+**① C2 is properly closed — and it resolves in the CNN's favour after all.** The overlapping n=3
+seed ranges (CNN [0.6353, 0.6446] inside control [0.6029, 0.6505]) suggested no winner. The
+**paired** test cancels flow-sampling noise common to both channels and finds the CNN's +0.0204
+advantage robust (p=0.001). **⚠️ Estimand caveat, and it matters:** this tests whether the
+*seed-mean* differs, treating these 3 seeds as fixed, and quantifies *flow*-sampling uncertainty
+only. It does **not** establish that a *fresh* CNN seed would beat a *fresh* control seed. At n=3
+the Wilcoxon signed-rank floor is p=0.25, so **no seed-level claim in this project can reach
+p<0.05 — that needs n≥6 seeds.** Both uncertainties are reported; do not conflate them.
+
+**② The double dissociation is now statistically established**, not merely non-overlapping ranges.
+Its *interpretation* changes though — see the (A)/(B) falsification above.
+
+**③ 🔴 A RETRACTION IS REVERSED: "on macro the CNN beats XGBoost" is NOT supported (p=0.80).**
+On 2026-07-27 the claim *"XGBoost (tabular SOTA) ≈ CNN"* was **retracted** on the grounds that the
+corrected macro metric showed the CNN winning 0.6446 vs 0.6372. That retraction compared two point
+estimates with no test. The paired bootstrap puts the difference at +0.0027 with a CI spanning zero.
+**The original "XGBoost ≈ CNN" claim was correct; retracting it was premature.** Consequence: the
+Phase-1 note that *"the 'pivot the story to explanation/adaptivity/response' framing was motivated
+by a tie that isn't there and should be revisited"* is **withdrawn — the tie is there.**
+This is the project's first retraction-of-a-retraction, and the lesson is symmetric to the earlier
+ones: *a point-estimate gap is not a result in either direction.*
+
 ## Component Status
+
+> 🔑 **THIS TABLE IS THE SINGLE SOURCE OF TRUTH for component status** (established 2026-08-03).
+> `CLAUDE.md`, `target/roadmap_gap_analysis.md` and `target/target_architecture.md` now point here
+> instead of maintaining parallel tables. Phase *numbering* (a different thing) is canonical in
+> [conference_roadmap.md §1b](target/conference_roadmap.md).
+>
+> ⚠️ **This table was itself the stalest thing in the repo when audited on 2026-08-03** — it still
+> described the autoencoder as `n=1 / macro 0.1000 / Bot 3.6× / 0.0000 recall on web attacks` after
+> all four had been superseded *the previous day, 400 lines above it in this same file*; it cited
+> "PortScan/DDoS strongly covered" (a claim KNOWN_ISSUES explicitly forbids); it said the behaviours
+> were "not yet wired into LTN" (they had been since 2026-07-27); and it had **no rows at all** for
+> `cnn_paper.py`, `baselines.py` or `novelty.py`, pointing instead at the superseded `cnn3.py`/`eval.py`.
+> Rewritten below. **If you change a component's status, change it HERE.**
+
+**Current pipeline (paper-aligned split) — this is what all reported results use:**
 
 | Component | Status | File | Notes |
 |-----------|--------|------|-------|
-| Preprocessing | ✅ Working | `scripts/preprocess.py` | Flow features, binary + multiclass labels. Drops IPs/ports. |
-| CNN (multiclass) | ✅ Verified correct | `scripts/cnn3.py` | See [cnn_current.md](implementation/cnn_current.md). Minor: double class-weighting. |
-| CNN evaluation | ✅ Working | `scripts/eval.py` | Produces PR-AUC baseline + `cnn_zeroday_eval.png`. |
-| Behaviour abstraction | ✅ Rebuilt & validated | `scripts/behavior.py` | Verified indices, vectorised, fuzzy [0,1], thresholds saved. PortScan/DDoS strongly covered. Not yet wired into LTN. See [doc](implementation/behaviour_abstraction_current.md). |
+| Preprocessing | ✅ Working | `scripts/preprocess.py` | 68 flow features + binary/multiclass labels. **Keeps** IP/port/timestamp in a row-aligned `meta_*.csv` side-table (since the 2026-06-18 dataset upgrade) — the old "drops IPs/ports" note was wrong. |
+| Paper-aligned split | ✅ Working | `scripts/preprocess_paper.py` | 9 known classes stratified 80/10/10, benign under-sampled 1:1. Train 883,796 / val 110,475 / test 114,658. Leakage-verified. |
+| **CNN + embeddings (neural pillar)** | ✅ **Verified correct — n=3** | `scripts/cnn_paper.py` | **macro 0.6399 [0.6353, 0.6446]**, log-odds scored. Multi-seed via `CNN_SEED`. Named `"embedding"` layer feeds novelty + KG. Minor: double class-weighting ([cnn_current.md](implementation/cnn_current.md)). |
+| Classical baselines | ✅ **n=3 (2026-08-03)** | `scripts/baselines.py` | XGBoost / RandomForest / IsolationForest. Multi-seed via `BASELINE_SEED`. Previously n=1 **and** on the pre-2026-07-27 metric schema (no macro logged) — both fixed; see "Last Measured Results". |
+| Novelty channels | ✅ **n=3** | `scripts/novelty.py` | MSP macro 0.5884, Mahalanobis 0.3777. Post-hoc on a trained CNN, no retraining. ⚠️ "Mahalanobis 4.3× on Bot" is **retracted** (seed 42 only); n=3 mean **3.0×**, seed 44 at chance. |
+| Behaviour abstraction | ✅ Rebuilt & validated | `scripts/behavior.py` | Verified indices, vectorised, fuzzy [0,1], thresholds saved. **7 behaviours** incl. `BeaconLike`. ⚠️ **Wired into LTN as Ax3–Ax6 since 2026-07-27.** ⚠️ Its validation tables were measured on the *temporal* split where PortScan/DDoS were zero-day — under the current protocol both are **known**, so "PortScan/DDoS strongly covered" is **not** evidence for the symbolic approach. `RepeatedConnections` is constant 0.0 (unblocked but unwired). See [doc](implementation/behaviour_abstraction_current.md). |
+| Metrics / tracking infra | ✅ Working | `scripts/metrics.py`, `tracking.py` | Headline = **macro** zero-day PR-AUC over powered families (n≥100); detects float32 saturation; appends to `runs.jsonl` (now version-controlled, see KNOWN_ISSUES). |
 | LTN reasoning (paper-split) | 🟡 Anatomized, multi-seeded — macro cost confirmed, Bot benefit retracted | `scripts/ltn_paper.py` | Clean (log-odds) control macro 0.6049 (n=1) / 0.6194 (n=3 mean); every axiom variant tried (old Ax3-5, targeted Ax6) costs macro relative to control, robust across seeds. ω=2.0 always collapses; ω=1.0 collapses 2/3 seeds — not the "safe zone" it looked like on n=1. Ax6's apparent Bot-lift improvement did not survive multi-seeding (control's own Bot lift ranges 1.5–2.9x). See STATUS "RESUME HERE" → "🔴 MULTI-SEED RESULTS" for the full table + retraction. |
-| LTN reasoning (legacy, temporal split) | 🔴 Superseded | `scripts/ltn.py` | Ran, underperformed (0.45 vs 0.67); SAT dominated CE ~40:1. Superseded by the paper-split protocol reset — see [doc](implementation/ltn_current.md). |
-| Knowledge Graph | ❌ Not built | — | Rescoped as memory + explainability corroboration. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
-| Decision Fusion | ❌ Not built | — | Now legitimately trainable under paper-aligned split. Spec: [decision_fusion.md](target/decision_fusion.md). |
+| **Anomaly pillar (autoencoder)** — canonical **Phase 3** | ✅ **Built, run & multi-seeded 2026-08-02 — n=3** | `scripts/autoencoder_paper.py` | Benign-only reconstruction error; **zero attack labels used in training *or* model selection**, so it is zero-day-legitimate by construction. **macro 0.0970 [0.0894, 0.1014]** · **Bot 0.1314 (3.8×) — the best Bot channel measured** · loses on web attacks (0.1048 / 0.0547). Establishes the **double dissociation** vs the CNN. Multi-seed via `AE_SEED`. ⚠️ Its first-day interpretation (a "modality analogue" mechanism) was **falsified the same day**; the *pattern* is real, the *explanation* is open — see "PHASE 3 RESULTS". |
+| **Knowledge Graph** — canonical **Phase 4** | 🔴 **BLOCKED — representation decision undecided** | — | Blocked, not merely unbuilt: clustering CNN embeddings is unsafe because Bot cluster purity swings **87.9 / 86.6 / 44.4 %** across CNN seeds while classification stays flat. Rescoped as memory + explainability corroboration (not primary detector). See "PHASE-4 BLOCKER" + [knowledge_graph.md](target/knowledge_graph.md). |
+| Decision Fusion — Phase 5 | ❌ Not built | — | ⚠️ A **fitted** combiner is structurally blocked — validation contains no zero-day by construction, so it cannot learn to weight a zero-day-specific channel (`fusion_beaconlike.py` → `[2.35, 0.02]`). See "THE FUSION WALL". Spec: [decision_fusion.md](target/decision_fusion.md). |
 | Explainability / Final Alert | ❌ Not built | — | + explanation-faithfulness measurement (Tier A). Spec: [explainability.md](target/explainability.md). |
-| Anomaly pillar (autoencoder) | ✅ **Built & run 2026-08-02** | `scripts/autoencoder_paper.py` | Canonical Phase 3. Benign-only reconstruction error, zero attack labels used. macro 0.1000, **Bot 3.6× (2nd best measured)**, but **0.0000 recall on all web attacks**. Produced the modality-analogue refinement — see "PHASE 3 RESULTS". n=1, not multi-seeded. |
 | Response engine (IPS) | ❌ Not built | — | Phase R (Shaunak solo, last). Temporal-replay containment. |
+
+**Legacy (temporal-split) pipeline — superseded 2026-06-18, retained as a secondary "hard mode" result:**
+
+| Component | Status | File | Notes |
+|-----------|--------|------|-------|
+| CNN (multiclass, temporal) | 🔴 Superseded | `scripts/cnn3.py` | The 0.6689 PR-AUC baseline. ⚠️ Trained with the **broken focal loss** and never retrained — see the open caveat in [KNOWN_ISSUES.md](KNOWN_ISSUES.md). |
+| CNN evaluation (temporal) | 🔴 Superseded | `scripts/eval.py` | Produces `cnn_zeroday_eval.png`. Reads `outputs/metadata/_legacy_temporal/`. |
+| LTN reasoning (temporal) | 🔴 Superseded | `scripts/ltn.py` | Ran, underperformed (0.45 vs 0.67); SAT dominated CE ~40:1. Superseded by the protocol reset — see [doc](implementation/ltn_current.md). |
 
 **Direction:** targeting top-tier publication — see [conference_roadmap.md](target/conference_roadmap.md) for plan v1.2 + the Tier-S/A/B "godly" agenda.
 
@@ -1097,7 +1353,8 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 1 | **Re-ground LTN axioms on behaviours** | ✅ Concluded (not "done" in the sense of shipping a win — see multi-seed retraction below) | Ax3–Ax6 all implemented, smoke-tested, multi-seeded. Every variant costs macro PR-AUC vs. the no-axiom control; targeted Ax6 (BeaconLike)'s apparent Bot-lift benefit did not survive multi-seeding. `ratio` omega-mode confirmed as the safe default if this line is revisited. Not pursuing further axiom variants for now. |
 | 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | **Unblocked, not blocked** — `meta_{train,val,test}.csv` now carry IP/port/timestamp aligned row-for-row. No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement. Wiring it is a choice, not a data problem. |
 | 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ✅ **DONE 2026-08-02** | Ran. Closes the "why not an autoencoder?" objection with a number, and produced the modality-analogue refinement that reframes the whole architecture. Was nearly skipped by a phase-number collision. **Follow-up (not scheduled): multi-seed it (n=1 today), and measure modality similarity to test the refined account.** |
-| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | 🔴 **BLOCKED** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). **Blocked on the representation decision** (Open Decisions below) — clustering CNN embeddings is not a safe foundation: Bot cluster purity swings 87.9/86.6/**44.4**% across CNN seeds. ⚠️ Also read the "Phase-4 readiness review" in that spec — 3 of its original assumptions no longer hold. |
+| 2c | **Pre-Phase-4 remediation + significance + Bot analysis** | ✅ **DONE 2026-08-03** | All audit discrepancies fixed (research record version-controlled, component status collapsed to one table, `kg_precheck` now persists, baselines on n=3 + current schema, legacy artifact collision resolved). Plus three research outputs: **significance tests run** (C2 closed; one retraction reversed), **the (A)/(B) strong form falsified** by RandomForest, and **the CNN's Bot failure explained**. |
+| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | 🟡 **UNBLOCKED — decision now evidence-backed, awaiting sign-off** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). **The representation question is no longer a coin flip**: the Bot failure analysis shows CNN embeddings rank Bot at *noise* (ρ=−0.090) while the AE bottleneck ranks it *reproducibly* (ρ=0.827) — so "ensemble CNN seeds" is futile and the AE bottleneck (or raw features) is the supported choice. See Open Decisions. ⚠️ Still read the "Phase-4 readiness review" in the spec — 3 of its original assumptions no longer hold, and the **false-positive rate of "unexplained cluster" is still unmeasured** (that remains the single most important untested quantity). |
 | 4 | Decision Fusion — canonical Phase 5 | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | Explainability / Final Alert | ⬜ | 3 explanations + alert. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
@@ -1116,8 +1373,9 @@ Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 | Decay "time" | Flow-count (reproducible) | — |
 | Compute (CPU vs GPU) | **CPU** (Ryzen 9 9950X3D) | GPU (RTX 5080/Blackwell) deferred — needs WSL2 + CUDA 12.8 + newer TF + Keras 3 migration. Revisit if training volume grows (multi-seed/sweeps/cross-dataset). |
 | ~~Run the Phase-3 autoencoder before the KG?~~ | ✅ **DECIDED & DONE 2026-08-02** | Ran it (n=3). Verdict: worth it. It answered the reviewer objection *and* produced the double-dissociation result, retracted "Mahalanobis 4.3×", and exposed the Phase-4 blocker. The prediction that its result was "genuinely unpredictable" held — it beat the CNN on Bot and lost 6.6× on macro. |
-| 🔴 **Which representation should the KG cluster?** | ⬜ **UNDECIDED — raised 2026-08-02, BLOCKS PHASE 4** | CNN embeddings are a seed lottery for Bot (purity 87.9/86.6/**44.4**%) while classification is flat. Options: (a) ensemble across CNN seeds; (b) raw features (no training, no lottery); (c) the AE's benign-trained 16-d bottleneck (most stable Bot channel — untested for clustering); (d) accept and publish the variance. **Lean: (c), but it is a hypothesis, not a data-backed recommendation.** See "PHASE-4 BLOCKER". |
-| **Run a significance test before citing CNN vs LTN control?** | ⬜ **UNDECIDED — raised 2026-08-02** | Their n=3 ranges overlap heavily, so neither can currently be called the winner. `conference_roadmap` Tier-S #2 already requires paired bootstrap / Wilcoxon on per-flow scores. Recommendation: **run it before any write-up**. |
+| 🔴 **Which representation should the KG cluster?** | ⬜ **STILL UNDECIDED (user's call) — but the evidence is no longer a coin flip** | **Updated 2026-08-03 by the Bot failure analysis, which turned this from a hypothesis into a data-backed recommendation.** (a) ensemble CNN seeds — ⚠️ **now looks futile**: the CNN's Bot ranking is *noise* (ρ=−0.090 across seeds), and averaging noise does not create signal; it would stabilise the *number* while the underlying representation still lacks Bot's features (0/8 overlap). (b) raw features — ✅ **viable**: Bot is fully separable there (oracle PR-AUC 0.9988) and there is no training lottery at all. (c) **AE's benign-trained 16-d bottleneck — ✅ now the data-backed lean**: it is the *only* representation measured that ranks Bot **reproducibly** (cross-seed ρ = **0.827**, vs CNN −0.090 / RF 0.068). (d) accept + publish the variance — cheapest, still honest. **Recommendation: (c), with (b) as a cheap complement/ablation.** Clustering purity under (c)/(b) is still **unmeasured** — one `kg_precheck.py` variant would settle it. |
+| ~~**Run a significance test before citing CNN vs LTN control?**~~ | ✅ **DONE 2026-08-03** | `scripts/significance.py`. Verdict: **the CNN does beat the control** (+0.0204, p=0.001, paired bootstrap over flows). ⚠️ Flow-level only — seed-level significance needs n≥6 and is *not* achievable at n=3 (Wilcoxon floor p=0.25). Also reversed the "CNN beats XGBoost" retraction (p=0.80, n.s.). |
+| **Multi-seed the remaining n=1 channels?** | ⬜ **NEW — raised 2026-08-03** | Now that `BASELINE_SEED` exists and multi-seeding overturned a thesis claim once, the remaining single-seed artifacts are a known risk. XGBoost is deterministic (no action possible without changing its config). Candidates: the LTN axiom variants at n=3 are done; `cnn_auxhead`, `fusion_*` are still n=1. Low cost, and this project has retracted **four** single-seed findings. |
 | **Omega mode for any future LTN work** | **`ratio`** (already the code default) | Settled 2026-07-27: `fixed` collapses 2/3 seeds at ω=1.0, deterministically at ω=2.0; `ratio` eliminated the collapse at no measured cost. Do not use `fixed` without a stated reason. |
 
 ## Last Measured Results
@@ -1132,28 +1390,46 @@ Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 | Channel | family | n | macro zd PR-AUC | Bot | Bot lift | Web BF | XSS |
 |---|:---:|:---:|---|---|---:|---:|---:|
 | **CNN** `cnn_paper` | A | 3 | **0.6399** [0.6353, 0.6446] | 0.0446 [0.0241, 0.0591] | 1.3× | **0.9226** | **0.9524** |
+| XGBoost | A | 1† | 0.6372 *(deterministic)* | 0.0608 | 1.8× | 0.9484 | 0.9023 |
 | LTN control `ltn_ctrl_w0` | A | 3 | 0.6194 [0.6029, 0.6505] | 0.0712 [0.0528, 0.0985] | 2.1× | 0.8889 | 0.8982 |
+| **RandomForest** | A | 3 | 0.5995 [0.5682, 0.6235] | **0.1311** [0.0576, 0.1933] | **3.8×** | 0.8686 | 0.7987 |
 | MSP | A/B | 3 | 0.5884 [0.5694, 0.6123] | 0.0448 [0.0245, 0.0591] | 1.3× | 0.8719 | 0.8485 |
 | Mahalanobis | B | 3 | 0.3777 [0.3363, 0.4585] | 0.1030 [0.0413, 0.1467] | 3.0× | 0.5840 | 0.4462 |
 | **Autoencoder** `autoencoder_paper` | B | 3 | 0.0970 [0.0894, 0.1014] | **0.1314** [0.1078, 0.1647] | **3.8×** | 0.1048 | 0.0547 |
+| IsolationForest | B | 3 | 0.0653 [0.0628, 0.0683] | 0.0637 [0.0571, 0.0732] | 1.9× | 0.0862 | 0.0459 |
 
 *(A) trained on known attacks · (B) trained on benign only.*
 
-**Not multi-seeded (n=1) and therefore not citable for comparison:** `xgboost`, `random_forest`,
-`isolation_forest`. All three also predate the 2026-07-27 `metrics.py` rewrite, so their
-`runs.jsonl` entries carry only the blended `zd_pr_auc` and **no per-family or macro breakdown**.
-Re-run `baselines.py` before using them in any table. Tracked in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
+† **XGBoost is deterministic here, so n=3 would be meaningless.** Seeds 42/43/44 produce
+**byte-identical** score arrays: no subsampling is configured (`subsample`/`colsample_*` default to
+1.0) and `tree_method="hist"` is deterministic, so `random_state` has no stochastic component to
+control. Treat this as **n=1 with verified reproducibility**, *not* as a 3-seed estimate — its
+training-time variance is **unmeasured**, not zero. To measure it you would need to enable
+subsampling or bootstrap the training data.
+
+> ✅ **All baselines were re-run on 3 seeds and the current metric schema on 2026-08-03**
+> (`BASELINE_SEED=42/43/44 python scripts/baselines.py`), closing the long-standing "n=1 and old
+> schema → not citable" gap. Doing so **overturned a thesis-level claim** — RandomForest's Bot score
+> ties the autoencoder's. See "🔴 THE (A)/(B) FRAMING IS FALSIFIED IN ITS STRONG FORM".
+> ⚠️ **RandomForest's Bot range [0.0576, 0.1933] is the widest in the table** — a 3.4× spread, and
+> its cross-seed Bot rank correlation is 0.068 (noise). Quote the mean only with the range.
 
 **Established comparative findings:**
 
 | claim | status | evidence |
 |---|---|---|
-| CNN vs Autoencoder is a **double dissociation** | ✅ **established** | ranges do not overlap on any family; AE wins Bot 2.9×, CNN wins Web BF 8.8× / XSS 17.4× |
+| **The CNN's Bot failure is representational, not informational** | ✅ **established 2026-08-03** | 100% argmax=BENIGN (all 3 seeds) · 0/8 feature overlap with the known-class task · cross-seed Bot rank ρ = **−0.090** vs 0.68–0.83 elsewhere · oracle PR-AUC 0.9988 rules out an information limit |
+| Web attacks transfer by **absorption into DoS slowloris**, not by detection | ✅ established 2026-08-03 | 89.8% / 92.9% modal-class assignment, stable across 3 seeds |
+| CNN vs Autoencoder is a **double dissociation** | ✅ **established + significant** | paired bootstrap: Bot −0.0868, Web BF +0.8178, XSS +0.8977, all p<0.0005 |
 | Every LTN axiom variant costs macro vs the no-axiom control | ✅ established | non-overlapping ranges, n=3 |
-| "The neural baseline beats the LTN control" | ❌ **not established** | CNN range [0.6353, 0.6446] sits *inside* control range [0.6029, 0.6505]; needs a significance test |
+| "The neural baseline beats the LTN control" | ✅ **NOW ESTABLISHED** (was "not established") | paired bootstrap +0.0204, CI [+0.0082, +0.0331], p=0.001. ⚠️ flow-level uncertainty only; seed-level remains underpowered at n=3 |
+| "**Only (B) methods reach Bot**" / "the problem is structurally (B)" | 🔴 **RETRACTED 2026-08-03** | RandomForest (A-family) ties the AE on Bot: 0.1311 vs 0.1314, p=0.88 — while beating it 0.50 on macro |
+| "Monotonic frontier — no channel sits at both ends" | 🔴 **RETRACTED 2026-08-03** | RF sits at both ends (Bot 0.1311 *and* Web BF 0.8686) |
+| "On macro the CNN beats XGBoost" | 🔴 **RETRACTION REVERSED** | +0.0027, CI [−0.0161, +0.0217], p=0.80 → n.s. The original *"XGBoost ≈ CNN"* claim stands; retracting it in 2026-07-27 was premature |
 | "Ax6 roughly doubles Bot lift" | 🔴 **retracted** | single-seed artifact; control's own mean lift is higher |
 | "Mahalanobis 4.3× — best Bot channel" | 🔴 **retracted** | seed 42 only; n=3 mean is 3.0×, seed 44 at chance |
 | "Bot forms a stable ~90%-pure cluster" | 🔴 **retracted** | varied clustering seed, not CNN seed; 87.9/86.6/**44.4**% across CNN seeds |
+| "The AE is a better Bot channel than Mahalanobis" | ✅ **established 2026-08-03** | +0.0284, CI [+0.0227, +0.0339], p<0.0005 (previously "ranges overlap, not established") |
 
 ## Session Log Pointer
 
