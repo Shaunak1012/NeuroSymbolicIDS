@@ -171,7 +171,9 @@ prob = cnn.predict(Xte, batch_size=1024, verbose=0)
 patk = 1.0 - prob[:, benign_idx]
 res = metrics.evaluate(yte, patk, zero_day, fpr=0.01)
 metrics.print_report(res)
-np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{TAG}_test.npy"), patk.astype(np.float32))
+# predictions_dir() quarantines smoke runs into _smoke_archive/ (see paths.py).
+np.save(os.path.join(paths.predictions_dir(TAG), f"y_prob_{TAG}_test.npy"),
+        patk.astype(np.float32))
 if SUBSET == 0:
     cnn.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
     tracking.log_run(TAG, {"protocol": "paper", "loss": LOSS, "axioms": AXIOMS,

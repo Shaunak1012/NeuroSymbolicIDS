@@ -1,0 +1,117 @@
+{
+ "applied": true,
+ "rows_before": 97,
+ "seed_fixes": [
+  {
+   "name": "ltn_ctrl_w0_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ctrl_w0_s44_logodds",
+   "was": 42,
+   "now": 44
+  },
+  {
+   "name": "ltn_ax6_w0p5_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ax6_w0p5_s44_logodds",
+   "was": 42,
+   "now": 44
+  },
+  {
+   "name": "ltn_ax6_w1p0_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ax6_w1p0_s44_logodds",
+   "was": 42,
+   "now": 44
+  },
+  {
+   "name": "ltn_ctrl_w0_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ctrl_w0_s44_logodds",
+   "was": 42,
+   "now": 44
+  },
+  {
+   "name": "ltn_ax6_w0p5_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ax6_w0p5_s44_logodds",
+   "was": 42,
+   "now": 44
+  },
+  {
+   "name": "ltn_ax6_w1p0_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ax6_w1p0_s44_logodds",
+   "was": 42,
+   "now": 44
+  },
+  {
+   "name": "ltn_ax6_ratio_w1p0_s43_logodds",
+   "was": 42,
+   "now": 43
+  },
+  {
+   "name": "ltn_ax6_ratio_w1p0_s44_logodds",
+   "was": 42,
+   "now": 44
+  }
+ ],
+ "duplicates_removed": [
+  "cnn_paper_logodds",
+  "ltn_ctrl_w0_logodds",
+  "ltn_repro_logodds",
+  "ltn_v2_logodds",
+  "ltn_anat_w0p5_logodds",
+  "ltn_anat_w1p0_logodds",
+  "ltn_anat_w2p0_logodds",
+  "ltn_ax6_w0p5_logodds",
+  "ltn_ax6_w1p0_logodds",
+  "cnn_auxhead_l0.5_logodds",
+  "cnn_paper_logodds",
+  "ltn_ctrl_w0_logodds",
+  "ltn_repro_logodds",
+  "ltn_v2_logodds",
+  "ltn_anat_w0p5_logodds",
+  "ltn_anat_w1p0_logodds",
+  "ltn_anat_w2p0_logodds",
+  "ltn_ax6_w0p5_logodds",
+  "ltn_ax6_w1p0_logodds",
+  "cnn_auxhead_l0.5_logodds",
+  "ltn_ctrl_w0_s43_logodds",
+  "ltn_ctrl_w0_s44_logodds",
+  "ltn_ax6_w0p5_s43_logodds",
+  "ltn_ax6_w0p5_s44_logodds",
+  "ltn_ax6_w1p0_s43_logodds",
+  "ltn_ax6_w1p0_s44_logodds"
+ ],
+ "schema_stamped": 71,
+ "duplicate_names_preserved": [
+  "cnn_auxhead_l0.5",
+  "isolation_forest",
+  "ltn_repro",
+  "ltn_v2",
+  "mahalanobis",
+  "msp",
+  "random_forest",
+  "xgboost"
+ ],
+ "rows_after": 71,
+ "stamp": "2026-08-03T01:12:40+00:00"
+}

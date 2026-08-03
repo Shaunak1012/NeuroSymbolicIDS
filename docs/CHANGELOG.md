@@ -45,6 +45,41 @@ answered the project's last open research question.**
   claim was right. The downstream note that the "pivot to explanation/adaptivity" framing rested on
   "a tie that isn't there" is **withdrawn — the tie is there.**
 
+### Data-integrity repairs (second pass, same day)
+
+The first pass **documented** these defects but left them in the data, citing the append-only rule.
+That reasoning became obsolete the moment `runs.jsonl` went under version control — git supplies
+the audit trail the rule was protecting. Repaired via `scripts/repair_runs_log.py` (dry-run by
+default, report written, fully revertible):
+
+- **14 rows carried the wrong seed** → 0. `rescore_logits.py` stamped every `_logodds` entry with
+  the config default (42); the *code* was fixed 2026-08-02, the *data* never was.
+  ⚠️ **Correcting my own correction:** an earlier note in KNOWN_ISSUES said *16* rows — that matched
+  `'_s4' in name and seed==42`, which wrongly counts `ltn_ax6_ratio_w1p0_s42{,_logodds}`, whose seed
+  *is* correctly 42. True figure is **14**, derived per-row from each tag's own `_s<N>` suffix.
+- **26 exact-duplicate rows removed** (97 → 71). ⚠️ **Only exact duplicates** — identical in name,
+  params *and* every metric. **8 duplicated names were deliberately preserved** because their
+  content genuinely differs: six old-schema/new-schema pairs from the metrics rewrite, plus
+  `ltn_repro` (0.4401 vs 0.4853) and `ltn_v2` (0.4908 vs 0.4912), which are **distinct training runs
+  with identical configs**. Collapsing those would have destroyed research data; the script asserts
+  no run name can disappear and refuses to write if one would.
+- **All 71 rows stamped with a schema version** (`v1-blended` 15 / `v2-macro` 56), so pre- and
+  post-2026-07-27 records stop being silently comparable.
+- ✅ **Verified every published figure reproduces unchanged after the repair.** A metadata repair
+  that moved a result would itself have been a bug.
+
+Two further defects in `tracking.py`, found while fixing the above:
+
+- **Every `stamp` was empty** — it defaulted to `""` and no caller ever passed one, so all 97 rows
+  had no time information whatsoever. Now auto-populated (UTC ISO-8601).
+- **The log was opened without an explicit encoding** — cp1252 on Windows, the same bug class that
+  broke `config.py`. Any non-ASCII class name (CIC-IDS2017 labels contain them) would have crashed
+  the write or corrupted the read.
+
+And **smoke artifacts no longer pollute the fusion-channel namespace**: `paths.predictions_dir(tag)`
+routes any "smoke" tag to `_smoke_archive/` automatically, so the 2026-08-02 hand-cleanup does not
+have to be repeated after every `*_SUBSET` run.
+
 ### Discrepancies fixed (the original scope)
 
 - **🔴 The entire research record was gitignored.** `outputs/metadata/` was excluded wholesale, so
