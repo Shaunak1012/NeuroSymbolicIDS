@@ -50,6 +50,22 @@ import paths
 _CAPTURE_DAYS = {3, 4, 5, 6, 7}   # 3-7 July 2017
 _CAPTURE_MONTH = 7
 
+# Corrected timestamps are persisted as a typed artifact so consumers never have
+# to re-derive them (and never re-hit the two traps). `preprocess_paper.py` emits
+# these; `backfill()` regenerates them for an existing split without re-running
+# preprocessing.
+ARTIFACT = "timestamp_{split}.npy"
+
+# Published CIC-IDS2017 attack schedule. Used to VALIDATE the reconstruction —
+# this is external ground truth, not something fitted to our labels.
+_EXPECTED_SCHEDULE = {
+    "Web Attack Brute Force": ("2017-07-06 09:00", "2017-07-06 10:30"),
+    "Web Attack XSS":         ("2017-07-06 10:00", "2017-07-06 11:00"),
+    "Bot":                    ("2017-07-07 09:00", "2017-07-07 13:30"),
+    "PortScan":               ("2017-07-07 12:30", "2017-07-07 16:00"),
+    "DDoS":                   ("2017-07-07 15:30", "2017-07-07 16:45"),
+}
+
 
 def parse(raw):
     """Parse a raw CIC-IDS2017 Timestamp series into true datetimes."""
@@ -74,8 +90,21 @@ def parse(raw):
     return t
 
 
+def _artifact_path(split):
+    return os.path.join(paths.PAPER, ARTIFACT.format(split=split))
+
+
 def load_timestamps(split):
-    """Row-aligned timestamps for a paper split ('train' | 'val' | 'test')."""
+    """Row-aligned corrected timestamps for a paper split ('train'|'val'|'test').
+
+    Prefers the precomputed `timestamp_<split>.npy` artifact; falls back to
+    parsing the meta CSV (and says so) if it has not been generated yet.
+    """
+    p = _artifact_path(split)
+    if os.path.exists(p):
+        return pd.Series(np.load(p))
+    print(f"[timeline] {os.path.basename(p)} missing — parsing meta CSV. "
+          f"Run `python scripts/timeline.py --backfill` to persist it.")
     meta = pd.read_csv(os.path.join(paths.PAPER, f"meta_{split}.csv"),
                        usecols=["Timestamp"])
     return parse(meta["Timestamp"])
@@ -84,3 +113,55 @@ def load_timestamps(split):
 def time_order(split):
     """Indices that sort this split's rows into true chronological order."""
     return np.argsort(load_timestamps(split).to_numpy(), kind="stable")
+
+
+def write_corrected(split, series=None):
+    """Persist corrected timestamps as datetime64[s]. Called by preprocess_paper."""
+    if series is None:
+        meta = pd.read_csv(os.path.join(paths.PAPER, f"meta_{split}.csv"),
+                           usecols=["Timestamp"])
+        series = parse(meta["Timestamp"])
+    arr = series.to_numpy().astype("datetime64[s]")
+    np.save(_artifact_path(split), arr)
+    return arr
+
+
+def selftest(split="test", verbose=True):
+    """Validate the reconstruction against the PUBLISHED capture schedule.
+
+    External ground truth, not fitted. Raises on mismatch so a future data change
+    (or a re-introduced parsing bug) fails loudly instead of silently reordering
+    every temporal result.
+    """
+    ts = pd.Series(pd.to_datetime(load_timestamps(split)))
+    y = np.load(os.path.join(paths.PAPER, f"y_{split}_mc.npy"), allow_pickle=True)
+    hours = set(pd.Series(ts).dt.hour.unique().tolist())
+    if not hours <= set(range(8, 18)):
+        raise AssertionError(f"hours {sorted(hours)} outside the 08:00-17:00 capture window")
+    problems = []
+    for fam, (lo, hi) in _EXPECTED_SCHEDULE.items():
+        m = y == fam
+        if not m.any():
+            continue
+        f_lo, f_hi = ts[m].min(), ts[m].max()
+        ok = pd.Timestamp(lo) <= f_lo and f_hi <= pd.Timestamp(hi)
+        if verbose:
+            print(f"  {'OK ' if ok else 'FAIL'} {fam:24s} {f_lo} -> {f_hi} "
+                  f"(expected within {lo} .. {hi})")
+        if not ok:
+            problems.append(fam)
+    if problems:
+        raise AssertionError(f"schedule mismatch for {problems} — do NOT trust temporal results")
+    if verbose:
+        print(f"  all families match the published CIC-IDS2017 schedule ({split})")
+    return True
+
+
+if __name__ == "__main__":
+    import sys
+    if "--backfill" in sys.argv:
+        for sp in ("train", "val", "test"):
+            a = write_corrected(sp)
+            print(f"wrote {_artifact_path(sp)}  n={len(a)}  {a.min()} -> {a.max()}")
+    print("\nself-test against the published capture schedule:")
+    selftest("test")

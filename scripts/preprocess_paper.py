@@ -118,6 +118,18 @@ meta.iloc[te_idx].to_csv(os.path.join(OUT, "meta_test.csv"), index=False)
 np.save(os.path.join(OUT, "known_classes.npy"), np.array(sorted(set(y_tr))))
 np.save(os.path.join(OUT, "zero_day_classes.npy"), np.array(sorted(ZERO_DAY)))
 
+# ---- CORRECTED timestamps as a typed artifact (added 2026-08-03) ----
+# The raw `Timestamp` string in meta_*.csv is a TRAP: dates are D/M/YYYY (naive
+# parsing scatters this 5-day capture across March/June/July) and the clock is
+# 12-hour with no AM/PM (so 1 PM sorts before 9 AM). Emitting the corrected value
+# as datetime64[s] here means downstream consumers get it right by default
+# instead of having to know. See scripts/timeline.py.
+import timeline
+for _sp, _idx in (("train", tr_idx), ("val", val_idx), ("test", te_idx)):
+    _ts = timeline.parse(meta.iloc[_idx]["Timestamp"])
+    timeline.write_corrected(_sp, _ts)
+print(f"wrote corrected timestamp_{{train,val,test}}.npy -> {OUT}")
+
 # ---- report + leakage assertions ----
 lines = []
 def log(s): print(s); lines.append(s)

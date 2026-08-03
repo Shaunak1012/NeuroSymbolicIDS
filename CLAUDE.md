@@ -268,6 +268,7 @@ Documentation map:
 - **68 features**, not 70. Verify with `check.py`.
 - **Only 3 zero-day families are adequately powered** (Bot n=1,956, Web Brute Force, Web XSS). Heartbleed (n=11), Infiltration (n=36) and SQL Injection (n=21) are excluded from the macro metric — never report them to 4 decimal places.
 - **The headline metric is macro zero-day PR-AUC**, not the blended "benign vs all unknowns" number — the blend is a size-weighted mixture that reorders the ranking. `metrics.py` enforces this.
+- **⏱️ NEVER parse `meta_*.csv` `Timestamp` directly — use `scripts/timeline.py`.** The raw string is wrong twice: dates are **D/M/YYYY** (naive parsing scatters the 5-day capture across four months) and the clock is **12-hour with no AM/PM** (1 PM sorts before 9 AM). Measured: **all 114,658 test rows change position** between naive and corrected order, and naive parsing emits `NaT`. Corrected values are persisted as `data/processed/paper/timestamp_{train,val,test}.npy`; regenerate with `python scripts/timeline.py --backfill`. `timeline.selftest()` validates against the published capture schedule and raises on mismatch.
 - Test flows of unseen classes are encoded as **−1** (zero-day marker).
 - The embedding layer is named **`"embedding"`** — downstream extraction depends on this name.
 - CNN ~chance recall on zero-day is **intended** — it's the honest baseline the symbolic stages must beat. As of Phase 2, **nothing has beaten it.**

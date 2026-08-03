@@ -214,6 +214,49 @@ time information at all), and **the log was opened without an explicit encoding*
 Windows, the same bug class that broke `config.py`, which would corrupt or crash on any non-ASCII
 class name (CIC-IDS2017 labels contain them).
 
+### [FIXED 2026-08-03] 🔴 `meta_*.csv` timestamps are silently wrong under naive parsing
+Found while building the KG's temporal-decay axis. `pd.to_datetime(meta["Timestamp"])` looks like it
+works and is wrong **twice**:
+
+1. **Dates are D/M/YYYY, not M/D/YYYY.** CIC-IDS2017 was captured Mon 3 – Fri 7 July 2017. Default
+   parsing turns `"3/7/2017"` into **March 7** and `"6/7/2017"` into **June 7**, scattering a
+   five-day capture across four months. The tell: every naively-parsed date has `day == 7` while the
+   month varies — impossible for a 5-day capture.
+2. **The clock is 12-hour with no AM/PM marker.** Observed hours are exactly {1,2,3,4,5, 8,9,10,11,12}
+   — no 0, no 6, no 7, nothing above 12 — which maps one-to-one onto an **08:00–17:00 workday**
+   ({8..12} AM, {1..5} PM) with no collisions. Uncorrected, **1 PM sorts before 9 AM**.
+
+**Severity: total, not subtle.** Measured directly — **all 114,658 test rows change position**
+between naive and corrected chronological order, and naive parsing additionally produces `NaT`.
+Any ordering, growth rate, decay curve or time-window analysis built on the raw column is
+meaningless. This would have silently wrecked the "adaptive" story that was committed to the same day.
+
+**Fix:** `scripts/timeline.py` — corrects both defects, and **`preprocess_paper.py` now emits
+`timestamp_{train,val,test}.npy` (datetime64[s]) as a typed artifact**, so consumers get the right
+value by default rather than having to know the trap exists. `timeline.load_timestamps()` prefers
+the artifact and falls back to (correct) parsing. `timeline.parse()` **raises rather than guessing**
+if the date/hour pattern doesn't match the expected capture window.
+
+**Validated against external ground truth, not fitted** — `timeline.selftest()` asserts every family
+lands in its published window and is wired to fail loudly on any future data change:
+
+| family | reconstructed | published schedule |
+|---|---|---|
+| Web Attack Brute Force | Thu 06 Jul 09:15–10:00 | Thu morning ✅ |
+| Web Attack XSS | Thu 06 Jul 10:15–10:35 | Thu morning ✅ |
+| Bot | Fri 07 Jul 09:34–12:59 | Fri morning ✅ |
+| PortScan | Fri 07 Jul 13:06–15:23 | Fri afternoon ✅ |
+| DDoS | Fri 07 Jul 15:56–16:16 | Fri afternoon ✅ |
+
+Artifacts are gitignored (≈9 MB, regenerable in seconds):
+```bash
+.venv/Scripts/python.exe scripts/timeline.py --backfill
+```
+
+⚠️ **Consequence that outlives the bug:** because the attacks are *scripted into fixed windows*, any
+growth-rate or decay result is partly measuring CIC-IDS2017's experimental design rather than the
+attacks. Must be stated in the write-up — see STATUS → "LAST PHASE-4 GATE CLOSED".
+
 ### [FIXED 2026-08-03] Smoke-test artifacts were written into the real fusion-channel namespace
 `*_SUBSET` runs train on a tiny slice for two epochs purely to prove the code path executes, but
 wrote `y_prob_<tag>_test.npy` into `outputs/predictions/` alongside genuine channels, where an

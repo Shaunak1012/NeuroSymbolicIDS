@@ -385,7 +385,16 @@ The reconstruction is **validated against the published capture schedule**, not 
 Thu 09:15–10:00 · XSS Thu 10:15–10:35 · Bot Fri 09:34–12:59 · PortScan Fri 13:06–15:23 · DDoS
 Fri 15:56–16:16. `parse()` raises rather than guessing if the date/hour pattern doesn't match.
 
-API: `load_timestamps(split)` → row-aligned `pd.Series`; `time_order(split)` → chronological index.
+**Severity is total, not subtle:** measured, **all 114,658 test rows change position** between naive
+and corrected chronological order, and naive parsing additionally emits `NaT`.
+
+`preprocess_paper.py` now emits `timestamp_{train,val,test}.npy` (datetime64[s]) so consumers get the
+corrected value **by default**. `load_timestamps()` prefers that artifact and falls back to correct
+parsing. `parse()` **raises rather than guessing** if the date/hour pattern is unexpected.
+
+API: `load_timestamps(split)` → row-aligned `pd.Series` · `time_order(split)` → chronological index ·
+`write_corrected(split)` · `selftest(split)` → validates against the published schedule, raises on
+mismatch. Regenerate artifacts: `python scripts/timeline.py --backfill`.
 
 ## `scripts/kg_criteria.py`
 
