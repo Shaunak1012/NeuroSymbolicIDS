@@ -14,9 +14,17 @@ Falsifiable prediction stated BEFORE the first run (2026-07-29):
     "Bot flows will distribute across benign-dominated clusters rather than
      concentrating in distinct ones."
 
-Result: HALF WRONG, in the useful direction. Zero-day flows DO land ~100% in
-benign-dominated clusters, but they CONCENTRATE rather than smear — Bot forms a
-~90%-pure cluster at k>=200, stable across seeds, capturing ~34% of Bot.
+Result, first pass (2026-07-29): HALF WRONG in the useful direction — zero-day flows
+DO land ~100% in benign-dominated clusters, but Bot CONCENTRATES into a ~90%-pure
+cluster at k>=200 rather than smearing.
+
+🔴 RETRACTED 2026-08-02 — "stable across seeds" measured the WRONG VARIABLE.
+The two seeds originally varied were CLUSTERING seeds on a FIXED seed-42 embedding,
+so it measured k-means stability, never the stability of the representation the KG
+would actually be built on. Varying the CNN seed gives Bot purity 87.9% / 86.6% /
+44.4% at k=200 — a 43.4 pp spread, versus 2.6 pp when only the clustering seed
+moves. Web BF / XSS stay stable (0.7-2.5 pp), so the instability is SPECIFIC TO BOT.
+This is the PHASE-4 BLOCKER: do not build the KG on a single CNN embedding.
 
 What this does NOT show
 -----------------------
@@ -27,15 +35,21 @@ clusters were already >90% benign in training. The false-positive rate of
 "unexplained cluster" is the quantity that actually decides whether the mechanism
 works, and it is NOT measured here. Measure it before building the graph.
 
-These are geometric measures, not detection metrics. n=2 seeds — provisional.
+These are geometric measures, not detection metrics.
 
 Run:  python scripts/kg_precheck.py
+Writes: outputs/metadata/kg_precheck.json  (added 2026-08-03 — before that this
+        script saved NOTHING, so the numbers blocking all of Phase 4 existed only as
+        prose in STATUS.md and were not reproducible from any artifact.)
 """
 import os
+import json
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans
 
 import paths
+
+RESULTS = {"part1_vary_cnn_seed": {}, "part2_vary_clustering_seed": {}, "spread": {}}
 
 P = paths.PAPER
 E = paths.EMBEDDINGS
@@ -82,6 +96,8 @@ for K in (200, 400):
         Ete = np.load(os.path.join(E, f"X_test_cnn_paper{sfx}_emb.npy"))
         r = measure(Etr, ytr, Ete, K, clust_seed=42)
         part1[(K, cnn_seed)] = r
+        RESULTS["part1_vary_cnn_seed"][f"k{K}_cnnseed{cnn_seed}"] = {
+            f: {"purity": r[f][0], "recall": r[f][1]} for f in FAMS}
         cells = [f"p={r[f][0]:5.1%} r={r[f][1]:5.1%}" for f in FAMS]
         print(f"{cnn_seed:9d} {K:5d} | " + " | ".join(f"{c:>20s}" for c in cells))
     print("-" * 96)
@@ -91,6 +107,10 @@ for K in (200, 400):
     for f in FAMS:
         ps = [part1[(K, s)][f][0] for s, _ in CNN_SEEDS]
         rs = [part1[(K, s)][f][1] for s, _ in CNN_SEEDS]
+        RESULTS["spread"][f"k{K}_{f}"] = {
+            "purity_min": min(ps), "purity_max": max(ps), "purity_spread_pp": (max(ps) - min(ps)) * 100,
+            "purity_by_seed": {str(s): part1[(K, s)][f][0] for s, _ in CNN_SEEDS},
+            "recall_min": min(rs), "recall_max": max(rs)}
         print(f"  k={K:3d} {f:24s} purity {min(ps):5.1%}-{max(ps):5.1%} "
               f"(spread {max(ps)-min(ps):5.1%}) | recall {min(rs):5.1%}-{max(rs):5.1%}")
 
@@ -104,8 +124,15 @@ print("-" * 96)
 for K in (50, 100, 200, 400, 800):
     for cs in (42, 43):
         r = measure(Etr, ytr, Ete, K, clust_seed=cs)
+        RESULTS["part2_vary_clustering_seed"][f"k{K}_clustseed{cs}"] = {
+            f: {"purity": r[f][0], "recall": r[f][1]} for f in FAMS}
         cells = [f"p={r[f][0]:5.1%} r={r[f][1]:5.1%}" for f in FAMS]
         print(f"{K:5d} {cs:6d} | " + " | ".join(f"{c:>20s}" for c in cells))
+
+_out = os.path.join(paths.METADATA, "kg_precheck.json")
+with open(_out, "w") as _f:
+    json.dump(RESULTS, _f, indent=1)
+print(f"\nwrote {_out}")
 
 print("""
 p = purity of that family's single best cluster (frac of the cluster that IS the family)
