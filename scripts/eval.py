@@ -40,8 +40,10 @@ def categorical_focal_loss(alpha_weights, gamma=2.0):
 with open(os.path.join(paths.MODELS, "label_encoder.pkl"), "rb") as f:
     le = pickle.load(f)
 
-class_names      = np.load(os.path.join(paths.METADATA, "class_names.npy"),      allow_pickle=True).tolist()
-zero_day_classes = np.load(os.path.join(paths.METADATA, "zero_day_classes.npy"),  allow_pickle=True).tolist()
+# NOTE: METADATA_LEGACY, not METADATA — this script evaluates the superseded temporal
+# split, whose class lists are incompatible with the current paper protocol's.
+class_names      = np.load(os.path.join(paths.METADATA_LEGACY, "class_names.npy"),      allow_pickle=True).tolist()
+zero_day_classes = np.load(os.path.join(paths.METADATA_LEGACY, "zero_day_classes.npy"),  allow_pickle=True).tolist()
 n_classes        = len(class_names)
 
 print(f"Known train classes ({n_classes}): {class_names}")
@@ -143,7 +145,7 @@ else:
 # =========================
 # PLOTS
 # =========================
-with open(os.path.join(paths.METADATA, "history.pkl"), "rb") as f:
+with open(os.path.join(paths.METADATA_LEGACY, "history.pkl"), "rb") as f:
     hist = pickle.load(f)
 
 fig = plt.figure(figsize=(18, 12))

@@ -15,7 +15,8 @@ models/              trained models + fitted scalers   -> MODELS
 outputs/arrays/      model-ready tensors & label splits-> ARRAYS
 outputs/embeddings/  64-dim CNN/LTN embeddings         -> EMBEDDINGS
 outputs/predictions/ softmax / P(attack) score arrays  -> PREDICTIONS
-outputs/metadata/    class names, history, thresholds  -> METADATA
+outputs/metadata/    runs.jsonl, thresholds, provenance-> METADATA
+outputs/metadata/_legacy_temporal/  superseded pipeline -> METADATA_LEGACY
 outputs/figures/     evaluation plots (.png)           -> FIGURES
 """
 
@@ -47,8 +48,19 @@ PREDICTIONS = os.path.join(ROOT, "outputs", "predictions")
 METADATA    = os.path.join(ROOT, "outputs", "metadata")
 FIGURES     = os.path.join(ROOT, "outputs", "figures")
 
+# LEGACY metadata (added 2026-08-03). The superseded temporal-split pipeline
+# (cnn3.py -> eval.py -> ltn.py) writes `class_names.npy` / `zero_day_classes.npy`
+# under the SAME filenames the paper split uses in data/processed/paper/, but with
+# incompatible contents: its zero-day list contains DDoS and PortScan (which are
+# KNOWN, trained-on classes under the current protocol) and omits Heartbleed.
+# Re-running the legacy pipeline used to silently overwrite METADATA with those,
+# leaving a wrong-protocol file sitting in the shared namespace. Legacy artifacts
+# now live here instead, so the two protocols cannot collide.
+METADATA_LEGACY = os.path.join(METADATA, "_legacy_temporal")
+
 # Create output directories on import (raw-CSV dirs are inputs, not created here).
-for _d in (PROCESSED, PAPER, MODELS, ARRAYS, EMBEDDINGS, PREDICTIONS, METADATA, FIGURES):
+for _d in (PROCESSED, PAPER, MODELS, ARRAYS, EMBEDDINGS, PREDICTIONS, METADATA,
+           METADATA_LEGACY, FIGURES):
     os.makedirs(_d, exist_ok=True)
 
 

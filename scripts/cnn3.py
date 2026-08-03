@@ -79,8 +79,11 @@ n_classes = len(train_classes)
 
 with open(os.path.join(paths.MODELS, "label_encoder.pkl"), "wb") as f:
     pickle.dump(le, f)
-np.save(os.path.join(paths.METADATA, "class_names.npy"),       np.array(train_classes))
-np.save(os.path.join(paths.METADATA, "zero_day_classes.npy"),  np.array(test_attack_types))
+# NOTE: METADATA_LEGACY, not METADATA. This is the superseded temporal split, whose
+# zero-day list contains DDoS/PortScan (KNOWN classes under the current paper protocol).
+# Writing it to the shared namespace would shadow data/processed/paper/'s copy.
+np.save(os.path.join(paths.METADATA_LEGACY, "class_names.npy"),       np.array(train_classes))
+np.save(os.path.join(paths.METADATA_LEGACY, "zero_day_classes.npy"),  np.array(test_attack_types))
 
 # SCHEME B: binary labels
 y_train_bin = (y_train_str != 'BENIGN').astype(int)
@@ -237,7 +240,7 @@ np.save(os.path.join(paths.ARRAYS, "y_test_bin.npy"),  y_test_bin)    # binary g
 np.save(os.path.join(paths.ARRAYS, "y_train.npy"),     y_train)
 np.save(os.path.join(paths.ARRAYS, "y_val.npy"),       y_val)
 
-with open(os.path.join(paths.METADATA, "history.pkl"), "wb") as f:
+with open(os.path.join(paths.METADATA_LEGACY, "history.pkl"), "wb") as f:
     pickle.dump(history.history, f)
 
 # =========================

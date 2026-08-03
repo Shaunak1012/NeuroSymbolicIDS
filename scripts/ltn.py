@@ -541,14 +541,15 @@ np.save(os.path.join(paths.ARRAYS, "X_test_ltn.npy"),     X_test_r)
 np.save(os.path.join(paths.PREDICTIONS, "y_prob_ltn_test.npy"), y_prob)
 np.save(os.path.join(paths.PREDICTIONS, "y_prob_ltn_bin.npy"),  y_prob_atk)
 
-with open(os.path.join(paths.METADATA, "ltn_history.pkl"), "wb") as f:
+with open(os.path.join(paths.METADATA_LEGACY, "ltn_history.pkl"), "wb") as f:
     pickle.dump(history, f)
 
 # Save label encoder and class info
 with open(os.path.join(paths.MODELS, "label_encoder.pkl"), "wb") as f:
     pickle.dump(le, f)
-np.save(os.path.join(paths.METADATA, "class_names.npy"),      np.array(train_classes))
-np.save(os.path.join(paths.METADATA, "zero_day_classes.npy"), np.array(zero_day_classes))
+# NOTE: METADATA_LEGACY, not METADATA — superseded temporal split (see paths.py).
+np.save(os.path.join(paths.METADATA_LEGACY, "class_names.npy"),      np.array(train_classes))
+np.save(os.path.join(paths.METADATA_LEGACY, "zero_day_classes.npy"), np.array(zero_day_classes))
 np.save(os.path.join(paths.ARRAYS, "y_test_ltn_bin.npy"),   y_test_bin)
 np.save(os.path.join(paths.ARRAYS, "y_test_ltn_mc.npy"),    y_test_enc)
 
