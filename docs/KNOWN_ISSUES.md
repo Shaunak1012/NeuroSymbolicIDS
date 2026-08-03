@@ -108,18 +108,38 @@ silently rewriting past entries would violate the project's own retract-in-place
 Any code reading `runs.jsonl` for those rows **must group by run name (tag), not by `params.seed`**,
 until/unless a deliberate, logged correction pass is run.
 
-> 🔢 **COUNTS CORRECTED 2026-08-03 — this entry understated both defects by ~2×.** Measured directly:
+> ✅ **REPAIRED 2026-08-03 — `scripts/repair_runs_log.py`.** Both defects are now fixed in the data,
+> not merely described. **Why it became safe to do:** the append-only rule above existed to prevent
+> untraceable edits — but `runs.jsonl` is now **version-controlled**, so `git diff` / `git revert`
+> provide exactly the audit trail the rule was protecting, and better.
 >
-> | | this entry said | actually measured |
-> |---|---|---|
-> | rows with the wrong seed | "8 rows" | **16 rows** (8 distinct *tags*, each present twice) |
-> | duplication | "several entries duplicated 3×" | **21 duplicated names, 31 redundant rows out of 88 (35% of the file)** |
+> | | originally said | **actually measured** | after repair |
+> |---|---|---|---|
+> | rows with the wrong seed | "8 rows" | **14 rows** (8 tags; 6 present twice, 2 once) | **0** |
+> | exact-duplicate rows | "several duplicated 3×" | **26 rows** | **0** |
+> | rows missing a schema version | (not tracked) | 97 of 97 | **0** — all stamped `v1-blended` (15) or `v2-macro` (56) |
+> | total rows | 97 | | **71** |
 >
-> The "8" counted distinct tags, not rows — so a correction pass guided by that number would have
-> **fixed half the affected rows and left the other half wrong.** Reproduce with:
-> ```bash
-> .venv/Scripts/python.exe -c "import json,collections; rows=[json.loads(l) for l in open('outputs/metadata/runs.jsonl',encoding='utf-8') if l.strip()]; print('rows',len(rows)); print('wrong-seed rows',sum(1 for r in rows if '_s4' in r['name'] and r['params'].get('seed')==42)); c=collections.Counter(r['name'] for r in rows); print('dup names',sum(1 for v in c.values() if v>1),'extra rows',sum(v-1 for v in c.values()))"
-> ```
+> ⚠️ **Two counting corrections, including one of my own:**
+> - The original "8" counted distinct *tags*, not rows — a repair guided by it would have fixed
+>   roughly half and left the rest wrong.
+> - An intermediate audit note in this file said **16 rows**; that was **also wrong** — it matched on
+>   `'_s4' in name and seed==42`, which wrongly includes `ltn_ax6_ratio_w1p0_s42{,_logodds}`, whose
+>   seed *is* correctly 42. The true figure is **14**, derived by comparing each row's seed against
+>   its own `_s<N>` suffix. Corrected here rather than silently.
+>
+> 🔒 **What the repair deliberately did NOT touch.** Only **exact** duplicates were removed (identical
+> in name, params *and* every metric). **8 duplicated names were preserved** because their content
+> genuinely differs and collapsing them would have destroyed research data:
+> `xgboost` · `msp` · `mahalanobis` · `random_forest` · `isolation_forest` · `cnn_auxhead_l0.5`
+> (each an old-schema/new-schema pair from the 2026-07-27 metrics rewrite), plus `ltn_repro`
+> (0.4401 vs 0.4853) and `ltn_v2` (0.4908 vs 0.4912) — **distinct training runs with identical
+> configs.** The script asserts no run name disappears entirely, and refuses to write if one would.
+>
+> ✅ **Verified: every published figure reproduces unchanged after the repair** — CNN 0.6399/0.0446,
+> LTN control 0.6194/0.0712, AE 0.0970/0.1314, Mahalanobis 0.3777/0.1030, MSP 0.5884/0.0448,
+> RandomForest 0.5995/0.1311. A metadata repair that moved a result would have been a bug.
+> Report: `outputs/metadata/runs_repair_report.json`.
 
 **Also still open:** several entries remain duplicated 3× from repeated full re-runs of
 `rescore_logits.py` (e.g. `cnn_paper_logodds` appears 3 times) — the code fix above does not dedupe
@@ -186,8 +206,22 @@ now carry per-family + macro on the current schema, at n=3.
 **0.1311** [0.0576, 0.1933], statistically tied with the autoencoder (p=0.88) while beating it 0.50
 on macro, which falsifies the strong form of the (A)/(B) reframing. See
 [STATUS.md](STATUS.md) → "THE (A)/(B) FRAMING IS FALSIFIED IN ITS STRONG FORM".
-**Still open (minor):** `tracking.log_run` has no schema-version field, so old rows remain
-identifiable only by the absence of `macro_zd_pr_auc`.
+**✅ Closed 2026-08-03:** `tracking.log_run` now writes a `schema` field (`v2-macro`), and
+`load_runs(schema=...)` filters on it. All 71 existing rows were stamped retroactively by
+`repair_runs_log.py`. Two further defects in the same file were found and fixed while doing it:
+**every `stamp` was empty** (it defaulted to `""` and no caller ever passed one, so 97 rows had no
+time information at all), and **the log was opened without an explicit encoding** — cp1252 on
+Windows, the same bug class that broke `config.py`, which would corrupt or crash on any non-ASCII
+class name (CIC-IDS2017 labels contain them).
+
+### [FIXED 2026-08-03] Smoke-test artifacts were written into the real fusion-channel namespace
+`*_SUBSET` runs train on a tiny slice for two epochs purely to prove the code path executes, but
+wrote `y_prob_<tag>_test.npy` into `outputs/predictions/` alongside genuine channels, where an
+undertrained array could plausibly be picked up as one. Five were archived by hand on 2026-08-02,
+but the code would recreate them on the next smoke run — so the issue was left open.
+**Fix:** `paths.predictions_dir(tag)` routes any tag containing "smoke" to
+`outputs/predictions/_smoke_archive/` automatically; `cnn_paper.py` and `ltn_paper.py` use it.
+The separation is now structural rather than a recurring cleanup chore.
 
 ---
 

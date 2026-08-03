@@ -58,9 +58,22 @@ FIGURES     = os.path.join(ROOT, "outputs", "figures")
 # now live here instead, so the two protocols cannot collide.
 METADATA_LEGACY = os.path.join(METADATA, "_legacy_temporal")
 
+# Smoke-test output (added 2026-08-03). `*_SUBSET` runs train on a tiny slice for
+# a couple of epochs purely to prove the code path executes; their predictions are
+# worthless as fusion channels but used to land in `outputs/predictions/` under the
+# same `y_prob_*_test.npy` namespace as real channels, where one could plausibly be
+# picked up by a downstream consumer. Five such files were archived by hand on
+# 2026-08-02; this makes the separation automatic instead of a cleanup chore.
+PREDICTIONS_SMOKE = os.path.join(PREDICTIONS, "_smoke_archive")
+
+
+def predictions_dir(tag: str) -> str:
+    """Where a run's prediction array belongs — smoke runs are quarantined."""
+    return PREDICTIONS_SMOKE if "smoke" in str(tag).lower() else PREDICTIONS
+
 # Create output directories on import (raw-CSV dirs are inputs, not created here).
-for _d in (PROCESSED, PAPER, MODELS, ARRAYS, EMBEDDINGS, PREDICTIONS, METADATA,
-           METADATA_LEGACY, FIGURES):
+for _d in (PROCESSED, PAPER, MODELS, ARRAYS, EMBEDDINGS, PREDICTIONS,
+           PREDICTIONS_SMOKE, METADATA, METADATA_LEGACY, FIGURES):
     os.makedirs(_d, exist_ok=True)
 
 

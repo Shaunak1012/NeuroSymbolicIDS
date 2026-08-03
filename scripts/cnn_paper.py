@@ -133,7 +133,9 @@ model.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
 scaler_suffix = "" if TAG == "cnn_paper" else f"_{TAG.split('cnn_paper_', 1)[-1]}"
 with open(os.path.join(paths.MODELS, f"scaler_paper{scaler_suffix}.pkl"), "wb") as f: pickle.dump(scaler, f)
 with open(os.path.join(paths.MODELS, f"label_encoder_paper{scaler_suffix}.pkl"), "wb") as f: pickle.dump(le, f)
-np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{TAG}_test.npy"), p_attack)
+# predictions_dir() quarantines smoke runs into _smoke_archive/ so an undertrained
+# array can never be picked up as a real fusion channel (see paths.py).
+np.save(os.path.join(paths.predictions_dir(TAG), f"y_prob_{TAG}_test.npy"), p_attack)
 with open(os.path.join(paths.METADATA, f"{TAG}_history.pkl"), "wb") as f: pickle.dump(hist.history, f)
 emb = models.Model(model.input, model.get_layer("embedding").output)
 for nm, arr in [("train", X_tr), ("val", X_val), ("test", X_te)]:
