@@ -1,0 +1,162 @@
+{
+ "config": {
+  "B": 2000,
+  "rng_seed": 42,
+  "method": "stratified paired bootstrap over test flows; benign and family resampled separately preserving counts; multi-seed channels collapsed to mean-over-seeds inside each replicate"
+ },
+ "comparisons": [
+  {
+   "a": "cnn_paper",
+   "b": "ltn_ctrl_w0",
+   "metric": "macro",
+   "obs_a": 0.6398527623922122,
+   "obs_b": 0.6194411812880894,
+   "obs_diff": 0.020411581104122778,
+   "ci95_lo": 0.008248775007405909,
+   "ci95_hi": 0.033117047342360775,
+   "p_boot": 0.001,
+   "significant": true,
+   "why": "C2 \u2014 is the neural baseline actually better than the no-axiom LTN control?"
+  },
+  {
+   "a": "cnn_paper",
+   "b": "autoencoder",
+   "metric": "Bot",
+   "obs_a": 0.04461487708265185,
+   "obs_b": 0.13139988403969943,
+   "obs_diff": -0.08678500695704758,
+   "ci95_lo": -0.09396845590405481,
+   "ci95_hi": -0.07998287980479264,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "double dissociation \u2014 AE should WIN Bot (negative diff expected)"
+  },
+  {
+   "a": "cnn_paper",
+   "b": "autoencoder",
+   "metric": "Web Attack Brute Force",
+   "obs_a": 0.9225909502264321,
+   "obs_b": 0.10478254372873334,
+   "obs_diff": 0.8178084064976988,
+   "ci95_lo": 0.8017195844381078,
+   "ci95_hi": 0.8329540793698669,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "double dissociation \u2014 CNN should win Web BF"
+  },
+  {
+   "a": "cnn_paper",
+   "b": "autoencoder",
+   "metric": "Web Attack XSS",
+   "obs_a": 0.9523524598675525,
+   "obs_b": 0.054673857333819305,
+   "obs_diff": 0.8976786025337331,
+   "ci95_lo": 0.8733636600027069,
+   "ci95_hi": 0.9192394915914825,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "double dissociation \u2014 CNN should win XSS"
+  },
+  {
+   "a": "random_forest",
+   "b": "autoencoder",
+   "metric": "Bot",
+   "obs_a": 0.1311007300324935,
+   "obs_b": 0.13139988403969943,
+   "obs_diff": -0.0002991540072059262,
+   "ci95_lo": -0.007042133049105448,
+   "ci95_hi": 0.006043011708185493,
+   "p_boot": 0.879,
+   "significant": false,
+   "why": "NEW 2026-08-03 \u2014 does a supervised (A) method match the AE on Bot?"
+  },
+  {
+   "a": "random_forest",
+   "b": "cnn_paper",
+   "metric": "Bot",
+   "obs_a": 0.1311007300324935,
+   "obs_b": 0.04461487708265185,
+   "obs_diff": 0.08648585294984165,
+   "ci95_lo": 0.08074258029496043,
+   "ci95_hi": 0.09260286649363991,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "NEW \u2014 RF vs CNN on Bot, both (A)-family"
+  },
+  {
+   "a": "random_forest",
+   "b": "autoencoder",
+   "metric": "macro",
+   "obs_a": 0.5994913717887083,
+   "obs_b": 0.09695209503408403,
+   "obs_diff": 0.5025392767546242,
+   "ci95_lo": 0.48409879348476337,
+   "ci95_hi": 0.5222418827102311,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "NEW \u2014 RF should dominate AE on macro"
+  },
+  {
+   "a": "cnn_paper",
+   "b": "xgboost",
+   "metric": "macro",
+   "obs_a": 0.6398527623922122,
+   "obs_b": 0.6371826637298106,
+   "obs_diff": 0.002670098662401643,
+   "ci95_lo": -0.016127274097307954,
+   "ci95_hi": 0.02171660928956435,
+   "p_boot": 0.8,
+   "significant": false,
+   "why": "retracted-claim check: 'on macro the CNN beats XGBoost'"
+  },
+  {
+   "a": "autoencoder",
+   "b": "mahalanobis",
+   "metric": "Bot",
+   "obs_a": 0.13139988403969943,
+   "obs_b": 0.10301676408401765,
+   "obs_diff": 0.028383119955681782,
+   "ci95_lo": 0.022670631639243176,
+   "ci95_hi": 0.033893934815367614,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "is the AE really the better (B) Bot channel?"
+  }
+ ],
+ "seedwise_macro": {
+  "cnn_paper": [
+   0.6446365252428516,
+   0.6353434135009612,
+   0.6395783484328236
+  ],
+  "ltn_ctrl_w0": [
+   0.6048758316433307,
+   0.6028984825504117,
+   0.6505492296705259
+  ],
+  "autoencoder": [
+   0.09997487784765063,
+   0.10143572665893136,
+   0.08944568059567008
+  ],
+  "random_forest": [
+   0.5681781111962679,
+   0.6235387516571137,
+   0.606757252512743
+  ],
+  "mahalanobis": [
+   0.45847425703121525,
+   0.3362848774120753,
+   0.3384490371941244
+  ],
+  "msp": [
+   0.6122709575619892,
+   0.5693999911069992,
+   0.5835293138053963
+  ],
+  "xgboost": [
+   0.6371826637298106
+  ]
+ },
+ "seed_power_note": "With 3 paired seeds the Wilcoxon signed-rank test has a minimum achievable two-sided p of 0.25, so no seed-level comparison in this project can reach p<0.05 regardless of effect size. The bootstrap above quantifies FLOW-sampling uncertainty only. To make a seed-level claim at alpha=0.05 you need n>=6 seeds."
+}

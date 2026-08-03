@@ -14,7 +14,15 @@ __pycache__/
 data/raw_csv/
 data/raw_csv_full/
 data/raw_pcaps/
-data/processed/
+data/processed/*
+# …but the paper split's PROTOCOL DEFINITION is small and is the provenance for
+# every reported number (which classes are known, which are zero-day, exact row
+# counts). Track it; keep the ~494 MB of arrays and meta CSVs out.
+!data/processed/paper/
+data/processed/paper/*
+!data/processed/paper/split_report.txt
+!data/processed/paper/known_classes.npy
+!data/processed/paper/zero_day_classes.npy
 
 # ── Trained models + fitted transformers ──
 models/
@@ -23,10 +31,18 @@ models/
 outputs/arrays/
 outputs/embeddings/
 outputs/predictions/
-outputs/metadata/
 outputs/*.log
 
 # NOTE: outputs/figures/ is intentionally NOT ignored — commit eval plots.
+#
+# NOTE: outputs/metadata/ is intentionally NOT ignored either (changed 2026-08-03).
+# It holds `runs.jsonl` — the append-only research log backing EVERY number in
+# docs/STATUS.md — plus small provenance artifacts (thresholds, class lists,
+# modality_analysis.json, per-run history pickles). Total ~101 KB. While it was
+# ignored, the entire research record had no version history, no backup, and no
+# way to detect a corrupting write, even though KNOWN_ISSUES treats it as an
+# append-only log that must never be silently rewritten. Nothing large belongs
+# here — big per-run artifacts go to models/ or outputs/{arrays,embeddings,predictions}/.
 
 # ── Copyrighted / reference material (do NOT publish) ──
 basepaper.pdf

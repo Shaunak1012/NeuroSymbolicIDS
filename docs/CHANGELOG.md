@@ -2,6 +2,84 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-03 (pre-Phase-4 remediation — and it produced three research results)
+
+Scoped as "fix every discrepancy found by a full workspace/git audit before starting Phase 4."
+Fixing them required re-running things, and **the re-runs overturned two documented claims and
+answered the project's last open research question.**
+
+### Research outcomes (unplanned — they fell out of the fixes)
+
+- **🔬 "Why does the CNN fail on Bot?" is ANSWERED** (`scripts/bot_failure_analysis.py`, four
+  hypotheses pre-registered in the script before running). The failure is **representational, not
+  informational**:
+  - **100% of Bot flows are classified BENIGN** (all 3 seeds, mean p(BENIGN)=0.9984). Bot is not
+    ambiguous to the CNN — it is confidently asserted benign.
+  - **Web attacks transfer by absorption into `DoS slowloris`** (89.8% / 92.9% modal class), a known
+    *attack* class — so their 0.92–0.95 PR-AUC is misclassification landing on the right side of the
+    binary, **not** zero-day detection. This replaces the falsified "modality analogue" story with a
+    measured mechanism. (Note it differs from `modality_analysis.py`'s raw-space nearest neighbour,
+    DoS Hulk — classifier behaviour ≠ raw proximity.)
+  - **0 of 8 feature overlap** between what the known-class task needs and what separates Bot from
+    benign. No gradient pressure to represent Bot's signature.
+  - **Therefore the CNN's Bot ranking is NOISE**: cross-seed Spearman ρ = **−0.090**, vs 0.68–0.83
+    for every other family. RandomForest shows the same (0.068); the **autoencoder does not**
+    (0.827). *One cause, four symptoms* — this explains the Phase-4 cluster-purity lottery, the
+    Mahalanobis Bot spread, and RF's Bot swing simultaneously.
+  - Refuted: Bot is **not** intrinsically hard (oracle PR-AUC 0.9988) and **not** boundary-adjacent
+    (it is benign-*interior*).
+- **🔴 The (A)/(B) thesis reframing is FALSIFIED in its strong form.** Putting the classical
+  baselines on 3 seeds — a *bookkeeping* fix — revealed **RandomForest (an (A)-family method) ties
+  the autoencoder on Bot** (0.1311 vs 0.1314, paired bootstrap p=0.88) **while beating it 0.50 on
+  macro.** "(B) methods are needed to reach Bot" is dead; so is "no channel sits at both ends of the
+  frontier" (RF does). The CNN-vs-AE double dissociation survives and is now *significant*, but it is
+  a dissociation between **two models**, not two **families**.
+- **✅ Significance tests run** (`scripts/significance.py`, stratified paired bootstrap over test
+  flows, B=2000). **C2 is properly closed: the CNN does beat the LTN control** (+0.0204, CI
+  [+0.0082, +0.0331], p=0.001) despite the overlapping seed ranges — the paired test cancels
+  flow-noise common to both. ⚠️ Flow-level uncertainty only; **seed-level significance is
+  unreachable at n=3** (Wilcoxon floor p=0.25 — needs n≥6). The double dissociation is significant
+  on all three families (p<0.0005).
+- **🔴 First retraction-of-a-retraction: "on macro the CNN beats XGBoost" is n.s. (p=0.80).** The
+  2026-07-27 retraction of *"XGBoost ≈ CNN"* compared two point estimates with no test. The original
+  claim was right. The downstream note that the "pivot to explanation/adaptivity" framing rested on
+  "a tie that isn't there" is **withdrawn — the tie is there.**
+
+### Discrepancies fixed (the original scope)
+
+- **🔴 The entire research record was gitignored.** `outputs/metadata/` was excluded wholesale, so
+  `runs.jsonl` — backing every number in STATUS — had no history, no backup, no way to detect a bad
+  write, while KNOWN_ISSUES simultaneously treated it as an append-only log that must never be
+  rewritten. Now tracked (101 KB), along with the paper split's protocol definition
+  (`split_report.txt`, `known_classes.npy`, `zero_day_classes.npy`).
+- **🔁 Component status collapsed to a single source of truth.** The duplication had caused the same
+  drift error in **three** consecutive sessions. `STATUS.md → "Component Status"` is now canonical;
+  `CLAUDE.md`, `roadmap_gap_analysis.md` and `target_architecture.md` are pointers.
+  **Critically, STATUS's own table was the stalest of the four** — still calling the autoencoder
+  n=1 with "0.0000 recall on web attacks", citing the forbidden "PortScan/DDoS strongly covered",
+  claiming the behaviours weren't wired into the LTN, and missing rows for `cnn_paper.py`,
+  `baselines.py` and `novelty.py` entirely. It was rewritten *before* being promoted, or the fix
+  would have propagated all of it.
+- **`kg_precheck.py` persisted nothing** — the numbers blocking all of Phase 4 were prose-only. Now
+  writes `kg_precheck.json`; re-ran and **the blocker reproduces exactly** (43.4 pp / 28.3 pp spread).
+- **Baselines re-run at n=3 on the current metric schema** (`BASELINE_SEED` added). Closes the
+  "n=1 + old schema → not citable" gap, and removes two macro figures (xgboost 0.6372, isolation
+  forest 0.0628) that were quoted in STATUS tables with **no logged provenance**. Also documented
+  that **XGBoost is deterministic** — seeds 42/43/44 are byte-identical, so its n=3 is n=1 with
+  verified reproducibility, not a variance estimate.
+- **Legacy artifact namespace collision resolved.** `outputs/metadata/{class_names,zero_day_classes}.npy`
+  were temporal-split files sharing basenames with the paper split's, listing **DDoS/PortScan as
+  zero-day**. Moved to `outputs/metadata/_legacy_temporal/` (new `paths.METADATA_LEGACY`) with a
+  README; `cnn3.py`/`ltn.py`/`eval.py` repointed. Moved, not deleted.
+- **KNOWN_ISSUES C5 counts corrected** — understated by ~2×: the seed bug affects **16 rows** (not
+  8; the 8 counted distinct *tags*), and duplication is **21 names / 31 redundant rows of 88**.
+- Fixed: `config.py` read `config.yaml` with the platform default encoding (cp1252 on Windows →
+  `UnicodeDecodeError` on any non-ASCII character); `CLAUDE.md` said "22 scripts" 13 lines above
+  saying "26"; unstruck retracted "Mahalanobis 4.3×" and stale "run Phase 3 first" directives in
+  STATUS; `config.yaml` now states that its `log1p` justification cites the contaminated metric (C4).
+- **Workflow:** this session used a branch + PR, restoring the CONTRIBUTING process the 2026-08-02
+  session skipped (its 20 commits were merged locally with no PR ever opened).
+
 ## 2026-08-02 (post-merge audit — found and recorded a recurring process defect)
 
 - **Audited what `origin/main` actually serves rather than trusting the merge, and found real drift.**

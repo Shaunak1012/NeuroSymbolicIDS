@@ -20,18 +20,19 @@ What is built today vs. the [target architecture](target_architecture.md), and t
 
 ## Built vs. Planned
 
-| Component | Status | Notes |
-|-----------|--------|-------|
-| Preprocessing (flow features) | ✅ Built | `preprocess.py`. Drops IP/port — blocks `RepeatedConnections` (see below). |
-| 1D CNN + 64-dim embeddings | ✅ Built | `cnn3.py`. |
-| CNN baseline evaluation | ✅ Built | `eval.py`. Provides the PR-AUC the full system must beat. |
-| LTN reasoning (SAT loss, 4 axioms) | ✅ Built | `ltn.py`. Axioms are *soft*; diagram says "hard" — reconcile (see #1). |
-| Behaviour abstraction | ⚠️ Partial | `behavior.py` uses different vocabulary; 2 of 4 target behaviours are not fully derivable. |
-| Knowledge Graph (adaptive memory) | ❌ Not built | Biggest gap. Spec in [knowledge_graph.md](knowledge_graph.md). |
-| KG reasoning + consistency score | ❌ Not built | Depends on KG. |
-| Decision Fusion | ❌ Not built | Spec in [decision_fusion.md](decision_fusion.md). |
-| Explainability (3 explanations) | ❌ Not built | Spec in [explainability.md](explainability.md). |
-| Final Alert assembly | ❌ Not built | Depends on fusion + explanations. |
+> 🔑 **This table was REMOVED on 2026-08-03 — deliberately, not lost.**
+>
+> **Component status now lives in exactly one place:
+> [docs/STATUS.md](../STATUS.md) → "Component Status".**
+>
+> A parallel table here was one of four independent copies, and that duplication caused the same
+> drift error in three consecutive sessions (this copy still said `behaviour abstraction ⚠️ Partial`
+> and `LTN reasoning ✅ Built` long after both had changed, and described preprocessing as dropping
+> IP/port, which stopped being true at the 2026-06-18 dataset upgrade). Restating status here is
+> what kept rotting — so it is a pointer now.
+>
+> Phase **numbering** (a different thing) stays canonical in
+> [conference_roadmap.md §1b](conference_roadmap.md).
 
 ## Key Gaps to Resolve (in priority order)
 

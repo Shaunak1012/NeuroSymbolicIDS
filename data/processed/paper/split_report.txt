@@ -1,0 +1,46 @@
+
+============================================================
+PAPER-ALIGNED SPLIT REPORT
+============================================================
+
+TRAIN  (n=883,796, attack ratio 0.5000)
+    BENIGN                            441,898
+    DoS Hulk                          184,099
+    PortScan                          127,043
+    DDoS                              102,420
+    DoS GoldenEye                       8,234
+    FTP-Patator                         6,348
+    SSH-Patator                         4,718
+    DoS slowloris                       4,637
+    DoS Slowhttptest                    4,399
+
+VAL  (n=110,475, attack ratio 0.5000)
+    BENIGN                             55,238
+    DoS Hulk                           23,012
+    PortScan                           15,880
+    DDoS                               12,803
+    DoS GoldenEye                       1,029
+    FTP-Patator                           794
+    SSH-Patator                           590
+    DoS slowloris                         579
+    DoS Slowhttptest                      550
+
+TEST  (n=114,658, attack ratio 0.5182)
+    BENIGN                             55,237
+    DoS Hulk                           23,013
+    PortScan                           15,881
+    DDoS                               12,802
+    Bot                                 1,956  [ZERO-DAY]
+    Web Attack Brute Force              1,507  [ZERO-DAY]
+    DoS GoldenEye                       1,030
+    FTP-Patator                           793
+    Web Attack XSS                        652  [ZERO-DAY]
+    SSH-Patator                           589
+    DoS slowloris                         580
+    DoS Slowhttptest                      550
+    Infiltration                           36  [ZERO-DAY]
+    Web Attack Sql Injection               21  [ZERO-DAY]
+    Heartbleed                             11  [ZERO-DAY]
+
+[OK] no zero-day leakage into train/val
+[OK] known classes: 9  zero-day classes in test: 6
