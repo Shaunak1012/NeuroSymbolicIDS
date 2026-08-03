@@ -45,6 +45,40 @@ answered the project's last open research question.**
   claim was right. The downstream note that the "pivot to explanation/adaptivity" framing rested on
   "a tie that isn't there" is **withdrawn — the tie is there.**
 
+### Last Phase-4 gate closed (fourth pass) — 1 of 3 KG criteria works
+
+`scripts/kg_criteria.py` + `scripts/timeline.py`, three predictions pre-registered.
+
+- **✅ Criterion #1 (cluster growth / burstiness) WORKS and is robust** — lift **5.94x**
+  [5.66, 6.11] across 3 clustering seeds at **~81% recall** of zero-day flows (42% precision vs a
+  7.04% base rate). At a looser threshold it captures **98.9%** of zero-day flows at 3.27x.
+- **⚠️ Criterion #3 (behaviour co-occurrence) is WEAK** — flow-level 2.81x at **1.5% recall**;
+  cluster-level at or below chance. Structurally coarse: only **24 of 64** behaviour patterns occur
+  in benign training data, so p90/p95/p99 thresholds collapse onto the same value. Root cause is in
+  the inputs — the five graded behaviours are DoS/scan-shaped and the zero-day families are not.
+- **🔴 A FIFTH single-seed artifact, caught BEFORE it entered the docs.** On clustering seed 42 the
+  conjunction `burst>=8 AND rarity>=p90` gave **lift 11.57x at 81.4% precision** — the most striking
+  number of the session. Multi-seeding first gave **11.57x / 2.37x / 1.73x** and precision
+  **0.814 / 0.167 / 0.122**. Do not cite "81% precision." First time this project's multi-seed
+  discipline caught an overclaim *before* publication rather than after.
+- **🔴 Two silent timestamp defects found and fixed** (`scripts/timeline.py`), both of which would
+  have wrecked the adaptive story: CIC-IDS2017 dates are **D/M/YYYY** (naive parsing scatters a
+  5-day capture across March/June/July), and the clock is **12-hour with no AM/PM** (observed hours
+  {1..5, 8..12} map onto an 08:00-17:00 workday, so 1 PM sorted before 9 AM). The reconstruction is
+  **validated against the published capture schedule** — Web BF Thu 09:15-10:00, XSS Thu 10:15-10:35,
+  Bot Fri 09:34-12:59, PortScan Fri 13:06-15:23, DDoS Fri 15:56-16:16 — all exact.
+- **⚠️ External-validity caveat, mandatory in any write-up:** growth works substantially *because*
+  CIC-IDS2017's attacks are scripted into fixed windows. A real network with continuous low-rate C2
+  would not produce the signal — and Bot is precisely the family whose real signature is persistence,
+  not bursts. Pre-registered as "will work, largely for the wrong reason"; confirmed on both halves.
+- **Decision logged (user):** keep the KG **adaptive** — temporal decay stays, with time defined as
+  flow-count position in true chronological order.
+
+**Phase 4 is now fully specified by measurement**: raw-feature clusters · corroboration +
+explainability scope · growth-rate-only emerging-pattern rule · decay kept. One honest observation
+carried forward: *"temporal burstiness of a raw-feature cluster" does not require a knowledge graph*,
+so the KG's justification must rest on explanation and corroboration, not on this detection number.
+
 ### Phase-4 readiness measured (third pass — "make it ready, don't start it")
 
 `scripts/kg_readiness.py`, four predictions pre-registered. **Two decisive results, one of which

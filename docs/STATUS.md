@@ -1127,6 +1127,76 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## ✅ LAST PHASE-4 GATE CLOSED (2026-08-03) — 1 of 3 emerging-pattern criteria works
+
+`scripts/kg_criteria.py` → `outputs/metadata/kg_criteria.json`. Three predictions pre-registered.
+With "unexplained cluster" already dead, this measured the spec's other two criteria — the only
+remaining route to any KG detection role. **All three criteria are now measured. The gate is closed.**
+
+Setup follows the decisions already taken: **raw features** (representation), **flow-count position
+in true chronological order** (the adaptive time axis, kept per the 2026-08-03 decision), k=200.
+Both criteria are computed **without labels** — growth from cluster ids + timestamps only,
+co-occurrence calibrated on **benign training flows only**. Labels score the result, never define it.
+
+### Verdict
+
+| criterion | result | status |
+|---|---|---|
+| **#1 Growth / burstiness** | **lift 5.94× [5.66, 6.11] (n=3), recall ~0.81** | ✅ **WORKS — robust** |
+| #2 Unexplained cluster | lift ≤ 1.00× (at or below chance) | 🔴 **DEAD** |
+| #3 Behaviour co-occurrence | flow-level 2.81× at **1.5 % recall**; cluster-level ≤ 1.35× | ⚠️ **WEAK** |
+| #1 ∧ #3 conjunction | lift 1.73–11.57×, precision 0.12–0.81 | 🔴 **NOT established** |
+
+**✅ Criterion #1 (growth) is the one that works, and it is genuinely robust.** Burstiness ≥ 8
+(peak-window share ÷ uniform share, 20 equal-flow-count windows) gives **lift 5.94× mean across 3
+clustering seeds, range [5.66, 6.11]** — a tight range — at **~81 % recall** of all zero-day flows
+and ~42 % precision against a 7.04 % base rate. At the looser burstiness ≥ 4 threshold it captures
+**98.9 %** of zero-day flows at 3.27× lift.
+
+> 🔴 **THE CONJUNCTION RESULT WAS A SINGLE-SEED ARTIFACT — CAUGHT BEFORE PUBLICATION.**
+> On clustering seed 42, `burst ≥ 8 ∧ rarity ≥ p90` gave **lift 11.57× at 81.4 % precision** — the
+> most striking number of the session, and it was about to be written up as the KG's headline.
+> Multi-seeding first (the discipline this project adopted after four retractions) gives
+> **11.57× / 2.37× / 1.73×** and precision **0.814 / 0.167 / 0.122**. A **6.7× lift spread.**
+> **Do not cite "81 % precision."** This is the fifth single-seed trap in this project and the first
+> one caught *before* it entered the documentation rather than after.
+
+**⚠️ Criterion #3 (co-occurrence) is weak and also structurally coarse.** Only **24 of 64** possible
+behaviour patterns occur in benign training data, so the rarity statistic is nearly discrete — the
+p90/p95/p99 thresholds collapse onto the *same* value (9.6 bits) and flag identical flow sets. At
+cluster level it is at or below chance (0.00× / 0.37× / 1.35×). Prediction Q2 confirmed. Root cause
+is visible in the inputs: the five graded behaviours are DoS/scan-shaped (`BurstTraffic`,
+`HighVolume`, `LargePackets`, `HighEntropy`, `ScanProbe`) and Bot/web attacks are none of those.
+
+### 🔴 The external-validity caveat, which is not optional
+
+**Growth works substantially because CIC-IDS2017's attacks are scripted into fixed windows.**
+Reconstructed capture schedule (`timeline.py`): Web Brute Force **Thu 09:15–10:00**, XSS **Thu
+10:15–10:35**, Bot **Fri 09:34–12:59** — against benign traffic spanning Mon 08:56 → Fri 17:02. Of
+course a 20-minute attack burst is bursty. **A real network with continuous low-rate C2 beaconing
+would not produce this signal**, and Bot is exactly the family whose real-world signature is
+*persistence*, not bursts. This must be stated in any write-up: it is a property of the dataset's
+experimental design as much as of the method. Q1 was pre-registered as *"will work, largely for the
+wrong reason"* — confirmed on both halves.
+
+### What this means for Phase 4 — the last gate is CLOSED
+
+**The KG can proceed, with its detection contribution reduced to one mechanism: cluster growth
+rate.** Combined with the earlier findings, Phase 4 is now fully specified by measurement:
+
+- **Representation:** raw features (not embeddings — the AE bottleneck was rejected).
+- **Scope:** corroboration + explainability (the "primary detector" path is measured dead).
+- **Emerging-pattern rule:** growth/burstiness **only**. Drop "unexplained" (chance). Drop
+  co-occurrence as a *detector* — it may still be worth keeping as an **explanation** attribute,
+  which costs nothing and is the KG's actual job.
+- **Decay:** kept (adaptive), flow-count over true chronological order.
+
+> 🧭 **One honest observation to carry into the write-up.** "Temporal burstiness of a raw-feature
+> cluster" **does not require a knowledge graph** — it is a much simpler mechanism than the spec's
+> graph-with-decaying-edges. The KG's justification therefore has to rest on **explanation and
+> corroboration** (reasoning paths, attributing a flow to a remembered pattern), not on this
+> detection number. A reviewer will make this point; better to make it first.
+
 ## 🚨 PHASE-4 READINESS MEASURED (2026-08-03) — the KG's specified zero-day mechanism DOES NOT WORK
 
 `scripts/kg_readiness.py` → `outputs/metadata/kg_readiness.json`. Four predictions pre-registered
@@ -1442,7 +1512,7 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | **Unblocked, not blocked** — `meta_{train,val,test}.csv` now carry IP/port/timestamp aligned row-for-row. No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement. Wiring it is a choice, not a data problem. |
 | 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ✅ **DONE 2026-08-02** | Ran. Closes the "why not an autoencoder?" objection with a number, and produced the modality-analogue refinement that reframes the whole architecture. Was nearly skipped by a phase-number collision. **Follow-up (not scheduled): multi-seed it (n=1 today), and measure modality similarity to test the refined account.** |
 | 2c | **Pre-Phase-4 remediation + significance + Bot analysis** | ✅ **DONE 2026-08-03** | All audit discrepancies fixed (research record version-controlled, component status collapsed to one table, `kg_precheck` now persists, baselines on n=3 + current schema, legacy artifact collision resolved). Plus three research outputs: **significance tests run** (C2 closed; one retraction reversed), **the (A)/(B) strong form falsified** by RandomForest, and **the CNN's Bot failure explained**. |
-| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | 🟡 **READY TO BUILD, but RESCOPED by measurement — awaiting sign-off** | **Prerequisites now measured** (`kg_readiness.py`). ✅ Representation decided on evidence: **raw features** (Bot purity 77.6/80.6 %, no training lottery) — *not* the AE bottleneck, whose 52.1 pp spread was the worst of all options. 🔴 **Scope forced by measurement: corroboration + explainability, NOT primary detection** — the "unexplained cluster" criterion scores **lift ≤ 1.00× (at or below chance)** across every representation and threshold, so that mechanism is dead. ⬜ **Remaining gate:** the spec's other two criteria (**growth rate**, **behaviour co-occurrence**) are untested — measure before building any detection role on them. ⬜ Also undecided: temporal decay's time axis. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
+| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | 🟡 **READY TO BUILD, but RESCOPED by measurement — awaiting sign-off** | **Prerequisites now measured** (`kg_readiness.py`). ✅ Representation decided on evidence: **raw features** (Bot purity 77.6/80.6 %, no training lottery) — *not* the AE bottleneck, whose 52.1 pp spread was the worst of all options. 🔴 **Scope forced by measurement: corroboration + explainability, NOT primary detection** — the "unexplained cluster" criterion scores **lift ≤ 1.00× (at or below chance)** across every representation and threshold, so that mechanism is dead. ✅ **Last gate CLOSED 2026-08-03**: all three emerging-pattern criteria measured — **growth works** (lift 5.94x [5.66, 6.11], n=3, ~81% recall), unexplained is dead, co-occurrence is weak. ✅ Decay decided: **keep it adaptive**, flow-count over true chronological order. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | 4 | Decision Fusion — canonical Phase 5 | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | Explainability / Final Alert | ⬜ | 3 explanations + alert. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
@@ -1464,7 +1534,7 @@ Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 | 🔴 **Which representation should the KG cluster?** | ✅ **MEASURED 2026-08-03 → recommend (b) RAW FEATURES.** Awaiting sign-off. | **Clustering purity is now measured for all options** (`kg_readiness.py`), and it **overturned the lean recorded here earlier the same day.** (a) ensemble CNN seeds — ❌ futile: the CNN's Bot ranking is noise (ρ=−0.090); averaging noise creates no signal. (b) **raw features — ✅ RECOMMENDED**: Bot purity **77.6 % (k=200) / 80.6 % (k=400)**, competitive with the CNN's good seeds and far above its worst (44.4 %), with **no training lottery** (residual k-means seed sensitivity ~2.6 pp). (c) AE bottleneck — 🔴 **WAS the lean, now REJECTED**: measured Bot-purity spread **52.1 pp**, the *worst* of all options, because **rank stability ≠ cluster stability** — the AE orders Bot flows consistently (ρ=0.827) but its 16-d geometry still scatters them across seeds. (d) accept-and-publish — unnecessary now that (b) exists. |
 | 🔴 **Is the KG a primary detector or corroboration?** | ✅ **RESOLVED EMPIRICALLY 2026-08-03 → corroboration.** | The spec contradiction (`knowledge_graph.md` "primary zero-day signal" vs `conference_roadmap.md` "corroboration, not primary detector") is settled by measurement, not preference: the "unexplained cluster" criterion scores **lift ≤ 1.00× — at or below chance — across 3 representations × 3 thresholds.** The primary-detector path is dead. **The roadmap was right.** |
 | ⬜ **Do the KG's other two emerging-pattern criteria work?** | ⬜ **NEW — UNTESTED, now the gating question for any KG detection role** | The spec lists three criteria; only "unexplained cluster" was tested (and failed). **Cluster growth rate** and **behaviour co-occurrence** remain unmeasured. If the KG is to keep *any* detection role it must come from these. Measure them the same way — train-labels-only criterion, scored against test — **before** building on them. |
-| ⬜ **KG "temporal decay" has no clean time axis** | ⬜ **UNDECIDED — carried over, now more urgent** | The paper split is stratified-random across all 5 days, so there is no train→test time arrow. Options: decay over flow-count in timestamp-sorted order within test (meta CSVs have timestamps) · drop decay for v1 · run the adaptive story on the temporal split as a secondary result. **"Adaptive" is in the project title**, so dropping it has a write-up cost. |
+| **KG "temporal decay" time axis** | ✅ **DECIDED 2026-08-03 (user) — KEEP IT ADAPTIVE.** | The paper split is stratified-random across all 5 days, so there is no train→test time arrow — but `meta_{train,val,test}.csv` carry **real CIC-IDS2017 timestamps**, row-aligned. **Decision: keep the adaptive/decay mechanism**, with time defined as **flow-count position in timestamp-sorted order within test** (already the standing default in this table: *"Decay 'time': Flow-count (reproducible)"*). Dropping decay was rejected — **"Adaptive" is in the project title** and removing it carries a write-up cost. ⚠️ **Caveat to state in any write-up:** CIC-IDS2017's attacks are *scripted into fixed windows*, so temporal concentration is partly an artifact of the capture schedule, not purely an intrinsic property of the attacks. Report it as such. |
 | ~~**Run a significance test before citing CNN vs LTN control?**~~ | ✅ **DONE 2026-08-03** | `scripts/significance.py`. Verdict: **the CNN does beat the control** (+0.0204, p=0.001, paired bootstrap over flows). ⚠️ Flow-level only — seed-level significance needs n≥6 and is *not* achievable at n=3 (Wilcoxon floor p=0.25). Also reversed the "CNN beats XGBoost" retraction (p=0.80, n.s.). |
 | **Multi-seed the remaining n=1 channels?** | ⬜ **NEW — raised 2026-08-03** | Now that `BASELINE_SEED` exists and multi-seeding overturned a thesis claim once, the remaining single-seed artifacts are a known risk. XGBoost is deterministic (no action possible without changing its config). Candidates: the LTN axiom variants at n=3 are done; `cnn_auxhead`, `fusion_*` are still n=1. Low cost, and this project has retracted **four** single-seed findings. |
 | **Omega mode for any future LTN work** | **`ratio`** (already the code default) | Settled 2026-07-27: `fixed` collapses 2/3 seeds at ω=1.0, deterministically at ω=2.0; `ratio` eliminated the collapse at no measured cost. Do not use `fixed` without a stated reason. |
@@ -1520,6 +1590,10 @@ subsampling or bootstrap the training data.
 | "Ax6 roughly doubles Bot lift" | 🔴 **retracted** | single-seed artifact; control's own mean lift is higher |
 | "Mahalanobis 4.3× — best Bot channel" | 🔴 **retracted** | seed 42 only; n=3 mean is 3.0×, seed 44 at chance |
 | "Bot forms a stable ~90%-pure cluster" | 🔴 **retracted** | varied clustering seed, not CNN seed; 87.9/86.6/**44.4**% across CNN seeds |
+| KG cluster **growth rate** detects zero-day | ✅ **established 2026-08-03** | lift **5.94x** [5.66, 6.11] n=3 clustering seeds, ~81% recall. ⚠️ substantially measures CIC-IDS2017's scripted attack windows |
+| KG "unexplained cluster" detects zero-day | 🔴 **refuted 2026-08-03** | lift <= 1.00x (at or below chance) across 3 representations x 3 thresholds |
+| KG behaviour **co-occurrence** detects zero-day | 🔴 **refuted 2026-08-03** | flow-level 2.81x at 1.5% recall; cluster-level <= 1.35x; only 24/64 patterns observed so thresholds degenerate |
+| "growth AND co-occurrence gives 81% precision" | 🔴 **NOT established — caught pre-publication** | seed-42 artifact; n=3 lift range [1.73, 11.57], precision [0.122, 0.814] |
 | "The AE is a better Bot channel than Mahalanobis" | ✅ **established 2026-08-03** | +0.0284, CI [+0.0227, +0.0339], p<0.0005 (previously "ranges overlap, not established") |
 
 ## Session Log Pointer

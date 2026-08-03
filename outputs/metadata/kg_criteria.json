@@ -1,0 +1,206 @@
+{
+ "predictions_preregistered": {
+  "Q1_growth": "lift > 3x, but largely measuring CIC-IDS2017's scripted capture schedule",
+  "Q2_cooccurrence": "lift < 2x -- behaviours are DoS/scan-shaped, zero-day families are not",
+  "Q3_conjunction": "better precision than either alone, worse recall"
+ },
+ "config": {
+  "representation": "raw_features_68d",
+  "k": 200,
+  "n_windows": 20,
+  "base_rate_zd_vs_benign": 0.07039717266913498
+ },
+ "criterion1_growth": {
+  "burstiness_percentiles": {
+   "50": 4.857230392156863,
+   "75": 8.15295211529521,
+   "90": 12.814865621500552,
+   "95": 19.237012987012978,
+   "99": 20.0
+  },
+  "results": {
+   "burst_ge_2.0": {
+    "n_flagged": 114658,
+    "zd": 4183,
+    "benign": 55237,
+    "precision": 0.07039717266913498,
+    "recall": 1.0,
+    "lift": 1.0
+   },
+   "burst_ge_4.0": {
+    "n_flagged": 72589,
+    "zd": 4135,
+    "benign": 13813,
+    "precision": 0.23038778694004902,
+    "recall": 0.9885249820702845,
+    "lift": 3.272685225909087
+   },
+   "burst_ge_8.0": {
+    "n_flagged": 33553,
+    "zd": 3306,
+    "benign": 4377,
+    "precision": 0.43030066380320187,
+    "recall": 0.7903418599091561,
+    "lift": 6.112470820747371
+   },
+   "burst_ge_12.0": {
+    "n_flagged": 14902,
+    "zd": 693,
+    "benign": 2008,
+    "precision": 0.256571640133284,
+    "recall": 0.16567057136026775,
+    "lift": 3.6446298964187744
+   }
+  }
+ },
+ "criterion3_cooccurrence": {
+  "active_behaviours": [
+   "BurstTraffic",
+   "HighVolume",
+   "LargePackets",
+   "HighEntropy",
+   "ScanProbe",
+   "BeaconLike"
+  ],
+  "results": {
+   "flow_rarity_p99.0": {
+    "n_flagged": 24536,
+    "zd": 61,
+    "benign": 247,
+    "precision": 0.19805194805194806,
+    "recall": 0.014582835285680135,
+    "lift": 2.81335088530881
+   },
+   "flow_rarity_p95.0": {
+    "n_flagged": 24536,
+    "zd": 61,
+    "benign": 247,
+    "precision": 0.19805194805194806,
+    "recall": 0.014582835285680135,
+    "lift": 2.81335088530881
+   },
+   "flow_rarity_p90.0": {
+    "n_flagged": 24536,
+    "zd": 61,
+    "benign": 247,
+    "precision": 0.19805194805194806,
+    "recall": 0.014582835285680135,
+    "lift": 2.81335088530881
+   },
+   "flow_rarity_p75.0": {
+    "n_flagged": 31174,
+    "zd": 95,
+    "benign": 2115,
+    "precision": 0.042986425339366516,
+    "recall": 0.022710972985895292,
+    "lift": 0.6106271560280082
+   },
+   "cluster_rarity_p90.0": {
+    "n_flagged": 17468,
+    "zd": 0,
+    "benign": 0,
+    "precision": 0.0,
+    "recall": 0.0,
+    "lift": 0.0
+   },
+   "cluster_rarity_p75.0": {
+    "n_flagged": 32063,
+    "zd": 80,
+    "benign": 2986,
+    "precision": 0.02609262883235486,
+    "recall": 0.01912502988285919,
+    "lift": 0.3706488178863317
+   },
+   "cluster_rarity_p50.0": {
+    "n_flagged": 48924,
+    "zd": 1552,
+    "benign": 14724,
+    "precision": 0.09535512410911771,
+    "recall": 0.3710255797274683,
+    "lift": 1.3545305939669554
+   }
+  }
+ },
+ "conjunction": {
+  "burst4.0_AND_rarity_p90.0": {
+   "n_flagged": 24344,
+   "zd": 58,
+   "benign": 84,
+   "precision": 0.4084507042253521,
+   "recall": 0.013865646665072914,
+   "lift": 5.802089611539666
+  },
+  "burst4.0_AND_rarity_p75.0": {
+   "n_flagged": 30065,
+   "zd": 66,
+   "benign": 1092,
+   "precision": 0.05699481865284974,
+   "recall": 0.015778149653358834,
+   "lift": 0.8096180072561155
+  },
+  "burst8.0_AND_rarity_p90.0": {
+   "n_flagged": 7370,
+   "zd": 57,
+   "benign": 13,
+   "precision": 0.8142857142857143,
+   "recall": 0.013626583791537174,
+   "lift": 11.567022984187698
+  },
+  "burst8.0_AND_rarity_p75.0": {
+   "n_flagged": 8150,
+   "zd": 62,
+   "benign": 529,
+   "precision": 0.10490693739424704,
+   "recall": 0.014821898159215873,
+   "lift": 1.490215209171924
+  }
+ },
+ "multiseed": {
+  "growth_ge8": [
+   {
+    "lift": 6.112470820747371,
+    "precision": 0.43030066380320187,
+    "recall": 0.7903418599091561
+   },
+   {
+    "lift": 6.036928740145267,
+    "precision": 0.4249827149112699,
+    "recall": 0.8816638775998088
+   },
+   {
+    "lift": 5.658108228002072,
+    "precision": 0.3983148219073152,
+    "recall": 0.7458761654315085
+   }
+  ],
+  "conjunction": [
+   {
+    "lift": 11.567022984187698,
+    "precision": 0.8142857142857143,
+    "recall": 0.013626583791537174
+   },
+   {
+    "lift": 2.367519324248944,
+    "precision": 0.16666666666666666,
+    "recall": 0.0007171886206072197
+   },
+   {
+    "lift": 1.732331212865081,
+    "precision": 0.12195121951219512,
+    "recall": 0.0011953143676786994
+   }
+  ]
+ },
+ "best_lift_any_criterion_seed42": 11.567022984187698,
+ "verdict": {
+  "growth_robust": true,
+  "growth_lift_mean_n3": 5.93583592963157,
+  "growth_lift_range_n3": [
+   5.658108228002072,
+   6.112470820747371
+  ],
+  "cooccurrence_weak": true,
+  "conjunction_established": false,
+  "note": "Growth is the only criterion that survives multi-seeding. The conjunction's seed-42 precision (0.81) is a single-seed artifact \u2014 n=3 range is 0.12-0.81. Growth substantially measures CIC-IDS2017's scripted attack windows, which is an external-validity threat, not a property of the method."
+ }
+}
