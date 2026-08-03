@@ -84,6 +84,63 @@ BEHAVIOUR_NAMES = [
 
 REPEATED_CONNECTIONS_AVAILABLE = False
 
+# ---------------------------------------------------------------------------
+# Downstream-consumer metadata (added 2026-08-03, ahead of Phase 4).
+#
+# These are ADDITIVE. `BEHAVIOUR_NAMES` and `behaviour_matrix()` are deliberately
+# unchanged: every Phase-2 LTN result was measured against that exact 7-column
+# layout, and silently changing its shape or column order would invalidate them.
+#
+# The problem being solved: not every column is the same KIND of thing, and a
+# consumer that treats them uniformly gets silently wrong answers.
+#
+#   * `RepeatedConnections` is CONSTANT ZERO (see above). It is silently carried
+#     through `behaviour_matrix()` as column 6 into any consumer that does not
+#     filter it. For the KG that means a dead `exhibits` edge type that fires on
+#     nothing -- or, worse, a co-occurrence statistic quietly divided by a
+#     column of zeros.
+#   * `BeaconLike` is BINARY (exactly 0.0 or 1.0), unlike the five graded
+#     behaviours. That is deliberate -- port number is not ordinal, and a
+#     magnitude ramp was tried and dropped for being anti-correlated with Bot
+#     (ROC 0.3995). But as a KG `exhibits` edge weight it yields a bimodal
+#     distribution rather than a spread, so any thresholding or weighting that
+#     assumes a continuous [0,1] value will behave differently on this one.
+#
+# Use `active_behaviour_names()` / `active_behaviour_matrix()` for anything that
+# consumes behaviours as features or edge weights. Check `BEHAVIOUR_KIND` before
+# assuming a column is continuous.
+# ---------------------------------------------------------------------------
+
+BEHAVIOUR_KIND = {
+    "BurstTraffic":        "graded",    # fuzzy [0,1]
+    "HighVolume":          "graded",
+    "LargePackets":        "graded",
+    "HighEntropy":         "graded",    # NB: packet-size variance, not Shannon entropy
+    "ScanProbe":           "graded",
+    "BeaconLike":          "binary",    # exactly 0.0 or 1.0 -- bimodal as an edge weight
+    "RepeatedConnections": "constant",  # always 0.0 while REPEATED_CONNECTIONS_AVAILABLE is False
+}
+assert set(BEHAVIOUR_KIND) == set(BEHAVIOUR_NAMES), "BEHAVIOUR_KIND out of sync"
+
+
+def active_behaviour_names():
+    """Behaviour names that actually carry signal, in `BEHAVIOUR_NAMES` order.
+
+    Excludes any behaviour whose kind is "constant" -- currently just
+    `RepeatedConnections`. If the IP/port side-table is ever wired in
+    (`REPEATED_CONNECTIONS_AVAILABLE = True`), flip its kind to "graded" and it
+    rejoins automatically, with no consumer change needed.
+    """
+    return [n for n in BEHAVIOUR_NAMES
+            if not (BEHAVIOUR_KIND[n] == "constant"
+                    or (n == "RepeatedConnections" and not REPEATED_CONNECTIONS_AVAILABLE))]
+
+
+def active_behaviour_indices():
+    """Column indices into `behaviour_matrix()` for the active behaviours."""
+    active = set(active_behaviour_names())
+    return [i for i, n in enumerate(BEHAVIOUR_NAMES) if n in active]
+
 # Fixed domain knowledge, NOT data-fitted — standard well-known service ports.
 # Deliberately not a percentile ramp: destination-port *magnitude* isn't ordinal
 # (port 8080 isn't "more" than port 443), and a magnitude ramp fit on this
@@ -237,9 +294,25 @@ def abstract_behaviours(X_raw, thresholds=None):
 
 
 def behaviour_matrix(X_raw, thresholds=None):
-    """Same as abstract_behaviours but returned as (N, len(BEHAVIOUR_NAMES)) array."""
+    """Same as abstract_behaviours but returned as (N, len(BEHAVIOUR_NAMES)) array.
+
+    ⚠️ Includes the constant-zero `RepeatedConnections` column (index 6). Column
+    order and width are FROZEN — every Phase-2 LTN result was measured against
+    this exact layout. New consumers should prefer `active_behaviour_matrix()`.
+    """
     b = abstract_behaviours(X_raw, thresholds)
     return np.stack([b[name] for name in BEHAVIOUR_NAMES], axis=1)
+
+
+def active_behaviour_matrix(X_raw, thresholds=None):
+    """`behaviour_matrix` with dead (constant) columns dropped.
+
+    Use this for anything that consumes behaviours as features or as KG edge
+    weights. Pair it with `active_behaviour_names()` for the column labels, and
+    consult `BEHAVIOUR_KIND` before assuming a column is continuous —
+    `BeaconLike` is binary, so it contributes a hard 0/1 rather than a spread.
+    """
+    return behaviour_matrix(X_raw, thresholds)[:, active_behaviour_indices()]
 
 
 # -------------------------------------------------------------

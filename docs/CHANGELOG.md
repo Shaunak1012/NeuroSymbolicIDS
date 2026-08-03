@@ -45,6 +45,40 @@ answered the project's last open research question.**
   claim was right. The downstream note that the "pivot to explanation/adaptivity" framing rested on
   "a tie that isn't there" is **withdrawn — the tie is there.**
 
+### Phase-4 readiness measured (third pass — "make it ready, don't start it")
+
+`scripts/kg_readiness.py`, four predictions pre-registered. **Two decisive results, one of which
+falsified a recommendation this project made earlier the same day.**
+
+- **🚨 The KG's specified zero-day mechanism DOES NOT WORK.** "Unexplained cluster" (weak/no
+  `associated_with` edges to a known AttackType) was operationalised honestly — train-labels-only
+  criterion, scored against test — and scores **lift ≤ 1.00× over the base rate across 3
+  representations × 3 thresholds.** Best result anywhere is exactly chance; everything else is
+  **below** it, i.e. anti-correlated. Cause is structural: **118 of 200 clusters contain zero
+  known-attack training flows**, because benign traffic is diverse and is half the training set, so
+  the criterion flags ~59,000 of ~59,400 benign+zero-day test flows.
+  **Consequences:** the KG cannot be a primary detector; the spec's scope contradiction
+  (`knowledge_graph.md` "primary zero-day signal" vs `conference_roadmap.md` "corroboration, not
+  primary detector") is **resolved empirically in the roadmap's favour**; and the spec's other two
+  criteria (**growth rate**, **behaviour co-occurrence**) are now the gating question for any KG
+  detection role — still untested.
+- **🔴 The AE-bottleneck representation recommendation was measured and REJECTED.** Earlier the same
+  day, Open Decisions recorded *"(c) the AE's benign-trained 16-d bottleneck is now the data-backed
+  lean"*, reasoning from the AE's reproducible Bot *ranking* (ρ=0.827 vs the CNN's −0.090). Measured
+  Bot-purity spread: **52.1 pp — the worst of all options**, versus the CNN's 43.4 pp.
+  **Rank stability ≠ cluster stability.** The AE orders Bot flows consistently but its 16-d geometry
+  still scatters them across seeds.
+- **✅ Raw features are the data-backed choice**: Bot purity **77.6 % (k=200) / 80.6 % (k=400)**,
+  competitive with the CNN's good seeds, far above its worst (44.4 %), and with **no training-seed
+  lottery** — residual k-means seed sensitivity ~2.6 pp, an order of magnitude below the 28–52 pp
+  training lottery. Bot-purity instability appears in **every learned representation** while
+  Web BF/XSS stay stable in all of them — consistent with the Bot failure analysis.
+- **Behaviour-column guards for Phase 4** (additive; the frozen 7-column `behaviour_matrix()` and
+  `BEHAVIOUR_NAMES` are untouched so Phase-2 results remain valid): `BEHAVIOUR_KIND` declares each
+  behaviour `graded`/`binary`/`constant`, and `active_behaviour_matrix()` drops the constant-zero
+  `RepeatedConnections` column automatically. `BeaconLike` is flagged `binary` — bimodal as an
+  `exhibits` edge weight.
+
 ### Data-integrity repairs (second pass, same day)
 
 The first pass **documented** these defects but left them in the data, citing the append-only rule.

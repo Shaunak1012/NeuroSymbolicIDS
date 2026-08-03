@@ -115,23 +115,38 @@ which measurement you mean.)
 now version-controlled) · C4 ✅ annotated in `config.yaml` (not fixed — the log1p A/B still cites the
 contaminated metric) · **C1 and C3 remain findings-only. Do not implement them unprompted.**
 
-🟢 **Phase-4 blocker status: UNBLOCKED, decision pending.** The blocker measurement stands and now
-has an artifact (`outputs/metadata/kg_precheck.json`; Bot purity **87.9 / 86.6 / 44.4 %** across CNN
-seeds, 43.4 pp spread). But the Bot analysis makes the choice non-arbitrary:
-**(a) ensembling CNN seeds now looks futile** — averaging a noise ranking does not create signal;
-**(b) raw features are viable** (Bot separable at 0.9988 given labels, no training lottery);
-**(c) the AE's 16-d benign-trained bottleneck is the data-backed lean** — the only representation
-measured that ranks Bot *reproducibly* (ρ=0.827); (d) accept-and-publish remains the cheap honest
-option. **Clustering purity under (b)/(c) is still unmeasured — one `kg_precheck.py` variant settles
-it.** ⚠️ Also still unmeasured and still the single most important quantity: **the false-positive
-rate of "unexplained cluster."**
+🚨 **PHASE-4 READINESS MEASURED (2026-08-03) — read before writing any KG code.**
+
+**The KG's specified zero-day mechanism DOES NOT WORK.** `scripts/kg_readiness.py` measured the
+"unexplained cluster" criterion (weak/no `associated_with` edges to a known AttackType) honestly —
+train-labels-only criterion, scored against test — and it returns **lift ≤ 1.00× over the base rate
+across 3 representations × 3 thresholds.** Best case is exactly chance; everything else is *below*
+it. **118 of 200 clusters have zero known-attack training flows**, so it flags ~59,000 of ~59,400
+benign+zero-day test flows. **Do not build a primary detector on it.** This empirically resolves the
+spec's scope contradiction in the roadmap's favour: **the KG is corroboration + explainability.**
+The spec's other two criteria (**growth rate**, **behaviour co-occurrence**) are **untested** and are
+now the gating question for any KG detection role.
+
+✅ **Cluster RAW FEATURES, not embeddings.** Bot purity **77.6 % (k=200) / 80.6 % (k=400)**,
+competitive with the CNN's good seeds, far above its worst (44.4 %), no training-seed lottery
+(residual k-means sensitivity ~2.6 pp).
+🔴 **The AE bottleneck was recommended and then measured and REJECTED** — spread **52.1 pp**, the
+worst of all options. The reasoning (the AE ranks Bot reproducibly, ρ=0.827) did not transfer:
+**rank stability ≠ cluster stability.** A confident, cheap-to-test recommendation that was wrong —
+measure before recommending.
+
+🧩 **Use `behavior.active_behaviour_matrix()`** in any KG code, not the raw 7-column matrix:
+`RepeatedConnections` is constant 0.0 (dead edge type / divide-by-zero risk) and `BeaconLike` is
+binary, so bimodal as an edge weight. Check `behavior.BEHAVIOUR_KIND` before assuming continuity.
 
 **Recommended order:** ~~C2~~ ✅ → ~~Phase 3 AE~~ ✅ → ~~modality test~~ ✅ → ~~multi-seed AE~~ ✅ →
 ~~train-vs-score decomposition~~ ✅ → ~~KG substrate re-check~~ ✅ → ~~significance test~~ ✅ →
-~~baselines on current schema~~ ✅ → ~~why the CNN fails on Bot~~ ✅ → **next: (a) decide the KG
-representation (measure (b)/(c) purity first — it is cheap); (b) measure the "unexplained cluster"
-false-positive rate; (c) C1/C3 reporting variants (no training) → C4.** LOCO/fusion-repair stays
-deprioritized; the per-flow "router" idea rested on the falsified modality mechanism.
+~~baselines on current schema~~ ✅ → ~~why the CNN fails on Bot~~ ✅ → ~~KG representation purity~~ ✅
+(raw features win) → ~~"unexplained cluster" FP rate~~ ✅ (mechanism dead) → **next: (a) measure the
+KG's remaining two emerging-pattern criteria — growth rate and behaviour co-occurrence — since they
+are now the only route to any KG detection role; (b) decide the temporal-decay time axis;
+(c) C1/C3 reporting variants (no training) → C4.** LOCO/fusion-repair stays deprioritized; the
+per-flow "router" idea rested on the falsified modality mechanism.
 
 **Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
@@ -176,7 +191,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 29 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
+**All 30 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -189,7 +204,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 29 scripts — see docs/scripts_reference.md
+├── scripts/                   ← 30 scripts — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline

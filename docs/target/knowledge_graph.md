@@ -5,7 +5,68 @@
 
 ---
 
-## ⚠️ READ FIRST — Phase-4 readiness review (2026-07-29)
+## 🚨 READ FIRST — MEASURED 2026-08-03. Two of this spec's decisions are now settled by data.
+
+`scripts/kg_readiness.py` → `outputs/metadata/kg_readiness.json`. Predictions pre-registered.
+
+### 🔴 1. The "unexplained cluster" mechanism DOES NOT WORK. Do not build it.
+
+This spec flags an emerging pattern partly by **weak or no `associated_with` edges to a known
+AttackType**. Measured honestly — cluster is "unexplained" if its **training** flows contain < τ
+known-attack fraction (train labels only, which the KG legitimately has), scored against test:
+
+| representation | τ=0.01 | τ=0.05 | τ=0.10 |
+|---|---:|---:|---:|
+| CNN embedding 64-d | 0.55× | 0.54× | 1.00× |
+| AE bottleneck 16-d | 0.28× | 0.44× | 0.43× |
+| Raw features 68-d | 0.93× | 0.90× | 0.90× |
+
+*(lift over the base rate 0.0704; **> 1.0 = better than random**)*
+
+**Best result anywhere: 1.00×, exactly chance. Everything else is below it** — a flow in an
+"unexplained" cluster is *less* likely to be zero-day than a random flow. **118 of 200 clusters
+contain zero known-attack training flows**, because benign traffic is diverse and is half the
+training set, so the criterion flags ~59,000 of ~59,400 benign+zero-day test flows. Not a tuning
+problem: lift ≤ 1.0 across 3 representations × 3 thresholds.
+
+**Consequences:**
+- ✅ **Contradiction #1 below is RESOLVED — empirically, in the roadmap's favour.** The KG is
+  **corroboration + explainability, not a primary detector.** That is now a measurement.
+- ⬜ **The other two emerging-pattern criteria are still untested** — **cluster growth rate** and
+  **behaviour co-occurrence**. Any detection role must come from those, and they must be measured
+  the same way *before* being built on.
+
+### ✅ 2. Cluster on RAW FEATURES, not embeddings
+
+| representation | Bot purity across seeds (k=200) | spread |
+|---|---|---:|
+| CNN embedding 64-d | 87.9 / 86.6 / **44.4** % | 43.4 pp |
+| AE bottleneck 16-d | 82.0 / 74.1 / **29.9** % | **52.1 pp** |
+| **Raw features 68-d** | **77.6 %** (80.6 % at k=400) | **no training lottery** |
+
+Raw features are competitive with the CNN's *good* seeds, far above its worst, and carry no
+training-seed lottery (residual k-means seed sensitivity ~2.6 pp).
+
+> ⚠️ **The AE bottleneck was the recommended option until this was measured, and the reasoning was
+> wrong.** It was chosen because the AE ranks Bot *reproducibly* (cross-seed ρ = 0.827 vs the CNN's
+> −0.090). **Rank stability ≠ cluster stability**: the AE orders Bot flows consistently by
+> reconstruction error, but its 16-d geometry still scatters them across seeds — measured spread
+> 52.1 pp, the worst of all three.
+
+### 🧩 3. Behaviour columns need care as `exhibits` edge weights
+
+Use `behavior.active_behaviour_matrix()` / `active_behaviour_names()`, not the raw 7-column matrix:
+- **`RepeatedConnections` is constant 0.0** — a dead edge type, and a divide-by-zero risk in any
+  co-occurrence statistic. `active_*` drops it automatically.
+- **`BeaconLike` is binary (0.0/1.0)**, not graded — bimodal as an edge weight. Check
+  `behavior.BEHAVIOUR_KIND` before assuming a column is continuous.
+
+---
+
+## ⚠️ Phase-4 readiness review (2026-07-29) — items 2 and 3 still stand
+
+> **Item 1 below is superseded by the measurement above** (same conclusion, now with evidence
+> rather than argument). Kept in place per the retract-in-place convention.
 
 This spec was written **before the protocol reset** and three of its assumptions no longer hold.
 Resolve these before writing code; none is fatal, but each changes what gets built.

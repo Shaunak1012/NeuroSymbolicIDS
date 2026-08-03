@@ -6,9 +6,20 @@
 
 **2026-08-03 session: pre-Phase-4 remediation — and it produced three research results, not just fixes.**
 
-The session was scoped as "fix every discrepancy before Phase 4." Fixing them required re-running
-things, and the re-runs overturned two documented claims and answered the project's last open
-research question. **Read these three boxes before anything else:**
+The session was scoped as "fix every discrepancy before Phase 4," then extended to "make Phase 4
+ready to start without starting it." Both produced research results.
+
+> 🚨 **MOST IMPORTANT SINGLE FINDING OF THE SESSION — read before touching Phase 4.**
+> **The Knowledge Graph's specified zero-day mechanism does not work.** "Unexplained cluster"
+> (weak/no `associated_with` edges to a known AttackType) scores **lift ≤ 1.00× — at or below
+> chance — across 3 representations × 3 thresholds.** It is anti-correlated, not merely weak.
+> This kills the KG as a *primary detector* and empirically resolves the spec's scope
+> contradiction in the roadmap's favour: **corroboration + explainability only.**
+> Also: **cluster raw features, not embeddings** — and note that this document's *own* AE-bottleneck
+> recommendation, made earlier the same day, was measured and **rejected** (52.1 pp spread, worst
+> of all options). See [PHASE-4 READINESS MEASURED](#-phase-4-readiness-measured-2026-08-03--the-kgs-specified-zero-day-mechanism-does-not-work).
+
+**Read these three boxes next:**
 
 1. 🔬 **"Why does the CNN fail on Bot?" is ANSWERED** — see
    [WHY THE CNN FAILS ON BOT](#-why-the-cnn-fails-on-bot--answered-2026-08-03). All four
@@ -1116,6 +1127,83 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## 🚨 PHASE-4 READINESS MEASURED (2026-08-03) — the KG's specified zero-day mechanism DOES NOT WORK
+
+`scripts/kg_readiness.py` → `outputs/metadata/kg_readiness.json`. Four predictions pre-registered
+before running. **Two decisive results, one of which falsifies the recommendation this document
+made earlier the same day.**
+
+### 🔴 PART B — "unexplained cluster" is WORSE THAN RANDOM. The mechanism is dead as specified.
+
+STATUS has called this *"the single most important untested quantity"* since 2026-07-29. It is now
+tested. The KG spec flags an emerging pattern partly by **weak or no `associated_with` edges to a
+known AttackType**. Operationalised honestly — a cluster is "unexplained" if its **training** flows
+contain < τ known-attack fraction (train labels only, which the KG legitimately has), then scored
+against test labels:
+
+| representation | τ=0.01 | τ=0.05 | τ=0.10 |
+|---|---:|---:|---:|
+| CNN embedding 64-d | **0.55×** | **0.54×** | **1.00×** |
+| AE bottleneck 16-d | **0.28×** | **0.44×** | **0.43×** |
+| Raw features 68-d | **0.93×** | **0.90×** | **0.90×** |
+
+*(lift over the base rate of 0.0704 = 4,183 zero-day vs 55,237 benign test flows)*
+
+**The best lift achieved by any representation at any threshold is 1.00× — i.e. exactly chance.
+Everything else is BELOW 1.0, meaning a flow in an "unexplained" cluster is *less* likely to be
+zero-day than a randomly chosen flow.** The criterion is not weak; it is **anti-correlated**.
+
+The reason is structural and was visible in the pre-check: **118 of 200 clusters contain zero
+known-attack training flows.** Benign traffic is diverse and makes up half the training set, so
+"no known-attack anchor" describes most of the space. The criterion flags 48,000–59,000 of ~59,400
+benign+zero-day test flows — it flags nearly everything.
+
+**This is not a tuning problem.** Lift ≤ 1.0 across 3 representations × 3 thresholds. Prediction P4
+(*"lift < 3× would kill the mechanism"*) is confirmed far more strongly than expected.
+
+**What it means for Phase 4** — and this is constructive, not fatal:
+1. 🔴 **The KG cannot be a primary zero-day detector via "unexplained cluster."** Do not build that.
+2. ✅ **It empirically resolves the spec's scope contradiction.** `knowledge_graph.md` calls the KG
+   the *"primary zero-day signal"*; `conference_roadmap.md §Phase 4` says *"corroboration +
+   reasoning paths, not primary detector."* **The roadmap was right.** That is now a measurement,
+   not a preference.
+3. ⬜ **The spec's other two emerging-pattern criteria are still untested** — cluster **growth
+   rate** and **behaviour co-occurrence**. If the KG is to retain any detection role it has to come
+   from those, and they should be measured the same way *before* being built on.
+
+### 🔴 PART A — and my own representation recommendation was WRONG
+
+| representation | Bot purity across seeds (k=200) | spread | k=400 spread |
+|---|---|---:|---:|
+| CNN embedding 64-d | 87.9 / 86.6 / **44.4** % | **43.4 pp** | 28.3 pp |
+| **AE bottleneck 16-d** | 82.0 / 74.1 / **29.9** % | **52.1 pp** | **44.3 pp** |
+| **Raw features 68-d** | **77.6 %** (k=200) · 80.6 % (k=400) | **no training lottery** | — |
+
+> 🔴 **PREDICTION P1 FALSIFIED — and it was the basis of this document's own recommendation.**
+> Earlier on 2026-08-03, Open Decisions recorded *"(c) the AE's benign-trained 16-d bottleneck is
+> now the data-backed lean"*, reasoning that the AE ranks Bot **reproducibly** (cross-seed Spearman
+> ρ = 0.827, vs the CNN's −0.090). **That reasoning does not transfer.** Measured, the AE bottleneck
+> is the *least* stable representation for clustering — **52.1 pp** Bot-purity spread, worse than
+> the CNN's 43.4 pp.
+>
+> **The lesson: rank stability ≠ cluster stability.** The AE orders Bot flows consistently by
+> reconstruction error, but the *geometry* of its 16-d bottleneck still varies enough across seeds
+> to scatter Bot across different clusters. Those are different properties and I conflated them.
+> This is precisely why the measurement had to be run instead of argued — the recommendation was
+> confident, cheap to test, and wrong.
+
+**✅ Raw features (option b) is the data-backed choice.** Bot purity 77.6 % (k=200) / 80.6 % (k=400)
+— competitive with the CNN's *good* seeds, far above its worst (44.4 %), above the AE's mean, and
+with **no training-seed lottery at all**, since no model is trained.
+⚠️ **Precisely stated:** raw features remove the *training* lottery, not all variance — k-means has
+its own seed, worth ~2.6 pp per `kg_precheck.py` Part 2. That is an order of magnitude below the
+28–52 pp training lottery, not zero.
+
+**A pattern worth noting:** Bot-purity instability appears in **every learned representation** (CNN
+and AE alike) while Web BF / XSS purity stays stable in both (0.7–2.5 pp for the CNN; 53.4/53.4/54.4 %
+for the AE). Consistent with the Bot failure analysis — Bot's signature is not what either training
+objective is organised around, so where Bot lands is left to initialisation.
+
 ## 🔬 WHY THE CNN FAILS ON BOT — ANSWERED (2026-08-03)
 
 `scripts/bot_failure_analysis.py`. **Four hypotheses were written into the script before it was
@@ -1354,7 +1442,7 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 2 | Decide `RepeatedConnections` data path | ⬜ deprioritized | **Unblocked, not blocked** — `meta_{train,val,test}.csv` now carry IP/port/timestamp aligned row-for-row. No longer motivated as a Bot fix (B2/fusion findings above); may still help Infiltration/lateral-movement. Wiring it is a choice, not a data problem. |
 | 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ✅ **DONE 2026-08-02** | Ran. Closes the "why not an autoencoder?" objection with a number, and produced the modality-analogue refinement that reframes the whole architecture. Was nearly skipped by a phase-number collision. **Follow-up (not scheduled): multi-seed it (n=1 today), and measure modality similarity to test the refined account.** |
 | 2c | **Pre-Phase-4 remediation + significance + Bot analysis** | ✅ **DONE 2026-08-03** | All audit discrepancies fixed (research record version-controlled, component status collapsed to one table, `kg_precheck` now persists, baselines on n=3 + current schema, legacy artifact collision resolved). Plus three research outputs: **significance tests run** (C2 closed; one retraction reversed), **the (A)/(B) strong form falsified** by RandomForest, and **the CNN's Bot failure explained**. |
-| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | 🟡 **UNBLOCKED — decision now evidence-backed, awaiting sign-off** | Cluster embeddings → graph + decay + emerging-pattern detection. Spec: [knowledge_graph.md](target/knowledge_graph.md). **The representation question is no longer a coin flip**: the Bot failure analysis shows CNN embeddings rank Bot at *noise* (ρ=−0.090) while the AE bottleneck ranks it *reproducibly* (ρ=0.827) — so "ensemble CNN seeds" is futile and the AE bottleneck (or raw features) is the supported choice. See Open Decisions. ⚠️ Still read the "Phase-4 readiness review" in the spec — 3 of its original assumptions no longer hold, and the **false-positive rate of "unexplained cluster" is still unmeasured** (that remains the single most important untested quantity). |
+| 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | 🟡 **READY TO BUILD, but RESCOPED by measurement — awaiting sign-off** | **Prerequisites now measured** (`kg_readiness.py`). ✅ Representation decided on evidence: **raw features** (Bot purity 77.6/80.6 %, no training lottery) — *not* the AE bottleneck, whose 52.1 pp spread was the worst of all options. 🔴 **Scope forced by measurement: corroboration + explainability, NOT primary detection** — the "unexplained cluster" criterion scores **lift ≤ 1.00× (at or below chance)** across every representation and threshold, so that mechanism is dead. ⬜ **Remaining gate:** the spec's other two criteria (**growth rate**, **behaviour co-occurrence**) are untested — measure before building any detection role on them. ⬜ Also undecided: temporal decay's time axis. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | 4 | Decision Fusion — canonical Phase 5 | ⬜ | CNN + LTN + KG → verdict. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | Explainability / Final Alert | ⬜ | 3 explanations + alert. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
@@ -1373,7 +1461,10 @@ Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 | Decay "time" | Flow-count (reproducible) | — |
 | Compute (CPU vs GPU) | **CPU** (Ryzen 9 9950X3D) | GPU (RTX 5080/Blackwell) deferred — needs WSL2 + CUDA 12.8 + newer TF + Keras 3 migration. Revisit if training volume grows (multi-seed/sweeps/cross-dataset). |
 | ~~Run the Phase-3 autoencoder before the KG?~~ | ✅ **DECIDED & DONE 2026-08-02** | Ran it (n=3). Verdict: worth it. It answered the reviewer objection *and* produced the double-dissociation result, retracted "Mahalanobis 4.3×", and exposed the Phase-4 blocker. The prediction that its result was "genuinely unpredictable" held — it beat the CNN on Bot and lost 6.6× on macro. |
-| 🔴 **Which representation should the KG cluster?** | ⬜ **STILL UNDECIDED (user's call) — but the evidence is no longer a coin flip** | **Updated 2026-08-03 by the Bot failure analysis, which turned this from a hypothesis into a data-backed recommendation.** (a) ensemble CNN seeds — ⚠️ **now looks futile**: the CNN's Bot ranking is *noise* (ρ=−0.090 across seeds), and averaging noise does not create signal; it would stabilise the *number* while the underlying representation still lacks Bot's features (0/8 overlap). (b) raw features — ✅ **viable**: Bot is fully separable there (oracle PR-AUC 0.9988) and there is no training lottery at all. (c) **AE's benign-trained 16-d bottleneck — ✅ now the data-backed lean**: it is the *only* representation measured that ranks Bot **reproducibly** (cross-seed ρ = **0.827**, vs CNN −0.090 / RF 0.068). (d) accept + publish the variance — cheapest, still honest. **Recommendation: (c), with (b) as a cheap complement/ablation.** Clustering purity under (c)/(b) is still **unmeasured** — one `kg_precheck.py` variant would settle it. |
+| 🔴 **Which representation should the KG cluster?** | ✅ **MEASURED 2026-08-03 → recommend (b) RAW FEATURES.** Awaiting sign-off. | **Clustering purity is now measured for all options** (`kg_readiness.py`), and it **overturned the lean recorded here earlier the same day.** (a) ensemble CNN seeds — ❌ futile: the CNN's Bot ranking is noise (ρ=−0.090); averaging noise creates no signal. (b) **raw features — ✅ RECOMMENDED**: Bot purity **77.6 % (k=200) / 80.6 % (k=400)**, competitive with the CNN's good seeds and far above its worst (44.4 %), with **no training lottery** (residual k-means seed sensitivity ~2.6 pp). (c) AE bottleneck — 🔴 **WAS the lean, now REJECTED**: measured Bot-purity spread **52.1 pp**, the *worst* of all options, because **rank stability ≠ cluster stability** — the AE orders Bot flows consistently (ρ=0.827) but its 16-d geometry still scatters them across seeds. (d) accept-and-publish — unnecessary now that (b) exists. |
+| 🔴 **Is the KG a primary detector or corroboration?** | ✅ **RESOLVED EMPIRICALLY 2026-08-03 → corroboration.** | The spec contradiction (`knowledge_graph.md` "primary zero-day signal" vs `conference_roadmap.md` "corroboration, not primary detector") is settled by measurement, not preference: the "unexplained cluster" criterion scores **lift ≤ 1.00× — at or below chance — across 3 representations × 3 thresholds.** The primary-detector path is dead. **The roadmap was right.** |
+| ⬜ **Do the KG's other two emerging-pattern criteria work?** | ⬜ **NEW — UNTESTED, now the gating question for any KG detection role** | The spec lists three criteria; only "unexplained cluster" was tested (and failed). **Cluster growth rate** and **behaviour co-occurrence** remain unmeasured. If the KG is to keep *any* detection role it must come from these. Measure them the same way — train-labels-only criterion, scored against test — **before** building on them. |
+| ⬜ **KG "temporal decay" has no clean time axis** | ⬜ **UNDECIDED — carried over, now more urgent** | The paper split is stratified-random across all 5 days, so there is no train→test time arrow. Options: decay over flow-count in timestamp-sorted order within test (meta CSVs have timestamps) · drop decay for v1 · run the adaptive story on the temporal split as a secondary result. **"Adaptive" is in the project title**, so dropping it has a write-up cost. |
 | ~~**Run a significance test before citing CNN vs LTN control?**~~ | ✅ **DONE 2026-08-03** | `scripts/significance.py`. Verdict: **the CNN does beat the control** (+0.0204, p=0.001, paired bootstrap over flows). ⚠️ Flow-level only — seed-level significance needs n≥6 and is *not* achievable at n=3 (Wilcoxon floor p=0.25). Also reversed the "CNN beats XGBoost" retraction (p=0.80, n.s.). |
 | **Multi-seed the remaining n=1 channels?** | ⬜ **NEW — raised 2026-08-03** | Now that `BASELINE_SEED` exists and multi-seeding overturned a thesis claim once, the remaining single-seed artifacts are a known risk. XGBoost is deterministic (no action possible without changing its config). Candidates: the LTN axiom variants at n=3 are done; `cnn_auxhead`, `fusion_*` are still n=1. Low cost, and this project has retracted **four** single-seed findings. |
 | **Omega mode for any future LTN work** | **`ratio`** (already the code default) | Settled 2026-07-27: `fixed` collapses 2/3 seeds at ω=1.0, deterministically at ω=2.0; `ratio` eliminated the collapse at no measured cost. Do not use `fixed` without a stated reason. |

@@ -1,0 +1,316 @@
+{
+ "predictions_preregistered": {
+  "P1": "AE bottleneck Bot purity more stable across seeds than CNN (spread << 43.4pp)",
+  "P2": "AE bottleneck absolute Bot purity LOWER than CNN best seed (87.9%)",
+  "P3": "raw features stable by construction and competitive",
+  "P4": "unexplained-cluster precision for zero-day is POOR (lift < 3x) -- would kill the mechanism"
+ },
+ "partA_representations": {
+  "cnn_embedding_64d": {
+   "k200_seed42": {
+    "Bot": {
+     "purity": 0.8786279683377308,
+     "recall": 0.34049079754601225
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.6237396883593034,
+     "recall": 0.9031187790311878
+    },
+    "Web Attack XSS": {
+     "purity": 0.28139321723189736,
+     "recall": 0.941717791411043
+    }
+   },
+   "k400_seed42": {
+    "Bot": {
+     "purity": 0.8222222222222222,
+     "recall": 0.34049079754601225
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.6524243879020644,
+     "recall": 0.9017916390179164
+    },
+    "Web Attack XSS": {
+     "purity": 0.2938070091214594,
+     "recall": 0.9386503067484663
+    }
+   },
+   "k200_seed43": {
+    "Bot": {
+     "purity": 0.865874363327674,
+     "recall": 0.2607361963190184
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.6487781504551988,
+     "recall": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "purity": 0.29372304743651173,
+     "recall": 0.9401840490797546
+    }
+   },
+   "k400_seed43": {
+    "Bot": {
+     "purity": 0.9105113636363636,
+     "recall": 0.3277096114519427
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.6696428571428571,
+     "recall": 0.8958195089581951
+    },
+    "Web Attack XSS": {
+     "purity": 0.3005952380952381,
+     "recall": 0.9294478527607362
+    }
+   },
+   "k200_seed44": {
+    "Bot": {
+     "purity": 0.44435215946843853,
+     "recall": 0.27351738241308793
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.6478711162255466,
+     "recall": 0.7471798274717982
+    },
+    "Web Attack XSS": {
+     "purity": 0.27790563866513235,
+     "recall": 0.74079754601227
+    }
+   },
+   "k400_seed44": {
+    "Bot": {
+     "purity": 0.6274038461538461,
+     "recall": 0.2668711656441718
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.6549566891241578,
+     "recall": 0.9031187790311878
+    },
+    "Web Attack XSS": {
+     "purity": 0.29499518768046196,
+     "recall": 0.9401840490797546
+    }
+   }
+  },
+  "ae_bottleneck_16d": {
+   "k200_seed42": {
+    "Bot": {
+     "purity": 0.8204419889502762,
+     "recall": 0.30368098159509205
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5343612334801762,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.2665198237885463,
+     "recall": 0.9279141104294478
+    }
+   },
+   "k400_seed42": {
+    "Bot": {
+     "purity": 0.36434511434511435,
+     "recall": 0.35838445807770963
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5792741165234002,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.2889207258834766,
+     "recall": 0.9279141104294478
+    }
+   },
+   "k200_seed43": {
+    "Bot": {
+     "purity": 0.741421568627451,
+     "recall": 0.30930470347648265
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5343612334801762,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.2665198237885463,
+     "recall": 0.9279141104294478
+    }
+   },
+   "k400_seed43": {
+    "Bot": {
+     "purity": 0.8018741633199464,
+     "recall": 0.3062372188139059
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5826128722382324,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.29010566762728146,
+     "recall": 0.9263803680981595
+    }
+   },
+   "k200_seed44": {
+    "Bot": {
+     "purity": 0.29918907383696114,
+     "recall": 0.35838445807770963
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.54419021982952,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.27142216240466577,
+     "recall": 0.9279141104294478
+    }
+   },
+   "k400_seed44": {
+    "Bot": {
+     "purity": 0.35838445807770963,
+     "recall": 0.35838445807770963
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5826128722382324,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.29010566762728146,
+     "recall": 0.9263803680981595
+    }
+   }
+  },
+  "raw_features_68d": {
+   "k200_seedNone": {
+    "Bot": {
+     "purity": 0.776,
+     "recall": 0.34713701431492844
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5439461883408072,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.2713004484304933,
+     "recall": 0.9279141104294478
+    }
+   },
+   "k400_seedNone": {
+    "Bot": {
+     "purity": 0.8063241106719368,
+     "recall": 0.3128834355828221
+    },
+    "Web Attack Brute Force": {
+     "purity": 0.5954835542464408,
+     "recall": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "purity": 0.2970054000981836,
+     "recall": 0.9279141104294478
+    }
+   }
+  }
+ },
+ "partB_unexplained_cluster": {
+  "base_rate_zd_vs_benign": 0.07039717266913498,
+  "cnn_embedding_64d": {
+   "tau_0.01": {
+    "n_clusters_unexplained": 125,
+    "n_test_flagged": 56357,
+    "zd_flagged": 2165,
+    "benign_flagged": 54188,
+    "precision_zd": 0.03841854027292247,
+    "recall_zd": 0.5175711212048769,
+    "lift_over_base_rate": 0.5457398190334815
+   },
+   "tau_0.05": {
+    "n_clusters_unexplained": 127,
+    "n_test_flagged": 56984,
+    "zd_flagged": 2165,
+    "benign_flagged": 54799,
+    "precision_zd": 0.03800646022049013,
+    "recall_zd": 0.5175711212048769,
+    "lift_over_base_rate": 0.539886174109855
+   },
+   "tau_0.1": {
+    "n_clusters_unexplained": 128,
+    "n_test_flagged": 59166,
+    "zd_flagged": 4149,
+    "benign_flagged": 54985,
+    "precision_zd": 0.07016268136774106,
+    "recall_zd": 0.9918718622997849,
+    "lift_over_base_rate": 0.9966690238754897
+   }
+  },
+  "ae_bottleneck_16d": {
+   "tau_0.01": {
+    "n_clusters_unexplained": 98,
+    "n_test_flagged": 48265,
+    "zd_flagged": 940,
+    "benign_flagged": 47298,
+    "precision_zd": 0.019486711721049793,
+    "recall_zd": 0.2247191011235955,
+    "lift_over_base_rate": 0.2768109993939227
+   },
+   "tau_0.05": {
+    "n_clusters_unexplained": 110,
+    "n_test_flagged": 52937,
+    "zd_flagged": 1641,
+    "benign_flagged": 51185,
+    "precision_zd": 0.0310642486654299,
+    "recall_zd": 0.3923021754721492,
+    "lift_over_base_rate": 0.44127125405207857
+   },
+   "tau_0.1": {
+    "n_clusters_unexplained": 115,
+    "n_test_flagged": 53863,
+    "zd_flagged": 1643,
+    "benign_flagged": 52039,
+    "precision_zd": 0.03060616221452256,
+    "recall_zd": 0.39278030121922064,
+    "lift_over_base_rate": 0.4347640829038801
+   }
+  },
+  "raw_features_68d": {
+   "tau_0.01": {
+    "n_clusters_unexplained": 116,
+    "n_test_flagged": 53289,
+    "zd_flagged": 3471,
+    "benign_flagged": 49779,
+    "precision_zd": 0.06518309859154929,
+    "recall_zd": 0.8297872340425532,
+    "lift_over_base_rate": 0.9259334731795024
+   },
+   "tau_0.05": {
+    "n_clusters_unexplained": 122,
+    "n_test_flagged": 54714,
+    "zd_flagged": 3476,
+    "benign_flagged": 51158,
+    "precision_zd": 0.06362338470549475,
+    "recall_zd": 0.8309825484102319,
+    "lift_over_base_rate": 0.9037775565863012
+   },
+   "tau_0.1": {
+    "n_clusters_unexplained": 125,
+    "n_test_flagged": 55574,
+    "zd_flagged": 3502,
+    "benign_flagged": 51944,
+    "precision_zd": 0.06316055260974641,
+    "recall_zd": 0.8371981831221611,
+    "lift_over_base_rate": 0.8972029730029002
+   }
+  }
+ },
+ "partA_spread_pp": {
+  "cnn_embedding_64d_k200_Bot": 43.42758088692923,
+  "cnn_embedding_64d_k200_Web Attack Brute Force": 2.503846209589544,
+  "cnn_embedding_64d_k200_Web Attack XSS": 1.5817408771379382,
+  "cnn_embedding_64d_k400_Bot": 28.31075174825175,
+  "cnn_embedding_64d_k400_Web Attack Brute Force": 1.7218469240792733,
+  "cnn_embedding_64d_k400_Web Attack XSS": 0.6788228973778676,
+  "ae_bottleneck_16d_k200_Bot": 52.125291511331504,
+  "ae_bottleneck_16d_k200_Web Attack Brute Force": 0.9828986349343816,
+  "ae_bottleneck_16d_k200_Web Attack XSS": 0.4902338616119495,
+  "ae_bottleneck_16d_k400_Bot": 44.34897052422368,
+  "ae_bottleneck_16d_k400_Web Attack Brute Force": 0.333875571483222,
+  "ae_bottleneck_16d_k400_Web Attack XSS": 0.1184941743804846
+ }
+}
