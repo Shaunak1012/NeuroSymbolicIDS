@@ -1298,7 +1298,83 @@ another guise, and it is why every improvement here is **parameter-free by neces
 hurt, which makes it a clean test); conformal / benign-only p-value calibration combined via
 Fisher/Simes (proposed in KNOWN_ISSUES, needs no attack labels at all); and n≥6 seeds.
 
-## 🟢🟢 THE SCORE IMPROVED (2026-08-03) — first combination to beat the CNN baseline
+## 🔴🔴 THE NOISE FLOOR — measured 2026-08-03, and it retracts a headline result
+
+> **Read this before citing ANY number in this document.** It is the single most consequential
+> measurement in the project, and it invalidates a claim that had already passed a significance test.
+
+### Training is not reproducible at fixed seed
+
+Six runs of **seed 42, identical code, idle machine**: 0.6446 · 0.6295 · 0.6366 · 0.6124 · 0.5825 ·
+0.6280.
+
+**mean 0.6223 · SD 0.0222 · range 0.0621 · CV 3.6 %**
+
+TensorFlow on CPU is not bit-deterministic and **no determinism flags are set** in this project, so
+thread scheduling changes float accumulation order between runs. A fixed seed does **not** pin the
+result here.
+
+### 🔴 C2 IS RETRACTED — on controlled grounds
+
+*"The neural baseline beats the LTN control"* was closed in the CNN's favour earlier the same day
+with a paired bootstrap, **p = 0.001**. Against the measured floor:
+
+| | value |
+|---|---:|
+| C2 gap | +0.0204 |
+| noise SD | 0.0222 |
+| **ratio** | **0.9 SD** |
+
+**The gap is smaller than re-running one model twice.** The bootstrap was arithmetically correct and
+epistemically empty: it treated each run's score as exact when re-running moves it by up to 0.062.
+**A paired significance test over per-flow scores cannot rescue a delta smaller than the pipeline's
+own reproducibility.** This is the project's most important methodological lesson.
+
+### 🔴 Every n=3 range in this document is an artefact
+
+The CNN's macro range was repeatedly described as *"tight (spread 0.0093)"*. That spread is **0.4 SD**
+— **less than half the noise of a single re-run.** Those ranges never measured seed variance; they
+measured too few draws from a noisy process. **Do not cite any n=3 range as evidence of stability.**
+
+### ⚠️ `cnn_paper = 0.6446` is the MAX of 11 runs, not a typical result
+
+The headline CNN number is the top of an 11-run distribution (mean 0.6217). The honest, reproducible
+baseline is the **ensemble: 0.6356**. This correction matters more than it looks — 0.6446 is the
+number that would otherwise have gone into the paper as "the CNN's score".
+
+### What survives, and why it always did
+
+| claim | delta | ÷ SD | verdict |
+|---|---:|---:|---|
+| Double dissociation (XSS) | +0.8977 | **40.4** | ✅ **ESTABLISHED** |
+| Double dissociation (Web BF) | +0.8178 | **36.8** | ✅ **ESTABLISHED** |
+| Double dissociation (Bot) | +0.0868 | **3.9** | ✅ **ESTABLISHED** |
+| CNN+KG fusion | +0.0527 | *paired* | ✅ **direction** (3/3 seeds positive); magnitude 0.027–0.088 |
+| **C2: CNN vs LTN control** | +0.0204 | **0.9** | 🔴 **RETRACTED — within noise** |
+
+The double dissociation strengthened under every test today while C2 collapsed under each one. That
+was never about rigour applied — it was **effect size relative to a floor nobody had measured.**
+
+> ⚠️ **On the fusion entry.** Judging it against the *between-run* floor (2.4 SD) is the wrong
+> reference: the fused score is computed **from the same CNN run**, so run-to-run noise is shared by
+> both sides and largely cancels. The right reference is the paired delta, which is positive on 3/3
+> seeds but varies 0.027–0.088. **Direction established, magnitude not.**
+
+### Three withdrawn claims, one underlying fact
+
+Over the course of the session I asserted and then withdrew: *"n=3 understated seed variance 4–5×"*,
+*"there is a session effect"*, and *"C2 must be reopened"*. All three were competing explanations for
+**one unmeasured quantity**. Four training runs settled what hours of observational comparison could
+not. A monotonic decline that looked like drift (ρ = −1.0 across three consecutive runs) **broke at
+run 4** — it was coincidence, as its 1-in-6 probability predicted.
+
+**The lesson: measure the variance before explaining it.**
+
+## 🟡 THE SCORE IMPROVED (2026-08-03) — first combination to beat the CNN baseline
+
+> ⚠️ **Amended 2026-08-03 (same day).** Direction holds (positive on 3/3 seeds) but the magnitude is
+> uncertain (0.027–0.088), and the `0.6399` baseline it is quoted against is itself the mean of an
+> n=3 sample from a process with SD 0.0222. See "THE NOISE FLOOR" above.
 
 `scripts/fusion_kg.py`. **Parameter-free rank fusion of CNN + KG.**
 
@@ -1874,6 +1950,11 @@ delta as a **multiple of it** — that ratio, not the raw number, decides whethe
 
 ## Last Measured Results
 
+> 🔴 **NOISE-FLOOR CAVEAT (2026-08-03).** Every figure below is an n=3 mean from a process with
+> **SD 0.0222** at fixed seed. Ranges in brackets are **too narrow** — they are 3 draws, not a
+> stability estimate. Treat any two channels within **~0.045 (2 SD)** of each other as
+> **indistinguishable**. See "THE NOISE FLOOR".
+>
 > **Canonical results table — last updated 2026-08-02.** Supersedes the `_TBD_` placeholder that
 > stood here from project start (it referenced the legacy `eval.py`/`ltn.py` pipeline, superseded
 > 2026-06-18). All figures are **mean over seeds 42/43/44, log-odds scored**, on the paper-aligned
@@ -1916,11 +1997,14 @@ subsampling or bootstrap the training data.
 | Web attacks transfer by **absorption into DoS slowloris**, not by detection | ✅ established 2026-08-03 | 89.8% / 92.9% modal-class assignment, stable across 3 seeds |
 | CNN vs Autoencoder is a **double dissociation** | ✅ **established + significant** | paired bootstrap: Bot −0.0868, Web BF +0.8178, XSS +0.8977, all p<0.0005 |
 | Every LTN axiom variant costs macro vs the no-axiom control | ✅ established | non-overlapping ranges, n=3 |
-| "The neural baseline beats the LTN control" | ✅ **NOW ESTABLISHED** (was "not established") | paired bootstrap +0.0204, CI [+0.0082, +0.0331], p=0.001. ⚠️ flow-level uncertainty only; seed-level remains underpowered at n=3 |
+| ~~"The neural baseline beats the LTN control"~~ | 🔴 **RETRACTED 2026-08-03 (controlled)** | The +0.0204 gap is **0.9 SD** of the measured noise floor (SD 0.0222) — smaller than re-running one model twice. The p=0.001 bootstrap treated each run's score as exact; re-running moves it up to 0.062. **A flow-level test cannot rescue a delta below the pipeline's own reproducibility.** |
 | "**Only (B) methods reach Bot**" / "the problem is structurally (B)" | 🔴 **RETRACTED 2026-08-03** | RandomForest (A-family) ties the AE on Bot: 0.1311 vs 0.1314, p=0.88 — while beating it 0.50 on macro |
 | "Monotonic frontier — no channel sits at both ends" | 🔴 **RETRACTED 2026-08-03** | RF sits at both ends (Bot 0.1311 *and* Web BF 0.8686) |
 | "On macro the CNN beats XGBoost" | 🔴 **RETRACTION REVERSED** | +0.0027, CI [−0.0161, +0.0217], p=0.80 → n.s. The original *"XGBoost ≈ CNN"* claim stands; retracting it in 2026-07-27 was premature |
 | "Ax6 roughly doubles Bot lift" | 🔴 **retracted** | single-seed artifact; control's own mean lift is higher |
+| **Training is not reproducible at fixed seed** | ✅ **established 2026-08-03** | 6 runs of seed 42, identical code: SD **0.0222**, range **0.0621**, CV 3.6%. No TF determinism flags are set. |
+| "cnn_paper = 0.6446" as the CNN's score | ⚠️ **misleading** | it is the **max of 11 runs** (mean 0.6217). Honest reproducible baseline = **ensemble 0.6356**. |
+| Every n=3 range quoted in this document | ⚠️ **artefact** | the "tight" 0.0093 CNN spread is **0.4 SD** — less than half a single re-run's noise. |
 | "Mahalanobis 4.3× — best Bot channel" | 🔴 **retracted** | seed 42 only; n=3 mean is 3.0×, seed 44 at chance |
 | "Bot forms a stable ~90%-pure cluster" | 🔴 **retracted** | varied clustering seed, not CNN seed; 87.9/86.6/**44.4**% across CNN seeds |
 | KG cluster **growth rate** detects zero-day | ✅ **established 2026-08-03** | lift **5.94x** [5.66, 6.11] n=3 clustering seeds, ~81% recall. ⚠️ substantially measures CIC-IDS2017's scripted attack windows |

@@ -105,6 +105,37 @@ Do not restate it here — that is exactly what kept rotting.
 **Next action (resume here):** **Phase 4 (Knowledge Graph) — the representation question is now
 evidence-backed and awaits sign-off.** Everything else that was blocking it is done.
 
+### 🔴🔴 THE NOISE FLOOR — read before citing ANY number in this project
+
+**Training is not reproducible at fixed seed.** Six runs of seed 42, identical code, idle machine:
+**SD 0.0222 · range 0.0621 · CV 3.6 %**. No TF determinism flags are set, so thread scheduling
+changes float accumulation between runs.
+
+**Express every delta as a multiple of this SD. That ratio, not the raw number, decides survival.**
+
+| claim | delta | ÷ SD | verdict |
+|---|---:|---:|---|
+| Double dissociation (XSS / Web BF) | +0.90 / +0.82 | 40 / 37 | ✅ established |
+| Double dissociation (Bot) | +0.0868 | 3.9 | ✅ established |
+| CNN+KG fusion | +0.0527 | *paired* | ✅ direction (3/3 seeds); magnitude 0.027–0.088 |
+| **C2: CNN vs LTN control** | +0.0204 | **0.9** | 🔴 **RETRACTED — within noise** |
+
+🔴 **C2 is retracted on controlled grounds.** It was closed in the CNN's favour with a paired
+bootstrap (p=0.001) earlier the same day. The gap is **smaller than re-running one model twice**.
+**A flow-level significance test cannot rescue a delta below the pipeline's own reproducibility** —
+the most important methodological lesson in this project.
+
+⚠️ **`cnn_paper = 0.6446` is the MAX of 11 runs, not a typical result** (mean 0.6217). The honest
+reproducible baseline is the **ensemble, 0.6356**.
+
+⚠️ **Every n=3 range in the docs is an artefact.** The CNN's "tight" 0.0093 spread is **0.4 SD** —
+less than half a single re-run's noise. Never cite an n=3 range as evidence of stability.
+
+🧭 **Three claims were asserted and withdrawn in one session** ("n=3 understated variance", "session
+effect", "C2 must be reopened") — all competing explanations for this one unmeasured quantity. Four
+training runs settled what hours of observational comparison could not. **Measure variance before
+explaining it.**
+
 ### What changed on 2026-08-03 (read this before citing anything older)
 
 A full audit + remediation session. It was scoped as bookkeeping, but the re-runs it required
