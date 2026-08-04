@@ -53,3 +53,5 @@ basepaper.pdf
 Thumbs.db
 .idea/
 .vscode/
+outputs/*.pid
+outputs/*.log
