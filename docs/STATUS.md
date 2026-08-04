@@ -1127,6 +1127,67 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## 🟢 PHASE 4 COMPLETE (2026-08-03) — explainability delivered, and it is FAITHFUL
+
+`scripts/explain.py`. All three explanations, Final Alert assembly, and the Tier-A
+faithfulness measurement the roadmap asks for and almost nobody in this field runs.
+
+### The neural explanation is measurably faithful, not decorative
+
+ERASER-style deletion metrics, each against a **random-feature control** (without which the numbers
+mean nothing), n=1,500 flows, Integrated Gradients with the training mean as baseline:
+
+| top-k | comprehensiveness (IG) | (random control) | **ratio** | sufficiency gap IG / random |
+|---|---:|---:|---:|---:|
+| 3 | +0.2908 | +0.0141 | **20.67×** | 0.4603 / 0.5153 |
+| 5 | +0.3810 | +0.0311 | **12.26×** | 0.4444 / 0.5141 |
+| 10 | +0.4536 | +0.1089 | **4.16×** | 0.4421 / 0.5131 |
+
+**Masking the 3 features IG points at drops the attack score 20.7× more than masking 3 random
+features.** The attribution is identifying what the model actually uses.
+
+⚠️ **Sufficiency is the weaker half and is reported as such**: IG beats random (0.442–0.460 vs
+0.513–0.515) but the absolute gap stays ~0.44, so the top-k *alone* do **not** reproduce the
+decision. Honest reading: **the explanation reliably finds features the model depends on
+(comprehensiveness), but the decision is distributed across more than 10 features (sufficiency).**
+
+✅ **Correctness check:** IG's completeness axiom holds — `sum(attributions) ≈ f(x) − f(baseline)`,
+|error| 0.0001–0.042.
+
+### 🔬 The qualitative result: the three pillars visibly disagree on Bot
+
+The single most informative output of the whole system, and it required all three pillars:
+
+```
+flow #114062 — true=Bot [ZERO-DAY] -> verdict=benign (p_attack=0.0021)
+  NEURAL : PSH Flag Count=+0.0107, Fwd Packet Length Max=-0.0068  (nothing decisive)
+  LOGIC  : Ax6 BeaconLike fires 1.00 -> VIOLATED
+  KG     : Cluster:163 burst=15.84x EMERGING | exhibits BeaconLike 0.841
+                                             | known: BENIGN 99.9%
+```
+
+**The neural pillar says benign. The symbolic pillar says beacon ⇒ attack, VIOLATED. The KG says
+this cluster is emerging and beacon-dominated.** Both non-neural pillars dissent from the CNN — on
+exactly the family we independently proved the CNN gets wrong (100% classified BENIGN, 0/8 feature
+overlap, cross-seed rank ρ = −0.090).
+
+This is the *"agreement vs disagreement is a feature, not a bug"* case the explainability spec
+anticipated, and **no single-pillar system can produce it.** It is the clearest argument in the
+project for the neuro-symbolic architecture — not that it beats the CNN's macro score, but that it
+**tells you when the CNN is wrong and why.**
+
+### What was built vs. deliberately omitted
+
+✅ Neural (Integrated Gradients) · ✅ Logic (per-axiom SAT) · ✅ KG (reasoning path) ·
+✅ Final Alert assembly · ✅ Faithfulness measurement.
+
+⚠️ **Only 4 of 6 axioms appear in the logic explanation, deliberately.** Ax1/Ax2 are *label
+anchors* — they condition on the ground-truth class, which does not exist at inference. Reporting
+them as explanations would be circular. Only the behaviour-grounded Ax3–Ax6 are usable.
+
+⚠️ **IG rather than SHAP**: implemented directly against `tf.GradientTape`, so it carries an exact
+correctness check (completeness) and avoids SHAP's brittle Keras-2 Conv1D path.
+
 ## 📊 COMPARABILITY + THE LIMITS OF FUSION (2026-08-03)
 
 ### We are not behind the literature — we report a harder metric
@@ -1659,7 +1720,7 @@ ones: *a point-estimate gap is not a result in either direction.*
 | **Anomaly pillar (autoencoder)** — canonical **Phase 3** | ✅ **Built, run & multi-seeded 2026-08-02 — n=3** | `scripts/autoencoder_paper.py` | Benign-only reconstruction error; **zero attack labels used in training *or* model selection**, so it is zero-day-legitimate by construction. **macro 0.0970 [0.0894, 0.1014]** · **Bot 0.1314 (3.8×) — the best Bot channel measured** · loses on web attacks (0.1048 / 0.0547). Establishes the **double dissociation** vs the CNN. Multi-seed via `AE_SEED`. ⚠️ Its first-day interpretation (a "modality analogue" mechanism) was **falsified the same day**; the *pattern* is real, the *explanation* is open — see "PHASE 3 RESULTS". |
 | **Knowledge Graph** — canonical **Phase 4** | 🟢 **BUILT & multi-seeded 2026-08-03** | `scripts/kg.py` | 215 nodes / 1,183 edges on **raw-feature** clusters (CNN embeddings and the AE bottleneck were both measured and rejected). Adaptive decay over true chronological order. **s_kg causal: macro 0.2488, Bot 0.3103 — best Bot channel measured.** Scope is corroboration + explanation: the spec's "unexplained cluster" detector is measured dead (≤1.00×). ⚠️ Mandatory lateness control lives in the script — a trivial "later in the week" baseline scores Bot 0.1575. Viz: `kg_visualize.py`. |
 | Decision Fusion — Phase 5 | ❌ Not built | — | ⚠️ A **fitted** combiner is structurally blocked — validation contains no zero-day by construction, so it cannot learn to weight a zero-day-specific channel (`fusion_beaconlike.py` → `[2.35, 0.02]`). See "THE FUSION WALL". Spec: [decision_fusion.md](target/decision_fusion.md). |
-| Explainability / Final Alert | 🟡 **1 of 3 delivered — Phase 4 is NOT complete** | `scripts/kg.py` | ✅ **KG explanation** (reasoning paths) built. ❌ **Neural explanation** (SHAP / integrated gradients) not built. ❌ **Logic explanation** (per-axiom SAT) not built. ❌ **Final Alert assembly** not built. ❌ **Explanation-faithfulness measurement** (Tier A) not built. Canonical Phase 4 = "Knowledge Graph **+ explainability**", so the KG half is done and the explainability half is ~⅓. Spec: [explainability.md](target/explainability.md). |
+| Explainability / Final Alert | ✅ **BUILT 2026-08-03 — 3 of 3 + faithfulness** | `scripts/kg.py` | ✅ **KG explanation** (reasoning paths) built. ❌ **Neural explanation** (SHAP / integrated gradients) not built. ❌ **Logic explanation** (per-axiom SAT) not built. ❌ **Final Alert assembly** not built. ❌ **Explanation-faithfulness measurement** (Tier A) not built. Canonical Phase 4 = "Knowledge Graph **+ explainability**", so the KG half is done and the explainability half is ~⅓. Spec: [explainability.md](target/explainability.md). |
 | Response engine (IPS) | ❌ Not built | — | Phase R (Shaunak solo, last). Temporal-replay containment. |
 
 **Legacy (temporal-split) pipeline — superseded 2026-06-18, retained as a secondary "hard mode" result:**

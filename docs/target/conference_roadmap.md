@@ -48,7 +48,7 @@ of them caused a real scoping error (see the box beneath the table).
 | **Phase 1** | Neural pillar + baselines + free novelty | Phase A (partial) | ✅ done |
 | **Phase 2** | Symbolic pillar — LTN, axioms, failure anatomy, aux head | Phase A (partial) | ✅ concluded |
 | **Phase 3** | **Anomaly pillar — benign-only autoencoder** | (not in that scheme) | ✅ **done 2026-08-02** (n=3) |
-| **Phase 4** | **Knowledge Graph + explainability** | Phase B + D | 🟡 **KG done, explainability 1 of 3** — not complete |
+| **Phase 4** | **Knowledge Graph + explainability** | Phase B + D | ✅ **DONE 2026-08-03** — KG + 3 explanations + faithfulness |
 | **Phase 5** | Fusion + rigor (seeds, significance, calibration, latency) | Phase C + E | 🟡 **partially done unplanned** — significance + parameter-free fusion landed 2026-08-03; fitted fusion, n≥6 seeds, calibration, latency outstanding |
 | **Phase 6** | Cross-dataset (CIC-IDS2018) | (not in that scheme) | ⬜ |
 | **Phase 7** | Paper + reproducibility artifact | (not in that scheme) | ⬜ |
