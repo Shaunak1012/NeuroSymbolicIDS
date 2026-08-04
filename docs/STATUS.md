@@ -1127,6 +1127,64 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## 📊 COMPARABILITY + THE LIMITS OF FUSION (2026-08-03)
+
+### We are not behind the literature — we report a harder metric
+
+`scripts/comparability.py`. Published CIC-IDS2017 work reports **99%+**; we headline **~0.64**.
+Same models, same runs, two protocols:
+
+| channel | overall binary *(what the field reports)* | dedup *(honest)* | **macro zero-day** *(ours)* |
+|---|---:|---:|---:|
+| XGBoost | **0.9936** | 0.9901 | 0.6372 |
+| CNN | **0.9928** | 0.9884 | 0.6446 |
+| LTN control | 0.9921 | 0.9874 | 0.6049 |
+| **CNN + KG fusion** | 0.9893 | 0.9896 | **0.7328** |
+
+**The same model goes 0.9936 → 0.6372 — a 0.3564 gap — purely by changing protocol.** That is the
+write-up's opening argument: *the field's numbers measure an easier task, and here is the same code
+producing both.*
+
+**Deduplication (issue C1, finally run):** 17.0 % of test rows are exact feature-vector duplicates of
+a train row (PortScan 58.3 %, SSH-Patator 48.6 %). Removing them costs the supervised channels
+0.0035–0.0049 — small, but the asymmetry is the point: **all six zero-day families measure 0.0 %
+overlap**, so duplication inflates *the field's* metric and leaves *ours* untouched.
+
+### 🔴 More channels do NOT help — a clean negative result
+
+`scripts/fusion_multi.py`, five **pre-registered** subsets, equal-weight rank fusion, nothing fitted:
+
+| subset | macro | Δ vs CNN | Bot | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| **CNN + KG (2 channels)** | **0.6926** | **+0.0527** | 0.2518 | 0.9283 | 0.8976 |
+| ALL 9 channels | 0.6664 | +0.0265 | 0.1510 | 0.9302 | 0.9179 |
+| A_ONLY (supervised) | 0.6600 | +0.0201 | 0.0730 | 0.9475 | 0.9596 |
+| A+B+KG (3 channels) | 0.6509 | +0.0110 | 0.3147 | 0.8807 | 0.7572 |
+| B_ONLY (benign-only) | 0.1180 | **−0.5219** | 0.0975 | 0.1642 | 0.0922 |
+| *CNN alone* | *0.6399* | — | *0.0446* | *0.9226* | *0.9524* |
+
+**Adding channels made it worse.** Under equal weighting IsolationForest (macro 0.0653) gets the
+same vote as the CNN (0.6399), so weak channels dilute strong ones. The **2-channel** pairing wins
+because CNN and KG are *complementary in a specific way* — the KG rescues Bot (0.0446 → 0.2518)
+while the CNN holds the web attacks — not because more evidence is better.
+
+**What survives as robust:** **4 of 5 subsets beat the CNN baseline.** Parameter-free fusion helps
+reliably; the *amount* depends on picking complementary channels, not many.
+
+⚠️ Five subsets were pre-registered and **all five are reported**. Quoting only the winner would be
+a selection effect.
+
+### Why we cannot simply "tune for a better score"
+
+Zero-day families are **test-only by construction**, so any knob tuned on zero-day performance —
+`k`, `tau`, burst threshold, channel subset — is fitting on the test set. That is the fusion wall in
+another guise, and it is why every improvement here is **parameter-free by necessity, not by taste.**
+
+**Still-legitimate levers, untested:** weighting channels by *known-class* validation performance
+(uses no zero-day information — though the fusion wall predicts it will *down*-weight the KG and
+hurt, which makes it a clean test); conformal / benign-only p-value calibration combined via
+Fisher/Simes (proposed in KNOWN_ISSUES, needs no attack labels at all); and n≥6 seeds.
+
 ## 🟢🟢 THE SCORE IMPROVED (2026-08-03) — first combination to beat the CNN baseline
 
 `scripts/fusion_kg.py`. **Parameter-free rank fusion of CNN + KG.**
