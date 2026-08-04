@@ -1298,6 +1298,51 @@ another guise, and it is why every improvement here is **parameter-free by neces
 hurt, which makes it a clean test); conformal / benign-only p-value calibration combined via
 Fisher/Simes (proposed in KNOWN_ISSUES, needs no attack labels at all); and n≥6 seeds.
 
+## 🔴 n=6 EVERYWHERE (2026-08-03) — the top tier is INDISTINGUISHABLE
+
+All 7 channels now at n=6, with **consistent log-odds scoring** for the TF channels.
+
+| channel | n=6 mean | range |
+|---|---:|---|
+| **CNN** | **0.6250** | [0.5966, 0.6446] |
+| **LTN control** | **0.6110** | [0.5824, 0.6505] |
+| RandomForest | 0.5985 | [0.5682, 0.6235] |
+| MSP | 0.5761 | [0.5053, 0.6289] |
+| Mahalanobis | 0.3948 | [0.2295, 0.5782] |
+| Autoencoder | 0.1083 | [0.0894, 0.1346] |
+| IsolationForest | 0.0681 | [0.0628, 0.0750] |
+
+**Distinguishable only if the gap exceeds ~0.0256** (2·SE·√2 at n=6, SD 0.0222):
+
+| comparison | gap | verdict |
+|---|---:|---|
+| CNN vs MSP | +0.0489 | ✅ distinguishable |
+| LTN control vs MSP | +0.0349 | ✅ distinguishable |
+| CNN vs RandomForest | +0.0265 | ✅ marginally |
+| **CNN vs LTN control** | **+0.0140** | 🔴 **INDISTINGUISHABLE** |
+| RandomForest vs LTN control | −0.0125 | 🔴 indistinguishable |
+
+### 🔴 The symbolic control MATCHES the neural baseline
+
+Not "the CNN wins narrowly" — **they cannot be told apart at achievable precision.** This is C2's
+third and cleanest refutation.
+
+⚠️ **And the gap SHRANK when a scoring inconsistency was fixed.** LTN control seeds 45–47 were
+initially scored **raw** while 42–44 were **log-odds** — mixed scoring *within one channel*, which
+penalises the LTN (it was saturated, so log-odds runs ~0.015–0.03 higher). Rescoring moved it
+**0.5977 → 0.6110** and cut the CNN's apparent lead from +0.0273 to +0.0140. So the original C2 gap
+was **partly a scoring artefact**, independent of the noise floor.
+
+**What this does NOT overturn:** *"every axiom variant costs macro relative to the no-axiom control"*
+— those gaps are 0.05–0.13, well above threshold. Phase 2's conclusion is unaffected and arguably
+sharper: adding axioms hurts, but the axiom-free symbolic trainer matches the CNN.
+
+**Three tiers, not a ranking:** supervised/closed-set (~0.58–0.63: CNN, LTN control, RF, MSP —
+mutually indistinguishable) · distance (~0.39: Mahalanobis, range 0.35 wide — unstable) ·
+benign-only (~0.07–0.11: AE, IsoForest). **The double dissociation lives ACROSS tiers**, which is why
+it survives everything; the within-tier comparisons this project spent months on were always below
+the noise.
+
 ## 🔴🔴 THE NOISE FLOOR — measured 2026-08-03, and it retracts a headline result
 
 > **Read this before citing ANY number in this document.** It is the single most consequential
