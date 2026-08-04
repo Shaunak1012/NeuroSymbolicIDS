@@ -2,6 +2,74 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-03 (later: Phase 4 built and completed, first result to beat the baseline)
+
+### Phase 4 — the Knowledge Graph, and then its explainability half
+
+- **KG built** (`kg.py`), n=3. Every design decision forced by the gate measurements rather than the
+  spec: **raw-feature clusters** (CNN embeddings and the AE bottleneck were both measured and
+  rejected), **corroboration scope** (the spec's "unexplained cluster" detector scores ≤1.00×, at or
+  below chance), **growth-only** emerging rule, decay kept. **s_kg causal: macro 0.2488, Bot 0.3103 —
+  the best Bot channel measured in this project.** The *online* variant significantly beats the batch
+  one, which is the right way round for a deployable IDS.
+- **🔴 A mandatory confound control, now permanent in the script.** The causal score rises with
+  arrival position and CIC-IDS2017 schedules attacks late, so "later ⇒ suspicious" had to be ruled
+  out. **A trivial lateness-only baseline scores Bot 0.1575 — beating the previous best channel
+  (autoencoder, 0.1314).** The KG's advantage *survives* (3.2× within-window vs the AE's 1.9×), but
+  the global 9.4× is roughly *schedule × cluster signal* and must be quoted with the within-window
+  figure. **A real share of apparent zero-day performance on this dataset is recoverable from the
+  capture schedule alone** — I could find no published work running this control.
+- **Explainability delivered** (`explain.py`), completing Phase 4: Integrated Gradients (with its
+  completeness axiom verified as a correctness check), per-axiom SAT, KG reasoning paths, Final Alert
+  assembly, and the **Tier-A faithfulness measurement**. Masking the 3 features IG points at drops the
+  attack score **20.7× more** than masking 3 random ones. Sufficiency is the weaker half and is
+  reported as such — the decision is distributed across more than 10 features.
+- **🔬 The qualitative result:** on a Bot flow the CNN calls benign, **both other pillars dissent** —
+  Ax6 BeaconLike fires 1.00 → VIOLATED, and the KG flags the cluster as emerging and beacon-dominated.
+  No single-pillar system produces that. It is the clearest argument for the architecture, and it is
+  not a score.
+
+### 🟢 The first combination to beat the CNN baseline
+
+- **Parameter-free rank fusion, CNN + KG: macro 0.6399 → 0.6926** (+0.0527, paired bootstrap p<0.001,
+  seed ranges **disjoint**, survives the lateness control). **Why it works when every fitted fusion
+  failed:** the fusion wall applies to *fitted* combiners, which must discover a zero-day channel's
+  value from validation data that contains none. A rank-mean **imposes** the weight instead — the
+  same structural point as the Phase-2 conclusion, used constructively for the first time.
+- **🔴 More channels made it worse.** Five pre-registered subsets: the 2-channel CNN+KG (0.6926) beats
+  all 9 channels (0.6664) and every other subset. Equal weighting lets IsolationForest (macro 0.0653)
+  outvote nothing useful. **Complementarity, not quantity.** 4 of 5 subsets still beat the baseline.
+
+### Comparability, robustness, and two audit items closed
+
+- **We were never behind the literature.** `comparability.py`: the same CNN scores **0.9928** on the
+  field's overall-binary metric and **0.6446** on ours — a **0.3564 gap from protocol alone.**
+- **C1 closed**: 17.0 % of test rows are exact train duplicates (PortScan 58.3 %). Deduplication costs
+  supervised channels ~0.004 — and **all six zero-day families measure 0.0 % overlap**, so duplication
+  inflates *the field's* metric and leaves ours untouched.
+- **C3 closed**: regrouping the macro to weight phenomena over labels shifts values ~0.11–0.15 but
+  **preserves every meaningful ordering**.
+- **Fusion wall tested constructively and it holds**: known-class weighting (legitimate — no zero-day
+  information) **hurts Bot by −0.0176**, down-weighting the KG precisely for being good at a family it
+  never trained on.
+
+### Process: conventions made mechanical after real lapses
+
+- The heartbeat rule lapsed on **six** jobs, and the same cp1252 bug was fixed **three times** as
+  separate incidents. Root cause: each rule has a *plausible-but-wrong substitute* next to it — the
+  harness notifies on **completion**, which feels like monitoring but does not cover stalls.
+- **`lint_conventions.py`** — mechanical checks, each naming its motivating incident. Found **12 real
+  issues** on first run and later caught an incorrect script-count bump mid-commit.
+- **`run_long.sh`** — launches *and* arms monitoring in one command. **`CLAUDE.md`** gained an 8-line
+  NON-NEGOTIABLES block at the top.
+- **⚠️ Two monitoring false alarms, both my own launcher design**, both fixed: a liveness check that
+  reported STALLED on a *finished* job, and `seed_sweep.sh` piping through `tail` (which buffers to
+  EOF, suppressing the log growth the heartbeat watches). The lint now fails on that pattern.
+  *A heartbeat rule is only as good as the launcher preserving the signal it depends on.*
+- **⚠️ Two false verdicts printed by my own analysis scripts**, both fixed in code: a 1.3×10⁻⁵ tie
+  reported as "conclusions NOT robust", and the fusion-wall test judged on macro instead of Bot,
+  inverting its conclusion. An automated verdict that cries wolf is worse than none.
+
 ## 2026-08-03 (pre-Phase-4 remediation — and it produced three research results)
 
 Scoped as "fix every discrepancy found by a full workspace/git audit before starting Phase 4."
