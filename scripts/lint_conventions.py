@@ -193,6 +193,28 @@ def _c7():
     return bad
 
 
+@check("launcher-suppresses-log-growth",
+       "The heartbeat rule watches LOG GROWTH. A launcher that pipes a long job "
+       "through tail/head buffers until EOF, so the log stays empty for the whole "
+       "run and the monitor reports a false STALL. Happened 2026-08-03 with "
+       "seed_sweep.sh — the rule was fixed, then a launcher broke its precondition.")
+def _c9():
+    bad = []
+    for p in glob.glob(os.path.join(SCRIPTS, "*.sh")):
+        for i, line in enumerate(_read(p).splitlines(), 1):
+            s = line.strip()
+            if s.startswith("#") or "python" not in s.lower():
+                continue
+            # tail/head buffer; grep --line-buffered is fine, plain grep is not
+            if re.search(r"\|\s*(tail|head)\b", s):
+                bad.append(f"{os.path.basename(p)}:{i}: pipes a job through tail/head "
+                           f"(buffers to EOF, kills log-growth monitoring)")
+            elif re.search(r"\|\s*grep\b", s) and "--line-buffered" not in s:
+                bad.append(f"{os.path.basename(p)}:{i}: pipes through grep without "
+                           f"--line-buffered")
+    return bad
+
+
 @check("gitignored-research-record",
        "outputs/metadata/ was gitignored, leaving the entire research record with "
        "no history or backup.")

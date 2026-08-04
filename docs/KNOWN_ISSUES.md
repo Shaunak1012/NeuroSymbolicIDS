@@ -469,6 +469,25 @@ consumer that does not filter it** — including, prospectively, the KG.
 
 ## Medium
 
+### [FIXED 2026-08-03] Heartbeat monitors produced TWO false alarms — both from launcher design
+The heartbeat rule (CLAUDE.md non-negotiable #2) watches **log growth**. Twice in one session the
+monitor cried wolf, and **both times the fault was the launcher, not the job**:
+
+1. **"STALLED" on a job that had already finished.** `run_long.sh`'s liveness check kept matching
+   after exit, so log-growth stopping was read as a hang rather than completion.
+   **Fix:** check the process explicitly before declaring a stall; report completion otherwise.
+2. **"STALLED" on a training run that was working perfectly.** `seed_sweep.sh` piped each run
+   through `| tail -5`. **`tail` buffers until EOF**, so nothing reached the log for the whole
+   ~20-minute run. Diagnosed by evidence rather than the alert: the process had **7,381 s of CPU**,
+   a 1.6 GB working set, and had just written `cnn_paper_s45_best.keras`.
+   **Fix:** launchers must not pipe long jobs through `tail`/`head`, and
+   `lint_conventions.py` now **fails** on that pattern (plus `grep` without `--line-buffered`).
+
+**The transferable lesson, now encoded:** *a heartbeat rule is only as good as the launcher
+preserving the signal it depends on.* The rule was strengthened earlier the same day and then a
+launcher written hours later silently broke its precondition. A false alarm is not harmless — the
+next reader discounts the real ones.
+
 ### [OPEN 2026-08-01] `ps aux` liveness checks are flaky on Windows Git-Bash — false "process died" reads
 While heartbeat-monitoring the C2 seed sweep (`cnn_paper.py` background training), a `ps aux | grep -c
 "[c]nn_paper.py"` liveness check reported `proc_alive=0` and the monitor declared the process dead at
