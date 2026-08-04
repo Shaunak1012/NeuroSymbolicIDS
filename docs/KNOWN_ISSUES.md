@@ -469,6 +469,69 @@ consumer that does not filter it** — including, prospectively, the KG.
 
 ## Medium
 
+### [OPEN 2026-08-03] 🔴 SEEDS ARE NOT COMPARABLE ACROSS SESSIONS — a session/environment effect
+**The most consequential methodological finding of the session, and it invalidates a comparison
+this project has been making since Phase 1.**
+
+Extending the CNN from n=3 to n=6 produced macro values that declined **perfectly monotonically with
+seed number** (ρ = **−1.000** for XSS, −0.943 for macro). Seed *number* has no causal meaning, so a
+perfect correlation with **run order** points at something drifting across the sweep, not at seed
+randomness. Probability of a perfect ordering by chance at n=6 is 2/720 ≈ **0.3 %**.
+
+**Confirmed by an independent channel.** The LTN control, retrained the same day, dropped the same way:
+
+| channel | seeds 42–44 *(earlier sessions)* | seeds 45–47 *(today)* | Δ |
+|---|---:|---:|---:|
+| CNN | 0.6398 | 0.6101 | **−0.0298** |
+| LTN control | 0.6194 | 0.5784 *(n=1 so far)* | **−0.0410** |
+
+Two unrelated architectures shifting the same direction by a similar amount is a **session effect**,
+not seed variance.
+
+**Most likely cause:** TensorFlow on CPU is not bit-deterministic even with a fixed seed — thread
+scheduling changes float accumulation order. Concurrent analysis work (KG runs, significance tests,
+rescoring — at one point a rescore ran *while* a training job was in flight) raised CPU contention
+steadily across the sweep, which reproduces exactly this pattern.
+
+#### 🔴 What it invalidated, including a claim made hours earlier in the same session
+
+1. **"n=3 understated seed variance by 4–5×" — CONFOUNDED.** Part of the widened n=6 range is session
+   effect, not seed randomness. Do not cite that figure.
+2. **"C2 must be reopened" — WITHDRAWN.** That alarm came from comparing a *depressed* CNN (n=6, half
+   trained today) against a *non-depressed* control (n=3, all trained earlier):
+
+   | C2 gap computed... | value |
+   |---|---:|
+   | earlier-session only | **+0.0204** |
+   | today-session only | **+0.0317** *(provisional)* |
+   | **mixed — the error** | **+0.0055** |
+
+   **Mixing sessions manufactured the collapse.** Within-session the CNN's advantage is preserved or
+   larger. The original C2 conclusion stands.
+3. **Unaffected: the CNN/AE double dissociation.** Both channels are measured on the *same* seeds, and
+   the gaps are 0.5–0.86 — a common −0.03 shift cannot touch it. It survives at n=6, 6/6 seeds per
+   family.
+
+#### The protocol change this forces
+
+**Compare within session, never pooled across sessions.** Any multi-seed comparison must use seeds
+trained in the same environment, or explicitly model the session as a blocking factor. Pooling seeds
+from different sessions silently compares models trained under different conditions.
+
+⚠️ **Every n=3 range published in this project predates this finding** and was computed from seeds
+trained in one or two sessions. Those ranges are probably *too narrow* (they miss cross-session
+variance) while the n=6 ranges are *too wide* (they conflate it with seed variance). Neither is a
+clean estimate of seed variance alone.
+
+**The clean test, not yet run:** retrain seed 42 on an idle machine. If it reproduces 0.6446, seeds
+are fine and the environment is the whole story; if it returns ~0.60, the effect is environmental and
+the magnitude is measured directly.
+
+> **Process note.** The confound was flagged *one message after* the C2 collapse had already been
+> reported as a headline finding. The project's own rule — *"a point-estimate gap is not a result"* —
+> was applied rigorously to old claims and not to a new one of my own. That asymmetry is the failure
+> mode worth remembering here, more than the confound itself.
+
 ### [FIXED 2026-08-03] Heartbeat monitors produced TWO false alarms — both from launcher design
 The heartbeat rule (CLAUDE.md non-negotiable #2) watches **log growth**. Twice in one session the
 monitor cried wolf, and **both times the fault was the launcher, not the job**:
