@@ -52,6 +52,7 @@ of them caused a real scoping error (see the box beneath the table).
 | **Phase 5** | Fusion + rigor (seeds, significance, calibration, latency) | Phase C + E | 🟡 **partially done unplanned** — significance + parameter-free fusion landed 2026-08-03; fitted fusion, n≥6 seeds, calibration, latency outstanding |
 | **Phase 6** | Cross-dataset (CIC-IDS2018) | (not in that scheme) | ⬜ |
 | **Phase 7** | Paper + reproducibility artifact | (not in that scheme) | ⬜ |
+| **Phase 7.5** | **Operational readiness (INTERMISSION)** — calibration, operating points, abstention, ensembling | (new, added 2026-08-03) | ⬜ **gates Phase R** |
 | **Phase R** | Response engine (solo, last) | (not in that scheme) | ⬜ |
 
 > 🔴 **The collision this resolves, and the work it nearly lost.**

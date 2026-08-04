@@ -1800,8 +1800,57 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · n≥6 seeds · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | 🟡 **1 of 3 delivered — this is the true next in-phase work** | ✅ KG explanation (reasoning paths, in `kg.py`). ❌ Neural explanation (SHAP / integrated gradients). ❌ Logic explanation (per-axiom SAT). ❌ Final Alert assembly. ❌ Explanation-faithfulness measurement (Tier A). Phase 4 = "Knowledge Graph **+ explainability**", so Phase 4 is **not** complete until these land. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
+| 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | ⬜ **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
 
 Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
+
+## 🧭 PHASE 7.5 — OPERATIONAL READINESS (intermission, planned 2026-08-03)
+
+**Sits between Phase 7 (paper) and Phase R (response engine), and gates Phase R.** Not started.
+
+### Why this phase exists
+
+**PR-AUC is the wrong target for a response engine.** It summarises *ranking quality across all
+thresholds*; a response engine acts at **one threshold**. What decides whether automated response is
+safe is **precision at that operating point** — a false positive means auto-blocking legitimate
+traffic. A system can post macro 0.69 and still auto-block at 40 % precision, which is operationally
+unusable, and **no metric currently in this project would warn you.**
+
+Three capabilities that determine response accuracy are entirely absent today.
+
+### Tier 1 — gates Phase R (mostly evaluation code, low compute)
+
+| # | Item | Why it matters for response |
+|---|---|---|
+| 1 | **Ship the ensemble, not a single run** | Measured noise floor is **SD 0.0222, CV 3.6 %** at fixed seed. You cannot deploy a model whose score swings 0.06 between identical trainings. Ensembling 11 existing runs gives **0.6356** (+0.0138 over the mean single run) and, more importantly, is **reproducible**. ⚠️ It does *not* beat the best single run (0.6446) — because **0.6446 is the max of 11 runs, not a typical result.** The honest deployable baseline is the ensemble. |
+| 2 | **Calibration** — isotonic/Platt fitted on **known classes only** (no zero-day leakage), plus **ECE** and reliability curves | Without it, `p = 0.9` does not mean 90 % and every threshold is arbitrary. |
+| 3 | **Precision @ alert budget** | The operational metric: *"at 100 alerts/day, what fraction are real?"* This predicts response accuracy; PR-AUC does not. |
+| 4 | **Selective prediction / abstention** — precision-vs-coverage curve | The engine should **not act** when uncertain. Find the confidence band where precision is high enough to auto-act, defer the rest to a human. |
+
+### Tier 2 — reduce noise at source
+
+| # | Item | Note |
+|---|---|---|
+| 5 | **TF determinism flags** (`enable_op_determinism()`, fixed `intra_op`/`inter_op`) | **None are currently set** — this is the direct cause of the 3.6 % CV. Costs speed, buys reproducibility. |
+| 6 | **k-fold CV** instead of a single stratified split | Better variance estimates; uses all the data. |
+| 7 | **Checkpoint averaging (SWA)** | Cheap intra-run variance reduction. |
+
+### Tier 3 — deferred
+
+Cross-dataset validation (Phase 6 proper) · architecture search. Larger effort, lower
+value-per-hour than Tier 1 for the response use case.
+
+### The standard every future claim must meet
+
+**Measured noise floor: SD 0.0222 / range 0.0621** over 6 identical seed-42 runs. Express every
+delta as a **multiple of it** — that ratio, not the raw number, decides whether a claim survives:
+
+| claim | delta | SD | verdict |
+|---|---:|---:|---|
+| Double dissociation (XSS / WebBF) | +0.90 / +0.82 | 40 / 37 | ✅ established |
+| Double dissociation (Bot) | +0.0868 | 3.9 | ✅ established |
+| CNN+KG fusion | +0.0527 | *(paired — 3/3 seeds positive)* | ✅ direction; magnitude uncertain |
+| C2: CNN vs LTN control | +0.0204 | 0.9 | 🔴 within noise |
 
 ## Open Decisions
 
