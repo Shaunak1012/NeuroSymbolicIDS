@@ -1127,6 +1127,58 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## ✅ C3 CLOSED + a fusion-wall test (2026-08-03) — `scripts/robustness.py`
+
+### C3: the macro conclusions ARE robust to the label-granularity artifact
+
+Web BF and XSS correlate at **r = +0.992** (same Thursday campaign, same tool), so
+`macro = mean(Bot, WebBF, XSS)` is really **⅓ Bot + ⅔ one web signal**. The regrouped
+alternative `mean(Bot, mean(WebBF, XSS))` weights *phenomena* instead of *labels*:
+
+| channel | macro (reported) | macro regrouped | Δ |
+|---|---:|---:|---:|
+| **CNN + KG fusion** | **0.6926** | **0.5824** | −0.1102 |
+| CNN | 0.6399 | 0.4910 | −0.1489 |
+| RandomForest | 0.5995 | 0.4824 | −0.1171 |
+| LTN control | 0.6194 | 0.4824 | −0.1371 |
+| KG (causal) | 0.2488 | 0.2642 | +0.0154 |
+| Autoencoder | 0.0970 | 0.1056 | +0.0086 |
+
+✅ **Meaningful ordering preserved.** Absolute values shift ~0.11–0.15, but every conclusion holds —
+fusion > CNN > the rest, KG > AE.
+
+> ⚠️ **A caught false alarm worth recording.** The first version flagged *"ORDERING CHANGES —
+> conclusions NOT robust"*. Investigating: LTN control and RandomForest differ by **1.3 × 10⁻⁵**
+> under regrouping — an exact tie the sort broke arbitrarily, not a reversal. The script now ignores
+> swaps between channels it ties to within 0.005. **An automated verdict that cries wolf is worse
+> than no verdict**, because the next reader will discount the real ones.
+
+### The fusion wall: tested constructively, and it holds where it claims to
+
+`fusion_multi.py` showed weak channels dilute strong ones under equal weighting. The obvious fix —
+weight by quality — is only legitimate if the weights use **no zero-day information**, so they were
+computed from **known-class PR-AUC**. Prediction registered before running: *this will hurt.*
+
+| | macro | Bot |
+|---|---:|---:|
+| equal weighting | 0.7089 | **0.3125** |
+| known-class weighted | 0.7116 | 0.2949 |
+| Δ | **+0.0027** | **−0.0176** |
+
+**The wall holds on the family it is about.** Known-class weighting **hurts Bot by 0.0176** — it
+down-weights the KG (known-class PR-AUC 0.9099) precisely because the KG's value lies on a family it
+was never trained on. The trivial macro gain (+0.0027) comes from the web attacks, which *are* well
+served by known-class-skilled channels.
+
+> ⚠️ **A second inverted verdict, also caught.** The script first judged on **macro** alone and
+> printed *"PREDICTION REFUTED"* — while Bot had moved exactly as predicted. **Wrong metric, wrong
+> conclusion.** The wall is a claim about zero-day-specific channels, so Bot is the diagnostic.
+> Fixed in the script, not just the write-up.
+>
+> ⚠️ **Power caveat:** known-class PR-AUC **saturates** (0.9998–1.0000 for CNN/LTN/RF; spread 0.0900
+> overall), so it barely differentiates the supervised channels. This test is **underpowered by
+> construction** — do not over-read the macro number in either direction.
+
 ## 🟢 PHASE 4 COMPLETE (2026-08-03) — explainability delivered, and it is FAITHFUL
 
 `scripts/explain.py`. All three explanations, Final Alert assembly, and the Tier-A

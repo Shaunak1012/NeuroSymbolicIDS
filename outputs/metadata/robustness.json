@@ -1,0 +1,69 @@
+{
+ "c3_regrouped_macro": {
+  "channels": {
+   "CNN": {
+    "macro": 0.6398527623922122,
+    "macro_regrouped": 0.4910432910648221,
+    "n_seeds": 3
+   },
+   "LTN control": {
+    "macro": 0.6194411812880894,
+    "macro_regrouped": 0.48238029165832924,
+    "n_seeds": 3
+   },
+   "RandomForest": {
+    "macro": 0.5994913717887083,
+    "macro_regrouped": 0.48239371134965453,
+    "n_seeds": 3
+   },
+   "Autoencoder": {
+    "macro": 0.09695209503408403,
+    "macro_regrouped": 0.10556404228548788,
+    "n_seeds": 3
+   },
+   "KG (causal)": {
+    "macro": 0.24881722493824723,
+    "macro_regrouped": 0.26418175122055115,
+    "n_seeds": 3
+   },
+   "CNN+KG fusion": {
+    "macro": 0.6926044463159963,
+    "macro_regrouped": 0.5824119866936667,
+    "n_seeds": 3
+   }
+  },
+  "ordering_preserved": true,
+  "order_standard": [
+   "CNN+KG fusion",
+   "CNN",
+   "LTN control",
+   "RandomForest",
+   "KG (causal)",
+   "Autoencoder"
+  ],
+  "order_regrouped": [
+   "CNN+KG fusion",
+   "CNN",
+   "RandomForest",
+   "LTN control",
+   "KG (causal)",
+   "Autoencoder"
+  ]
+ },
+ "fusion_wall_test": {
+  "equal weighting": {
+   "macro": 0.7088610987593671,
+   "bot": 0.3125054948831921
+  },
+  "known-class weighted": {
+   "macro": 0.7116005604034837,
+   "bot": 0.29491186029290034
+  },
+  "delta": 0.0027394616441166475,
+  "delta_bot": -0.017593634590291785,
+  "known_class_weight_spread": 0.09004117877974038,
+  "power_caveat": "known-class PR-AUC saturates near 1.0 for supervised channels, so it barely differentiates them; this test is underpowered by construction",
+  "prediction": "known-class weighting will underperform equal weighting",
+  "verdict": "WALL HOLDS on the family it is about: known-class weighting HURTS Bot (-0.0176) by down-weighting the very channel carrying the zero-day signal. The macro move (+0.0027) is trivial and driven by the web attacks, which ARE well served by known-class-skilled channels."
+ }
+}
