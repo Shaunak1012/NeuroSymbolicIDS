@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-03** (35 Python scripts, plus run_long.sh).
+> Last verified against source: **2026-08-03** (36 Python scripts, plus run_long.sh).
 
 ## Map
 

@@ -1,11 +1,8 @@
 {
  "applied": true,
- "rows_before": 80,
+ "rows_before": 81,
  "seed_fixes": [],
- "duplicates_removed": [
-  "kg",
-  "kg_causal"
- ],
+ "duplicates_removed": [],
  "schema_stamped": 0,
  "duplicate_names_preserved": [
   "cnn_auxhead_l0.5",
@@ -18,6 +15,6 @@
   "random_forest",
   "xgboost"
  ],
- "rows_after": 78,
- "stamp": "2026-08-04T01:05:43+00:00"
+ "rows_after": 81,
+ "stamp": "2026-08-04T01:13:05+00:00"
 }

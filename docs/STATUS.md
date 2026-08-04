@@ -1127,6 +1127,43 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## 🟢🟢 THE SCORE IMPROVED (2026-08-03) — first combination to beat the CNN baseline
+
+`scripts/fusion_kg.py`. **Parameter-free rank fusion of CNN + KG.**
+
+| | macro | Bot | Web BF | XSS |
+|---|---|---|---|---|
+| CNN alone (the baseline) | 0.6399 [0.6353, 0.6446] | 0.0446 | 0.9226 | **0.9524** |
+| **CNN + KG (rank-mean)** | **0.6926 [0.6626, 0.7328]** | **0.2518** | **0.9283** | 0.8976 |
+| | **+0.0528** | **5.6×** | +0.0057 | −0.0548 |
+
+**Verified on all three of this project's own bars:**
+- **All 3 seeds improve** (+0.0881 / +0.0273 / +0.0428); fused range **disjoint** from the CNN's
+- **Paired bootstrap +0.0528, 95% CI [+0.0468, +0.0594], p<0.001**
+- **Survives the lateness control** — within-window Bot lift: CNN 1.50× · KG 3.20× · **fused 2.97×**
+
+### Why this works when every previous fusion failed
+
+**THE FUSION WALL applies to *fitted* combiners.** A fitted fuser is calibrated on validation data
+containing no zero-day by construction, so it cannot *discover* that a zero-day-specific channel is
+worth weighting — `fusion_beaconlike.py` measured exactly that and returned `[2.35, 0.02]`.
+
+**A rank-mean needs no fitting: the weight is imposed, not discovered.** The combiner never has to
+learn the value of a signal it was never shown. This is the same structural point as the Phase-2
+conclusion that *training-time* constraints succeed where *inference-time* fitting cannot — reached
+from the opposite direction, and it is the first constructive use of that insight.
+
+### ⚠️ Caveats that must travel with the number
+
+1. **Three combination rules were tried and the best is reported.** rank-mean 50/50 **+0.0528** ·
+   rank 0.75/0.25 **+0.0320** · rank-**max** **−0.4125** (catastrophic; max is dominated by whichever
+   channel has more top ranks, and `s_kg`'s coarse 193-value score puts huge tied blocks there).
+   2 of 3 improve, and 50/50 is the canonical no-tuning default rather than a fitted choice — but
+   this is a mild selection effect and is stated, not hidden.
+2. **XSS gets worse** (0.9524 → 0.8976). A real trade, not a free win.
+3. This is a **channel combination**, not the full Phase-5 Decision Fusion.
+4. n=3; the bootstrap covers flow-sampling uncertainty only.
+
 ## 🟢 PHASE 4 BUILT (2026-08-03) — `scripts/kg.py`. Best Bot channel measured, with a caveat that halves it.
 
 Adaptive KG over **raw-feature clusters** (215 nodes: 200 Cluster + 6 Behaviour + 9 AttackType;

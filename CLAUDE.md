@@ -239,7 +239,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 35 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
+**All 36 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -252,7 +252,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 35 Python scripts + run_long.sh — see docs/scripts_reference.md
+├── scripts/                   ← 36 Python scripts + run_long.sh — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
