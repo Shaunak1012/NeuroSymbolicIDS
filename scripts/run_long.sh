@@ -65,7 +65,16 @@ while true; do
     tail -3 "$LOG"; break
   fi
   if [ "$stale" -ge 12 ]; then
-    echo "HEARTBEAT: $BASE STALLED — no log growth for 12 polls (~10 min). Investigate."
+    # Distinguish FINISHED from HUNG before crying wolf. A 2026-08-03 monitor
+    # reported STALLED for a job that had already completed cleanly, because log
+    # growth stopping is ambiguous between the two and the liveness check was
+    # unreliable. Check the process explicitly before declaring a stall.
+    if kill -0 "$PID" 2>/dev/null; then
+      echo "HEARTBEAT: $BASE STALLED — process alive but no log growth for ~10 min. Investigate."
+    else
+      echo "HEARTBEAT: $BASE finished (log quiet, process gone); final log ${sz}B"
+      tail -3 "$LOG"
+    fi
     break
   fi
   sleep 50
