@@ -132,7 +132,7 @@ metrics.print_report(res)
 model.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
 with open(os.path.join(paths.MODELS, f"scaler_ae_paper{'' if TAG=='autoencoder_paper' else '_'+TAG.split('autoencoder_paper_',1)[-1]}.pkl"), "wb") as f:
     pickle.dump(scaler, f)
-np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{TAG}_test.npy"), score)
+np.save(os.path.join(paths.predictions_dir(TAG), f"y_prob_{TAG}_test.npy"), score)
 with open(os.path.join(paths.METADATA, f"{TAG}_history.pkl"), "wb") as f:
     pickle.dump(hist.history, f)
 

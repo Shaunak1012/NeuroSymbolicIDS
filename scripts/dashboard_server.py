@@ -98,17 +98,44 @@ def running_training_processes():
     return {"available": True, "processes": procs}
 
 
-def _decode_best_effort(raw, n):
-    # PowerShell `*>>` batch logs interleave UTF-8 and UTF-16LE in one file
-    # (docs/KNOWN_ISSUES.md). Pick whichever decode looks clean, else replace.
-    for enc in ("utf-8", "utf-16-le", "utf-16"):
-        try:
-            text = raw.decode(enc)
-            if text.count("\x00") < max(1, len(text) * 0.05):
-                return text.splitlines()[-n:]
-        except Exception:
-            continue
-    return raw.decode("utf-8", errors="replace").splitlines()[-n:]
+def _decode_best_effort(raw, n, _min_run=8):
+    """Decode a PowerShell `*>>` batch log, which is MIXED-ENCODING by construction.
+
+    These files interleave **UTF-8** (the Python subprocess's own stdout, passed
+    through) with **UTF-16LE** (PowerShell's `Add-Content` header lines) in a
+    single file with no marker — see docs/KNOWN_ISSUES.md.
+
+    🔴 The previous whole-buffer approach could not work, and was visibly broken in
+    the live dashboard (2026-08-03): it tried `utf-8` first, which **raises** at the
+    first UTF-16LE section, then fell through to `utf-16-le`, which decodes the
+    whole file — rendering the *majority* UTF-8 content as CJK mojibake
+    (`㴽‽低䕖呌彙䕓䑅` for what is actually `=== NOVELTY_SEED=42 ===`).
+    Any single codec is guaranteed to mangle one of the two halves.
+
+    Fix: segment on null-byte density and decode each run with its own codec.
+    UTF-8 never contains 0x00, so a byte pair `(non-zero, 0x00)` is a reliable
+    UTF-16LE marker. `_min_run` avoids flapping on incidental byte pairs.
+    """
+    out, i, N = [], 0, len(raw)
+
+    def _is_u16_at(k):
+        return k + 1 < N and raw[k] != 0 and raw[k + 1] == 0
+
+    while i < N:
+        if _is_u16_at(i):
+            j = i
+            while _is_u16_at(j):
+                j += 2
+            if j - i >= _min_run:                      # genuine UTF-16LE run
+                out.append(raw[i:j].decode("utf-16-le", errors="replace"))
+                i = j
+                continue
+        j = i + 1
+        while j < N and not (_is_u16_at(j) and j + _min_run <= N):
+            j += 1
+        out.append(raw[i:j].decode("utf-8", errors="replace"))
+        i = j
+    return "".join(out).splitlines()[-n:]
 
 
 def latest_log_tail(n=40):
@@ -130,7 +157,10 @@ def runs_summary():
     if not os.path.exists(path):
         return []
     out = []
-    with open(path) as f:
+    # encoding is explicit: the platform default is cp1252 on Windows, which
+    # corrupts or crashes on any non-ASCII class name. Same bug class that broke
+    # config.py and tracking.py (fixed 2026-08-03).
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:

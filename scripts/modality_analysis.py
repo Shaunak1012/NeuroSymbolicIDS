@@ -164,7 +164,7 @@ print(f"  corr(d_benign, AE reconstruction error) = {np.corrcoef(db_e[zd_mask], 
 print(f"  corr(margin,   CNN attack log-odds)     = {np.corrcoef(mg_e[zd_mask], cnnp[zd_mask])[0,1]:+.3f}")
 print(f"  corr(d_benign, CNN attack log-odds)     = {np.corrcoef(db_e[zd_mask], cnnp[zd_mask])[0,1]:+.3f}")
 
-with open(os.path.join(paths.METADATA, "modality_analysis.json"), "w") as f:
+with open(os.path.join(paths.METADATA, "modality_analysis.json"), "w", encoding="utf-8") as f:
     json.dump(out, f, indent=1)
 print(f"\nwrote {os.path.join(paths.METADATA, 'modality_analysis.json')}")
 print("DONE (modality_analysis)")

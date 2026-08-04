@@ -259,6 +259,6 @@ except Exception as e:  # noqa: BLE001
     OUT["results"]["H1_absorption"] = f"SKIPPED: {type(e).__name__}: {e}"
 
 outp = os.path.join(paths.METADATA, "bot_failure_analysis.json")
-with open(outp, "w") as f:
+with open(outp, "w", encoding="utf-8") as f:
     json.dump(OUT, f, indent=1)
 print(f"\nwrote {outp}")

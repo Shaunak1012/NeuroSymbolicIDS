@@ -461,7 +461,7 @@ y_prob_atk  = 1.0 - y_prob[:, benign_idx]                        # P(attack)
 y_pred_bin  = (y_prob_atk > 0.5).astype(int)
 
 # Load CNN baseline scores if available (for comparison)
-cnn_baseline_path = os.path.join(paths.PREDICTIONS, "y_prob_test_bin.npy")
+cnn_baseline_path = os.path.join(paths.predictions_dir("ltn_legacy"), "y_prob_test_bin.npy")
 has_baseline      = os.path.exists(cnn_baseline_path)
 if has_baseline:
     cnn_base_prob = np.load(cnn_baseline_path)
@@ -538,8 +538,8 @@ for attack in zero_day_classes:
 # SAVE OUTPUTS
 # =========================
 np.save(os.path.join(paths.ARRAYS, "X_test_ltn.npy"),     X_test_r)
-np.save(os.path.join(paths.PREDICTIONS, "y_prob_ltn_test.npy"), y_prob)
-np.save(os.path.join(paths.PREDICTIONS, "y_prob_ltn_bin.npy"),  y_prob_atk)
+np.save(os.path.join(paths.predictions_dir("ltn_legacy"), "y_prob_ltn_test.npy"), y_prob)
+np.save(os.path.join(paths.predictions_dir("ltn_legacy"), "y_prob_ltn_bin.npy"),  y_prob_atk)
 
 with open(os.path.join(paths.METADATA_LEGACY, "ltn_history.pkl"), "wb") as f:
     pickle.dump(history, f)

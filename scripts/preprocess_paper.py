@@ -152,6 +152,6 @@ assert not zd_in_val, f"LEAK: zero-day in val: {zd_in_val}"
 log(f"\n[OK] no zero-day leakage into train/val")
 log(f"[OK] known classes: {len(set(y_tr))}  zero-day classes in test: {len(set(y_te) & ZERO_DAY)}")
 
-with open(os.path.join(OUT, "split_report.txt"), "w") as f:
+with open(os.path.join(OUT, "split_report.txt"), "w", encoding="utf-8") as f:
     f.write("\n".join(lines))
 log(f"\nSaved -> {OUT}")

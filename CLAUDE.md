@@ -2,6 +2,34 @@
 
 > This file is auto-loaded at the start of every Claude Code session. It tells you (Claude) and any collaborator how to get oriented fast, what state the project is in, and how to work in this repo. **Keep it current.**
 
+---
+
+## 🚨 NON-NEGOTIABLES — read these eight lines first, every session
+
+Everything below this block is context. **This block is rules.** Every one of them
+exists because it was *already broken at least once* — the incident is named so
+nobody re-litigates it. They lapse during long tool-heavy stretches, which is
+exactly when they matter, so re-read this block after every merged PR.
+
+| # | Rule | Broken when |
+|---|---|---|
+| 1 | **End every response with `→ Next model:`** — including one-line acknowledgements | 2026-07-27: silently stopped mid-session during tool-heavy turns |
+| 2 | **Long job ⇒ `scripts/run_long.sh`**, never a bare background launch. Completion notifications are *not* monitoring — they don't cover stalls | 2026-08-03: lapsed on **six** jobs in one session |
+| 3 | **Multi-seed BEFORE writing a number down.** n=1 is provisional, always | **Five** retractions; only the fifth was caught pre-publication |
+| 4 | **Retract in place** — strike through, keep the reasoning, never silently delete or rewrite | The living docs' credibility depends entirely on this |
+| 5 | **Branch → PR → local `--no-ff` merge.** Never commit straight to `main` | 2026-08-02: 20 commits merged with no PR ever opened |
+| 6 | **Run `python scripts/lint_conventions.py` before ending a session** | The same cp1252 bug was fixed **3×** as separate incidents before being linted |
+| 7 | **Component status lives ONLY in `docs/STATUS.md`** | Same drift error in 3 consecutive sessions |
+| 8 | **Timestamps go through `scripts/timeline.py`** — never parse `meta_*.csv` directly | Naive parsing reorders **all 114,658** test rows |
+
+> **Why a rule lapses here, so you can catch it in yourself:** each of these has a
+> *plausible-but-wrong substitute* sitting next to it — the harness notifies on
+> completion (feels like monitoring), a point estimate looks like a result, one
+> updated table feels like updating the docs. When something feels already handled,
+> check *which* rule you actually satisfied.
+
+---
+
 ## What this project is
 
 **NeuroSymbolic-IDS** — an *Explainable & Adaptive Neuro-Symbolic Intrusion Detection System* for the CIC-IDS2017 dataset. Goal: detect both known and **zero-day** network attacks by combining:
@@ -34,6 +62,13 @@ that record project state — nothing else needs touching:
 If a *result* changed, it must also be reproducible from `outputs/metadata/runs.jsonl` (now
 version-controlled) — a number quoted in a doc with no logged run behind it is a defect, and there
 have been three.
+
+**Then run the lint** (non-negotiable #6). It mechanically checks the conventions that have
+actually lapsed, and names the incident behind each one:
+
+```bash
+python scripts/lint_conventions.py
+```
 
 ✅ **Component status now has ONE home (fixed 2026-08-03).** Change it in
 **[docs/STATUS.md](docs/STATUS.md) → "Component Status"** and nowhere else. This file,
@@ -204,7 +239,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 32 scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
+**All 35 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
 
 ## Repo layout
 
@@ -217,7 +252,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 32 scripts — see docs/scripts_reference.md
+├── scripts/                   ← 35 Python scripts + run_long.sh — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline

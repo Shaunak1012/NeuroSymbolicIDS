@@ -88,6 +88,14 @@ CHANNELS = {
     # deterministic: random_state has no stochastic component to control
     # (no subsampling configured), verified byte-identical across seeds 42/43/44.
     "xgboost":       ["y_prob_xgboost_test.npy"],
+    # Phase 4 (added 2026-08-03). "causal" = online variant, scored using only
+    # windows that had already arrived — the honest real-time number.
+    "kg_causal":     ["y_prob_kg_causal_test.npy",
+                      "y_prob_kg_s43_causal_test.npy",
+                      "y_prob_kg_s44_causal_test.npy"],
+    "kg":            ["y_prob_kg_test.npy",
+                      "y_prob_kg_s43_test.npy",
+                      "y_prob_kg_s44_test.npy"],
 }
 
 scores = {}
@@ -195,6 +203,14 @@ TESTS = [
      "retracted-claim check: 'on macro the CNN beats XGBoost'"),
     ("autoencoder", "mahalanobis", "family", "Bot",
      "is the AE really the better (B) Bot channel?"),
+    ("kg_causal", "autoencoder", "family", "Bot",
+     "PHASE 4 — does the KG beat the previous best Bot channel?"),
+    ("kg_causal", "random_forest", "family", "Bot",
+     "PHASE 4 — KG vs the other joint-best Bot channel"),
+    ("kg_causal", "kg", "family", "Bot",
+     "PHASE 4 — is the causal/online KG really better than the transductive one?"),
+    ("cnn_paper", "kg_causal", "macro", None,
+     "PHASE 4 — the CNN should still dominate on macro"),
 ]
 
 print("\n" + "=" * 100)
@@ -236,6 +252,6 @@ RESULTS["seed_power_note"] = (
 print("\n  " + RESULTS["seed_power_note"].replace(". ", ".\n  "))
 
 out = os.path.join(paths.METADATA, "significance.json")
-with open(out, "w") as f:
+with open(out, "w", encoding="utf-8") as f:
     json.dump(RESULTS, f, indent=1)
 print(f"\nwrote {out}")

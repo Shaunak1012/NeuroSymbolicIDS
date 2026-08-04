@@ -130,7 +130,7 @@ for K in (50, 100, 200, 400, 800):
         print(f"{K:5d} {cs:6d} | " + " | ".join(f"{c:>20s}" for c in cells))
 
 _out = os.path.join(paths.METADATA, "kg_precheck.json")
-with open(_out, "w") as _f:
+with open(_out, "w", encoding="utf-8") as _f:
     json.dump(RESULTS, _f, indent=1)
 print(f"\nwrote {_out}")
 
