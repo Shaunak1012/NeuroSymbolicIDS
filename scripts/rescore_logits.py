@@ -58,9 +58,20 @@ TAGS = ["cnn_paper", "ltn_ctrl_w0", "ltn_repro", "ltn_v2",
         "cnn_paper_s43", "cnn_paper_s44"]  # added 2026-08-02 for STATUS audit C2
 # NOTE: re-running this full list re-scores everything and appends a fresh
 # runs.jsonl entry per tag every time -- do not run it just to add one new tag
-# (see KNOWN_ISSUES C5, "runs.jsonl mixes... duplicated 3x"). Temporarily scope
-# TAGS to only the new tag(s), run, then restore this list -- as done 2026-08-02
-# for cnn_paper_s43/s44.
+# (see KNOWN_ISSUES C5, "runs.jsonl mixes... duplicated 3x").
+#
+# ⚠️ The old workaround was "temporarily edit TAGS, run, then restore". That is
+# exactly the kind of manual edit-run-restore dance that gets forgotten halfway
+# through, and it is how the duplicate rows in runs.jsonl were created in the
+# first place. Use the env var instead -- no edit, nothing to restore:
+#
+#     RESCORE_TAGS=cnn_paper_s45,cnn_paper_s46 python scripts/rescore_logits.py
+#
+# Added 2026-08-03 when seeds 45-47 needed rescoring for the n=6 seed-level test.
+_env_tags = os.environ.get("RESCORE_TAGS", "").strip()
+if _env_tags:
+    TAGS = [t.strip() for t in _env_tags.split(",") if t.strip()]
+    print(f"RESCORE_TAGS set -> scoped to {len(TAGS)} tag(s): {', '.join(TAGS)}")
 
 
 def tag_seed(tag):
