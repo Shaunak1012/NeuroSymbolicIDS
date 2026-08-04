@@ -121,6 +121,58 @@
    "p_boot": 0.0,
    "significant": true,
    "why": "is the AE really the better (B) Bot channel?"
+  },
+  {
+   "a": "kg_causal",
+   "b": "autoencoder",
+   "metric": "Bot",
+   "obs_a": 0.310275330067463,
+   "obs_b": 0.13139988403969943,
+   "obs_diff": 0.17887544602776356,
+   "ci95_lo": 0.1686472877446426,
+   "ci95_hi": 0.18855295862279733,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "PHASE 4 \u2014 does the KG beat the previous best Bot channel?"
+  },
+  {
+   "a": "kg_causal",
+   "b": "random_forest",
+   "metric": "Bot",
+   "obs_a": 0.310275330067463,
+   "obs_b": 0.1311007300324935,
+   "obs_diff": 0.1791746000349695,
+   "ci95_lo": 0.17110439033553096,
+   "ci95_hi": 0.1881266160016278,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "PHASE 4 \u2014 KG vs the other joint-best Bot channel"
+  },
+  {
+   "a": "kg_causal",
+   "b": "kg",
+   "metric": "Bot",
+   "obs_a": 0.310275330067463,
+   "obs_b": 0.24568667832869048,
+   "obs_diff": 0.06458865173877251,
+   "ci95_lo": 0.05981801820679698,
+   "ci95_hi": 0.06920873296935233,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "PHASE 4 \u2014 is the causal/online KG really better than the transductive one?"
+  },
+  {
+   "a": "cnn_paper",
+   "b": "kg_causal",
+   "metric": "macro",
+   "obs_a": 0.6398527623922122,
+   "obs_b": 0.24881722493824723,
+   "obs_diff": 0.391035537453965,
+   "ci95_lo": 0.37783373026524397,
+   "ci95_hi": 0.40312828879726875,
+   "p_boot": 0.0,
+   "significant": true,
+   "why": "PHASE 4 \u2014 the CNN should still dominate on macro"
   }
  ],
  "seedwise_macro": {
@@ -156,6 +208,16 @@
   ],
   "xgboost": [
    0.6371826637298106
+  ],
+  "kg_causal": [
+   0.249517642289695,
+   0.25229068546811145,
+   0.24464334705693525
+  ],
+  "kg": [
+   0.205902900192273,
+   0.20901106147272572,
+   0.18245022071366043
   ]
  },
  "seed_power_note": "With 3 paired seeds the Wilcoxon signed-rank test has a minimum achievable two-sided p of 0.25, so no seed-level comparison in this project can reach p<0.05 regardless of effect size. The bootstrap above quantifies FLOW-sampling uncertainty only. To make a seed-level claim at alpha=0.05 you need n>=6 seeds."

@@ -1127,6 +1127,82 @@ criteria, not from "unexplained" alone. Build that measurement before building t
 
 ✅ **Reorganised (2026-06-18).** Artifacts no longer dump to repo root — they live under `data/processed/`, `models/`, and `outputs/{arrays,embeddings,predictions,metadata,figures}/`. All paths are centralised in [`scripts/paths.py`](../scripts/paths.py); every script imports it. Verified: all scripts compile, all 28 existing artifacts present at new locations. Layout documented in [README](../README.md#project-structure) and [artifacts.md](artifacts.md#where-everything-lives).
 
+## 🟢 PHASE 4 BUILT (2026-08-03) — `scripts/kg.py`. Best Bot channel measured, with a caveat that halves it.
+
+Adaptive KG over **raw-feature clusters** (215 nodes: 200 Cluster + 6 Behaviour + 9 AttackType;
+1,183 edges). Memory initialised from TRAIN, then TEST **streamed in true chronological order** with
+exponential edge decay (τ=3 windows) — the "adaptive" half of the project title. n=3 seeds.
+
+### Two scores, and the causal one is better
+
+| | macro | Bot | Bot lift |
+|---|---|---|---|
+| `s_kg` transductive (whole stream) | 0.1991 [0.1825, 0.2090] | 0.2457 [0.2377, 0.2583] | 7.2× |
+| **`s_kg` causal / online (past only)** | **0.2488 [0.2446, 0.2523]** | **0.3103 [0.2970, 0.3210]** | **9.1×** |
+
+**All four Phase-4 comparisons are significant** (paired bootstrap, B=2000):
+
+| comparison | diff | 95% CI | p |
+|---|---:|---|---:|
+| KG causal vs **Autoencoder** (Bot) | **+0.1789** | [+0.1686, +0.1886] | <0.0005 |
+| KG causal vs **RandomForest** (Bot) | **+0.1792** | [+0.1711, +0.1881] | <0.0005 |
+| KG causal vs KG transductive (Bot) | +0.0646 | [+0.0598, +0.0692] | <0.0005 |
+| **CNN vs KG causal (macro)** | **+0.3910** | [+0.3778, +0.4031] | <0.0005 |
+
+So: **the KG is the best Bot channel ever measured here** (0.3103 vs the previous best 0.1314), and
+**the online variant is significantly better than the batch one** — a good result for a real IDS,
+since the deployable version is the stronger one. **The CNN still dominates macro by 0.39**, exactly
+as scoped: the KG is not a general detector.
+
+### 🔴 THE CONFOUND CONTROL — run it before quoting any of the above
+
+The causal score rises with arrival position, and CIC-IDS2017 schedules attacks **late**. So
+"later ⇒ more suspicious" could explain everything. Measured, and now a permanent part of `kg.py`:
+
+| channel | Bot global | lift | **Bot within-window** | **lift** |
+|---|---:|---:|---:|---:|
+| **s_kg causal** | 0.3210 | 9.4× | **0.9134** | **3.2×** |
+| s_kg transductive | 0.2583 | 7.6× | 0.9052 | 3.2× |
+| Autoencoder | 0.1217 | 3.6× | 0.5368 | 1.9× |
+| RandomForest | 0.0576 | 1.7× | 0.4217 | 1.5× |
+| CNN | 0.0591 | 1.7× | 0.4267 | 1.5× |
+| **lateness ONLY (control)** | **0.1575** | **4.6×** | 0.2853 | **1.0×** ✓ |
+
+*Within-window = score family-vs-benign inside each time window separately, so lateness is held
+constant. The control collapsing to exactly 1.0× confirms the test is sound.*
+
+**Three things follow, and all three must reach the write-up:**
+
+1. 🔴 **A trivial "later in the week" baseline scores Bot 0.1575 — beating the autoencoder (0.1314),
+   the previous best channel.** That is a finding *about the dataset*: a meaningful share of
+   apparent zero-day detection on CIC-IDS2017 is recoverable from the capture schedule alone.
+   Anyone reporting temporal zero-day results here owes this control.
+2. ✅ **The KG's advantage survives the control.** Within-window it still leads every channel —
+   3.2× vs the AE's 1.9× and the CNN's 1.5×. The signal is real, not schedule artifact.
+3. ⚠️ **But the headline 9.4× is roughly "schedule × cluster signal."** Quote **0.3103 global and
+   3.2× within-window together**; the global figure alone overstates the method.
+
+Also precise: **causal ≈ transductive within-window** (0.9134 vs 0.9052). The causal variant's
+significant global edge comes almost entirely from better exploiting *when*, not from better
+identifying *which* — worth stating plainly rather than implying a representational gain.
+
+### What the KG actually delivers
+
+Reasoning paths, which is the job the roadmap scoped it for:
+
+```
+Cluster:41 -[exhibits]-> [BeaconLike 93%, HighVolume 7%]
+           -[associated_with]-> [DoS slowloris 100%]
+           | EMERGING - activity concentrated in time (burstiness 20.0x uniform)
+```
+
+⚠️ Note the top-burstiness clusters are mostly **known** attacks and benign, not zero-day — the
+zero-day ones sit lower. And `s_kg` takes only **193 distinct values** (one per cluster), so PR-AUC
+is valid but **recall@1%FPR is degenerate — do not cite it.**
+
+🎨 `scripts/kg_visualize.py` emits `outputs/figures/kg_graph.html` — a self-contained Obsidian-style
+force-directed view (215 nodes, 931 edges, no CDN).
+
 ## ✅ LAST PHASE-4 GATE CLOSED (2026-08-03) — 1 of 3 emerging-pattern criteria works
 
 `scripts/kg_criteria.py` → `outputs/metadata/kg_criteria.json`. Three predictions pre-registered.
