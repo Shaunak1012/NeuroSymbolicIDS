@@ -1,0 +1,61 @@
+{
+ "duplicate_rate_overall": 0.17018437440039072,
+ "n_test": 114658,
+ "n_duplicated": 19513,
+ "channels": {
+  "CNN (cnn_paper)": {
+   "overall_binary": 0.9927908896626012,
+   "overall_binary_dedup": 0.9884195682929298,
+   "delta_from_dedup": -0.004371321369671444,
+   "macro_zero_day": 0.6446365252428516
+  },
+  "XGBoost": {
+   "overall_binary": 0.9936053012757667,
+   "overall_binary_dedup": 0.9900846441700215,
+   "delta_from_dedup": -0.0035206571057452285,
+   "macro_zero_day": 0.6371826637298106
+  },
+  "RandomForest": {
+   "overall_binary": 0.9917568852487313,
+   "overall_binary_dedup": 0.9868447017194795,
+   "delta_from_dedup": -0.0049121835292518234,
+   "macro_zero_day": 0.5681781111962679
+  },
+  "LTN control": {
+   "overall_binary": 0.9921410394390818,
+   "overall_binary_dedup": 0.9874106584308162,
+   "delta_from_dedup": -0.004730381008265616,
+   "macro_zero_day": 0.6048758316433307
+  },
+  "Mahalanobis": {
+   "overall_binary": 0.48283158195503045,
+   "overall_binary_dedup": 0.4575418482585163,
+   "delta_from_dedup": -0.02528973369651416,
+   "macro_zero_day": 0.45847425703121525
+  },
+  "Autoencoder": {
+   "overall_binary": 0.9251191600881057,
+   "overall_binary_dedup": 0.9463402633873461,
+   "delta_from_dedup": 0.02122110329924043,
+   "macro_zero_day": 0.09997487784765063
+  },
+  "IsolationForest": {
+   "overall_binary": 0.7629564122368384,
+   "overall_binary_dedup": 0.7651371429753955,
+   "delta_from_dedup": 0.0021807307385570684,
+   "macro_zero_day": 0.06277422627126668
+  },
+  "KG (causal)": {
+   "overall_binary": 0.9146934824017926,
+   "overall_binary_dedup": 0.9075878683474445,
+   "delta_from_dedup": -0.007105614054348064,
+   "macro_zero_day": 0.249517642289695
+  },
+  "CNN + KG fusion": {
+   "overall_binary": 0.9892884790930435,
+   "overall_binary_dedup": 0.9895792324162586,
+   "delta_from_dedup": 0.00029075332321504277,
+   "macro_zero_day": 0.7327658311704673
+  }
+ }
+}
