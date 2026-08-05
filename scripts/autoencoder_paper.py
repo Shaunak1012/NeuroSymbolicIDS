@@ -49,11 +49,15 @@ from tensorflow.keras import layers, models, callbacks, Input
 from sklearn.preprocessing import StandardScaler
 
 import paths, config, features, metrics, tracking
+import determinism
 
 cfg = config.get()
 _DEFAULT_SEED = cfg["seed"]
 SEED = int(os.environ.get("AE_SEED", _DEFAULT_SEED))
-tf.random.set_seed(SEED); np.random.seed(SEED)
+# Phase 7.5 Tier 2 #5 — seeding alone does not pin the result (SD 0.0222 measured
+# on the CNN). Must run before any op is created. TF_DETERMINISM=0 opts out.
+DET = determinism.enable(SEED, intra=int(os.environ.get("TF_THREADS", "16")),
+                         inter=int(os.environ.get("TF_THREADS_INTER", "2")))
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
 

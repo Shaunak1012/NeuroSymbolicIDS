@@ -4,6 +4,107 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 📊 BASE-PAPER + LITERATURE METRICS (2026-08-05) — `scripts/paper_metrics.py`
+
+**Until today not one of the base paper's numbers had ever been computed for our models.** The
+project headlines macro zero-day PR-AUC because `metrics.py` enforces it; the capstone also has to be
+readable next to Bizzarri et al. (Accuracy + F1, five views) and next to the field's 99 %+ claims.
+Both metric systems are now produced from the same runs.
+
+### Base paper Table II (50 epochs, Adamax), our column added
+
+| Test set | Hybrid-LTN | 1D CNN | **CNN (ours, n=3)** | LTN ctrl | LTN +Ax6 | LTN repro |
+|---|---:|---:|---:|---:|---:|---:|
+| Multi-class, 9 known | 81.08 % | 80.99 % | **99.81 %** | 99.87 % | 99.87 % | 99.86 % |
+| Binary, 9 known | 99.57 % | 99.42 % | **99.84 %** | 99.89 % | 99.89 % | 99.89 % |
+| Multi-class, 15 classes | 67.52 % | 67.45 % | **96.17 %** | 96.22 % | 96.23 % | 96.22 % |
+| Binary, 15 classes | 93.03 % | 90.88 % | **97.95 %** | 97.90 % | 97.97 % | 97.97 % |
+| **Binary, 6 unknown** | **60.47 %** | **48.34 %** | **47.85 %** | 45.37 % | 47.18 % | 47.24 % |
+
+**Two results, pointing opposite ways:**
+
+1. ✅ **We beat the base paper by 18–29 pp on all four known-class views.** ⚠️ **This is a MODALITY
+   advantage, not a method one** — 68 engineered flow features are far more separable than raw
+   payload bytes. Do not write it up as an algorithmic win.
+2. 🔴 **We reproduce their 1D CNN's zero-day number almost exactly (47.85 % vs 48.34 %) and CANNOT
+   reproduce the Hybrid-LTN's +12 pp symbolic gain.** Our closest reproduction of their model
+   (`ltn_repro`, plain CE + Ax1/Ax2 label anchors) scores **47.24 %** — no gain over our own CNN.
+   **This is the project's central finding stated for the first time on the base paper's own
+   metric**, and it is the strongest form of it: not "our variants cost macro PR-AUC" but "*their*
+   reported improvement does not appear."
+
+### 🔴 Two defects in the base paper's zero-day metric, both verified arithmetically
+
+**(a) No false-positive term.** View 5 contains **only attack rows** → precision ≡ 1, accuracy *is*
+recall, and **`F1 = 2A/(1+A)` exactly** — reproducing every published F1 from its accuracy to
+<0.02 pp. So *"accuracy 48→60 %, F1 65→75 %"* is **one result reported twice**, and **a model that
+flags everything scores 100 % on both** while running a 100 % false alarm rate. Our own float32
+saturation bug did exactly that (2026-07-27) and was caught **only** because our metric has a benign
+side.
+
+**(b) A size-weighted mixture** — the defect `metrics.py` was rewritten to remove:
+
+| family | n | our share | their share | our CNN detects |
+|---|---:|---:|---:|---:|
+| **Bot** | 1,956 | **46.8 %** | 8.0 % | **0.0 %** |
+| Web Attack Brute Force | 1,507 | 36.0 % | 36.8 % | 89.9 % |
+| Web Attack XSS | 652 | 15.6 % | 10.5 % | 96.9 % |
+| **Heartbleed** | 11 | 0.3 % | **42.2 %** | 0.0 % |
+
+Holding the model fixed and changing only the mix moves the headline **48.32 % → 44.38 %**.
+**Composition explains ~4 pp — so the missing ~12 pp symbolic gain is NOT explained away by it.**
+
+### The field's suite (overall binary) — comparable to published 99 %+ claims
+
+| channel | accuracy | precision | recall | F1 | FAR | ROC-AUC | PR-AUC |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **CNN (ours)** | **97.95 %** | 99.71 % | 96.32 % | **97.98 %** | **0.31 %** | 98.32 % | 99.00 % |
+| LTN control | 97.90 % | 99.82 % | 96.13 % | 97.94 % | 0.19 % | 98.15 % | 98.24 % |
+| LTN +Ax6 | 97.97 % | 99.82 % | 96.26 % | 98.01 % | 0.19 % | 98.16 % | 98.24 % |
+
+⚠️ **In the literature's range, and NOT a better result than our 0.64 macro zero-day PR-AUC** — an
+easier question asked of the same models. **Report both, and say which is which.**
+
+⚠️ **Comparison in FORM, not head-to-head.** Three documented deviations: **modality** (payload bytes
+vs flow features) · **zero-day membership differs by a swap** — they hold out **PortScan** and train
+on **Infiltration**, we do the reverse (5 of 6 overlap) · **class sizes** (their Heartbleed is 13,486
+payload packets; flow data has 11).
+
+## 🔴 ABLATION (2026-08-05) — `scripts/ablation.py`. ONLY THE KG EARNS ITS PLACE.
+
+Remaining Work #6, n=3 paired seeds, parameter-free equal-weight rank fusion (nothing fitted).
+Five rungs, because *"+LTN"* is ambiguous: the **control** is the symbolic trainer with axiom weight
+zero, **Ax6** is the actual symbolic pillar. Both are run.
+
+| rung | macro | range | Bot | Web BF | XSS | Δ vs CNN | seeds up |
+|---|---:|---|---:|---:|---:|---:|---:|
+| CNN | 0.6399 | [0.6353, 0.6446] | 0.0446 | 0.9226 | **0.9524** | — | — |
+| CNN + LTN-ctrl | 0.6433 | [0.6338, 0.6497] | 0.0594 | 0.9195 | 0.9511 | +0.0035 | 2/3 |
+| CNN + LTN-Ax6 | 0.6394 | [0.6319, 0.6498] | 0.0495 | 0.9187 | 0.9501 | **−0.0004** | **1/3** |
+| **CNN + KG** | **0.6926** | [0.6626, 0.7328] | **0.2518** | **0.9283** | 0.8976 | **+0.0528** | **3/3** |
+| CNN + LTN-Ax6 + KG (**FULL**) | 0.6708 | [0.6394, 0.7114] | 0.2043 | 0.9277 | 0.8806 | +0.0310 | 3/3 |
+| CNN + LTN-ctrl + KG | 0.6887 | [0.6559, 0.7133] | 0.2302 | 0.9276 | 0.9085 | +0.0489 | 3/3 |
+
+**Paired bootstrap** (B=2000): CNN+KG vs CNN **+0.0528** [+0.0466, +0.0592] p<0.0001 ·
+**FULL vs CNN+KG −0.0218** [−0.0288, −0.0149] **p<0.0001** · CNN+LTN-Ax6 vs CNN −0.0004 **n.s.**
+
+### The conclusion, and it is negative about our own architecture
+
+**Only the KG earns its place.** The symbolic pillar adds nothing alone (−0.0004, n.s., improving on
+1 of 3 seeds) and **significantly HURTS when stacked on the KG** (0.6926 → 0.6708, p<0.0001),
+diluting the KG's Bot signal from **0.2518 → 0.2043**. Consistent with `fusion_multi.py`'s
+independent finding that equal-weight fusion rewards **complementarity, not quantity**.
+
+> ⚠️ **A trap inside our own new result, caught by applying our own rule.** `CNN + LTN-ctrl vs CNN`
+> comes back **p<0.0001** — and must **NOT** be reported as an improvement. The gap is **+0.0035 =
+> 0.16 SD** of the noise floor, improving on **2 of 3 seeds**. This is exactly C2: *a flow-level
+> paired bootstrap cannot rescue a delta below the pipeline's own reproducibility.* It answers
+> "would this hold on different traffic", not "would this hold if we retrained". **This is noise.**
+
+✅ **Two independent reproductions validate the implementation** — recomputing macro from raw score
+arrays gives **0.6399** (CNN) and **0.6926** (CNN+KG), exactly matching `metrics.py` and
+`fusion_kg.py`.
+
 ## ✅ PHASE 7.5 TIER 1 COMPLETE (2026-08-05) — `scripts/operational.py`. All 4 predictions confirmed.
 
 **PR-AUC is the wrong target for a response engine**, and Tier 1 measures what is. Four predictions
@@ -2059,7 +2160,7 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | ✅ **BUILT & multi-seeded 2026-08-03** (the KG half of Phase 4; explainability half is item 5) | **Prerequisites now measured** (`kg_readiness.py`). ✅ Representation decided on evidence: **raw features** (Bot purity 77.6/80.6 %, no training lottery) — *not* the AE bottleneck, whose 52.1 pp spread was the worst of all options. 🔴 **Scope forced by measurement: corroboration + explainability, NOT primary detection** — the "unexplained cluster" criterion scores **lift ≤ 1.00× (at or below chance)** across every representation and threshold, so that mechanism is dead. ✅ **Last gate CLOSED 2026-08-03**: all three emerging-pattern criteria measured — **growth works** (lift 5.94x [5.66, 6.11], n=3, ~81% recall), unexplained is dead, co-occurrence is weak. ✅ Decay decided: **keep it adaptive**, flow-count over true chronological order. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
 | 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline; direction established on 3/3 seeds, **magnitude uncertain 0.027–0.088**) · **n≥6 seeds ✅ DONE 2026-08-04** (`rigor_n6.sh`, all 7 channels — and it showed the top tier is mutually **indistinguishable**). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | ✅ **DONE 2026-08-03 — 3 of 3 + faithfulness** (`explain.py`) | ✅ Neural (Integrated Gradients, completeness-checked) · ✅ Logic (per-axiom SAT, Ax3–Ax6 only — Ax1/Ax2 are label anchors and would be circular) · ✅ KG reasoning paths · ✅ Final Alert assembly · ✅ Tier-A faithfulness (IG top-3 masking is **20.67×** a random-feature control; sufficiency reported as the weaker half). **Phase 4 is therefore complete.** Its most informative output is not a score: on a Bot flow the CNN calls benign, **both other pillars dissent** — no single-pillar system produces that. Spec: [explainability.md](target/explainability.md). |
-| 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
+| 6 | Ablation (CNN → +LTN → +KG → full) | ✅ **DONE 2026-08-05** (`ablation.py`) | 🔴 **Result is negative: only the KG earns its place.** The symbolic pillar adds nothing alone (−0.0004, n.s.) and **significantly hurts stacked on the KG** (0.6926 → 0.6708, p<0.0001). See the ablation section. |
 | 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | 🟡 **TIER 1 DONE 2026-08-05** — `operational.py`, all 4 predictions confirmed. **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
 
 Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
@@ -2091,7 +2192,7 @@ Three capabilities that determine response accuracy are entirely absent today.
 
 | # | Item | Note |
 |---|---|---|
-| 5 | **TF determinism flags** (`enable_op_determinism()`, fixed `intra_op`/`inter_op`) | **None are currently set** — this is the direct cause of the 3.6 % CV. Costs speed, buys reproducibility. |
+| 5 | **TF determinism flags** (`enable_op_determinism()`, fixed `intra_op`/`inter_op`) | ✅ **BUILT 2026-08-05** — `scripts/determinism.py`, wired into `cnn_paper`/`ltn_paper`/`autoencoder_paper`. Pins `PYTHONHASHSEED`, op-determinism and **fixed** thread counts (intra=16/inter=2 — fixed, not minimal). ⚠️ **Whether pinned multi-threading is enough is an empirical claim, so it is tested, not assumed**: `verify_determinism.sh` trains seed 42 twice and requires **byte-identical** output. ⚠️ **Determinism does not make old and new runs comparable** — pinning threads changes the reduction order, defining a *new* fixed point; do not pool across the flag. |
 | 6 | **k-fold CV** instead of a single stratified split | Better variance estimates; uses all the data. |
 | 7 | **Checkpoint averaging (SWA)** | Cheap intra-run variance reduction. |
 

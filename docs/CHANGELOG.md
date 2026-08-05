@@ -2,6 +2,67 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-05 (base-paper + literature metrics, ablation, determinism)
+
+### 📊 Our numbers in the base paper's metric set — computed for the first time
+
+`scripts/paper_metrics.py`. **Not one of Bizzarri et al.'s numbers had ever been computed for our
+models**, so the capstone had no readable comparison to its own base paper or to the field's 99 %+
+claims. Both metric systems now come out of the same runs.
+
+- ✅ **We beat the base paper by 18–29 pp on all four known-class views** (multi-class 15 classes:
+  **96.17 % vs 67.52 %**). ⚠️ **A modality advantage, not a method one** — engineered flow features
+  are far more separable than raw payload bytes. Not an algorithmic win; do not write it as one.
+- 🔴 **We reproduce their 1D CNN's zero-day accuracy almost exactly (47.85 % vs 48.34 %) and cannot
+  reproduce the Hybrid-LTN's +12 pp symbolic gain.** Our closest reproduction of their model
+  (`ltn_repro`, CE + Ax1/Ax2) scores **47.24 %** — no gain over our own CNN. **This is the project's
+  central finding stated on the base paper's own metric**, and in its strongest form: not "our
+  variants cost macro PR-AUC" but "*their* reported improvement does not appear."
+- 🔴 **Their zero-day metric has no false-positive term.** View 5 contains only attack rows, so
+  precision ≡ 1 and **`F1 = 2A/(1+A)` exactly** — which reproduces every published F1 from its
+  accuracy to <0.02 pp. Their *"accuracy 48→60 %, F1 65→75 %"* headline is **one result reported
+  twice**, and **a model that flags every flow scores 100 % on both.** Our own float32 saturation bug
+  did exactly that and was caught only because our metric has a benign side.
+- 🔴 **It is also a size-weighted mixture** — the defect `metrics.py` was rewritten to remove.
+  Holding the model fixed and changing only the family mix moves the headline **48.32 % → 44.38 %**.
+  Their set is Heartbleed+WebBF-dominated (79 %); ours is **Bot**-dominated (46.8 %), the family our
+  CNN provably cannot reach (0.0 % detected). **Composition explains ~4 pp, so the missing ~12 pp is
+  not explained away by it.**
+- **The field's suite is now reported**: CNN accuracy **97.95 %**, precision 99.71 %, recall 96.32 %,
+  F1 **97.98 %**, FAR **0.31 %**, ROC-AUC 98.32 %, PR-AUC 99.00 % — in the literature's range, and
+  **an easier question asked of the same models**, not a better result than macro 0.64.
+
+### 🔴 Ablation — only the KG earns its place
+
+`scripts/ablation.py`, n=3 paired seeds, parameter-free rank fusion, four predictions pre-registered
+and all four confirmed.
+
+- **CNN 0.6399 → CNN+KG 0.6926** (+0.0528, 3/3 seeds, p<0.0001).
+- **The symbolic pillar adds nothing alone** (−0.0004, n.s., improving on 1 of 3 seeds) **and
+  significantly HURTS stacked on the KG**: FULL 0.6708 vs CNN+KG 0.6926, **−0.0218, p<0.0001**,
+  diluting the KG's Bot signal 0.2518 → 0.2043.
+- ⚠️ **A trap inside our own result, caught by our own rule**: `CNN+LTN-ctrl vs CNN` returns
+  p<0.0001 — and is **noise**. The gap is +0.0035 = **0.16 SD** of the floor, improving on 2 of 3
+  seeds. *A flow-level bootstrap cannot rescue a delta below the pipeline's reproducibility.*
+- ✅ Implementation independently validated: recomputing macro from raw arrays gives 0.6399 and
+  0.6926, exactly matching `metrics.py` and `fusion_kg.py`.
+
+### ⚙️ TF determinism (Phase 7.5 Tier 2 #5)
+
+`scripts/determinism.py`, wired into `cnn_paper` / `ltn_paper` / `autoencoder_paper`.
+
+- Pins `PYTHONHASHSEED`, op-determinism and **fixed** thread counts (intra=16 / inter=2 — *fixed*,
+  not minimal). **Whether pinned multi-threading suffices is an empirical claim, so it is tested:**
+  `verify_determinism.sh` trains seed 42 twice and requires **byte-identical** output.
+- ✅ **Fast verification (50k rows, 2 epochs): BYTE-IDENTICAL.** Reproducibility at full speed — no
+  single-thread cost needed. Full-training verification launched.
+- ⚠️ **Determinism does not make old and new runs comparable.** Pinning threads changes the reduction
+  order, defining a *new* fixed point; the 11 historical seed-42 values are a different population.
+  Recorded in `runs.jsonl` as `det_*` fields so the state travels with the numbers.
+- ⚠️ Caught in my own launcher: FULL mode would have written two genuinely-trained channels under a
+  `smoke` tag, quarantining real runs into the smoke archive *and* stamping the research record with
+  rows named "smoke". Fixed to use real tags when it trains for real.
+
 ## 2026-08-05 (Phase 7.5 Tier 1 — the metrics that decide whether response is safe)
 
 `scripts/operational.py`. Four predictions pre-registered before running; **all four confirmed.**
