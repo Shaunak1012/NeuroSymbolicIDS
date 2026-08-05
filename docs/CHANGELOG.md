@@ -2,6 +2,46 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-05 (Phase 7.5 Tier 1 — the metrics that decide whether response is safe)
+
+`scripts/operational.py`. Four predictions pre-registered before running; **all four confirmed.**
+No training — evaluation over saved predictions, plus one validation forward pass.
+
+- **1. The ensemble is the deployable baseline.** 11 CNN runs, probability-mean → **0.6356**,
+  reproducing the figure STATUS already quoted. Beats the single-run mean (0.6217), **not** the max
+  (0.6446) — because the max is the top of 11 draws, not a typical result. **The argument for the
+  ensemble is reproducibility, not the delta.** ⚠️ `cnn_auxhead` was caught contaminating the glob on
+  the first run: it matches `cnn_*` but is a *different architecture*, so ensembling it would have
+  silently answered a different question while being reported as a reproducibility fix.
+- **2. 🔴 Calibration works on known classes and does nothing for zero-day.** Fitted on validation
+  (zero-day-free by construction, asserted in code): isotonic reaches **ECE 0.0001** on known classes
+  while zero-day ECE stays at **0.0387 — 287× worse.** A calibrator learns a score→outcome mapping,
+  and for a class the model has never seen that mapping does not hold. **The better the calibration,
+  the wider the gap.** Operationally: `p = 0.9` means 90 % for known attacks and nothing for novel
+  ones.
+- **🔴 Isotonic wins ECE but is unusable as an operating point** — a step function with **74 distinct
+  values** over 114,658 flows, so the 1 %-FPR quantile lands in a tie block. The first run thresholded
+  on it and achieved **FPR 0.70 against a 0.01 target.** Platt is monotone and continuous and hits
+  0.0100 exactly. **Calibrate with isotonic for reporting; threshold with Platt.**
+- **3. 🔴 At any deployable alert budget you see only known attacks.** Precision is ~1.000 at every
+  budget for every channel — and **zero-day recall is 0.0000 through 10,000 alerts.** Reaching half
+  the zero-day flows requires reviewing **32–52 % of all traffic**. The KG and the CNN+KG fusion cut
+  that depth by ~20 pp (52 % → 29–32 %), **which is the clearest operational statement of what the KG
+  buys — and it is not a PR-AUC delta.**
+- **4. 🔴 Abstention does not rescue zero-day (+0.0000 across every non-degenerate coverage).**
+  Predicted in advance from the Bot failure analysis: the CNN is **confidently wrong** on Bot (100 %
+  argmax BENIGN, p(BENIGN)=0.9984), and **a confidence rule cannot catch confident-and-wrong.**
+- ⚠️ **Two methodological errors caught inside the script**, both of which would have produced
+  publishable-looking nonsense: thresholding a tie-degenerate score, and defining confidence as
+  `|p − 0.5|` when the operating point is 0.000049 (which ranks *confidently benign* flows as most
+  confident). **Both were visible only because achieved FPR was printed next to its target.** Also
+  tightened P4 to test the best point on the curve rather than the endpoint, and to exclude
+  coverages retaining <1,000 benign flows — using the endpoint would have picked the comparison that
+  flattered the prediction.
+
+**The Phase-R headline**: automated response is **safe on what this system fires on** and **useless
+for novel attacks at any budget a SOC would run.** PR-AUC 0.64 does not show that; this does.
+
 ## 2026-08-05 (documentation debt closed — and a lint that could not fire)
 
 No new measurements. This session closed eight drift items left by the previous one, then continued

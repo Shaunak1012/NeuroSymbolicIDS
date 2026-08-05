@@ -4,6 +4,103 @@
 
 ## ▶ RESUME HERE (next session)
 
+## ✅ PHASE 7.5 TIER 1 COMPLETE (2026-08-05) — `scripts/operational.py`. All 4 predictions confirmed.
+
+**PR-AUC is the wrong target for a response engine**, and Tier 1 measures what is. Four predictions
+pre-registered before running; **all four CONFIRMED**.
+
+### 1 — The ensemble is the deployable baseline
+
+| | macro |
+|---|---:|
+| single-run mean (n=11) | 0.6217 |
+| single-run **max** | **0.6446** ← the number usually quoted |
+| single-run min | 0.5825 |
+| **ENSEMBLE (probability-mean)** | **0.6356** |
+
+Reproduces STATUS's previously-quoted 0.6356 exactly. Beats the mean, **not** the max — as predicted,
+because 0.6446 is the top of 11 draws. **The ensemble's argument is not the delta; it is that it is
+reproducible.** ⚠️ `cnn_auxhead` was caught contaminating the glob on the first run — it matches
+`cnn_*` but is a *different architecture*, and including it would have silently answered "does a
+heterogeneous ensemble help?" while being reported as a reproducibility fix.
+
+### 2 — 🔴 Calibration works on known classes and does NOTHING for zero-day
+
+Fitted on **validation** (zero-day-free by construction — asserted in code), measured separately:
+
+| method | ECE all | ECE known-class | ECE zero-day | **zd ÷ known** |
+|---|---:|---:|---:|---:|
+| uncalibrated | 0.0260 | 0.0084 | 0.0381 | 4.5× |
+| Platt | 0.0196 | 0.0006 | 0.0387 | 62× |
+| isotonic | **0.0192** | **0.0001** | 0.0387 | **287×** |
+
+**Isotonic reaches ECE 0.0001 on known classes while zero-day ECE does not move at all.** A
+calibrator learns a score→outcome mapping, and for a class the model has never seen that mapping does
+not hold. **The better the calibration, the wider the gap** — the fusion wall in another guise, and a
+direct operational consequence: **`p = 0.9` means 90 % for known attacks and nothing for novel ones.**
+
+🔴 **Isotonic wins ECE but is unusable as an operating point** — a step function with **74 distinct
+values** over 114,658 flows, so the 1 %-FPR quantile lands inside a tie block. The first run
+thresholded on it and achieved **FPR 0.70 against a 0.01 target.** Platt is monotone and continuous
+(59,920 values) and hits 0.0100 exactly. **Calibrate with isotonic for reporting; threshold with
+Platt.** `metrics.py` already flags this failure mode for model scores; it applies to calibrators too.
+
+### 3 — 🔴 At any deployable alert budget, you see ONLY known attacks
+
+Precision is **~1.000 at every budget for every channel** — and that is the problem:
+
+| budget | CNN precision | zero-day in alerts | zd recall |
+|---:|---:|---:|---:|
+| 100 | 1.000 | **0** | 0.0000 |
+| 1,000 | 1.000 | **0** | 0.0000 |
+| 10,000 | 1.000 | 3 | 0.0007 |
+| 25,000 | 1.000 | 1,913 | 0.4573 |
+
+**Depth required before novel attacks surface** (as % of the 114,658 test flows):
+
+| channel | @10 % zd | @25 % zd | @50 % zd |
+|---|---:|---:|---:|
+| CNN | 13,170 (11 %) | 14,301 (12 %) | 59,355 (**52 %**) |
+| CNN ensemble | 29,911 (26 %) | 31,533 (28 %) | 60,043 (52 %) |
+| **CNN + KG fusion** | 16,556 (14 %) | 23,899 (21 %) | **36,661 (32 %)** |
+| **KG (causal)** | 14,992 (13 %) | 28,701 (25 %) | **33,063 (29 %)** |
+
+**Reaching half the zero-day flows means reviewing a third to a half of all traffic.** The KG and the
+fusion **cut that depth by ~20 pp** — the clearest operational statement of what the KG buys, and
+more meaningful than any PR-AUC delta. **A 100 %-precise alert stream that contains zero novel
+attacks is exactly the failure Phase 7.5 exists to expose, and PR-AUC 0.64 does not show it.**
+
+### 4 — 🔴 Abstention does not rescue zero-day. At all.
+
+Confidence = margin from the decision threshold, `|logit(p) − logit(thr)|`.
+
+| coverage | precision | recall | benign kept | **zd precision** |
+|---:|---:|---:|---:|---:|
+| 100 % | 0.990 | 0.964 | 55,237 | **0.0350** |
+| 95 % | 0.996 | 0.963 | 49,766 | **0.0350** |
+| 90 % | 0.996 | 0.963 | 44,035 | **0.0350** |
+| 75 % | 0.996 | 0.963 | 26,839 | **0.0350** |
+
+**Zero-day precision does not move (+0.0000) across every non-degenerate coverage.** This was
+predicted in advance from the Bot failure analysis: the CNN is **confidently wrong** on Bot (100 %
+argmax BENIGN, mean p(BENIGN)=0.9984), and **a confidence-based rule cannot catch
+confident-and-wrong.** Coverages ≤50 % are excluded as degenerate (2–125 benign flows retained out of
+55,237 — which is why their FPR reads exactly 1.0000).
+
+⚠️ **Two methodological errors were caught and fixed inside this script**, both of which would have
+produced publishable-looking nonsense: thresholding on a tie-degenerate isotonic score (FPR 0.70 vs
+0.01 target), and defining confidence as `|p − 0.5|` when the operating point is 0.000049 — which
+ranks *confidently benign* flows as most confident and collapsed recall to 0.035 for reasons
+unrelated to selective prediction. **Both were visible only because the achieved FPR was printed
+next to its target.**
+
+### What Tier 1 means for Phase R
+
+**Automated response is safe on what this system fires on** (precision ~0.99 at the 1 %-FPR operating
+point, ≥0.95 at every coverage) **and useless for novel attacks at any budget a SOC would run.** The
+honest deployment story is: auto-act on known attacks, and treat zero-day as a *depth* problem the KG
+improves but does not solve. Tier 2 (determinism, k-fold, SWA) is next.
+
 ### 📍 CURRENT — 2026-08-05
 
 **Phases 0–4 COMPLETE. Phase 5 partially entered. Next: Phase 7.5 Tier 1 · the ablation · TF
@@ -15,7 +112,7 @@ determinism flags.**
 | **4 — Knowledge Graph + explainability** | ✅ **COMPLETE** — `kg.py`, `kg_visualize.py`, `explain.py`; faithfulness measured |
 | **5 — Decision Fusion + rigor** | 🟡 **PARTIAL** — ✅ significance · ✅ parameter-free rank fusion · ✅ n=6 on all 7 channels. ❌ calibration · ❌ latency · ❌ the *fitted* fuser (blocked by THE FUSION WALL) |
 | 6, 7 | ⬜ not started |
-| **7.5 — operational readiness** | ⬜ not started, **gates Phase R** |
+| **7.5 — operational readiness** | 🟡 **Tier 1 ✅ DONE 2026-08-05** (`operational.py`, 4/4 predictions confirmed); Tier 2 in progress. **Gates Phase R** |
 | R — response engine | ⬜ not started |
 
 **The three things in flight, in order:** (a) **Phase 7.5 Tier 1** — ship the ensemble, calibration
@@ -1963,7 +2060,7 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline; direction established on 3/3 seeds, **magnitude uncertain 0.027–0.088**) · **n≥6 seeds ✅ DONE 2026-08-04** (`rigor_n6.sh`, all 7 channels — and it showed the top tier is mutually **indistinguishable**). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | ✅ **DONE 2026-08-03 — 3 of 3 + faithfulness** (`explain.py`) | ✅ Neural (Integrated Gradients, completeness-checked) · ✅ Logic (per-axiom SAT, Ax3–Ax6 only — Ax1/Ax2 are label anchors and would be circular) · ✅ KG reasoning paths · ✅ Final Alert assembly · ✅ Tier-A faithfulness (IG top-3 masking is **20.67×** a random-feature control; sufficiency reported as the weaker half). **Phase 4 is therefore complete.** Its most informative output is not a score: on a Bot flow the CNN calls benign, **both other pillars dissent** — no single-pillar system produces that. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
-| 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | ⬜ **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
+| 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | 🟡 **TIER 1 DONE 2026-08-05** — `operational.py`, all 4 predictions confirmed. **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
 
 Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 
