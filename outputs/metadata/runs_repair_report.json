@@ -1,33 +1,26 @@
 {
  "applied": true,
- "rows_before": 143,
+ "rows_before": 159,
  "seed_fixes": [],
- "duplicates_removed": [
-  "ood_cnn_p_attack",
-  "ood_msp",
-  "ood_max_logit",
-  "ood_entropy",
-  "ood_margin",
-  "ood_energy_T1",
-  "ood_energy_T10",
-  "ood_energy_T100",
-  "ood_energy_T1000",
-  "ood_odin_T1",
-  "ood_odin_T1000"
- ],
+ "duplicates_removed": [],
  "schema_stamped": 0,
  "duplicate_names_preserved": [
   "cnn_auxhead_l0.5",
+  "decision_tree",
   "fusion_cnn_kg",
   "isolation_forest",
   "kg",
+  "linear_svm",
+  "logistic_regression",
   "ltn_repro",
   "ltn_v2",
   "mahalanobis",
+  "mlp",
   "msp",
   "random_forest",
+  "rbf_svm_nystroem",
   "xgboost"
  ],
- "rows_after": 132,
- "stamp": "2026-08-05T03:48:00+00:00"
+ "rows_after": 159,
+ "stamp": "2026-08-05T08:30:49+00:00"
 }

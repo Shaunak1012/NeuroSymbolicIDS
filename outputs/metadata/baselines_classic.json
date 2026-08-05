@@ -1,0 +1,147 @@
+{
+ "decision_tree": {
+  "macro": 0.6049297206004177,
+  "families": {
+   "Bot": 0.03419998950920567,
+   "Heartbleed": 0.00019910222994497538,
+   "Infiltration": 0.000651312575760317,
+   "Web Attack Brute Force": 0.8467300049188355,
+   "Web Attack Sql Injection": 0.40483429247047187,
+   "Web Attack XSS": 0.933859167373212
+  },
+  "fit_seconds": 25.14253544807434,
+  "predict_seconds": 0.016000747680664062,
+  "deviation": null,
+  "score_resolution": 0.0004622442393901865,
+  "largest_tie_frac": 0.5006541192066842,
+  "saturated": true,
+  "overall_binary_pr_auc": 0.9806530092738475,
+  "known_only_pr_auc": 0.9987934220938395
+ },
+ "naive_bayes": {
+  "macro": 0.1263943807678788,
+  "families": {
+   "Bot": 0.04148098584736333,
+   "Heartbleed": 0.0001227213632256194,
+   "Infiltration": 0.0003708098545941926,
+   "Web Attack Brute Force": 0.20673284301503436,
+   "Web Attack Sql Injection": 0.0014235609452974236,
+   "Web Attack XSS": 0.13096931344123866
+  },
+  "fit_seconds": 0.5603928565979004,
+  "predict_seconds": 0.10300612449645996,
+  "deviation": null,
+  "score_resolution": 0.5082855099513335,
+  "largest_tie_frac": 0.33081860838319177,
+  "saturated": true,
+  "overall_binary_pr_auc": 0.8468346518986145,
+  "known_only_pr_auc": 0.8445356802380277
+ },
+ "logistic_regression": {
+  "macro": 0.03796811919899473,
+  "families": {
+   "Bot": 0.023449047998862858,
+   "Heartbleed": 0.00011505420661464866,
+   "Infiltration": 0.00035662230756374185,
+   "Web Attack Brute Force": 0.06299072698848635,
+   "Web Attack Sql Injection": 0.007526224262093694,
+   "Web Attack XSS": 0.02746458260963499
+  },
+  "fit_seconds": 14.679462909698486,
+  "predict_seconds": 0.010174989700317383,
+  "deviation": null,
+  "score_resolution": 0.9296778244867344,
+  "largest_tie_frac": 0.0078319873013658,
+  "saturated": false,
+  "overall_binary_pr_auc": 0.9768572808700186,
+  "known_only_pr_auc": 0.9951395257404018
+ },
+ "linear_svm": {
+  "macro": 0.03742043620260064,
+  "families": {
+   "Bot": 0.03121540960248934,
+   "Heartbleed": 0.0001102391227539641,
+   "Infiltration": 0.00040876753819866455,
+   "Web Attack Brute Force": 0.05695359274006312,
+   "Web Attack Sql Injection": 0.007490501326432534,
+   "Web Attack XSS": 0.024092306265249455
+  },
+  "fit_seconds": 66.60194492340088,
+  "predict_seconds": 0.008042097091674805,
+  "deviation": null,
+  "score_resolution": 0.9296952676655794,
+  "largest_tie_frac": 0.0078319873013658,
+  "saturated": false,
+  "overall_binary_pr_auc": 0.9801935858847259,
+  "known_only_pr_auc": 0.997116709197959
+ },
+ "rbf_svm_nystroem": {
+  "macro": 0.08703819491975133,
+  "families": {
+   "Bot": 0.01970901141658549,
+   "Heartbleed": 0.0010430407808327481,
+   "Infiltration": 0.0022108239084643847,
+   "Web Attack Brute Force": 0.16708430011125355,
+   "Web Attack Sql Injection": 0.016963996069008256,
+   "Web Attack XSS": 0.07432127323141492
+  },
+  "fit_seconds": 6.825848340988159,
+  "predict_seconds": 0.4529111385345459,
+  "deviation": "RBF approximated by Nystroem(300) + linear SGD; exact RBF-SVM is O(n^2) and not runnable at 883k rows",
+  "score_resolution": 0.9531912295696767,
+  "largest_tie_frac": 0.0013344031816358212,
+  "saturated": false,
+  "overall_binary_pr_auc": 0.9820992074924189,
+  "known_only_pr_auc": 0.9981370479631291
+ },
+ "mlp": {
+  "macro": 0.5359548453078827,
+  "families": {
+   "Bot": 0.02189689523284733,
+   "Heartbleed": 0.00010863083584629251,
+   "Infiltration": 0.0006103679761959959,
+   "Web Attack Brute Force": 0.8237337561036628,
+   "Web Attack Sql Injection": 0.1836309236730344,
+   "Web Attack XSS": 0.7622338845871383
+  },
+  "fit_seconds": 46.493443727493286,
+  "predict_seconds": 0.03200101852416992,
+  "deviation": null,
+  "score_resolution": 0.8543581782344014,
+  "largest_tie_frac": 0.020382354480280487,
+  "saturated": false,
+  "overall_binary_pr_auc": 0.9854076933807723,
+  "known_only_pr_auc": 0.9999364745074857
+ },
+ "knn_k5": {
+  "macro": 0.426981237118508,
+  "families": {
+   "Bot": 0.03419998950920567,
+   "Heartbleed": 0.00019910222994497538,
+   "Infiltration": 0.0009939709205173356,
+   "Web Attack Brute Force": 0.6785602262782436,
+   "Web Attack Sql Injection": 0.07509273287934773,
+   "Web Attack XSS": 0.5681834955680746
+  },
+  "fit_seconds": 0.002998828887939453,
+  "predict_seconds": 3.1929116249084473,
+  "deviation": "fitted on a stratified 50,000-row subsample of 883,796; brute-force k-NN over the full train set is ~10^11 distance computations per pass",
+  "score_resolution": 5.232953653473809e-05,
+  "largest_tie_frac": 0.4975753981405571,
+  "saturated": true,
+  "overall_binary_pr_auc": 0.9804469573224659,
+  "known_only_pr_auc": 0.9981292358972828
+ },
+ "_predictions": {
+  "T1_none_above_band": true,
+  "T2_no_bot": true,
+  "T3_knn_best_on_bot": false
+ },
+ "_meta": {
+  "seed": 42,
+  "knn_subsample": 50000,
+  "nystroem_components": 300,
+  "cnn_n6_reference": 0.625,
+  "distinguishable_threshold": 0.0256
+ }
+}

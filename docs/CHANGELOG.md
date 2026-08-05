@@ -2,6 +2,135 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-05 (method tiers B and D — the comparison table is complete)
+
+### 🏗️ Tier B — deep architectures (`deep_zoo.py`)
+
+| model | MACRO zd | Bot | FIELD binary |
+|---|---:|---:|---:|
+| **deep_cnn_lstm** | **0.6219** | 0.0206 | 0.9854 |
+| deep_lstm | 0.3633 | 0.0501 | 0.9914 |
+| deep_gru | 0.3029 | 0.0626 | 0.9932 |
+| **deep_transformer** | **0.1106** | 0.0609 | 0.9894 |
+
+- ✅ **Only the convolutional front-end matters.** CNN-LSTM lands **0.0031** from the CNN —
+  indistinguishable — while pure recurrence *halves* the score. Adding an LSTM on top of a conv stack
+  neither helps nor hurts; replacing the stack with recurrence is destructive. Cleaner than "LSTMs
+  are bad here."
+- **B1 CONFIRMED** (nothing escapes the top tier upward) · **B2 CONFIRMED** (nothing touches Bot —
+  best 0.0626 against the KG's 0.3103).
+- 🔴 **B3 FALSIFIED, and it was the tier's most confident prediction.** The Transformer was predicted
+  to be **best** — self-attention is permutation-equivariant, the only inductive bias here that fits
+  68 *unordered* tabular features. **It came last (0.1106), six times worse than CNN-LSTM.**
+  ⚠️ Read as *"an untuned Transformer at a 30-epoch budget"*, **not** "attention is unsuited to this
+  task": flat Adam 1e-3, no warmup, d=32, 2 blocks, mean-pooled tokens. **A negative result about one
+  under-tuned configuration is not one about the architecture class.**
+- ⚠️ **Two tier-wide caveats on record.** The recurrent models run over the **feature axis, not
+  time** (68 unordered statistics, not timesteps) — this matches what published "LSTM on
+  CIC-IDS2017" work does, so it is the right comparison, but it is **not evidence about sequence
+  modelling for intrusion detection**. And **budgets are not matched**: `deep_lstm` hit the 30-epoch
+  cap without early stopping while `cnn_paper` gets 50.
+- 📊 **The field's metric hides the entire tier**: FIELD binary spans **0.9854–0.9932**, and the
+  *worst* zero-day model (Transformer, 0.1106) posts 0.9894 while `deep_gru` (macro 0.3029) posts the
+  tier's **highest** at 0.9932. Third independent demonstration this session.
+
+### 📐 Tier D — data-split variance (`protocol_variance.py`)
+
+5-fold over the train+val pool with the **test set held fixed** (zero-day is test-only). Model is
+`cnn_paper.py`'s verbatim.
+
+- 🔴 **The two variance sources are the SAME SIZE**: training stochasticity **SD 0.0222**, data split
+  **SD 0.0228** — **1.03×**. D1 technically confirms but **must not be reported as "data variance is
+  larger."** The finding is that a *second, previously unmeasured* uncertainty exists at the same
+  magnitude as the one that retracted C2.
+- **The consequence differs by case.** Comparing channels on a shared split — every comparison this
+  project makes — the data draw is common and **cancels**, so the ~0.0256 threshold stands. Quoting
+  an **absolute** number carries **√(0.0228² + 0.0222²) ≈ 0.032**.
+- ⚠️ **Fold 5 (0.5802) falls below the CNN's entire n=6 range** [0.5966, 0.6446].
+- ✅ **D2 CONFIRMED — SWA does nothing** (0.6218 → 0.6217). It flattens the *known-class* loss surface
+  it averages over, which is not what zero-day measures.
+- ⬜ **Cross-dataset (Phase 6) BLOCKED** — CIC-IDS2018 is not present locally. Recorded, not skipped.
+- 🔴 **A defect caught before it published a wrong number.** The first version used a loosely
+  "CNN-like" model (2 conv blocks, plain CE, **plus `class_weight` on top of focal α** — the
+  double-weighting KNOWN_ISSUES warns about) while carrying a comment I wrote claiming it matched
+  `cnn_paper.py`. Fold 1 returned **0.3244**; that 0.30 gap was an **architecture-and-loss difference
+  being reported as data-split variance**, the exact confound the script isolates. After replicating
+  the model verbatim, fold 1 returned **0.6218**, in line with the CNN — which is what confirmed the
+  fix. **The anomaly forced the check; a wrong model scoring near 0.62 would never have been
+  questioned.**
+- 🔴 **Downstream cost:** a `pkill` I did not verify had failed, so the wrong-model run kept going and
+  wrote **three** rows (`cnn_kfold1/2/3`) into `runs.jsonl`. **Not exact duplicates**, so
+  `repair_runs_log.py` would not have caught them — two different models under one run name, with the
+  integrity lint passing. Excised by timestamp; safe because `runs.jsonl` is version-controlled.
+
+### ⚠️ Process: four monitoring mechanisms misled in one session
+
+Buffered `tail` (false stall) · bare `grep` in a launcher (false stall, **and the lint check for it
+was structurally unable to fire**) · a monitor re-emitting unchanged lines · a duplicate monitor left
+running after a relaunch. Plus an unverified `pkill`. **The consistent lesson is that the
+verification step is the one that gets skipped** — the same shape as the `script-count` regex that
+passed on a wrong count. Rules added: verify a kill actually killed; reconcile a job's monitor when
+you stop or relaunch it; test a lint check against the code it is meant to catch.
+
+## 2026-08-05 (method tiers A and C — filling the comparison table)
+
+Two of the four missing-method tiers, run after the base-paper metrics exposed how thin our
+comparison table was.
+
+### 📉 Tier A — classic baselines (`baselines_classic.py`)
+
+Decision Tree, k-NN, Naive Bayes, Logistic Regression, linear SVM, RBF-SVM (Nystroem), MLP.
+
+- 🔴 **The clearest protocol-gap evidence in the project.** On the field's binary metric all seven
+  score **0.977–0.985** against the CNN's 0.9928; on macro zero-day they span **0.0374 → 0.6049**,
+  a 16× spread. **Logistic regression looks 98 % as good as the CNN on the published metric and is
+  17× worse on zero-day.** `comparability.py`'s argument, made across seven models instead of one.
+- ⚠️ **The two that look competitive are score-degenerate.** `decision_tree` (0.6049) is nominally
+  indistinguishable from the CNN, but **50.1 % of test rows share one score** — a depth-limited tree
+  emits leaf-purity probabilities. k-NN is 49.8 % tied. **PR-AUC over a half-tied ranking is not
+  comparable to a continuous scorer's.** The best *valid* result is the **MLP at 0.5360**, genuinely
+  below the CNN. Tie diagnostics are now printed and persisted for every model.
+- **T3 FALSIFIED**: k-NN was predicted to be the best Tier-A method on Bot — the only instance-based
+  one, working on the same raw-feature substrate the KG clusters. It was not (0.0342 vs 0.0415).
+- 🔴 **A bug in my own script, caught by recomputing from the saved arrays.** Scores were cast to
+  **float32 on save** while evaluated in float64; GaussianNB's probabilities underflow toward 0/1, so
+  the narrower mantissa collapsed distinct values into ties and its reloaded macro read **0.0597
+  against a logged 0.1264** — the saved channel no longer reproduced the logged metric. Fixed to
+  float64 in three scripts. Same float32-precision class as the 2026-07-27 saturation bug.
+
+### 🧪 Tier C — benign-only anomaly zoo (`anomaly_zoo.py`)
+
+VAE, Deep SVDD, One-Class SVM (SGD), LOF — all trained on benign only.
+
+- 🔴 **C2 FALSIFIED, and it corrects how this project has described the (B) family.** **LOF reaches
+  macro 0.3368** (Web BF 0.5592, XSS 0.4131) — a benign-only method that does **not** collapse on web
+  attacks, unlike the autoencoder (0.1048 / 0.0547). It lands where **Mahalanobis** does (0.3777).
+  Both are density/distance methods; the AE scores by reconstruction. **So "benign-only ⇒ collapses
+  on web attacks" is a property of reconstruction-error scoring, not of the (B) family.**
+- 🔴 **C1 reads CONFIRMED and must not be cited that way.** Deep SVDD's Bot **0.1558 sits inside the
+  autoencoder's own n=3 range [0.1078, 0.1647]**, so at n=1 it is not an established improvement.
+  Sixth single-seed near-miss in this project — the difference is that it was checked against an
+  existing seed range *before* being written down. Needs `ANOM_SEED=43/44`.
+- ✅ **C3** — Deep SVDD did not collapse (score SD 3.20×10⁻²); the degenerate all-to-centre solution
+  was guarded against and checked explicitly rather than assumed.
+
+### ⚙️ Determinism confirmed at full scale
+
+**Two complete 50-epoch seed-42 trainings → BYTE-IDENTICAL predictions**, achieved **while three
+other jobs competed for CPU** — a stronger test than an idle machine, and the direct answer to the
+withdrawn session/environment effect. Reproducibility at full speed; the single-thread fallback is
+unnecessary. ⚠️ **The SD 0.0222 floor applies to runs made before the flag and not going forward —
+but old and new runs are different populations and must not be pooled.**
+
+### 🔴 A second lint check found structurally unable to fire
+
+`launcher-suppresses-log-growth` **passed** on my own `verify_determinism.sh`, which pipes a training
+run through a bare `grep`: the check required `python` and the pipe on the **same physical line**, but
+the pipe sat on a backslash continuation. It then produced **exactly the false STALL alarm it exists
+to prevent**. Third instance of this class in one day. Fixed by joining continuations, and the check
+was verified to fire on the offending file *before* the file was fixed. **Same shape as the
+`script-count` regex gap found the same morning: a check that cannot fire is worse than no check.**
+
 ## 2026-08-05 (base-paper + literature metrics, ablation, determinism)
 
 ### 📊 Our numbers in the base paper's metric set — computed for the first time

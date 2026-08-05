@@ -4,6 +4,224 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🏗️ TIER B — DEEP ARCHITECTURES (2026-08-05) — `scripts/deep_zoo.py`
+
+LSTM, GRU, CNN-LSTM and a Transformer encoder. Run last because each needs a full training pass, and
+predicted to teach us least — but *"why didn't you try an LSTM?"* is a guaranteed examiner question
+and "we predicted it wouldn't help" is not an answer. n=1, seed 42, 30-epoch cap.
+
+| model | MACRO zd | Bot | lift | Web BF | XSS | FIELD binary | min |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **deep_cnn_lstm** | **0.6219** | 0.0206 | 0.60× | 0.9079 | 0.9372 | 0.9854 | 25.4 |
+| deep_lstm | 0.3633 | 0.0501 | 1.46× | 0.5875 | 0.4524 | 0.9914 | 94.3 |
+| deep_gru | 0.3029 | 0.0626 | 1.83× | 0.5071 | 0.3390 | 0.9932 | 44.9 |
+| **deep_transformer** | **0.1106** | 0.0609 | 1.78× | 0.1818 | 0.0892 | 0.9894 | 57.9 |
+
+*(reference: CNN 0.6250 [n=6] · LTN control 0.6110 · RandomForest 0.5985; indistinguishable if
+|gap| ≤ 0.0256)*
+
+### ✅ The architectural finding: only the convolutional front-end matters
+
+**CNN-LSTM lands 0.0031 from the CNN — indistinguishable.** Pure recurrence *halves* the score
+(0.30–0.36). So bolting an LSTM onto a conv front-end neither helps nor hurts, while replacing the
+front-end with recurrence is destructive. **The Conv1D stack is doing the work**, which is a cleaner
+statement than "LSTMs are bad here."
+
+**B1 CONFIRMED** — nothing escapes the top tier upward. **B2 CONFIRMED** — nothing touches Bot (best
+is deep_gru at 0.0626, against the KG's 0.3103).
+
+### 🔴 B3 FALSIFIED — and it was my most confident prediction in the tier
+
+I predicted the **Transformer would be the tier's best**, on the reasoning that self-attention is
+permutation-equivariant and therefore the only inductive bias here that actually fits 68 *unordered*
+tabular features. **It came last, at 0.1106 — six times worse than CNN-LSTM.**
+
+⚠️ **The honest reading is "an untuned Transformer at a 30-epoch budget", not "attention is unsuited
+to this task."** Transformers are notoriously sensitive to LR warmup and schedule; this one used
+Adam 1e-3 flat, d=32, 2 blocks, 4 heads, no warmup, and mean-pooled its feature tokens. **A negative
+result about a specific under-tuned configuration is not a negative result about the architecture
+class**, and it must not be written up as one.
+
+### ⚠️ Two caveats that travel with this whole tier
+
+1. **The recurrent models run over the FEATURE axis, not time.** Each row is 68 unordered engineered
+   statistics, not 68 timesteps. This mirrors what published *"LSTM on CIC-IDS2017 flow features"*
+   work does, so it is the right comparison to report — but **these are not evidence about sequence
+   modelling for intrusion detection.** The genuinely sequential version needs packet or per-host
+   flow sequences, which this project does not have.
+2. **Training budgets are not matched.** `deep_lstm` ran all 30 epochs without early stopping, so it
+   is **budget-limited**, while `cnn_paper` gets 50. GRU (19), CNN-LSTM (23) and Transformer (29)
+   early-stopped, so the caveat applies to the LSTM specifically.
+
+### 📊 And once again, the field's metric hides all of it
+
+**FIELD binary spans 0.9854–0.9932 across all four** — the *worst* macro-zero-day model here
+(Transformer, 0.1106) scores **0.9894** on the metric the literature publishes, and `deep_gru`
+(macro 0.3029) posts the tier's **highest** field binary at 0.9932. Third independent demonstration
+this session, after Tier A and `comparability.py`.
+
+## 📐 TIER D — DATA-SPLIT VARIANCE (2026-08-05) — `scripts/protocol_variance.py`
+
+Phase 7.5 Tier 2 #6 and #7. **5-fold CV over the train+val pool with the TEST SET HELD FIXED** —
+zero-day families are test-only, so folding them into training would destroy the protocol. Each fold
+therefore answers *"same model, same evaluation, different training draw"*. The model is
+`cnn_paper.py`'s **verbatim** (3 conv+BN blocks, Flatten, L2 dense, focal loss, no `class_weight`).
+
+| fold | macro | Bot |
+|---|---:|---:|
+| 1 | 0.6218 | 0.0234 |
+| 2 | 0.6054 | 0.0341 |
+| 3 | 0.6384 | 0.0784 |
+| 4 | 0.6284 | 0.0369 |
+| 5 | **0.5802** | 0.0346 |
+
+**mean 0.6148 · SD 0.0228 · range [0.5802, 0.6384] · spread 0.0582**
+
+### 🔴 The two variance sources are the SAME SIZE — read this before citing 1.03×
+
+| source | SD |
+|---|---:|
+| training stochasticity (6 identical seed-42 runs) | 0.0222 |
+| **data split** (5 folds, fixed model + test) | **0.0228** |
+| ratio | **1.03×** |
+
+D1 was *"data-split SD ≥ training SD"* and it technically **CONFIRMED at 1.03×** — but **do not
+report that as "data variance is larger."** It is a dead heat. **The finding is that a second,
+previously unmeasured source of uncertainty exists at the same magnitude as the one that retracted
+C2.**
+
+**The consequence, stated precisely, because the two cases differ:**
+- **Comparing channels on the same split** (every comparison this project makes): the data draw is
+  **common to both sides and cancels**, exactly as run-to-run noise cancels in the paired fusion
+  comparison. The ~0.0256 threshold stands.
+- **Quoting an absolute number** ("the CNN scores 0.62"): the sources are independent, so the honest
+  uncertainty is **√(0.0228² + 0.0222²) ≈ 0.032** — larger than either alone. A single number from a
+  single split with a single seed carries ~±0.03, not ±0.022.
+
+⚠️ **Fold 5 (0.5802) falls below the CNN's entire n=6 range** [0.5966, 0.6446]. A different stratified
+draw of the *same* protocol produces a number outside everything published for this model.
+
+### ✅ D2 — SWA does nothing (−0.0000)
+
+Averaging the last 5 epochs' weights moved fold 1 from 0.6218 to **0.6217**. Predicted: SWA flattens
+the solution with respect to the **known-class** loss it averages over, and zero-day performance is
+not what that loss measures. **Checkpoint averaging is not a route to zero-day stability.**
+
+### ⬜ Cross-dataset (Phase 6) — BLOCKED, not skipped
+
+**CIC-IDS2018 is not present locally** (`data/` holds only the 2017 `raw_csv`, `raw_csv_full` and
+`processed`). Recorded in `protocol_variance.json` rather than silently omitted; it needs a separate
+data-acquisition step.
+
+> 🔴 **A defect in this script, caught before it published a wrong number.** The first version used a
+> loosely "CNN-like" model — 2 conv blocks, GlobalAveragePooling, plain cross-entropy, **plus
+> `class_weight` on top of focal α** (the double-weighting KNOWN_ISSUES warns about) — while carrying
+> a comment I had written claiming it was *"the same shape as cnn_paper.py."* It was not. Fold 1 came
+> back at **0.3244**, and that 0.30 gap was an **architecture-and-loss difference being reported as
+> data-split variance** — the exact confound the script exists to isolate. Found by reading
+> `cnn_paper.py` instead of trusting my own comment. After replicating the model verbatim, fold 1
+> returned **0.6218**, in line with the CNN's 0.6250 — which is what confirmed the fix.
+> ⚠️ **The anomaly is what forced the check.** Had the wrong model scored near 0.62, it would not have
+> been questioned.
+>
+> 🔴 **Downstream cost:** the killed run had already written **three** wrong-model rows
+> (`cnn_kfold1/2/3`, macro 0.3244/0.3079/0.4077) into `runs.jsonl` — because a `pkill` I did not
+> verify had failed to kill it. They were **not exact duplicates**, so `repair_runs_log.py` would not
+> have caught them: two different models would have sat under one run name indefinitely. Excised
+> 2026-08-05 by timestamp (< 04:40), safe because `runs.jsonl` is version-controlled and `git diff`
+> is the audit trail the append-only rule exists to provide.
+
+## ✅ DETERMINISM CONFIRMED AT FULL SCALE (2026-08-05) — the noise floor is closed
+
+**Two complete 50-epoch trainings of seed 42 produced BYTE-IDENTICAL predictions**
+(hash `ff0bb97f…` both runs), and they did so **while three other jobs were competing for CPU** —
+a stronger test than an idle machine, and the direct answer to the session/environment effect that
+was withdrawn on 2026-08-04. The fast check (50k rows, 2 epochs) agreed.
+
+**`determinism.enable()` at intra=16 / inter=2 pins the result at full speed.** The single-thread
+fallback is not needed. **The SD 0.0222 noise floor applies to runs made BEFORE this flag; it does
+not apply going forward.**
+
+⚠️ **This does not make old and new runs comparable.** Pinning threads changes the reduction order,
+so a deterministic seed-42 run defines a **new fixed point** and will not reproduce any of the 11
+historical seed-42 values. They are different populations — do not pool them. Runs now carry
+`det_*` fields in `runs.jsonl` so the state travels with the numbers.
+
+## 🧪 TIER C — BENIGN-ONLY ANOMALY ZOO (2026-08-05) — `scripts/anomaly_zoo.py`
+
+VAE, Deep SVDD, One-Class SVM and LOF, all trained on **benign only** (zero-day-legitimate by
+construction, matching `autoencoder_paper.py`'s discipline). n=1, seed 42.
+
+| model | MACRO | Bot | Bot lift | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| **deep_svdd** | 0.1393 | **0.1558** | **4.56×** | 0.1656 | 0.0964 |
+| **lof** | **0.3368** | 0.0380 | 1.11× | **0.5592** | **0.4131** |
+| vae | 0.0444 | 0.0742 | 2.17× | 0.0422 | 0.0169 |
+| ocsvm_sgd | 0.0275 | 0.0213 | 0.62× | 0.0422 | 0.0191 |
+
+*(reference: Autoencoder Bot 0.1314 · Mahalanobis 0.1030 · IsolationForest 0.0637 · **KG causal 0.3103**)*
+
+🔴 **C1 "something beats the AE on Bot" — the script says CONFIRMED. DO NOT CITE IT THAT WAY.**
+Deep SVDD's **0.1558 sits INSIDE the autoencoder's own n=3 seed range [0.1078, 0.1647]**. At n=1 this
+is **not an established improvement** — it is one draw from a distribution that already contains it.
+**This is the sixth time a single-seed number has looked like a result in this project**; the
+difference is that it was checked against an existing seed range before being written down.
+**Multi-seed with `ANOM_SEED=43/44` before this goes anywhere near the write-up.**
+
+🔴 **C2 "all collapse on the web families" — FALSIFIED, and this is the real finding.**
+**LOF reaches macro 0.3368 with Web BF 0.5592 and XSS 0.4131** — a benign-only method that does
+**not** collapse on web attacks, unlike the AE (0.1048 / 0.0547). It lands almost exactly where
+**Mahalanobis** does (macro 0.3777), which fits: both are density/distance methods over the feature
+space, whereas the AE scores by reconstruction. **So "benign-only ⇒ collapses on web attacks" was
+never a property of the (B) family — it is a property of reconstruction-error scoring specifically.**
+That is a real correction to how this project has described the (B) family.
+
+✅ **C3 — Deep SVDD did not collapse** (score SD 3.20×10⁻²). The known degenerate solution (every
+input mapped to the hypersphere centre, objective → 0, detects nothing) was guarded against with no
+bias terms and no bounded activations, and checked explicitly rather than assumed.
+
+## 📉 TIER A — CLASSIC BASELINES (2026-08-05) — `scripts/baselines_classic.py`
+
+The comparison table every NIDS paper carries and this project had never run. Same protocol as
+`baselines.py` (paper split, log1p + scaler on train, binary target), n=1 seed 42.
+
+| model | MACRO zd | Bot | lift | Web BF | XSS | **FIELD binary** | ties |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| decision_tree | 0.6049 | 0.0342 | 1.00× | 0.8467 | 0.9339 | 0.9807 | **0.501 ⚠️** |
+| mlp | **0.5360** | 0.0219 | 0.64× | 0.8237 | 0.7622 | 0.9854 | 0.020 |
+| knn (k=5) | 0.4270 | 0.0342 | 1.00× | 0.6786 | 0.5682 | 0.9804 | **0.498 ⚠️** |
+| naive_bayes | 0.1264 | 0.0415 | 1.21× | 0.2067 | 0.1310 | 0.8468 | 0.331 ⚠️ |
+| rbf_svm (Nystroem) | 0.0870 | 0.0197 | 0.58× | 0.1671 | 0.0743 | 0.9821 | 0.001 |
+| logistic_regression | 0.0380 | 0.0234 | 0.69× | 0.0630 | 0.0275 | **0.9769** | 0.008 |
+| linear_svm | 0.0374 | 0.0312 | 0.91× | 0.0570 | 0.0241 | 0.9802 | 0.008 |
+
+### 🔴 The single best demonstration of the protocol gap in this project
+
+**On the field's binary metric every one of these scores 0.977–0.985, against the CNN's 0.9928. On
+macro zero-day they span 0.0374 → 0.6049 — a 16× spread.** Logistic regression looks **98 % as good
+as the CNN** on the metric the literature publishes, and is **17× worse** on the one that measures
+zero-day detection. Same models, same run, two protocols. This is `comparability.py`'s argument made
+across seven models instead of one.
+
+### ⚠️ The two that look competitive are score-degenerate
+
+`decision_tree` (0.6049) is within 0.0201 of the CNN's n=6 mean — nominally **indistinguishable**.
+But its largest tied score block is **50.1 % of the test set** (0.046 % distinct values), because a
+depth-limited tree emits leaf-purity probabilities. **PR-AUC over a ranking where half the rows are
+tied is not comparable to a continuous scorer's**, and the same applies to k-NN (49.8 % tied, k=5
+gives 6 possible values). **Do not report "a decision tree matches the CNN."**
+
+**The best *valid* Tier-A result is the MLP at 0.5360** (2 % ties, clean) — and that is **0.089 below
+the CNN, well above the 0.0256 threshold, so genuinely distinguishable.**
+
+**Predictions:** T1 (none escapes the top tier upward) ✅ **CONFIRMED** · T2 (none reliably detects
+Bot; best is naive_bayes at 0.0415) ✅ **CONFIRMED** · T3 (k-NN would be the best Tier-A method on
+Bot, being the only instance-based one) 🔴 **FALSIFIED** — k-NN 0.0342 vs naive_bayes 0.0415.
+
+⚠️ **Deviations, stated not hidden**: k-NN fitted on a stratified 50,000-row subsample (brute-force
+k-NN over 883,796 train rows is ~10¹¹ distance computations per pass); RBF-SVM approximated by
+Nystroem(300) + linear SGD (exact kernel SVM is O(n²) and not runnable at this scale).
+
 ## 🔬 OOD SCORING BATTERY (2026-08-05) — `scripts/ood_scores.py`. The battery does NOT rescue Bot.
 
 *"Did you try a proper OOD score?"* is the most predictable reviewer question for a zero-day paper,

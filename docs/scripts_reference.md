@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-05** (46 Python scripts, plus 5 shell launchers).
+> Last verified against source: **2026-08-05** (50 Python scripts, plus 5 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -27,6 +27,10 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Tier B — deep architectures** | **`deep_zoo`** (LSTM · GRU · CNN-LSTM · Transformer) |
+| **Tier D — protocol variance** | **`protocol_variance`** (k-fold + SWA) |
+| **Tier C — benign-only anomaly** | **`anomaly_zoo`** (VAE · Deep SVDD · OC-SVM · LOF) |
+| **Tier A — classic baselines** | **`baselines_classic`** (DT · kNN · NB · LogReg · SVM · MLP) |
 | **Open-set / OOD** | **`ood_scores`** (post-hoc battery on the CNN) · `novelty` (MSP, Mahalanobis) |
 | **Literature comparability** | **`paper_metrics`** (base-paper Table II + the field's suite) · `comparability` |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
@@ -562,6 +566,146 @@ the combiner learned to ignore the symbolic channel.
 > can get a hand-specified zero-day signature into the model at all.
 
 ---
+
+## `scripts/deep_zoo.py`
+
+**Purpose**: **Tier B** — LSTM, GRU, CNN-LSTM and a Transformer encoder. Run last (each needs a full
+training pass) and predicted to teach least, but closes the guaranteed *"why didn't you try an
+LSTM?"* question with a measurement. `DEEP_ARCH=lstm` runs one architecture.
+
+| model | MACRO zd | Bot | Web BF | XSS | FIELD binary | min |
+|---|---:|---:|---:|---:|---:|---:|
+| **deep_cnn_lstm** | **0.6219** | 0.0206 | 0.9079 | 0.9372 | 0.9854 | 25.4 |
+| deep_lstm | 0.3633 | 0.0501 | 0.5875 | 0.4524 | 0.9914 | 94.3 |
+| deep_gru | 0.3029 | 0.0626 | 0.5071 | 0.3390 | 0.9932 | 44.9 |
+| **deep_transformer** | **0.1106** | 0.0609 | 0.1818 | 0.0892 | 0.9894 | 57.9 |
+
+✅ **Only the convolutional front-end matters.** CNN-LSTM sits **0.0031** from the CNN
+(indistinguishable); pure recurrence halves the score. Adding an LSTM on top of a conv stack neither
+helps nor hurts; replacing the stack with recurrence is destructive.
+
+**B1 CONFIRMED** (nothing escapes the top tier upward) · **B2 CONFIRMED** (nothing touches Bot; best
+0.0626 vs the KG's 0.3103).
+
+🔴 **B3 FALSIFIED — the tier's most confident prediction.** The Transformer was predicted to be
+*best*, since self-attention is permutation-equivariant and is the only bias here matching unordered
+tabular features. **It came last (0.1106).** ⚠️ Read as *"an untuned Transformer at a 30-epoch
+budget"*, **not** "attention is unsuited to this task" — flat Adam 1e-3, d=32, 2 blocks, 4 heads, no
+warmup, mean-pooled tokens. A negative result about one under-tuned configuration is not one about
+the architecture class.
+
+⚠️ **Two tier-wide caveats.** (1) The recurrent models run over the **feature axis, not time** — 68
+unordered statistics, not 68 timesteps. This matches what published "LSTM on CIC-IDS2017" work does,
+so it is the right comparison to report, but it is **not evidence about sequence modelling for
+intrusion detection**. (2) **Budgets are not matched**: `deep_lstm` ran all 30 epochs without early
+stopping (budget-limited) while `cnn_paper` gets 50; the others early-stopped.
+
+📊 **The field's metric hides the entire tier**: FIELD binary spans 0.9854–0.9932, and the *worst*
+zero-day model posts 0.9894 while `deep_gru` (macro 0.3029) posts the tier's *highest* at 0.9932.
+
+## `scripts/protocol_variance.py`
+
+**Purpose**: **Tier D** — Phase 7.5 Tier 2 #6 (k-fold CV) and #7 (SWA). Measures **data-split
+variance**, which nothing else in this project separates from seed variance.
+
+**Design constraint**: the **test set is fixed and never re-partitioned** — zero-day families are
+test-only, so folding them into training destroys the protocol. The 5-fold runs over the
+**train+val pool only**, every fold scored against the same untouched test set. ⚠️ This is *not* the
+k-fold NIDS papers usually report, which rotates the test set and thereby measures known-class
+performance.
+
+| fold | 1 | 2 | 3 | 4 | 5 |
+|---|---:|---:|---:|---:|---:|
+| macro | 0.6218 | 0.6054 | 0.6384 | 0.6284 | **0.5802** |
+
+**mean 0.6148 · SD 0.0228 · spread 0.0582**
+
+🔴 **Data-split SD (0.0228) and training SD (0.0222) are the SAME SIZE — 1.03×.** D1 technically
+confirms, but **do not report it as "data variance is larger"**; it is a dead heat, and the finding
+is that a *second* unmeasured uncertainty source exists at the same magnitude as the one that
+retracted C2. Comparisons on a shared split still cancel it (threshold ~0.0256 stands); **an absolute
+number carries √(0.0228² + 0.0222²) ≈ 0.032.** Fold 5 (0.5802) falls **below the CNN's entire n=6
+range**.
+
+✅ **D2 — SWA does nothing** (0.6218 → 0.6217). It flattens the solution w.r.t. the *known-class* loss
+it averages over, which is not what zero-day performance measures.
+
+⬜ **Cross-dataset (Phase 6) BLOCKED** — CIC-IDS2018 is not present locally. Recorded in the JSON
+rather than silently skipped.
+
+⚠️ **The model is `cnn_paper.py`'s replicated VERBATIM** (3 conv+BN blocks, Flatten, L2 dense, focal
+loss with the `reshape([-1])` fix, **no `class_weight`**), and must be kept in sync — `cnn_paper.py`
+cannot be imported because importing it runs a training. The first version used a loosely CNN-like
+model and reported **0.3244**, an architecture-and-loss gap masquerading as data variance.
+
+## `scripts/anomaly_zoo.py`
+
+**Purpose**: **Tier C** — VAE, Deep SVDD, One-Class SVM (SGD) and LOF, all trained on **benign only**,
+so zero-day-legitimate by construction. This is the tier the evidence said could move Bot, since the
+channels that touch Bot all model normality rather than a decision boundary.
+
+| model | MACRO | Bot | lift | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| **deep_svdd** | 0.1393 | **0.1558** | **4.56×** | 0.1656 | 0.0964 |
+| **lof** | **0.3368** | 0.0380 | 1.11× | **0.5592** | **0.4131** |
+| vae | 0.0444 | 0.0742 | 2.17× | 0.0422 | 0.0169 |
+| ocsvm_sgd | 0.0275 | 0.0213 | 0.62× | 0.0422 | 0.0191 |
+
+🔴 **C1 reads CONFIRMED in the output — do not cite it that way.** Deep SVDD's Bot **0.1558 sits
+inside the autoencoder's own n=3 range [0.1078, 0.1647]**, so at n=1 it is not an established
+improvement. **Multi-seed with `ANOM_SEED=43/44` first.**
+
+🔴 **C2 FALSIFIED, and that is the real finding.** LOF reaches macro **0.3368** (Web BF 0.5592, XSS
+0.4131) — a benign-only method that does *not* collapse on web attacks, landing where **Mahalanobis**
+does (0.3777). Both are density/distance methods; the AE scores by reconstruction. **So
+"benign-only ⇒ collapses on web attacks" is a property of reconstruction-error scoring, not of the
+(B) family.** A real correction to how this project has described that family.
+
+✅ **C3 — Deep SVDD did not collapse** (score SD 3.20×10⁻²). Guarded with no bias terms and no
+bounded activations, and checked explicitly rather than assumed.
+
+⚠️ **Deviations**: LOF fitted on a 50,000-row benign subsample (of ~442k — it stores its training set
+and does not finish at full size); One-Class SVM uses the SGD linear approximation (exact kernel
+OC-SVM is O(n²)).
+
+## `scripts/baselines_classic.py`
+
+**Purpose**: **Tier A** — the classic baselines every NIDS comparison table carries and this project
+had never run: **Decision Tree, k-NN, Naive Bayes, Logistic Regression, linear SVM, RBF-SVM
+(Nystroem), MLP**. Same protocol as `baselines.py`. `BASELINE_SEED` supported.
+
+| model | MACRO zd | Bot | Web BF | XSS | **FIELD binary** | ties |
+|---|---:|---:|---:|---:|---:|---:|
+| decision_tree | 0.6049 | 0.0342 | 0.8467 | 0.9339 | 0.9807 | **0.501 ⚠️** |
+| mlp | **0.5360** | 0.0219 | 0.8237 | 0.7622 | 0.9854 | 0.020 |
+| knn (k=5) | 0.4270 | 0.0342 | 0.6786 | 0.5682 | 0.9804 | **0.498 ⚠️** |
+| naive_bayes | 0.1264 | 0.0415 | 0.2067 | 0.1310 | 0.8468 | 0.331 ⚠️ |
+| rbf_svm (Nystroem) | 0.0870 | 0.0197 | 0.1671 | 0.0743 | 0.9821 | 0.001 |
+| logistic_regression | 0.0380 | 0.0234 | 0.0630 | 0.0275 | **0.9769** | 0.008 |
+| linear_svm | 0.0374 | 0.0312 | 0.0570 | 0.0241 | 0.9802 | 0.008 |
+
+🔴 **The two columns tell opposite stories, and that is the point.** On the field's binary metric all
+seven score **0.977–0.985** against the CNN's 0.9928; on macro zero-day they span **0.0374 → 0.6049**.
+Logistic regression looks 98 % as good as the CNN on the published metric and is **17× worse** on
+zero-day.
+
+⚠️ **The two that look competitive are score-degenerate.** `decision_tree` is nominally
+indistinguishable from the CNN (gap 0.0201 < 0.0256) but **50.1 % of test rows share one score**;
+k-NN is 49.8 % tied. **PR-AUC over a half-tied ranking is not comparable to a continuous scorer's.**
+The best *valid* result is the **MLP at 0.5360**, which is genuinely below the CNN.
+
+**Predictions**: T1 ✅ · T2 ✅ · **T3 🔴 FALSIFIED** — k-NN was predicted to be the best Tier-A method
+on Bot (the only instance-based one, operating on the same raw-feature substrate as the KG); it was
+not (0.0342 vs naive_bayes 0.0415).
+
+⚠️ **Deviations**: k-NN on a stratified 50,000-row subsample; RBF-SVM via Nystroem(300) + linear SGD
+(exact kernel SVM is O(n²), not runnable at 883k rows). Both printed in the output and stored in
+`runs.jsonl` params.
+
+⚠️ **Scores are saved float64.** The first version cast to float32, which collapsed GaussianNB's
+underflowing probabilities into ties and moved its reloaded macro **0.1264 → 0.0597** — the saved
+array no longer reproduced the logged metric. Same float32-precision class as the 2026-07-27
+saturation bug.
 
 ## `scripts/ood_scores.py`
 

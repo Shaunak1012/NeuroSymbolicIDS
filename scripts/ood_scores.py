@@ -181,9 +181,13 @@ for name, arrs in CHANNELS.items():
     agg["n_seeds"] = len(arrs)
     RES["scorers"][name] = agg
     rows.append((name, agg))
-    # persist the seed-42 array so it can be fused/compared like any channel
+    # persist the seed-42 array so it can be fused/compared like any channel.
+    # float64: energy/max-logit scores span a wide dynamic range, and a float32
+    # cast can collapse distinct values into ties, so the saved file would no
+    # longer reproduce the logged metric (found 2026-08-05 in
+    # baselines_classic.py, where it moved GaussianNB's macro by 0.067).
     np.save(os.path.join(paths.predictions_dir(f"ood_{name}"),
-                         f"y_prob_ood_{name}_test.npy"), arrs[0].astype(np.float32))
+                         f"y_prob_ood_{name}_test.npy"), np.asarray(arrs[0], np.float64))
 
 for name, a in sorted(rows, key=lambda r: -r[1]["macro"]):
     print(f"{name:18s} {a['macro']:>8.4f} {a['Bot']:>9.4f} {a['bot_lift']:>8.2f}x "
