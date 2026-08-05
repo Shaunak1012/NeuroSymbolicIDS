@@ -24,16 +24,19 @@ import os
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 import tensorflow as tf
-tf.config.threading.set_intra_op_parallelism_threads(16)
-tf.config.threading.set_inter_op_parallelism_threads(2)
 from tensorflow.keras import layers, models, Input
 import tensorflow.keras.backend as K
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 import paths, config, features, behavior, metrics, tracking
+import determinism
 
 cfg = config.get(); SEED = int(os.environ.get("LTN_SEED", cfg["seed"]))
-tf.random.set_seed(SEED); np.random.seed(SEED)
+# Phase 7.5 Tier 2 #5. This replaces the bare intra=16/inter=2 calls that used to
+# sit at import time: same thread pinning, plus op-determinism and full seeding.
+# Must run before any op is created. TF_DETERMINISM=0 opts out.
+DET = determinism.enable(SEED, intra=int(os.environ.get("TF_THREADS", "16")),
+                         inter=int(os.environ.get("TF_THREADS_INTER", "2")))
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
 

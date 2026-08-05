@@ -27,11 +27,17 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.utils.class_weight import compute_class_weight
 
 import paths, config, features, metrics, tracking
+import determinism
 
 cfg = config.get()
 _DEFAULT_SEED = cfg["seed"]
 SEED = int(os.environ.get("CNN_SEED", _DEFAULT_SEED))
-tf.random.set_seed(SEED); np.random.seed(SEED)
+# Phase 7.5 Tier 2 #5. Seeding alone does NOT pin the result: 6 runs of seed 42
+# on an idle machine gave SD 0.0222 / CV 3.6%, because CPU thread scheduling
+# changes float accumulation order. This must run before any op is created.
+# TF_DETERMINISM=0 opts out for a throwaway exploratory run.
+DET = determinism.enable(SEED, intra=int(os.environ.get("TF_THREADS", "16")),
+                         inter=int(os.environ.get("TF_THREADS_INTER", "2")))
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 TFM = cfg["protocol"]["feature_transform"]
 
@@ -142,7 +148,11 @@ for nm, arr in [("train", X_tr), ("val", X_val), ("test", X_te)]:
     np.save(os.path.join(paths.EMBEDDINGS, f"X_{nm}_{TAG}_emb.npy"), emb.predict(arr, batch_size=1024, verbose=0))
 
 if SUBSET == 0:
-    tracking.log_run(TAG, {"protocol": "paper", "transform": TFM, "seed": SEED, "epochs": EPOCHS},
+    # Determinism state travels with the numbers: runs recorded before this flag
+    # existed are a DIFFERENT population (pinning threads changes the reduction
+    # order), so they must not be pooled with deterministic ones.
+    tracking.log_run(TAG, {"protocol": "paper", "transform": TFM, "seed": SEED,
+                           "epochs": EPOCHS, **{f"det_{k}": v for k, v in DET.items()}},
                      metrics.flatten(res))
     print(f"\nlogged {TAG} to runs.jsonl")
 print(f"DONE ({TAG})")

@@ -1,0 +1,176 @@
+{
+ "paper_table_50ep": {
+  "Multi-class 9 known classes": {
+   "Hybrid-LTN": 81.08,
+   "1D CNN": 80.99
+  },
+  "Binary 9 known classes": {
+   "Hybrid-LTN": 99.57,
+   "1D CNN": 99.42
+  },
+  "Multi-class 15 classes": {
+   "Hybrid-LTN": 67.52,
+   "1D CNN": 67.45
+  },
+  "Binary 15 classes": {
+   "Hybrid-LTN": 93.03,
+   "1D CNN": 90.88
+  },
+  "Binary 6 unknown classes": {
+   "Hybrid-LTN": 60.47,
+   "1D CNN": 48.34
+  }
+ },
+ "paper_f1_50ep": {
+  "Binary 9 known classes": {
+   "Hybrid-LTN": 99.62,
+   "1D CNN": 99.49
+  },
+  "Binary 15 classes": {
+   "Hybrid-LTN": 94.2,
+   "1D CNN": 90.88
+  },
+  "Binary 6 unknown classes": {
+   "Hybrid-LTN": 75.37,
+   "1D CNN": 65.18
+  }
+ },
+ "ours": {
+  "CNN (ours)": {
+   "Multi-class 9 known classes": 99.81262729124235,
+   "Binary 9 known classes": 99.84189484800483,
+   "_f1_Binary 9 known classes": 99.842130742628,
+   "Multi-class 15 classes": 96.17122224354165,
+   "Binary 15 classes": 97.94519353206927,
+   "_f1_Binary 15 classes": 97.9833026800049,
+   "Binary 6 unknown classes": 47.85241851940393,
+   "_f1_Binary 6 unknown classes": 64.72996714840798,
+   "_field": {
+    "accuracy": 97.94519353206927,
+    "precision": 99.70501332207887,
+    "recall": 96.32004397996218,
+    "f1": 97.9833026800049,
+    "far": 0.3065578024391863,
+    "roc_auc": 98.31940525292823,
+    "pr_auc": 99.00234651458636
+   },
+   "_n": 3
+  },
+  "LTN control (w=0)": {
+   "Multi-class 9 known classes": 99.86693822131706,
+   "Binary 9 known classes": 99.89198159462926,
+   "_f1_Binary 9 known classes": 99.89207134833902,
+   "Multi-class 15 classes": 96.22355178007639,
+   "Binary 15 classes": 97.90274846354664,
+   "_f1_Binary 15 classes": 97.93848798165105,
+   "Binary 6 unknown classes": 45.36616463463224,
+   "_f1_Binary 6 unknown classes": 62.40258152109946,
+   "_field": {
+    "accuracy": 97.90274846354664,
+    "precision": 99.81651010000668,
+    "recall": 96.12987552099987,
+    "f1": 97.93848798165105,
+    "far": 0.1900899759219364,
+    "roc_auc": 98.14908388846646,
+    "pr_auc": 98.23664809789308
+   },
+   "_n": 3
+  },
+  "LTN +Ax6 (ratio w=1)": {
+   "Multi-class 9 known classes": 99.87086067737799,
+   "Binary 9 known classes": 99.894697141133,
+   "_f1_Binary 9 known classes": 99.89478453116412,
+   "Multi-class 15 classes": 96.2273311354928,
+   "Binary 15 classes": 97.97164901998407,
+   "_f1_Binary 15 classes": 98.00754431110987,
+   "Binary 6 unknown classes": 47.18304247350386,
+   "_f1_Binary 6 unknown classes": 64.11467954244144,
+   "_field": {
+    "accuracy": 97.97164901998407,
+    "precision": 99.8190905066643,
+    "recall": 96.26058127597987,
+    "f1": 98.00754431110987,
+    "far": 0.18767613495784827,
+    "roc_auc": 98.15642424636765,
+    "pr_auc": 98.23692268841104
+   },
+   "_n": 3
+  },
+  "LTN repro (CE+Ax1/2)": {
+   "Multi-class 9 known classes": 99.8624123104775,
+   "Binary 9 known classes": 99.89137813985064,
+   "_f1_Binary 9 known classes": 99.89146950293032,
+   "Multi-class 15 classes": 96.21919098536517,
+   "Binary 15 classes": 97.9704861413944,
+   "_f1_Binary 15 classes": 98.00645951664995,
+   "Binary 6 unknown classes": 47.238823810662204,
+   "_f1_Binary 6 unknown classes": 64.16626075661634,
+   "_field": {
+    "accuracy": 97.9704861413944,
+    "precision": 99.81502809478937,
+    "recall": 96.26226418269636,
+    "f1": 98.00645951664995,
+    "far": 0.19190035664500246,
+    "roc_auc": 98.12934757712405,
+    "pr_auc": 98.18137331715681
+   },
+   "_n": 1
+  }
+ },
+ "view5_degenerate": {
+  "f1_equals_2a_over_1_plus_a": true,
+  "n_zero_day_rows": 4183,
+  "n_benign_in_view5": 0
+ },
+ "composition": {
+  "our_family_rates": {
+   "Bot": {
+    "n": 1956,
+    "share": 0.4676069806359072,
+    "rate": 0.0
+   },
+   "Heartbleed": {
+    "n": 11,
+    "share": 0.002629691608893139,
+    "rate": 0.0
+   },
+   "Infiltration": {
+    "n": 36,
+    "share": 0.008606263447286636,
+    "rate": 0.0
+   },
+   "Web Attack Brute Force": {
+    "n": 1507,
+    "share": 0.36026775041836,
+    "rate": 0.8991373589913736
+   },
+   "Web Attack Sql Injection": {
+    "n": 21,
+    "share": 0.005020320344250538,
+    "rate": 0.8095238095238095
+   },
+   "Web Attack XSS": {
+    "n": 652,
+    "share": 0.15586899354530243,
+    "rate": 0.9693251533742331
+   }
+  },
+  "their_counts": {
+   "Heartbleed": 13486,
+   "Web Attack Brute Force": 11754,
+   "Web Attack XSS": 3341,
+   "Bot": 2543,
+   "PortScan": 830,
+   "Web Attack Sql Injection": 12
+  },
+  "our_weighting": 0.4832408970340005,
+  "their_weighting": 0.4437528950643051,
+  "shared_families": [
+   "Bot",
+   "Heartbleed",
+   "Web Attack Brute Force",
+   "Web Attack Sql Injection",
+   "Web Attack XSS"
+  ]
+ }
+}

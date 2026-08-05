@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-05** (42 Python scripts, plus 5 shell launchers).
+> Last verified against source: **2026-08-05** (45 Python scripts, plus 5 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -26,10 +26,11 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
-| **Phase 7.5 — operational readiness** | **`operational`** (gates Phase R) |
+| **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Literature comparability** | **`paper_metrics`** (base-paper Table II + the field's suite) · `comparability` |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
-| **Shell launchers** (not Python) | `run_long.sh` (**use this for any job >10–15 min**) · `seed_sweep.sh` · `noise_floor.sh` · `rigor_n6.sh` · `ltn_ctrl_sweep.sh` |
+| **Shell launchers** (not Python) | `run_long.sh` (**use this for any job >10–15 min**) · `seed_sweep.sh` · `noise_floor.sh` · `rigor_n6.sh` · `ltn_ctrl_sweep.sh` · `verify_determinism.sh` |
 
 **Multi-seed convention.** Every trainable script takes a `<PREFIX>_SEED` env var and writes
 `<name>_s<seed>` artifacts, leaving the config-default (seed 42) filenames untouched:
@@ -561,6 +562,79 @@ the combiner learned to ignore the symbolic channel.
 
 ---
 
+## `scripts/paper_metrics.py`
+
+**Purpose**: **Our runs in the base paper's metric set (Accuracy + F1, five test-set views) and in
+the wider literature's (accuracy/precision/recall/F1/FAR/ROC-AUC/PR-AUC).** This project headlines
+macro zero-day PR-AUC because `metrics.py` enforces it — but that is not what anyone we are compared
+against reports, and until 2026-08-05 **not one of the base paper's numbers had ever been computed
+for our models.**
+
+**Base paper Table II (50 epochs, Adamax) with our column added:**
+
+| Test set | Hybrid-LTN | 1D CNN | **CNN (ours, n=3)** | LTN ctrl | LTN +Ax6 | LTN repro |
+|---|---:|---:|---:|---:|---:|---:|
+| Multi-class, 9 known | 81.08 % | 80.99 % | **99.81 %** | 99.87 % | 99.87 % | 99.86 % |
+| Binary, 9 known | 99.57 % | 99.42 % | **99.84 %** | 99.89 % | 99.89 % | 99.89 % |
+| Multi-class, 15 classes | 67.52 % | 67.45 % | **96.17 %** | 96.22 % | 96.23 % | 96.22 % |
+| Binary, 15 classes | 93.03 % | 90.88 % | **97.95 %** | 97.90 % | 97.97 % | 97.97 % |
+| **Binary, 6 unknown** | **60.47 %** | **48.34 %** | **47.85 %** | 45.37 % | 47.18 % | 47.24 % |
+
+**Two results, and they point opposite ways:**
+
+1. ✅ **We beat the base paper by 18–29 pp on all four known-class views** (multi-class 15: 96.17 %
+   vs 67.52 %). ⚠️ That is a **modality** advantage, not a method one — 68 engineered flow features
+   are far more separable than raw payload bytes. Do not claim it as an algorithmic win.
+2. 🔴 **We reproduce their 1D CNN's zero-day number almost exactly (47.85 % vs 48.34 %) and CANNOT
+   reproduce the Hybrid-LTN's +12 pp symbolic gain.** Our closest reproduction of their model
+   (`ltn_repro` = plain CE + Ax1/Ax2 label anchors) scores **47.24 %** — no gain over our own CNN.
+   **This is the project's central finding, expressed for the first time on the base paper's own
+   metric.**
+
+### 🔴 Two defects in the base paper's zero-day metric, both verified here
+
+**(a) It has no false-positive term.** View 5 contains **only attack rows**, so precision ≡ 1,
+accuracy *is* recall, and `F1 = 2A/(1+A)` exactly. The script reproduces every published F1 from the
+matching accuracy to <0.02 pp. So their *"accuracy 48→60 %, F1 65→75 %"* headline is **one result
+reported twice**, and **a model that flags every flow as an attack scores 100 % on both** while
+running a 100 % false alarm rate. Our own float32 saturation bug did exactly that in 2026-07-27 and
+was caught **only** because our metric has a benign side.
+
+**(b) It is a size-weighted mixture** — the same defect `metrics.py` was rewritten to remove.
+Per-family detection at their argmax rule (our CNN):
+
+| family | n | our share | their share | detected |
+|---|---:|---:|---:|---:|
+| **Bot** | 1,956 | **46.8 %** | 8.0 % | **0.0 %** |
+| Web Attack Brute Force | 1,507 | 36.0 % | 36.8 % | 89.9 % |
+| Web Attack XSS | 652 | 15.6 % | 10.5 % | 96.9 % |
+| **Heartbleed** | 11 | 0.3 % | **42.2 %** | 0.0 % |
+| Infiltration | 36 | 0.9 % | — (known to them) | 0.0 % |
+
+Holding the model fixed and only changing the mix moves the headline **48.32 % → 44.38 %**. Their
+set is Heartbleed+WebBF-dominated (79 %); ours is **Bot**-dominated, the one family our CNN provably
+cannot reach. **A single zero-day accuracy number is not comparable across papers unless the family
+mix matches** — composition explains ~4 pp of the gap, so the missing ~12 pp symbolic gain is *not*
+explained away by it.
+
+### The field's suite (overall binary, all 15 classes) — comparable to published 99 %+ claims
+
+| channel | accuracy | precision | recall | F1 | FAR | ROC-AUC | PR-AUC |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **CNN (ours)** | **97.95 %** | 99.71 % | 96.32 % | **97.98 %** | 0.31 % | 98.32 % | 99.00 % |
+| LTN control | 97.90 % | 99.82 % | 96.13 % | 97.94 % | 0.19 % | 98.15 % | 98.24 % |
+| LTN +Ax6 | 97.97 % | 99.82 % | 96.26 % | 98.01 % | 0.19 % | 98.16 % | 98.24 % |
+
+⚠️ **These are in the literature's range and are NOT a better result than our 0.64 macro zero-day
+PR-AUC — they are an easier question asked of the same models.** Report both, and say which is which.
+
+⚠️ **Three documented deviations make this a comparison in FORM, not head-to-head**: modality
+(payload bytes vs flow features), zero-day membership (**they hold out PortScan and train on
+Infiltration; we do the reverse** — 5 of 6 overlap), and class sizes (their Heartbleed is 13,486
+payload packets; flow data has 11).
+
+**Writes** `outputs/metadata/paper_metrics.json`.
+
 ## `scripts/comparability.py`
 
 **Purpose**: **The table that makes this project comparable to the literature.** Published
@@ -875,6 +949,117 @@ out of 55,237, which is why their FPR column reads exactly 1.0000.
 ```bash
 python scripts/operational.py
 ```
+
+## `scripts/ablation.py`
+
+**Purpose**: **Remaining Work #6 — does each component earn its place?** CNN → +LTN → +KG → full, at
+n=3 paired seeds, using the same parameter-free equal-weight rank fusion `fusion_kg.py` established.
+Nothing is fitted, so nothing here can be tuned on the test set.
+
+**Five rungs, not three, because "+LTN" is ambiguous and the ambiguity is load-bearing**: the LTN
+**control** is the symbolic *trainer* with axiom weight zero (statistically indistinguishable from
+the CNN at n=6), while **Ax6** is the actual symbolic *pillar* (behaviour-grounded axioms, `ratio`
+omega-mode). *"Do the axioms earn their place?"* and *"does the training loop?"* are different
+questions; both are run.
+
+| rung | macro (mean) | range | Bot | Web BF | XSS |
+|---|---:|---|---:|---:|---:|
+| CNN | 0.6399 | [0.6353, 0.6446] | 0.0446 | 0.9226 | **0.9524** |
+| CNN + LTN-ctrl | 0.6433 | [0.6338, 0.6497] | 0.0594 | 0.9195 | 0.9511 |
+| CNN + LTN-Ax6 | 0.6394 | [0.6319, 0.6498] | 0.0495 | 0.9187 | 0.9501 |
+| **CNN + KG** | **0.6926** | [0.6626, 0.7328] | **0.2518** | **0.9283** | 0.8976 |
+| CNN + LTN-Ax6 + KG (FULL) | 0.6708 | [0.6394, 0.7114] | 0.2043 | 0.9277 | 0.8806 |
+| CNN + LTN-ctrl + KG | 0.6887 | [0.6559, 0.7133] | 0.2302 | 0.9276 | 0.9085 |
+
+**Paired deltas vs CNN** (each rung shares the CNN run, so run-to-run noise cancels — **this, not the
+between-run SD, is the correct reference**):
+
+| rung | mean Δ | seeds improved |
+|---|---:|---:|
+| CNN + LTN-ctrl | +0.0035 | 2/3 |
+| CNN + LTN-Ax6 | **−0.0004** | **1/3** |
+| **CNN + KG** | **+0.0528** | **3/3** |
+| CNN + LTN-Ax6 + KG (FULL) | +0.0310 | 3/3 |
+
+**Paired bootstrap over test flows** (B=2000, common random numbers):
+
+| comparison | diff | 95 % CI | p |
+|---|---:|---|---:|
+| CNN + KG vs CNN | **+0.0528** | [+0.0466, +0.0592] | <0.0001 |
+| CNN + LTN-ctrl vs CNN | +0.0035 | [+0.0017, +0.0061] | <0.0001 |
+| CNN + LTN-Ax6 vs CNN | −0.0004 | [−0.0021, +0.0018] | 0.59 (n.s.) |
+| **FULL vs CNN + KG** | **−0.0218** | [−0.0288, −0.0149] | **<0.0001** |
+
+⚠️ **`CNN + LTN-ctrl vs CNN` is "significant" at p<0.0001 and must NOT be reported as an
+improvement.** The gap is **+0.0035 — 0.16 SD** of the measured noise floor, and it improves on only
+**2 of 3 seeds.** This is precisely the C2 trap: *a flow-level paired bootstrap cannot rescue a delta
+below the pipeline's own reproducibility.* The bootstrap quantifies "would this hold on different
+traffic", not "would this hold if we retrained". **Applying the project's own rule to its own new
+result: this is noise.**
+
+🔴 **The conclusion is negative, and it is about this project's own architecture: only the KG earns
+its place.** Adding the symbolic pillar on top of the KG is **significantly harmful** (−0.0218,
+p<0.0001) — not merely unhelpful. The symbolic pillar adds nothing on its own (−0.0004, improving on 1 of 3 seeds) and
+**actively hurts when stacked on the KG** — the full system scores **0.6708 vs CNN+KG's 0.6926**, and
+dilutes the KG's Bot signal from 0.2518 to 0.2043. Consistent with `fusion_multi.py`'s independent
+finding that equal-weight fusion is about **complementarity, not quantity**.
+
+✅ **Two independent reproductions validate the implementation**: this script recomputes macro from
+raw score arrays and lands on **0.6399** for the CNN and **0.6926** for CNN+KG — exactly the figures
+`metrics.py` and `fusion_kg.py` report.
+
+**Writes** `outputs/metadata/ablation.json`. ⚠️ The bootstrap is one pass of B × 6 rungs using
+**common random numbers** (correct for paired comparisons, and ~5× cheaper than per-comparison
+resampling — the first version needed ~180,000 PR-AUC computations and had to be killed).
+**Run it through `run_long.sh`** — it takes ~10 min.
+
+## `scripts/determinism.py`
+
+**Purpose**: **Phase 7.5 Tier 2 #5 — make training reproducible at fixed seed.** Imported by every
+trainable script and called immediately after `import tensorflow`, before any op runs.
+
+**The defect it addresses**: six runs of **seed 42, identical code, idle machine** gave **SD 0.0222,
+range 0.0621, CV 3.6 %**. A fixed seed did *not* pin the result. That noise floor **retracted C2**,
+made every published n=3 range an artefact, and showed the headline `cnn_paper = 0.6446` is the
+**max of 11 runs**. Root cause: **no determinism flags were set anywhere in this project.** Seeding
+controls the *pseudo-random* sources (init, shuffling, dropout); it does nothing about *thread
+scheduling*, and float addition is not associative.
+
+**What `enable(seed, intra=16, inter=2)` sets**: `PYTHONHASHSEED` · `TF_DETERMINISTIC_OPS` ·
+`TF_CUDNN_DETERMINISTIC` (no-op on CPU, set so a future GPU move inherits it) ·
+`tf.keras.utils.set_random_seed` · `tf.config.experimental.enable_op_determinism()` · **pinned
+intra/inter-op thread counts**.
+
+**Why pinned rather than `threads=1`.** One thread is the only setting reproducible *across machines
+with different core counts*, but it is drastically slower and this project has one machine. Pinning
+to a fixed count should give same-machine reproducibility at full speed — **and because that is an
+empirical claim, it is tested rather than assumed** (`verify_determinism.sh`).
+
+⚠️ **Determinism does NOT make old and new runs comparable.** Pinning threads changes the reduction
+order, so a deterministic seed-42 run will not reproduce any of the 11 historical seed-42 values —
+it defines a **new fixed point**. Runs before and after this flag are different populations; do not
+pool them. Same trap as the session/environment effect in KNOWN_ISSUES. The applied state is returned
+and logged into `runs.jsonl` as `det_*` fields so it travels with the numbers.
+
+⚠️ **Must be called before any op runs** — TF snapshots the threadpool config on first use and raises
+afterwards. `enable()` detects that rejection and prints a loud warning rather than silently
+producing a non-deterministic run. `TF_DETERMINISM=0` opts out for throwaway exploration.
+
+## `scripts/verify_determinism.sh`
+
+**Purpose**: Tests the claim above instead of asserting it. Trains **seed 42 twice** with identical
+settings and compares the saved probability arrays for **byte-level identity** — the only unambiguous
+pass, since "close" is exactly what we already had at SD 0.0222.
+
+```bash
+scripts/verify_determinism.sh            # fast: 50k rows, 2 epochs
+FULL=1 scripts/verify_determinism.sh     # full training, both runs (slow)
+```
+
+Runs use tags containing `smoke`, so `paths.predictions_dir()` quarantines the undertrained arrays
+into `_smoke_archive/` and `CNN_SUBSET` suppresses `runs.jsonl` logging — **this cannot pollute the
+fusion-channel namespace or the research record.** On failure it prints `max|diff|` and tells you to
+fall back to `TF_THREADS=1`.
 
 # Legacy (temporal split — superseded 2026-06-18)
 
