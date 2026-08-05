@@ -138,18 +138,43 @@ def _c4():
 
 @check("script-count",
        "CLAUDE.md once said '22 scripts' 13 lines above saying '26'. Docs must "
-       "match disk.")
+       "match disk. And on 2026-08-05 this check PASSED on a wrong count: the old "
+       "regex was `(\\d+) scripts`, which never matched the actual phrasing '40 "
+       "Python scripts', so 9 undocumented scripts slid through. A mechanical "
+       "check that cannot fire is worse than no check -- it buys false confidence.")
 def _c5():
     n = len(_py_files())
     bad = []
+    # Tolerate a qualifier between the number and the word ("40 scripts",
+    # "40 Python scripts") -- the qualifier is what hid the original bug.
+    # Constraints that matter: stay on ONE line (\s+ would span newlines and
+    # match a numbered list item followed by `python scripts/foo.py`), and
+    # reject `scripts/` so command lines are not counted as prose.
+    pat = re.compile(r"(\d+)[ \t]+(?:Python[ \t]+)?scripts\b(?!/)", re.IGNORECASE)
     for rel in ("CLAUDE.md", "docs/scripts_reference.md"):
         p = os.path.join(ROOT, rel)
         if not os.path.exists(p):
             continue
-        for m in re.finditer(r"(\d+) scripts", _read(p)):
+        for m in pat.finditer(_read(p)):
             if int(m.group(1)) != n:
-                bad.append(f"{rel}: says '{m.group(1)} scripts', disk has {n}")
+                bad.append(f"{rel}: says {m.group(0)!r}, disk has {n}")
     return bad
+
+
+@check("undocumented-scripts",
+       "The count sentence can be right while the file is still incomplete. On "
+       "2026-08-05 scripts_reference.md documented 32 of 41 scripts -- the whole "
+       "Phase-4/fusion/explainability toolchain was missing. Check membership, "
+       "not just arithmetic.")
+def _c5b():
+    ref = os.path.join(ROOT, "docs", "scripts_reference.md")
+    if not os.path.exists(ref):
+        return ["docs/scripts_reference.md is missing"]
+    src = _read(ref)
+    missing = [os.path.basename(p) for p in _py_files()
+               if os.path.basename(p) not in src]
+    return [f"docs/scripts_reference.md: {name} is not documented"
+            for name in missing]
 
 
 @check("hardcoded-paths",
