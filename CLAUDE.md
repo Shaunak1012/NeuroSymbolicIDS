@@ -89,21 +89,32 @@ grep -rln "^| Component | Status" --include=*.md . | grep -v .venv
 
 ## Current state (one-line pointer — full table in STATUS.md)
 
-**Phases 0–3 done. Phase 4 (Knowledge Graph) is 🟡 UNBLOCKED — the representation decision is now
-evidence-backed and awaits sign-off. Phases 5–7 + R not started.**
+**Phases 0–4 done. Phase 5 (Decision Fusion) is 🟡 PARTIALLY ENTERED. Phases 6–7, 7.5 and R not
+started.**
 
-Two established results: **(1)** a **double dissociation** between the CNN (`cnn_paper.py`, n=3,
-macro **0.6399**) and the autoencoder (`autoencoder_paper.py`, n=3, macro 0.0970 but Bot **3.8×**) —
-significant on all three families, though it is a dissociation between *two models*, **not** two
+> 🔴 **This block said "Phase 4 … awaits sign-off. Not started" until 2026-08-05 — while Phase 4 had
+> been built, multi-seeded AND completed with explainability two sessions earlier.** Fourth
+> occurrence of the component-status drift defect, in the one file auto-loaded into every session.
+> It survived because the 2026-08-04 session updated STATUS/KNOWN_ISSUES but not this pointer.
+> **If you change phase state, change it here too** — this line is the first thing the next session
+> reads.
+
+Three established results: **(1)** a **double dissociation** between the CNN (`cnn_paper.py`) and the
+autoencoder (`autoencoder_paper.py`) — 3.9–40 SD of the measured noise floor, the only comparative
+claim in the project with that margin, though it is a dissociation between *two models*, **not** two
 method families; **(2)** the CNN's Bot failure is **representational** — 100% of Bot flows are
 classified BENIGN, Bot's discriminative features have 0/8 overlap with the known-class task's, and
-the resulting Bot ranking is **noise** (cross-seed ρ = −0.090).
+the resulting Bot ranking is **noise** (cross-seed ρ = −0.090); **(3)** **training is not
+reproducible at fixed seed** (SD 0.0222 — see the noise floor below), which retracted C2 and demotes
+every within-tier comparison this project spent months on.
 
 👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
-**Next action (resume here):** **Phase 4 (Knowledge Graph) — the representation question is now
-evidence-backed and awaits sign-off.** Everything else that was blocking it is done.
+**Next action (resume here):** **Phase 7.5 Tier 1 (operational readiness), the ablation, and TF
+determinism flags** — all three in flight as of 2026-08-05. Phase 4 is complete (KG + explainability
++ faithfulness); Phase 5 has significance, parameter-free fusion and n=6 rigor done, with calibration,
+latency and the *fitted* Decision Fusion outstanding (the last is blocked by THE FUSION WALL).
 
 ### 🔴🔴 THE NOISE FLOOR — read before citing ANY number in this project
 
@@ -177,13 +188,17 @@ the CNN assigns ~90% of Web BF/XSS flows to **`DoS slowloris`**, a known *attack
 from raw-space nearest-neighbour, which is DoS Hulk — classifier behaviour ≠ raw proximity; cite
 which measurement you mean.)
 
-🟡 **Earlier-phase audit (2026-07-29):** C2 ✅ resolved · C5 ✅ addressed (counts corrected, record
-now version-controlled) · C4 ✅ annotated in `config.yaml` (not fixed — the log1p A/B still cites the
-contaminated metric) · **C1 and C3 remain findings-only. Do not implement them unprompted.**
+🟡 **Earlier-phase audit (2026-07-29):** C2 🔴 **retracted** (the gap is 0.9 SD — see the noise floor)
+· C5 ✅ addressed (counts corrected, record now version-controlled) · **C1 ✅ closed 2026-08-03**
+(`comparability.py` reports the dedup variant; supervised channels lose 0.0035–0.0049, all six
+zero-day families measure 0.0 % overlap) · **C3 ✅ closed 2026-08-03** (`robustness.py`; the regrouped
+macro shifts values ~0.11–0.15 but preserves every ordering) · **C4 still open** — annotated in
+`config.yaml` but not fixed; the log1p A/B still cites the contaminated metric.
 
-✅ **PHASE 4 IS READY TO START — all gates measured (2026-08-03). Not started.**
+✅ **PHASE 4 IS COMPLETE (2026-08-03) — KG built, multi-seeded, explainability + faithfulness
+delivered.** `kg.py` · `kg_visualize.py` · `explain.py`.
 
-Phase 4 is now **fully specified by measurement**, not by the original spec:
+It was **fully specified by measurement**, not by the original spec:
 - **Representation: RAW FEATURES.** Bot purity 77.6 % (k=200) / 80.6 % (k=400), no training-seed
   lottery. 🔴 The AE bottleneck was recommended, then measured and **rejected** (52.1 pp spread,
   worst of all options) — **rank stability ≠ cluster stability.**
@@ -221,11 +236,14 @@ binary, so bimodal as an edge weight. Check `behavior.BEHAVIOUR_KIND` before ass
 **Recommended order:** ~~C2~~ ✅ → ~~Phase 3 AE~~ ✅ → ~~modality test~~ ✅ → ~~multi-seed AE~~ ✅ →
 ~~train-vs-score decomposition~~ ✅ → ~~KG substrate re-check~~ ✅ → ~~significance test~~ ✅ →
 ~~baselines on current schema~~ ✅ → ~~why the CNN fails on Bot~~ ✅ → ~~KG representation purity~~ ✅
-(raw features win) → ~~"unexplained cluster" FP rate~~ ✅ (mechanism dead) → **next: (a) measure the
-KG's remaining two emerging-pattern criteria — growth rate and behaviour co-occurrence — since they
-are now the only route to any KG detection role; (b) decide the temporal-decay time axis;
-(c) C1/C3 reporting variants (no training) → C4.** LOCO/fusion-repair stays deprioritized; the
-per-flow "router" idea rested on the falsified modality mechanism.
+(raw features win) → ~~"unexplained cluster" FP rate~~ ✅ (mechanism dead) → ~~KG's other two
+emerging-pattern criteria~~ ✅ (growth works, co-occurrence weak) → ~~temporal-decay time axis~~ ✅
+(kept adaptive) → ~~C1/C3 reporting variants~~ ✅ (both closed) → ~~build the KG~~ ✅ →
+~~explainability + faithfulness~~ ✅ → ~~noise floor + n=6 everywhere~~ ✅ (C2 retracted) →
+**next: (a) Phase 7.5 Tier 1 — ensemble, calibration/ECE, precision@alert-budget, abstention;
+(b) the CNN→+LTN→+KG ablation; (c) TF determinism flags, which attack the 3.6 % CV at source;
+then C4.** LOCO/fusion-repair stays deprioritized; the per-flow "router" idea rested on the
+falsified modality mechanism.
 
 **Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
@@ -270,7 +288,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 40 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`.
+**All 41 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **5 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -283,17 +301,23 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 40 Python scripts + run_long.sh — see docs/scripts_reference.md
+├── scripts/                   ← 41 Python scripts + 5 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
 │   │   baselines, novelty, behavior, ltn_paper,
 │   │   cnn_auxhead_paper, autoencoder_paper
+│   ├── kg, kg_visualize, explain                  ← PHASE 4 (KG + explainability)
+│   ├── fusion_kg, fusion_multi, significance,     ← PHASE 5 (fusion + rigor)
+│   │   significance_seed
 │   ├── skyline_oracle, rescore_logits,            ← analysis / one-off
 │   │   fusion_beaconlike, modality_analysis,
-│   │   kg_precheck, audit_leakage
+│   │   kg_precheck, kg_readiness, kg_criteria,
+│   │   bot_failure_analysis, comparability,
+│   │   robustness, timeline, audit_leakage
 │   ├── cnn3, eval, ltn                            ← LEGACY (superseded)
-│   └── dashboard_server, visual, check            ← utilities
+│   └── dashboard_server, visual, check,           ← utilities
+│       lint_conventions, repair_runs_log
 │
 ├── data/
 │   ├── raw_csv_full/          ← CIC-IDS2017 GeneratedLabelledFlows (not committed)

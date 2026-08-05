@@ -2,6 +2,146 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-05 (documentation debt closed — and a lint that could not fire)
+
+No new measurements. This session closed eight drift items left by the previous one, then continued
+into Phase 7.5 / ablation / determinism work (logged separately below as it lands).
+
+- **🔴 The previous session never wrote a CHANGELOG entry.** It updated `STATUS.md`, `CLAUDE.md` and
+  `KNOWN_ISSUES.md` — but the file whose entire job is the dated record got nothing, so the noise
+  floor, C2's retraction and the n=6 sweep existed everywhere except the history. **Backfilled below
+  as the 2026-08-04 entry.**
+- **🔴 `CLAUDE.md` asserted Phase 4 had not started** — in three places — **two sessions after it was
+  built, multi-seeded and completed with explainability.** Fourth occurrence of the component-status
+  drift defect, and the worst-placed one: `CLAUDE.md` is auto-loaded into every session, so it was
+  the first thing a new session read. Fixed, with a note in place explaining how it survived.
+- **`STATUS.md` internal contradictions fixed**: the Component Status row for Explainability said
+  `✅ 3 of 3 + faithfulness` in its status column while its Notes column still listed all four
+  sub-items as `❌ not built`; Remaining Work #5 still called explainability "the true next in-phase
+  work"; #4 still listed n≥6 seeds as outstanding after they were done. Header date and RESUME HERE
+  were two sessions stale. The canonical n=3 results table now points at the n=6 table for macro.
+- **`KNOWN_ISSUES.md`: C1 and C3 were still tagged `[OPEN]`** although both were closed 2026-08-03 by
+  `comparability.py` and `robustness.py`. Marked closed **in place**, with what was measured.
+- **🔴 `scripts_reference.md` documented 32 of 41 scripts** — the entire Phase-4 / fusion /
+  explainability toolchain (`kg` · `kg_visualize` · `explain` · `fusion_kg` · `fusion_multi` ·
+  `comparability` · `robustness` · `significance_seed` · `lint_conventions`) was undocumented while
+  the header claimed it was verified against source. **All nine written up from the source**, not
+  from memory.
+- **🔴 The lint had been passing on a wrong count for two sessions.** `script-count` used the regex
+  `(\d+) scripts`, which requires the number to sit directly against the word — but the docs put a
+  qualifier between them, so **the check could never fire.** It reported ALL CHECKS PASS over a stale
+  count and nine missing entries. **A mechanical check that cannot fire is worse than no check: it
+  buys false confidence, and this project converted prose rules into lint checks precisely to stop
+  relying on that.** Fixed, plus a new **`undocumented-scripts`** check that verifies *membership*
+  rather than arithmetic — because a count can be right while the file is still incomplete.
+  ⚠️ Caught en route: the first widened regex over-matched, counting numbered list items followed by
+  `python scripts/foo.py` as prose. Constrained to one line and to reject `scripts/`.
+
+**The transferable lesson**, and it is the same shape as the two monitoring false alarms recorded on
+2026-08-03: *the check and the thing it checks drift apart silently, and a passing check is
+indistinguishable from a working one.* The heartbeat rule was broken by a launcher that suppressed
+the signal it watched; the script-count rule was broken by a doc that reworded the string it matched.
+**When a convention is made mechanical, the mechanism itself becomes something that can rot.**
+
+## 2026-08-04 (BACKFILLED 2026-08-05 — the noise floor, and the retraction it forced)
+
+> ⚠️ **This entry was written a day late**, reconstructed from the five commits and `STATUS.md`.
+> The session labelled its own content `2026-08-03` (it ran past midnight); the commits are dated
+> 2026-08-04. Dated by commit here.
+
+### 🔴🔴 Training is not reproducible at fixed seed — the project's most consequential measurement
+
+- Six runs of **seed 42, identical code, idle machine**: 0.6446 · 0.6295 · 0.6366 · 0.6124 · 0.5825 ·
+  0.6280 → **mean 0.6223 · SD 0.0222 · range 0.0621 · CV 3.6 %**. TensorFlow on CPU is not
+  bit-deterministic and **no determinism flags are set**, so thread scheduling changes float
+  accumulation order. `noise_floor.sh`.
+- **Every delta must now be expressed as a multiple of this SD.** That ratio, not the raw number,
+  decides whether a claim survives.
+
+### 🔴 C2 is RETRACTED — on controlled grounds, hours after passing a significance test
+
+- *"The neural baseline beats the LTN control"* was closed in the CNN's favour **earlier the same
+  day** with a paired bootstrap at **p=0.001**. The gap is **+0.0204 = 0.9 SD** — **smaller than
+  re-running one model twice.**
+- **The bootstrap was arithmetically correct and epistemically empty**: it treated each run's score
+  as exact when re-running moves it by up to 0.062. **A paired significance test over per-flow scores
+  cannot rescue a delta below the pipeline's own reproducibility.** This is the project's most
+  important methodological lesson.
+- Two further corrections recorded: **`cnn_paper = 0.6446` is the MAX of 11 runs**, not a typical
+  result (mean 0.6217) — the honest reproducible baseline is the **ensemble, 0.6356**, and 0.6446 is
+  the number that would otherwise have gone into the paper. And **every n=3 range in the docs is an
+  artefact**: the CNN's "tight" 0.0093 spread is **0.4 SD**, less than half a single re-run's noise.
+
+### 🔴 All 7 channels to n=6 — the top tier is INDISTINGUISHABLE
+
+`rigor_n6.sh`, `ltn_ctrl_sweep.sh`. MSP and Mahalanobis were free (post-hoc on already-trained CNN
+seeds 45–47). Equal n matters more than the absolute value here, because **asymmetric sampling is how
+the C2 confusion arose in the first place.**
+
+| channel | n=6 mean | range |
+|---|---:|---|
+| CNN | **0.6250** | [0.5966, 0.6446] |
+| LTN control | **0.6110** | [0.5824, 0.6505] |
+| RandomForest | 0.5985 | [0.5682, 0.6235] |
+| MSP | 0.5761 | [0.5053, 0.6289] |
+| Mahalanobis | 0.3948 | [0.2295, 0.5782] |
+| Autoencoder | 0.1083 | [0.0894, 0.1346] |
+| IsolationForest | 0.0681 | [0.0628, 0.0750] |
+
+- Distinguishable only above **~0.0256**. **CNN vs LTN control = +0.0140 → INDISTINGUISHABLE.**
+  Not "the CNN wins narrowly" — **they cannot be told apart at achievable precision.** C2's third and
+  cleanest refutation.
+- ⚠️ **And the gap shrank when a scoring inconsistency was fixed.** LTN control seeds 45–47 were
+  scored **raw** while 42–44 were **log-odds** — mixed scoring *within one channel*, which penalises
+  the LTN because it was saturated. Rescoring moved it **0.5977 → 0.6110** and cut the CNN's apparent
+  lead from +0.0273 to **+0.0140**. The original C2 gap was **partly a scoring artefact**, separately
+  from the noise floor. **Third time in one session a comparison was invalid for a reason invisible
+  in the numbers** (mixed sessions, mixed CPU load, mixed scoring).
+- **NOT overturned**: *"every axiom variant costs macro vs the no-axiom control"* — those gaps are
+  0.05–0.13, well above threshold. **Phase 2 is unaffected and sharper: adding axioms hurts, but the
+  axiom-free symbolic trainer matches the CNN.**
+- **Three tiers, not a ranking**: supervised/closed-set (~0.58–0.63, mutually indistinguishable) ·
+  distance (~0.39, unstable) · benign-only (~0.07–0.11). **The double dissociation lives ACROSS
+  tiers**, which is why it survives everything — and why the within-tier comparisons this project
+  spent months on were always below the noise.
+
+### 🧭 Three claims asserted and withdrawn in one session
+
+*"n=3 understated seed variance 4–5×"*, *"there is a session effect"*, *"C2 must be reopened"* — all
+three were **competing explanations for one unmeasured quantity**. A monotonic decline that looked
+like environmental drift (ρ = −1.0 across three consecutive runs) **broke at run 4**, exactly as its
+1-in-6 probability predicted. **Four training runs settled what hours of observational comparison
+could not: measure the variance before explaining it.** The session-effect analysis is kept in
+`KNOWN_ISSUES.md` with its withdrawal marked in place.
+
+> **Process note carried forward.** The confound was flagged *one message after* the C2 collapse had
+> already been reported as a headline finding. The project's own rule — *"a point-estimate gap is not
+> a result"* — was applied rigorously to old claims and not to a new one of my own. **That asymmetry
+> is the failure mode worth remembering, more than the confound itself.**
+
+### What survives
+
+| claim | delta | ÷ SD | verdict |
+|---|---:|---:|---|
+| Double dissociation (XSS) | +0.8977 | **40.4** | ✅ established |
+| Double dissociation (Web BF) | +0.8178 | **36.8** | ✅ established |
+| Double dissociation (Bot) | +0.0868 | **3.9** | ✅ established |
+| CNN+KG fusion | +0.0527 | *paired* | ✅ direction (3/3 seeds); magnitude 0.027–0.088 |
+| **C2: CNN vs LTN control** | +0.0204 | **0.9** | 🔴 **RETRACTED** |
+
+**The double dissociation strengthened under every test while C2 collapsed under each one. That was
+never about rigour applied — it was effect size relative to a floor nobody had measured.**
+
+### Also added
+
+- **Phase 7.5 — operational readiness**, a planned intermission between Phase 7 and Phase R, which it
+  **gates**. Rationale: **PR-AUC is the wrong target for a response engine** — it summarises ranking
+  across all thresholds while the engine acts at **one**. A system can post macro 0.69 and still
+  auto-block at 40 % precision, and **no metric currently in this project would warn you.**
+- `significance_seed.py` — seed-level significance, impossible at n=3 (Wilcoxon floor p=0.25),
+  achievable at n=6 (floor p=0.031). ⚠️ Still weak: a non-significant result at n=6 is evidence the
+  test is underpowered, not evidence of no effect.
+
 ## 2026-08-03 (later: Phase 4 built and completed, first result to beat the baseline)
 
 ### Phase 4 — the Knowledge Graph, and then its explainability half

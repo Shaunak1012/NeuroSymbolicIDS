@@ -44,7 +44,16 @@ now per-family PR-AUC + macro over families with n ≥ `MIN_FAMILY_N` (100); the
 Heartbleed (n=11), Infiltration (n=36) and SQL Injection (n=21) are excluded as underpowered rather
 than reported to 4 decimal places.
 
-### [OPEN 2026-07-29] 17% of test rows are exact duplicates of training rows
+### [CLOSED 2026-08-03] 17% of test rows are exact duplicates of training rows
+
+> ✅ **CLOSED — the proposed fix was implemented exactly as written** (`scripts/comparability.py`):
+> report both the as-is and a unique-flows-only variant, no de-duplication, protocol unchanged, one
+> evaluation pass, no retraining. **Deduplication costs the supervised channels 0.0035–0.0049**
+> (XGBoost 0.9936 → 0.9901, CNN 0.9928 → 0.9884, LTN control 0.9921 → 0.9874). The **asymmetry is
+> the finding**: all six zero-day families measure **0.0 % overlap**, so duplication inflates *the
+> field's* headline metric and leaves *ours* untouched. That is now the write-up's opening argument
+> rather than a liability. *(Tagged `[OPEN]` here until 2026-08-05 — a doc-drift lapse; the work
+> landed 2026-08-03.)* Original issue below, kept as written.
 CIC-IDS2017 is duplicate-heavy and `preprocess.py` deliberately keeps duplicates; the paper split is
 **stratified random**, so identical feature vectors land in both train and test. Measured by hashing
 every row: **19,513 / 114,658 test rows (17.0%)** have an exact feature-vector twin in train.
@@ -75,7 +84,15 @@ new open item. Full numbers and interpretation in [STATUS.md](STATUS.md) → "EA
 
 xgboost, random_forest, isolation_forest, msp, mahalanobis remain n=1 — not addressed this pass.
 
-### [OPEN 2026-07-29] The macro metric counts one signal twice
+### [CLOSED 2026-08-03] The macro metric counts one signal twice
+
+> ✅ **CLOSED — the regrouped macro is now reported as a robustness row** (`scripts/robustness.py`),
+> which is what this issue proposed. Regrouping to `mean(Bot, mean(WebBF, XSS))` shifts absolute
+> values by ~0.11–0.15 but **preserves every meaningful ordering**, so the macro-cost conclusions are
+> robust to the label-granularity artifact. ⚠️ **A false verdict was caught and fixed in the script
+> itself**: a 1.3×10⁻⁵ tie was being printed as *"conclusions NOT robust"*. An automated verdict that
+> cries wolf is worse than none. *(Tagged `[OPEN]` here until 2026-08-05 — a doc-drift lapse; the
+> work landed 2026-08-03.)* Original issue below, kept as written.
 `fam_web_attack_brute_force_pr_auc` and `fam_web_attack_xss_pr_auc` correlate at **r = +0.992** across
 60 runs — same Thursday-morning campaign, same tool. `macro = mean(Bot, WebBF, XSS)` is therefore
 ⅓ Bot + ⅔ *one* web signal, weighted by an artifact of CIC-IDS2017's labelling granularity.

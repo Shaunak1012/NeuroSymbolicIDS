@@ -1,8 +1,41 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-08-02**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-08-05**.
 
 ## ▶ RESUME HERE (next session)
+
+### 📍 CURRENT — 2026-08-05
+
+**Phases 0–4 COMPLETE. Phase 5 partially entered. Next: Phase 7.5 Tier 1 · the ablation · TF
+determinism flags.**
+
+| Phase | State |
+|---|---|
+| 0–3 (split, CNN, LTN, autoencoder) | ✅ done |
+| **4 — Knowledge Graph + explainability** | ✅ **COMPLETE** — `kg.py`, `kg_visualize.py`, `explain.py`; faithfulness measured |
+| **5 — Decision Fusion + rigor** | 🟡 **PARTIAL** — ✅ significance · ✅ parameter-free rank fusion · ✅ n=6 on all 7 channels. ❌ calibration · ❌ latency · ❌ the *fitted* fuser (blocked by THE FUSION WALL) |
+| 6, 7 | ⬜ not started |
+| **7.5 — operational readiness** | ⬜ not started, **gates Phase R** |
+| R — response engine | ⬜ not started |
+
+**The three things in flight, in order:** (a) **Phase 7.5 Tier 1** — ship the ensemble, calibration
++ ECE, precision @ alert budget, abstention curve; (b) **the ablation** CNN → +LTN → +KG → full
+(Remaining Work #6); (c) **TF determinism flags**, which attack the 3.6 % CV at source.
+
+> 🔴 **Read [THE NOISE FLOOR](#-the-noise-floor--measured-2026-08-03-and-it-retracts-a-headline-result)
+> before citing any number below.** SD **0.0222** at fixed seed. C2 is **retracted** on those grounds
+> — the CNN and the LTN control are **indistinguishable** at n=6 (+0.0140 against a ~0.0256
+> threshold). The double dissociation survives at **3.9–40 SD**.
+
+> ⚠️ **Documentation-debt note (closed 2026-08-05).** The 2026-08-04 session updated this file,
+> `CLAUDE.md` and `KNOWN_ISSUES.md` but **never wrote a CHANGELOG entry**, and left `CLAUDE.md`
+> asserting Phase 4 had not started — two sessions after it was completed. Eight drift items were
+> found and closed on 2026-08-05; see that CHANGELOG entry. The lint's `script-count` check had
+> **passed on a wrong count** because its regex `(\d+) scripts` never matched the actual phrasing,
+> *"40 Python scripts"*. **A mechanical check that cannot fire is worse than no check** — it buys
+> false confidence. Regex widened.
+
+---
 
 **2026-08-03 session: pre-Phase-4 remediation — and it produced three research results, not just fixes.**
 
@@ -831,7 +864,16 @@ similarity between each zero-day family and the known classes (e.g. embedding-sp
 nearest known-class centroid) and check it predicts which family wins. That would convert the story
 from a plausible narrative into a falsifiable law.
 
-## 🟡 EARLIER-PHASE AUDIT (2026-07-29) — 5 open concerns; C2 RESOLVED 2026-08-02, C1/C3/C4/C5 still open
+## 🟡 EARLIER-PHASE AUDIT (2026-07-29) — 5 concerns; only C4 remains open
+
+> 📍 **Final disposition (updated 2026-08-05).** **C1 ✅ closed** 2026-08-03 (`comparability.py` runs
+> the dedup variant: supervised channels lose 0.0035–0.0049, all six zero-day families measure 0.0 %
+> overlap) · **C2 🔴 RETRACTED** 2026-08-03 — it was "resolved in the CNN's favour" at p=0.001 and
+> then retracted on controlled grounds, because the +0.0204 gap is **0.9 SD** of the measured noise
+> floor · **C3 ✅ closed** 2026-08-03 (`robustness.py`: regrouping shifts values ~0.11–0.15 but
+> preserves every ordering) · **C5 ✅ closed** 2026-08-03 (`repair_runs_log.py`) · **C4 ⬜ still
+> open** — the feature transform is still justified by the contaminated overall-binary metric.
+> The section below is the original audit, kept as written.
 
 > **C2 is done** (2 CNN seeds run + rescored, see below) — resolved to "no clean winner at n=3,
 > needs a significance test," not to "CNN confirmed." **C1, C3, C4, C5 remain findings-only,
@@ -1893,7 +1935,7 @@ ones: *a point-estimate gap is not a result in either direction.*
 | **Anomaly pillar (autoencoder)** — canonical **Phase 3** | ✅ **Built, run & multi-seeded 2026-08-02 — n=3** | `scripts/autoencoder_paper.py` | Benign-only reconstruction error; **zero attack labels used in training *or* model selection**, so it is zero-day-legitimate by construction. **macro 0.0970 [0.0894, 0.1014]** · **Bot 0.1314 (3.8×) — the best Bot channel measured** · loses on web attacks (0.1048 / 0.0547). Establishes the **double dissociation** vs the CNN. Multi-seed via `AE_SEED`. ⚠️ Its first-day interpretation (a "modality analogue" mechanism) was **falsified the same day**; the *pattern* is real, the *explanation* is open — see "PHASE 3 RESULTS". |
 | **Knowledge Graph** — canonical **Phase 4** | 🟢 **BUILT & multi-seeded 2026-08-03** | `scripts/kg.py` | 215 nodes / 1,183 edges on **raw-feature** clusters (CNN embeddings and the AE bottleneck were both measured and rejected). Adaptive decay over true chronological order. **s_kg causal: macro 0.2488, Bot 0.3103 — best Bot channel measured.** Scope is corroboration + explanation: the spec's "unexplained cluster" detector is measured dead (≤1.00×). ⚠️ Mandatory lateness control lives in the script — a trivial "later in the week" baseline scores Bot 0.1575. Viz: `kg_visualize.py`. |
 | Decision Fusion — Phase 5 | ❌ Not built | — | ⚠️ A **fitted** combiner is structurally blocked — validation contains no zero-day by construction, so it cannot learn to weight a zero-day-specific channel (`fusion_beaconlike.py` → `[2.35, 0.02]`). See "THE FUSION WALL". Spec: [decision_fusion.md](target/decision_fusion.md). |
-| Explainability / Final Alert | ✅ **BUILT 2026-08-03 — 3 of 3 + faithfulness** | `scripts/kg.py` | ✅ **KG explanation** (reasoning paths) built. ❌ **Neural explanation** (SHAP / integrated gradients) not built. ❌ **Logic explanation** (per-axiom SAT) not built. ❌ **Final Alert assembly** not built. ❌ **Explanation-faithfulness measurement** (Tier A) not built. Canonical Phase 4 = "Knowledge Graph **+ explainability**", so the KG half is done and the explainability half is ~⅓. Spec: [explainability.md](target/explainability.md). |
+| Explainability / Final Alert | ✅ **BUILT 2026-08-03 — 3 of 3 + faithfulness** | `scripts/explain.py` (+ KG paths in `scripts/kg.py`) | ✅ **Neural explanation** — Integrated Gradients against `tf.GradientTape`, with the completeness axiom verified as a correctness check (\|error\| 0.0001–0.042). ✅ **Logic explanation** — per-axiom SAT; only Ax3–Ax6 are reported, because Ax1/Ax2 are label anchors and would be circular at inference. ✅ **KG explanation** — reasoning paths. ✅ **Final Alert assembly.** ✅ **Faithfulness (Tier A)** — ERASER deletion metrics vs a random-feature control: masking IG's top-3 drops the attack score **20.67×** more than 3 random features. ⚠️ Sufficiency is the weaker half and is reported as such (0.442–0.460 vs random 0.513–0.515) — the decision is distributed across more than 10 features. Spec: [explainability.md](target/explainability.md). |
 | Response engine (IPS) | ❌ Not built | — | Phase R (Shaunak solo, last). Temporal-replay containment. |
 
 **Legacy (temporal-split) pipeline — superseded 2026-06-18, retained as a secondary "hard mode" result:**
@@ -1918,8 +1960,8 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ✅ **DONE 2026-08-02** | Ran. Closes the "why not an autoencoder?" objection with a number, and produced the modality-analogue refinement that reframes the whole architecture. Was nearly skipped by a phase-number collision. **Follow-up (not scheduled): multi-seed it (n=1 today), and measure modality similarity to test the refined account.** |
 | 2c | **Pre-Phase-4 remediation + significance + Bot analysis** | ✅ **DONE 2026-08-03** | All audit discrepancies fixed (research record version-controlled, component status collapsed to one table, `kg_precheck` now persists, baselines on n=3 + current schema, legacy artifact collision resolved). Plus three research outputs: **significance tests run** (C2 closed; one retraction reversed), **the (A)/(B) strong form falsified** by RandomForest, and **the CNN's Bot failure explained**. |
 | 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | ✅ **BUILT & multi-seeded 2026-08-03** (the KG half of Phase 4; explainability half is item 5) | **Prerequisites now measured** (`kg_readiness.py`). ✅ Representation decided on evidence: **raw features** (Bot purity 77.6/80.6 %, no training lottery) — *not* the AE bottleneck, whose 52.1 pp spread was the worst of all options. 🔴 **Scope forced by measurement: corroboration + explainability, NOT primary detection** — the "unexplained cluster" criterion scores **lift ≤ 1.00× (at or below chance)** across every representation and threshold, so that mechanism is dead. ✅ **Last gate CLOSED 2026-08-03**: all three emerging-pattern criteria measured — **growth works** (lift 5.94x [5.66, 6.11], n=3, ~81% recall), unexplained is dead, co-occurrence is weak. ✅ Decay decided: **keep it adaptive**, flow-count over true chronological order. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
-| 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · n≥6 seeds · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
-| 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | 🟡 **1 of 3 delivered — this is the true next in-phase work** | ✅ KG explanation (reasoning paths, in `kg.py`). ❌ Neural explanation (SHAP / integrated gradients). ❌ Logic explanation (per-axiom SAT). ❌ Final Alert assembly. ❌ Explanation-faithfulness measurement (Tier A). Phase 4 = "Knowledge Graph **+ explainability**", so Phase 4 is **not** complete until these land. Spec: [explainability.md](target/explainability.md). |
+| 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline; direction established on 3/3 seeds, **magnitude uncertain 0.027–0.088**) · **n≥6 seeds ✅ DONE 2026-08-04** (`rigor_n6.sh`, all 7 channels — and it showed the top tier is mutually **indistinguishable**). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
+| 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | ✅ **DONE 2026-08-03 — 3 of 3 + faithfulness** (`explain.py`) | ✅ Neural (Integrated Gradients, completeness-checked) · ✅ Logic (per-axiom SAT, Ax3–Ax6 only — Ax1/Ax2 are label anchors and would be circular) · ✅ KG reasoning paths · ✅ Final Alert assembly · ✅ Tier-A faithfulness (IG top-3 masking is **20.67×** a random-feature control; sufficiency reported as the weaker half). **Phase 4 is therefore complete.** Its most informative output is not a score: on a Bot flow the CNN calls benign, **both other pillars dissent** — no single-pillar system produces that. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ⬜ | Proves each component earns its place. |
 | 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | ⬜ **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
 
@@ -1999,6 +2041,14 @@ delta as a **multiple of it** — that ratio, not the raw number, decides whethe
 > **SD 0.0222** at fixed seed. Ranges in brackets are **too narrow** — they are 3 draws, not a
 > stability estimate. Treat any two channels within **~0.045 (2 SD)** of each other as
 > **indistinguishable**. See "THE NOISE FLOOR".
+>
+> 📍 **SUPERSEDED FOR MACRO BY THE n=6 TABLE (2026-08-04).** All 7 channels were subsequently taken
+> to **n=6** with consistent log-odds scoring — see
+> [n=6 EVERYWHERE](#-n6-everywhere-2026-08-03--the-top-tier-is-indistinguishable). **Cite the n=6
+> macro figures, not the n=3 ones below.** The table here is kept for its per-family breakdown
+> (Bot / Web BF / XSS), which was not recomputed at n=6. The headline change: **CNN 0.6399 → 0.6250**
+> and **LTN control 0.6194 → 0.6110**, a gap of **+0.0140 against a ~0.0256 distinguishability
+> threshold** — i.e. the two are **indistinguishable**, which is what retracted C2.
 >
 > **Canonical results table — last updated 2026-08-02.** Supersedes the `_TBD_` placeholder that
 > stood here from project start (it referenced the legacy `eval.py`/`ltn.py` pipeline, superseded

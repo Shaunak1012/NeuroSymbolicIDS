@@ -3,7 +3,16 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-03** (40 Python scripts, plus run_long.sh).
+> Last verified against source: **2026-08-05** (41 Python scripts, plus 5 shell launchers).
+
+> 🔴 **This file documented 32 of 41 scripts until 2026-08-05** — the entire Phase-4 / fusion /
+> explainability toolchain (`kg` · `kg_visualize` · `explain` · `fusion_kg` · `fusion_multi` ·
+> `comparability` · `robustness` · `significance_seed` · `lint_conventions`) was missing while the
+> header still claimed it was verified. The `script-count` lint **passed** throughout, because its
+> regex `(\d+) scripts` required the number to sit directly against the word, and the phrasing here
+> put a qualifier between them (*"…&#32;Python scripts"*), so the check never fired. Both were fixed:
+> the regex now tolerates a qualifier, and a new **`undocumented-scripts`** check verifies
+> *membership* rather than arithmetic — a count can be right while the file is still incomplete.
 
 ## Map
 
@@ -11,11 +20,14 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** |
-| **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** |
+| **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
+| **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
+| **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
+| **Shell launchers** (not Python) | `run_long.sh` (**use this for any job >10–15 min**) · `seed_sweep.sh` · `noise_floor.sh` · `rigor_n6.sh` · `ltn_ctrl_sweep.sh` |
 
 **Multi-seed convention.** Every trainable script takes a `<PREFIX>_SEED` env var and writes
 `<name>_s<seed>` artifacts, leaving the config-default (seed 42) filenames untouched:
@@ -547,6 +559,226 @@ the combiner learned to ignore the symbolic channel.
 
 ---
 
+## `scripts/comparability.py`
+
+**Purpose**: **The table that makes this project comparable to the literature.** Published
+CIC-IDS2017 work routinely reports **99 %+**; we headline **~0.64**. That looks like we are far
+behind. We are not — the two numbers measure different tasks, and **the same models produce both.**
+
+| channel | overall binary *(what the field reports)* | dedup *(honest)* | **macro zero-day** *(ours)* |
+|---|---:|---:|---:|
+| XGBoost | **0.9936** | 0.9901 | 0.6372 |
+| CNN | **0.9928** | 0.9884 | 0.6446 |
+| LTN control | 0.9921 | 0.9874 | 0.6049 |
+| **CNN + KG fusion** | 0.9893 | 0.9896 | **0.7328** |
+
+**The same model goes 0.9936 → 0.6372 — a 0.3564 gap — purely by changing protocol.** That is the
+write-up's opening argument, and reviewers cannot be expected to notice it unprompted.
+
+**The third column closes audit item C1.** 17.0 % of test rows are exact feature-vector duplicates
+of a training row (PortScan 58.3 %, SSH-Patator 48.6 %); for those rows the task is lookup, not
+detection. **No de-duplication is performed** — that would change the protocol and break base-paper
+comparability. Both variants are reported instead, which is what C1 proposed. Costs one evaluation
+pass, no retraining. **The asymmetry is the finding: all six zero-day families measure 0.0 % overlap**,
+so duplication inflates *the field's* metric and leaves *ours* untouched.
+
+**Constants**: `CHANNELS`, `OUT` · helper `_hashes`.
+
+## `scripts/robustness.py`
+
+**Purpose**: Closes audit item **C3**, and tests the fusion wall **constructively**.
+
+**Part 1 — C3: the macro metric counts one signal twice.** `fam_web_attack_brute_force_pr_auc` and
+`fam_web_attack_xss_pr_auc` correlate at **r = +0.992** (same Thursday-morning campaign, same tool,
+same target), so `macro = mean(Bot, WebBF, XSS)` is really **⅓ Bot + ⅔ one web signal**, weighted by
+an artifact of how many web sub-labels CIC-IDS2017 happens to define. The regrouped alternative
+`mean(Bot, mean(WebBF, XSS))` weights the two *phenomena* equally instead of the two *labels*.
+**Verdict: absolute values shift ~0.11–0.15 but every meaningful ordering is preserved** — the
+macro-cost conclusions are robust to the label-granularity artifact.
+
+**Part 2 — does known-class weighting beat equal weighting?** The obvious fix to `fusion_multi.py`'s
+"weak channels dilute strong ones" is to weight by quality, and the only **legitimate** way here is
+on **known-class validation performance**, which uses no zero-day information. **The fusion wall
+predicts this will hurt, and it does: Bot −0.0176** — it down-weights the KG precisely for being
+good at a family it never trained on. A constructive confirmation of the wall rather than another
+null result.
+
+⚠️ **A false verdict was caught and fixed in this script**: a 1.3×10⁻⁵ tie was being printed as
+*"conclusions NOT robust"*. **An automated verdict that cries wolf is worse than none.**
+
+**Functions**: `fam_pr`, `macro_std`, `macro_regrouped`, `_swaps`.
+
+# Phase 4 — Knowledge Graph + explainability
+
+## `scripts/kg.py`
+
+**Purpose**: **Phase 4 — the adaptive Knowledge Graph.** 215 nodes (200 Cluster + 6 Behaviour +
+9 AttackType), 1,183 edges. Memory is initialised from TRAIN, then TEST is **streamed in true
+chronological order** with exponential edge decay (τ=3 windows) — the "adaptive" half of the
+project title. n=3 seeds.
+
+⚠️ **Every design decision here was forced by measurement, not by the original spec.** Read
+[STATUS.md](STATUS.md) → "LAST PHASE-4 GATE CLOSED" before changing any of them:
+
+| Decision | Value | Why not the alternative |
+|---|---|---|
+| Representation | **raw features** | CNN embeddings swing Bot purity 87.9/86.6/**44.4** % across seeds; the AE bottleneck is worse still (52.1 pp) — **rank stability ≠ cluster stability** |
+| Scope | **corroboration + explanation** | the spec's "unexplained cluster" detector measures lift **≤ 1.00×**, at or below chance |
+| Emerging rule | **growth/burstiness only** | co-occurrence is weak (2.81× at 1.5 % recall); "unexplained" is dead |
+| Decay | **kept (adaptive)** | time = flow-count position in true chronological order, via `timeline.py` |
+| Behaviours | **`active_behaviour_matrix()`** | `RepeatedConnections` is constant zero; `BeaconLike` is binary |
+
+**Constants**: `SEED`, `K` (clusters), `N_WINDOWS`, `TAU` (decay), `BURST_THR`, `TAG`, `BEH`.
+
+**Results**: `s_kg` **causal / online** (past only) — macro **0.2488** [0.2446, 0.2523], Bot
+**0.3103** [0.2970, 0.3210], **the best Bot channel measured in this project**. The transductive
+(whole-stream) variant is worse (Bot 0.2457), so **the deployable version is the stronger one**.
+The CNN still dominates macro by 0.39 — the KG is not a general detector, exactly as scoped.
+
+🔴 **The lateness control is permanent in this script and must be quoted with any KG number.** The
+causal score rises with arrival position and CIC-IDS2017 schedules attacks late, so *"later ⇒ more
+suspicious"* had to be ruled out. A **trivial lateness-only baseline scores Bot 0.1575** — beating
+the previous best channel (autoencoder, 0.1314). The KG's advantage **survives** (within-window
+3.2× vs the AE's 1.9× and the CNN's 1.5×; the control collapses to exactly 1.0×, confirming the
+test is sound), but the headline 9.4× is roughly *schedule × cluster signal*. **Quote 0.3103 global
+and 3.2× within-window together.**
+
+⚠️ `s_kg` takes only **193 distinct values** (one per cluster), so PR-AUC is valid but
+**recall@1%FPR is degenerate — do not cite it.**
+
+**Writes** `models/kg.gpickle`, KG channel predictions, and its metrics to `runs.jsonl`.
+
+## `scripts/kg_visualize.py`
+
+**Purpose**: Obsidian-style interactive view of the graph built by `kg.py`. Emits a
+**self-contained** HTML file — no CDN, no external assets, everything inline — with a force-directed
+layout: dark canvas, nodes sized by degree and coloured by type, hover-to-highlight-neighbourhood,
+drag, zoom, pan.
+
+**Why hand-rolled rather than d3**: the published-artifact CSP blocks every external host, so a CDN
+import would silently fail. At ~215 nodes an O(n²) repulsion step is cheaper than the download.
+
+**Reads** `models/kg.gpickle` · **Writes** `outputs/figures/kg_graph.html` (215 nodes, 931 edges).
+
+```bash
+python scripts/kg_visualize.py
+```
+
+## `scripts/explain.py`
+
+**Purpose**: **The explainability half of canonical Phase 4**, plus the **Tier-A faithfulness
+measurement** the roadmap asks for and almost nobody in this field runs. `kg.py` delivered the KG
+and one of the three explanations; this delivers the other two, assembles the Final Alert, and
+measures whether the neural explanation is actually faithful to the model.
+
+**The three explanations** (per [explainability.md](target/explainability.md)):
+
+1. **Neural** — **Integrated Gradients**, implemented directly against `tf.GradientTape`, baseline =
+   the training mean (so attributions read as *deviation from typical traffic*). Chosen over SHAP's
+   DeepExplainer because IG carries an exactness check — the **completeness axiom**, verified in
+   `ig_completeness()`: `sum(attributions) ≈ f(x) − f(baseline)`, |error| 0.0001–0.042 — and avoids
+   SHAP's brittle Keras-2 Conv1D path.
+2. **Logic** — per-axiom SAT for the flow. ⚠️ **Only Ax3–Ax6 appear, deliberately.** Ax1/Ax2 are
+   *label anchors*: they condition on the ground-truth class, which does not exist at inference, so
+   reporting them as explanations would be circular. This is why 4 of 6 axioms are shown.
+3. **KG** — reasoning path from `kg.py` (cluster → behaviours → known attacks, plus whether the
+   cluster is currently emerging).
+
+**Faithfulness (Tier A)** — ERASER-style deletion metrics, each against a **random-feature control**
+(without which the numbers mean nothing), n=1,500 flows:
+
+| top-k | comprehensiveness (IG) | random control | **ratio** |
+|---|---:|---:|---:|
+| 3 | +0.2908 | +0.0141 | **20.67×** |
+| 5 | +0.3810 | +0.0311 | **12.26×** |
+| 10 | +0.4536 | +0.1089 | **4.16×** |
+
+⚠️ **Sufficiency is the weaker half and is reported as such**: IG beats random (0.442–0.460 vs
+0.513–0.515) but the absolute gap stays ~0.44, so the top-k *alone* do not reproduce the decision.
+Honest reading: **the explanation reliably finds features the model depends on; the decision is
+distributed across more than 10 features.**
+
+**Functions**: `attack_score`, `integrated_gradients`, `ig_completeness`, `logic_explanation`.
+**Constants**: `N_ALERTS`, `N_FAITH`, `IG_STEPS`, `BASELINE`, `AXIOMS`.
+
+🔬 **Its most informative output is not a score.** On Bot flow #114062 the CNN says benign
+(p_attack=0.0021), **Ax6 BeaconLike fires 1.00 → VIOLATED**, and the KG flags the cluster as
+emerging and beacon-dominated. Both non-neural pillars dissent from the CNN, on exactly the family
+the CNN is independently proven to get wrong. **No single-pillar system produces that.**
+
+# Phase 5 — fusion + rigor
+
+## `scripts/fusion_kg.py`
+
+**Purpose**: **Parameter-free rank fusion of the CNN and the KG — the first combination in this
+project to beat the CNN baseline.**
+
+| | macro | Bot | Web BF | XSS |
+|---|---|---|---|---|
+| CNN alone | 0.6399 [0.6353, 0.6446] | 0.0446 | 0.9226 | **0.9524** |
+| **CNN + KG (rank-mean)** | **0.6926 [0.6626, 0.7328]** | **0.2518** | **0.9283** | 0.8976 |
+
++0.0528, paired bootstrap **p<0.001**, 95 % CI [+0.0468, +0.0594], all 3 seeds improve, seed ranges
+**disjoint**, and it survives the lateness control.
+
+**Why it works when every fitted fusion failed**: THE FUSION WALL applies to *fitted* combiners,
+which must be calibrated on validation data containing no zero-day by construction —
+`fusion_beaconlike.py` measured exactly that and returned `[2.35, 0.02]`. **A rank-mean needs no
+fitting: the weight is imposed, not discovered**, so the combiner never has to learn the value of a
+signal it was never shown. Ranks rather than raw scores because the channels are on wildly different
+scales and `s_kg` is heavily tied.
+
+⚠️ **Caveats that must travel with the number**: (1) **three combination rules were tried and the
+best is reported** — rank-mean 50/50 **+0.0528**, rank 0.75/0.25 **+0.0320**, rank-**max**
+**−0.4125** (catastrophic; max is dominated by whichever channel has more top ranks, and `s_kg`'s
+193-value score puts huge tied blocks there). 50/50 is the canonical no-tuning default, but this is
+a mild selection effect and is stated, not hidden. (2) **XSS gets worse** (0.9524 → 0.8976) — a real
+trade. (3) It is a channel combination, **not** the full Phase-5 Decision Fusion. (4) Per the noise
+floor, **direction is established (3/3 seeds); magnitude is not (0.027–0.088).**
+
+## `scripts/fusion_multi.py`
+
+**Purpose**: Parameter-free multi-channel rank fusion over **five pre-registered subsets** — the
+improvement path that does not involve fitting on test.
+
+**The constraint that shapes it**: zero-day families are test-only by construction, so **any**
+hyperparameter tuned by looking at zero-day performance (k, τ, burst threshold, which channels to
+include) is fitting on the test set. What remains legitimate is combination with **imposed** rather
+than learned weights.
+
+| subset | macro | Δ vs CNN | Bot |
+|---|---:|---:|---:|
+| **CNN + KG (2 channels)** | **0.6926** | **+0.0527** | 0.2518 |
+| ALL 9 channels | 0.6664 | +0.0265 | 0.1510 |
+| A_ONLY (supervised) | 0.6600 | +0.0201 | 0.0730 |
+| A+B+KG (3 channels) | 0.6509 | +0.0110 | 0.3147 |
+| B_ONLY (benign-only) | 0.1180 | **−0.5219** | 0.0975 |
+
+🔴 **More channels made it worse.** Under equal weighting IsolationForest (macro 0.0653) gets the
+same vote as the CNN. The 2-channel pairing wins because CNN and KG are **complementary in a
+specific way** — the KG rescues Bot while the CNN holds the web attacks — **not** because more
+evidence is better. **What survives as robust: 4 of 5 subsets beat the CNN baseline.**
+
+⚠️ All five subsets were pre-registered and **all five are reported**. Quoting only the winner would
+be a selection effect.
+
+## `scripts/significance_seed.py`
+
+**Purpose**: **Seed-level** significance — "would this hold if we retrained?" — which n=3 made
+arithmetically impossible. `significance.py` bootstraps over test **flows** ("would this hold on
+different traffic?"); this is the different, and for a claim about a *method* arguably more
+important, question.
+
+**Why it could not exist before**: the Wilcoxon signed-rank test with 3 paired samples has a
+**minimum achievable two-sided p of 0.25**, so no n=3 result could reach p<0.05 regardless of effect
+size. At **n=6** the floor drops to **p = 2/2⁶ = 0.031**.
+
+⚠️ **Even at n=6 the test is weak** — it can only return p ∈ {0.031, 0.094, …}. **A non-significant
+result at n=6 is not evidence of no effect; it is evidence the test is underpowered.** Both the
+p-value and the raw per-seed values are printed, and a sign test is reported alongside.
+
+**Functions**: `fam_pr`, `macro`, `seed_test` · **Writes** `outputs/metadata/significance_seed.json`.
+
 # Legacy (temporal split — superseded 2026-06-18)
 
 > These still execute, but produce the **superseded** temporal-split artifacts. No reported result
@@ -563,6 +795,36 @@ the combiner learned to ignore the symbolic channel.
 ---
 
 # Utilities
+
+## `scripts/lint_conventions.py`
+
+**Purpose**: **Mechanical enforcement of this repo's conventions. Run it at the end of every
+session** — it is non-negotiable #6 in [CLAUDE.md](../CLAUDE.md).
+
+```bash
+python scripts/lint_conventions.py            # report
+python scripts/lint_conventions.py --strict   # exit 1 on any FAIL (for CI)
+```
+
+**Why it exists**: on 2026-08-03 the same latent bug (`open()` with no explicit encoding → cp1252 on
+Windows) was found and fixed **three separate times in one session** — `config.py`, `tracking.py`,
+`dashboard_server.py` — because each was treated as an incident rather than an instance of a *class*.
+Separately, the heartbeat-monitor rule lapsed on **six** long-running jobs. Conventions written as
+prose depend on someone remembering them at exactly the right moment; this fails loudly instead.
+**Each check names the incident that motivated it**, so nobody has to re-derive why.
+
+**Checks**: `open()`-without-encoding · timestamp-bypass (naive `to_datetime` without `timeline`) ·
+smoke-namespace · single-component-table · **script-count** · **undocumented-scripts** ·
+hardcoded-paths · `runs.jsonl` integrity · launcher-suppresses-log-growth · gitignored-research-record.
+
+⚠️ **A cautionary note about this script itself.** On 2026-08-05 the `script-count` check was found
+to have been **passing on a wrong count for two sessions**: its regex `(\d+) scripts` required the
+number to sit directly against the word, but the docs put a qualifier between them
+(*"…&#32;Python scripts"*), so the check never fired — 9 undocumented scripts slid through while the
+lint reported ALL CHECKS PASS. **A mechanical check that cannot fire is worse than no check — it
+buys false confidence.** Fixed by tolerating a qualifier (while staying on one line and rejecting
+`scripts/` so command lines are not counted as prose) and by adding `undocumented-scripts`, which
+verifies *membership* rather than arithmetic.
 
 ## `scripts/dashboard_server.py`
 
