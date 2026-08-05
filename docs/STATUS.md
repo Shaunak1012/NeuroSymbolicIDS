@@ -4,6 +4,55 @@
 
 ## ▶ RESUME HERE (next session)
 
+## ✅ DETERMINISM CONFIRMED AT FULL SCALE (2026-08-05) — the noise floor is closed
+
+**Two complete 50-epoch trainings of seed 42 produced BYTE-IDENTICAL predictions**
+(hash `ff0bb97f…` both runs), and they did so **while three other jobs were competing for CPU** —
+a stronger test than an idle machine, and the direct answer to the session/environment effect that
+was withdrawn on 2026-08-04. The fast check (50k rows, 2 epochs) agreed.
+
+**`determinism.enable()` at intra=16 / inter=2 pins the result at full speed.** The single-thread
+fallback is not needed. **The SD 0.0222 noise floor applies to runs made BEFORE this flag; it does
+not apply going forward.**
+
+⚠️ **This does not make old and new runs comparable.** Pinning threads changes the reduction order,
+so a deterministic seed-42 run defines a **new fixed point** and will not reproduce any of the 11
+historical seed-42 values. They are different populations — do not pool them. Runs now carry
+`det_*` fields in `runs.jsonl` so the state travels with the numbers.
+
+## 🧪 TIER C — BENIGN-ONLY ANOMALY ZOO (2026-08-05) — `scripts/anomaly_zoo.py`
+
+VAE, Deep SVDD, One-Class SVM and LOF, all trained on **benign only** (zero-day-legitimate by
+construction, matching `autoencoder_paper.py`'s discipline). n=1, seed 42.
+
+| model | MACRO | Bot | Bot lift | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| **deep_svdd** | 0.1393 | **0.1558** | **4.56×** | 0.1656 | 0.0964 |
+| **lof** | **0.3368** | 0.0380 | 1.11× | **0.5592** | **0.4131** |
+| vae | 0.0444 | 0.0742 | 2.17× | 0.0422 | 0.0169 |
+| ocsvm_sgd | 0.0275 | 0.0213 | 0.62× | 0.0422 | 0.0191 |
+
+*(reference: Autoencoder Bot 0.1314 · Mahalanobis 0.1030 · IsolationForest 0.0637 · **KG causal 0.3103**)*
+
+🔴 **C1 "something beats the AE on Bot" — the script says CONFIRMED. DO NOT CITE IT THAT WAY.**
+Deep SVDD's **0.1558 sits INSIDE the autoencoder's own n=3 seed range [0.1078, 0.1647]**. At n=1 this
+is **not an established improvement** — it is one draw from a distribution that already contains it.
+**This is the sixth time a single-seed number has looked like a result in this project**; the
+difference is that it was checked against an existing seed range before being written down.
+**Multi-seed with `ANOM_SEED=43/44` before this goes anywhere near the write-up.**
+
+🔴 **C2 "all collapse on the web families" — FALSIFIED, and this is the real finding.**
+**LOF reaches macro 0.3368 with Web BF 0.5592 and XSS 0.4131** — a benign-only method that does
+**not** collapse on web attacks, unlike the AE (0.1048 / 0.0547). It lands almost exactly where
+**Mahalanobis** does (macro 0.3777), which fits: both are density/distance methods over the feature
+space, whereas the AE scores by reconstruction. **So "benign-only ⇒ collapses on web attacks" was
+never a property of the (B) family — it is a property of reconstruction-error scoring specifically.**
+That is a real correction to how this project has described the (B) family.
+
+✅ **C3 — Deep SVDD did not collapse** (score SD 3.20×10⁻²). The known degenerate solution (every
+input mapped to the hypersphere centre, objective → 0, detects nothing) was guarded against with no
+bias terms and no bounded activations, and checked explicitly rather than assumed.
+
 ## 📉 TIER A — CLASSIC BASELINES (2026-08-05) — `scripts/baselines_classic.py`
 
 The comparison table every NIDS paper carries and this project had never run. Same protocol as

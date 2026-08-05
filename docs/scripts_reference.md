@@ -27,6 +27,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Tier C — benign-only anomaly** | **`anomaly_zoo`** (VAE · Deep SVDD · OC-SVM · LOF) |
 | **Tier A — classic baselines** | **`baselines_classic`** (DT · kNN · NB · LogReg · SVM · MLP) |
 | **Open-set / OOD** | **`ood_scores`** (post-hoc battery on the CNN) · `novelty` (MSP, Mahalanobis) |
 | **Literature comparability** | **`paper_metrics`** (base-paper Table II + the field's suite) · `comparability` |
@@ -563,6 +564,36 @@ the combiner learned to ignore the symbolic channel.
 > can get a hand-specified zero-day signature into the model at all.
 
 ---
+
+## `scripts/anomaly_zoo.py`
+
+**Purpose**: **Tier C** — VAE, Deep SVDD, One-Class SVM (SGD) and LOF, all trained on **benign only**,
+so zero-day-legitimate by construction. This is the tier the evidence said could move Bot, since the
+channels that touch Bot all model normality rather than a decision boundary.
+
+| model | MACRO | Bot | lift | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| **deep_svdd** | 0.1393 | **0.1558** | **4.56×** | 0.1656 | 0.0964 |
+| **lof** | **0.3368** | 0.0380 | 1.11× | **0.5592** | **0.4131** |
+| vae | 0.0444 | 0.0742 | 2.17× | 0.0422 | 0.0169 |
+| ocsvm_sgd | 0.0275 | 0.0213 | 0.62× | 0.0422 | 0.0191 |
+
+🔴 **C1 reads CONFIRMED in the output — do not cite it that way.** Deep SVDD's Bot **0.1558 sits
+inside the autoencoder's own n=3 range [0.1078, 0.1647]**, so at n=1 it is not an established
+improvement. **Multi-seed with `ANOM_SEED=43/44` first.**
+
+🔴 **C2 FALSIFIED, and that is the real finding.** LOF reaches macro **0.3368** (Web BF 0.5592, XSS
+0.4131) — a benign-only method that does *not* collapse on web attacks, landing where **Mahalanobis**
+does (0.3777). Both are density/distance methods; the AE scores by reconstruction. **So
+"benign-only ⇒ collapses on web attacks" is a property of reconstruction-error scoring, not of the
+(B) family.** A real correction to how this project has described that family.
+
+✅ **C3 — Deep SVDD did not collapse** (score SD 3.20×10⁻²). Guarded with no bias terms and no
+bounded activations, and checked explicitly rather than assumed.
+
+⚠️ **Deviations**: LOF fitted on a 50,000-row benign subsample (of ~442k — it stores its training set
+and does not finish at full size); One-Class SVM uses the SGD linear approximation (exact kernel
+OC-SVM is O(n²)).
 
 ## `scripts/baselines_classic.py`
 
