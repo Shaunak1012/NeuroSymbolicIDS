@@ -3,9 +3,10 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-05** (41 Python scripts, plus 5 shell launchers).
+> Last verified against source: **2026-08-05** (42 Python scripts, plus 5 shell launchers).
 
-> 🔴 **This file documented 32 of 41 scripts until 2026-08-05** — the entire Phase-4 / fusion /
+> 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
+> disk) — the entire Phase-4 / fusion /
 > explainability toolchain (`kg` · `kg_visualize` · `explain` · `fusion_kg` · `fusion_multi` ·
 > `comparability` · `robustness` · `significance_seed` · `lint_conventions`) was missing while the
 > header still claimed it was verified. The `script-count` lint **passed** throughout, because its
@@ -25,6 +26,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
+| **Phase 7.5 — operational readiness** | **`operational`** (gates Phase R) |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
 | **Shell launchers** (not Python) | `run_long.sh` (**use this for any job >10–15 min**) · `seed_sweep.sh` · `noise_floor.sh` · `rigor_n6.sh` · `ltn_ctrl_sweep.sh` |
@@ -778,6 +780,101 @@ result at n=6 is not evidence of no effect; it is evidence the test is underpowe
 p-value and the raw per-seed values are printed, and a sign test is reported alongside.
 
 **Functions**: `fam_pr`, `macro`, `seed_test` · **Writes** `outputs/metadata/significance_seed.json`.
+
+# Phase 7.5 — operational readiness
+
+## `scripts/operational.py`
+
+**Purpose**: **All four Tier-1 items that gate Phase R**, in one pass. Exists because **PR-AUC is
+the wrong target for a response engine**: it summarises ranking across *all* thresholds while the
+engine acts at **one**. A system can post macro 0.69 and still auto-block at 40 % precision, and no
+other metric in this project would warn you.
+
+**Four pre-registered predictions, all CONFIRMED.**
+
+**1 — Ship the ensemble, not a single run.** 11 CNN runs, probability-mean:
+
+| | macro |
+|---|---:|
+| single-run mean (n=11) | 0.6217 |
+| single-run **max** | **0.6446** ← the number usually quoted |
+| single-run min | 0.5825 |
+| **ENSEMBLE** | **0.6356** |
+
+Beats the mean, **not** the max — because 0.6446 is the top of 11 draws, not a typical result. **The
+ensemble's argument is not the delta, it is that it is reproducible.** ⚠️ `cnn_auxhead_*` is
+**excluded and the exclusion is load-bearing** — it matches the `cnn_*` glob but is a *different
+architecture*, so including it would silently answer "does a heterogeneous ensemble help?" while
+being reported as a reproducibility fix. Caught on first run (12 files, not the 11 STATUS reports).
+
+**2 — Calibration**, fitted on **validation**, which is zero-day-free by construction (asserted in
+code), then measured *separately* on known-class and zero-day subsets:
+
+| method | ECE all | ECE known-class | ECE zero-day | **zd ÷ known** |
+|---|---:|---:|---:|---:|
+| uncalibrated | 0.0260 | 0.0084 | 0.0381 | 4.5× |
+| Platt | 0.0196 | 0.0006 | 0.0387 | 62× |
+| isotonic | **0.0192** | **0.0001** | 0.0387 | **287×** |
+
+🔴 **Calibration works beautifully on known classes and does nothing for zero-day.** Isotonic reaches
+ECE 0.0001 on known classes while its zero-day ECE is unchanged at 0.0387 — **287× worse.** A
+calibrator learns a score→outcome mapping; for a class the model has never seen, that mapping does
+not hold. **The better the calibration, the wider the gap** — which is the fusion wall in yet another
+guise.
+
+🔴 **Isotonic wins ECE but is UNUSABLE as an operating point**, and this is an operational finding in
+its own right: it is a step function with **74 distinct values** over 114,658 flows, so the 1%-FPR
+quantile lands inside a tie block. The first run of this script thresholded on it and achieved
+**FPR 0.70 against a 0.01 target.** Platt is a monotone *continuous* transform (59,920 distinct
+values), preserves the ranking exactly, and hits the target FPR at 0.0100. **Calibrate with isotonic
+for reporting; threshold with Platt.**
+
+**3 — Precision @ alert budget.** Precision is **~1.000 at every budget for every channel** — and
+that is the problem, because **the alerts are entirely known attacks**:
+
+| budget | CNN precision | zero-day in alerts | zd recall |
+|---:|---:|---:|---:|
+| 100 | 1.000 | **0** | 0.0000 |
+| 1,000 | 1.000 | **0** | 0.0000 |
+| 10,000 | 1.000 | 3 | 0.0007 |
+| 25,000 | 1.000 | 1,913 | 0.4573 |
+
+**Depth required before a novel attack surfaces at all** (as % of the 114,658 test flows):
+
+| channel | @10 % zd | @25 % zd | @50 % zd |
+|---|---:|---:|---:|
+| CNN | 13,170 (11 %) | 14,301 (12 %) | 59,355 (**52 %**) |
+| CNN ensemble | 29,911 (26 %) | 31,533 (28 %) | 60,043 (52 %) |
+| **CNN + KG fusion** | 16,556 (14 %) | 23,899 (21 %) | **36,661 (32 %)** |
+| **KG (causal)** | 14,992 (13 %) | 28,701 (25 %) | **33,063 (29 %)** |
+
+**At any deployable alert budget you see only known attacks.** Reaching half the zero-day flows means
+reviewing a third to a half of all traffic. **The KG and the fusion cut that depth by ~20 pp**, which
+is the clearest operational statement of what the KG buys — better than any PR-AUC delta.
+
+**4 — Selective prediction / abstention.** Confidence = **margin from the decision threshold**,
+`|logit(p) − logit(thr)|`. ⚠️ The first version used `|p − 0.5|`, which is wrong when the operating
+point is 0.000049 — it ranks *confidently benign* flows as most confident and collapsed recall to
+0.035 for reasons unrelated to selective prediction.
+
+| coverage | precision | recall | benign kept | **zd precision** |
+|---:|---:|---:|---:|---:|
+| 100 % | 0.990 | 0.964 | 55,237 | **0.0350** |
+| 95 % | 0.996 | 0.963 | 49,766 | **0.0350** |
+| 90 % | 0.996 | 0.963 | 44,035 | **0.0350** |
+| 75 % | 0.996 | 0.963 | 26,839 | **0.0350** |
+
+🔴 **Abstention does not rescue zero-day — zero-day precision does not move at all (+0.0000).**
+Predicted in advance from the Bot failure analysis: the CNN is **confidently wrong** on Bot (100 %
+argmax BENIGN, mean p(BENIGN)=0.9984), and **confidence-based abstention cannot catch
+confident-and-wrong.** Coverages ≤50 % are excluded as degenerate — they retain 2–125 benign flows
+out of 55,237, which is why their FPR column reads exactly 1.0000.
+
+**Writes** `outputs/metadata/operational.json`, `outputs/figures/operational.png`.
+
+```bash
+python scripts/operational.py
+```
 
 # Legacy (temporal split — superseded 2026-06-18)
 
