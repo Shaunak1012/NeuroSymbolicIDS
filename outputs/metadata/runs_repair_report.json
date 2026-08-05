@@ -1,8 +1,20 @@
 {
  "applied": true,
- "rows_before": 121,
+ "rows_before": 143,
  "seed_fixes": [],
- "duplicates_removed": [],
+ "duplicates_removed": [
+  "ood_cnn_p_attack",
+  "ood_msp",
+  "ood_max_logit",
+  "ood_entropy",
+  "ood_margin",
+  "ood_energy_T1",
+  "ood_energy_T10",
+  "ood_energy_T100",
+  "ood_energy_T1000",
+  "ood_odin_T1",
+  "ood_odin_T1000"
+ ],
  "schema_stamped": 0,
  "duplicate_names_preserved": [
   "cnn_auxhead_l0.5",
@@ -16,6 +28,6 @@
   "random_forest",
   "xgboost"
  ],
- "rows_after": 121,
- "stamp": "2026-08-04T08:50:00+00:00"
+ "rows_after": 132,
+ "stamp": "2026-08-05T03:48:00+00:00"
 }

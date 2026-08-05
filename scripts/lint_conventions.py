@@ -226,8 +226,28 @@ def _c7():
 def _c9():
     bad = []
     for p in glob.glob(os.path.join(SCRIPTS, "*.sh")):
-        for i, line in enumerate(_read(p).splitlines(), 1):
-            s = line.strip()
+        # Join backslash continuations into LOGICAL lines before checking.
+        # 2026-08-05: this check PASSED on verify_determinism.sh, which pipes a
+        # training run through a bare `grep`, because the pipe sat on a
+        # continuation line and the "python" token sat on the previous one --
+        # so the two conditions could never be true of the same physical line
+        # and the check was structurally unable to fire. Second check found
+        # inert on the same day as the script-count regex; the shared lesson is
+        # that a check must be tested against the code it is meant to catch.
+        raw, logical, buf, start = _read(p).splitlines(), [], "", 1
+        for i, line in enumerate(raw, 1):
+            if not buf:
+                start = i
+            buf += " " + line.rstrip()
+            if line.rstrip().endswith("\\"):
+                buf = buf.rstrip("\\")
+                continue
+            logical.append((start, buf.strip()))
+            buf = ""
+        if buf:
+            logical.append((start, buf.strip()))
+
+        for i, s in logical:
             if s.startswith("#") or "python" not in s.lower():
                 continue
             # tail/head buffer; grep --line-buffered is fine, plain grep is not

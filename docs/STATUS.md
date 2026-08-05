@@ -4,6 +4,41 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🔬 OOD SCORING BATTERY (2026-08-05) — `scripts/ood_scores.py`. The battery does NOT rescue Bot.
+
+*"Did you try a proper OOD score?"* is the most predictable reviewer question for a zero-day paper,
+and until now the honest answer was *"we tried two"* (MSP, Mahalanobis). The open-set literature's
+standard battery is all **functions of logits we had already computed**, so it cost one forward pass.
+Post-hoc on the trained CNN, n=3 seeds, **nothing retrained and nothing tuned** (ODIN's ε and the
+temperatures are literature defaults — tuning them on zero-day would be fitting the test set).
+
+| scorer | macro | Bot | Bot lift | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| CNN p(attack) *(reference)* | **0.6399** | 0.0448 | 1.31× | **0.9226** | **0.9524** |
+| ODIN T=1 | 0.6040 | 0.0442 | 1.29× | 0.8895 | 0.8783 |
+| logit margin | 0.5929 | 0.0488 | 1.43× | 0.8763 | 0.8536 |
+| entropy | 0.5925 | 0.0437 | 1.28× | 0.8728 | 0.8609 |
+| ODIN T=1000 | 0.5884 | 0.0334 | 0.98× | 0.8772 | 0.8547 |
+| MSP *(reference)* | 0.5884 | 0.0448 | 1.31× | 0.8719 | 0.8485 |
+| max-logit | 0.5702 | 0.0332 | 0.97× | 0.8595 | 0.8179 |
+| energy T=1 | 0.5214 | 0.0333 | 0.97× | 0.8036 | 0.7272 |
+| **energy T=1000** | **0.0326** | **0.0783** | **2.29×** | 0.0135 | 0.0059 |
+
+**O1 (no scorer materially beats MSP on Bot) — CONFIRMED, but by a 2 % margin.** The falsification
+threshold was fixed at 0.08 in advance; the best scorer landed at **0.0783**. **Say that, do not
+round it to a clean pass** — a threshold set slightly lower would have flipped it.
+
+**What disqualifies the winner is not the margin, it is the cost.** `energy_T1000` buys Bot 1.75×
+MSP's by **destroying known-class discrimination entirely** — macro **0.0326** vs MSP's 0.5884, Web
+BF 0.0135, XSS 0.0059. And it is still **below every (B)-family channel already measured**: AE
+0.1314 · RandomForest 0.1311 · Mahalanobis 0.1030 · **KG causal 0.3103**. The effect is consistent
+across T=10/100/1000 (0.074–0.078), so it is real, just useless.
+
+✅ **The representational account survives, and now covers the whole standard battery rather than
+just MSP.** No function of these logits recovers a class the representation does not encode. This
+closes the reviewer question **with a measurement instead of an argument** — with the energy-family
+footnote attached.
+
 ## 📊 BASE-PAPER + LITERATURE METRICS (2026-08-05) — `scripts/paper_metrics.py`
 
 **Until today not one of the base paper's numbers had ever been computed for our models.** The
