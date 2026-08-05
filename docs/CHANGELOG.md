@@ -2,6 +2,65 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-05 (method tiers A and C — filling the comparison table)
+
+Two of the four missing-method tiers, run after the base-paper metrics exposed how thin our
+comparison table was.
+
+### 📉 Tier A — classic baselines (`baselines_classic.py`)
+
+Decision Tree, k-NN, Naive Bayes, Logistic Regression, linear SVM, RBF-SVM (Nystroem), MLP.
+
+- 🔴 **The clearest protocol-gap evidence in the project.** On the field's binary metric all seven
+  score **0.977–0.985** against the CNN's 0.9928; on macro zero-day they span **0.0374 → 0.6049**,
+  a 16× spread. **Logistic regression looks 98 % as good as the CNN on the published metric and is
+  17× worse on zero-day.** `comparability.py`'s argument, made across seven models instead of one.
+- ⚠️ **The two that look competitive are score-degenerate.** `decision_tree` (0.6049) is nominally
+  indistinguishable from the CNN, but **50.1 % of test rows share one score** — a depth-limited tree
+  emits leaf-purity probabilities. k-NN is 49.8 % tied. **PR-AUC over a half-tied ranking is not
+  comparable to a continuous scorer's.** The best *valid* result is the **MLP at 0.5360**, genuinely
+  below the CNN. Tie diagnostics are now printed and persisted for every model.
+- **T3 FALSIFIED**: k-NN was predicted to be the best Tier-A method on Bot — the only instance-based
+  one, working on the same raw-feature substrate the KG clusters. It was not (0.0342 vs 0.0415).
+- 🔴 **A bug in my own script, caught by recomputing from the saved arrays.** Scores were cast to
+  **float32 on save** while evaluated in float64; GaussianNB's probabilities underflow toward 0/1, so
+  the narrower mantissa collapsed distinct values into ties and its reloaded macro read **0.0597
+  against a logged 0.1264** — the saved channel no longer reproduced the logged metric. Fixed to
+  float64 in three scripts. Same float32-precision class as the 2026-07-27 saturation bug.
+
+### 🧪 Tier C — benign-only anomaly zoo (`anomaly_zoo.py`)
+
+VAE, Deep SVDD, One-Class SVM (SGD), LOF — all trained on benign only.
+
+- 🔴 **C2 FALSIFIED, and it corrects how this project has described the (B) family.** **LOF reaches
+  macro 0.3368** (Web BF 0.5592, XSS 0.4131) — a benign-only method that does **not** collapse on web
+  attacks, unlike the autoencoder (0.1048 / 0.0547). It lands where **Mahalanobis** does (0.3777).
+  Both are density/distance methods; the AE scores by reconstruction. **So "benign-only ⇒ collapses
+  on web attacks" is a property of reconstruction-error scoring, not of the (B) family.**
+- 🔴 **C1 reads CONFIRMED and must not be cited that way.** Deep SVDD's Bot **0.1558 sits inside the
+  autoencoder's own n=3 range [0.1078, 0.1647]**, so at n=1 it is not an established improvement.
+  Sixth single-seed near-miss in this project — the difference is that it was checked against an
+  existing seed range *before* being written down. Needs `ANOM_SEED=43/44`.
+- ✅ **C3** — Deep SVDD did not collapse (score SD 3.20×10⁻²); the degenerate all-to-centre solution
+  was guarded against and checked explicitly rather than assumed.
+
+### ⚙️ Determinism confirmed at full scale
+
+**Two complete 50-epoch seed-42 trainings → BYTE-IDENTICAL predictions**, achieved **while three
+other jobs competed for CPU** — a stronger test than an idle machine, and the direct answer to the
+withdrawn session/environment effect. Reproducibility at full speed; the single-thread fallback is
+unnecessary. ⚠️ **The SD 0.0222 floor applies to runs made before the flag and not going forward —
+but old and new runs are different populations and must not be pooled.**
+
+### 🔴 A second lint check found structurally unable to fire
+
+`launcher-suppresses-log-growth` **passed** on my own `verify_determinism.sh`, which pipes a training
+run through a bare `grep`: the check required `python` and the pipe on the **same physical line**, but
+the pipe sat on a backslash continuation. It then produced **exactly the false STALL alarm it exists
+to prevent**. Third instance of this class in one day. Fixed by joining continuations, and the check
+was verified to fire on the offending file *before* the file was fixed. **Same shape as the
+`script-count` regex gap found the same morning: a check that cannot fire is worse than no check.**
+
 ## 2026-08-05 (base-paper + literature metrics, ablation, determinism)
 
 ### 📊 Our numbers in the base paper's metric set — computed for the first time
