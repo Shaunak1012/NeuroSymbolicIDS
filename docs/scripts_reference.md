@@ -27,6 +27,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Tier D — protocol variance** | **`protocol_variance`** (k-fold + SWA) |
 | **Tier C — benign-only anomaly** | **`anomaly_zoo`** (VAE · Deep SVDD · OC-SVM · LOF) |
 | **Tier A — classic baselines** | **`baselines_classic`** (DT · kNN · NB · LogReg · SVM · MLP) |
 | **Open-set / OOD** | **`ood_scores`** (post-hoc battery on the CNN) · `novelty` (MSP, Mahalanobis) |
@@ -564,6 +565,41 @@ the combiner learned to ignore the symbolic channel.
 > can get a hand-specified zero-day signature into the model at all.
 
 ---
+
+## `scripts/protocol_variance.py`
+
+**Purpose**: **Tier D** — Phase 7.5 Tier 2 #6 (k-fold CV) and #7 (SWA). Measures **data-split
+variance**, which nothing else in this project separates from seed variance.
+
+**Design constraint**: the **test set is fixed and never re-partitioned** — zero-day families are
+test-only, so folding them into training destroys the protocol. The 5-fold runs over the
+**train+val pool only**, every fold scored against the same untouched test set. ⚠️ This is *not* the
+k-fold NIDS papers usually report, which rotates the test set and thereby measures known-class
+performance.
+
+| fold | 1 | 2 | 3 | 4 | 5 |
+|---|---:|---:|---:|---:|---:|
+| macro | 0.6218 | 0.6054 | 0.6384 | 0.6284 | **0.5802** |
+
+**mean 0.6148 · SD 0.0228 · spread 0.0582**
+
+🔴 **Data-split SD (0.0228) and training SD (0.0222) are the SAME SIZE — 1.03×.** D1 technically
+confirms, but **do not report it as "data variance is larger"**; it is a dead heat, and the finding
+is that a *second* unmeasured uncertainty source exists at the same magnitude as the one that
+retracted C2. Comparisons on a shared split still cancel it (threshold ~0.0256 stands); **an absolute
+number carries √(0.0228² + 0.0222²) ≈ 0.032.** Fold 5 (0.5802) falls **below the CNN's entire n=6
+range**.
+
+✅ **D2 — SWA does nothing** (0.6218 → 0.6217). It flattens the solution w.r.t. the *known-class* loss
+it averages over, which is not what zero-day performance measures.
+
+⬜ **Cross-dataset (Phase 6) BLOCKED** — CIC-IDS2018 is not present locally. Recorded in the JSON
+rather than silently skipped.
+
+⚠️ **The model is `cnn_paper.py`'s replicated VERBATIM** (3 conv+BN blocks, Flatten, L2 dense, focal
+loss with the `reshape([-1])` fix, **no `class_weight`**), and must be kept in sync — `cnn_paper.py`
+cannot be imported because importing it runs a training. The first version used a loosely CNN-like
+model and reported **0.3244**, an architecture-and-loss gap masquerading as data variance.
 
 ## `scripts/anomaly_zoo.py`
 

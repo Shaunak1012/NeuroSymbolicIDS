@@ -106,17 +106,51 @@ ypool_e = le.transform(ypool)
 nfeat = Xpool_t.shape[1]
 
 
+# 🔴 THIS MUST BE cnn_paper.py's MODEL, EXACTLY.
+# The first version of this file used a loosely "CNN-like" model — 2 conv blocks,
+# GlobalAveragePooling, plain cross-entropy, plus class_weight — and carried a
+# docstring claiming it was "the same shape as cnn_paper.py". It was not, and
+# fold 1 came back at macro 0.3244 against the CNN's 0.6250. That gap was an
+# ARCHITECTURE AND LOSS difference being silently reported as data-split
+# variance, which is the exact confound this script exists to isolate. Caught by
+# reading cnn_paper.py instead of trusting the comment I had written from memory
+# — the "verify against source, not memory" rule in CLAUDE.md.
+#
+# cnn_paper.py cannot be imported (it is a script: importing runs a full
+# training), so the definition is replicated here and must be kept in sync.
+def focal(alpha_w, gamma=2.0):
+    """Verbatim from cnn_paper.py, including the reshape([-1]) that fixes the
+    (batch,1) broadcast bug — any new loss in this project must apply it."""
+    a = tf.constant(alpha_w); nc = len(alpha_w)
+
+    def loss(yt, yp):
+        yt = tf.reshape(tf.cast(yt, tf.int32), [-1])
+        yp = tf.clip_by_value(yp, tf.keras.backend.epsilon(),
+                              1 - tf.keras.backend.epsilon())
+        pt = tf.reduce_sum(yp * tf.one_hot(yt, nc), axis=-1)
+        return tf.reduce_mean(-tf.gather(a, yt) * tf.pow(1 - pt, gamma) * tf.math.log(pt))
+    return loss
+
+
 def build(nf, nc):
-    """Same shape as cnn_paper.py, so fold-to-fold variance is attributable to
-    the DATA SPLIT and not to an architecture change."""
-    inp = Input((nf, 1))
-    x = layers.Conv1D(64, 3, activation="relu", padding="same")(inp)
-    x = layers.MaxPooling1D(2)(x)
-    x = layers.Conv1D(128, 3, activation="relu", padding="same")(x)
-    x = layers.GlobalAveragePooling1D()(x)
-    x = layers.Dense(64, activation="relu", name="embedding")(x)
+    """Verbatim from cnn_paper.py, so fold-to-fold variance is attributable to
+    the DATA SPLIT and nothing else."""
+    inp = Input((nf, 1), name="input")
+    x = inp
+    for f, n in [(32, "1"), (64, "2"), (128, "3")]:
+        x = layers.Conv1D(f, 3, padding="same", activation="relu", name=f"conv{n}")(x)
+        x = layers.BatchNormalization(name=f"bn{n}")(x)
+        x = layers.MaxPooling1D(2, name=f"pool{n}")(x)
+    x = layers.Flatten(name="flatten")(x)
+    x = layers.Dense(64, activation="relu",
+                     kernel_regularizer=tf.keras.regularizers.l2(1e-4),
+                     name="embedding")(x)
+    x = layers.Dropout(0.4)(x)
+    x = layers.Dense(32, activation="relu",
+                     kernel_regularizer=tf.keras.regularizers.l2(1e-4),
+                     name="dense2")(x)
     x = layers.Dropout(0.3)(x)
-    return models.Model(inp, layers.Dense(nc, activation="softmax")(x))
+    return models.Model(inp, layers.Dense(nc, activation="softmax", name="output")(x))
 
 
 def score(model, Xt):
@@ -150,10 +184,13 @@ for k, (itr, iva) in enumerate(skf.split(Xpool_t, ypool_e)):
     Xt = sc.transform(Xte_t).reshape(-1, nfeat, 1).astype(np.float32)
     ya, yb = ypool_e[itr], ypool_e[iva]
 
+    # alpha computed per fold from that fold's own training rows, exactly as
+    # cnn_paper.py computes it from its training split.
     cw = compute_class_weight("balanced", classes=np.unique(ya), y=ya)
+    alpha = np.array([dict(zip(np.unique(ya), cw)).get(i, 1.0) for i in range(n_classes)])
+    alpha = (alpha / alpha.mean()).astype(np.float32)
     model = build(nfeat, n_classes)
-    model.compile(optimizer=tf.keras.optimizers.Adam(1e-3),
-                  loss="sparse_categorical_crossentropy",
+    model.compile(optimizer=tf.keras.optimizers.Adam(3e-4), loss=focal(alpha),
                   metrics=["sparse_categorical_accuracy"])
 
     snaps = []
@@ -166,10 +203,19 @@ for k, (itr, iva) in enumerate(skf.split(Xpool_t, ypool_e)):
             if len(snaps) > SWA_LAST:
                 snaps.pop(0)
 
+    # ⚠️ NO class_weight — cnn_paper.py deliberately omits it because focal-loss
+    # alpha already handles the imbalance, and passing both compounds the effect
+    # (the "double class-weighting" issue in KNOWN_ISSUES). The first version of
+    # this script passed it, which alone made the model non-comparable.
+    # Callbacks also match cnn_paper.py: monitor val accuracy, not val_loss.
     hist = model.fit(Xa, ya, validation_data=(Xb, yb), epochs=EPOCHS, batch_size=256,
-                     class_weight={i: float(w) for i, w in enumerate(cw)}, verbose=2,
-                     callbacks=[callbacks.EarlyStopping(monitor="val_loss", patience=5,
-                                                        restore_best_weights=True),
+                     verbose=2,
+                     callbacks=[callbacks.EarlyStopping(
+                                    monitor="val_sparse_categorical_accuracy",
+                                    patience=8, restore_best_weights=True, mode="max"),
+                                callbacks.ReduceLROnPlateau(
+                                    monitor="val_sparse_categorical_accuracy",
+                                    factor=0.5, patience=3, min_lr=1e-6, mode="max"),
                                 Snap()])
     macro, fam, r = ev(score(model, Xt))
     print(f"  fold {k+1}: macro {macro:.4f} | Bot {fam.get('Bot', float('nan')):.4f} "

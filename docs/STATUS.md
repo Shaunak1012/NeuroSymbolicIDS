@@ -4,6 +4,77 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 📐 TIER D — DATA-SPLIT VARIANCE (2026-08-05) — `scripts/protocol_variance.py`
+
+Phase 7.5 Tier 2 #6 and #7. **5-fold CV over the train+val pool with the TEST SET HELD FIXED** —
+zero-day families are test-only, so folding them into training would destroy the protocol. Each fold
+therefore answers *"same model, same evaluation, different training draw"*. The model is
+`cnn_paper.py`'s **verbatim** (3 conv+BN blocks, Flatten, L2 dense, focal loss, no `class_weight`).
+
+| fold | macro | Bot |
+|---|---:|---:|
+| 1 | 0.6218 | 0.0234 |
+| 2 | 0.6054 | 0.0341 |
+| 3 | 0.6384 | 0.0784 |
+| 4 | 0.6284 | 0.0369 |
+| 5 | **0.5802** | 0.0346 |
+
+**mean 0.6148 · SD 0.0228 · range [0.5802, 0.6384] · spread 0.0582**
+
+### 🔴 The two variance sources are the SAME SIZE — read this before citing 1.03×
+
+| source | SD |
+|---|---:|
+| training stochasticity (6 identical seed-42 runs) | 0.0222 |
+| **data split** (5 folds, fixed model + test) | **0.0228** |
+| ratio | **1.03×** |
+
+D1 was *"data-split SD ≥ training SD"* and it technically **CONFIRMED at 1.03×** — but **do not
+report that as "data variance is larger."** It is a dead heat. **The finding is that a second,
+previously unmeasured source of uncertainty exists at the same magnitude as the one that retracted
+C2.**
+
+**The consequence, stated precisely, because the two cases differ:**
+- **Comparing channels on the same split** (every comparison this project makes): the data draw is
+  **common to both sides and cancels**, exactly as run-to-run noise cancels in the paired fusion
+  comparison. The ~0.0256 threshold stands.
+- **Quoting an absolute number** ("the CNN scores 0.62"): the sources are independent, so the honest
+  uncertainty is **√(0.0228² + 0.0222²) ≈ 0.032** — larger than either alone. A single number from a
+  single split with a single seed carries ~±0.03, not ±0.022.
+
+⚠️ **Fold 5 (0.5802) falls below the CNN's entire n=6 range** [0.5966, 0.6446]. A different stratified
+draw of the *same* protocol produces a number outside everything published for this model.
+
+### ✅ D2 — SWA does nothing (−0.0000)
+
+Averaging the last 5 epochs' weights moved fold 1 from 0.6218 to **0.6217**. Predicted: SWA flattens
+the solution with respect to the **known-class** loss it averages over, and zero-day performance is
+not what that loss measures. **Checkpoint averaging is not a route to zero-day stability.**
+
+### ⬜ Cross-dataset (Phase 6) — BLOCKED, not skipped
+
+**CIC-IDS2018 is not present locally** (`data/` holds only the 2017 `raw_csv`, `raw_csv_full` and
+`processed`). Recorded in `protocol_variance.json` rather than silently omitted; it needs a separate
+data-acquisition step.
+
+> 🔴 **A defect in this script, caught before it published a wrong number.** The first version used a
+> loosely "CNN-like" model — 2 conv blocks, GlobalAveragePooling, plain cross-entropy, **plus
+> `class_weight` on top of focal α** (the double-weighting KNOWN_ISSUES warns about) — while carrying
+> a comment I had written claiming it was *"the same shape as cnn_paper.py."* It was not. Fold 1 came
+> back at **0.3244**, and that 0.30 gap was an **architecture-and-loss difference being reported as
+> data-split variance** — the exact confound the script exists to isolate. Found by reading
+> `cnn_paper.py` instead of trusting my own comment. After replicating the model verbatim, fold 1
+> returned **0.6218**, in line with the CNN's 0.6250 — which is what confirmed the fix.
+> ⚠️ **The anomaly is what forced the check.** Had the wrong model scored near 0.62, it would not have
+> been questioned.
+>
+> 🔴 **Downstream cost:** the killed run had already written **three** wrong-model rows
+> (`cnn_kfold1/2/3`, macro 0.3244/0.3079/0.4077) into `runs.jsonl` — because a `pkill` I did not
+> verify had failed to kill it. They were **not exact duplicates**, so `repair_runs_log.py` would not
+> have caught them: two different models would have sat under one run name indefinitely. Excised
+> 2026-08-05 by timestamp (< 04:40), safe because `runs.jsonl` is version-controlled and `git diff`
+> is the audit trail the append-only rule exists to provide.
+
 ## ✅ DETERMINISM CONFIRMED AT FULL SCALE (2026-08-05) — the noise floor is closed
 
 **Two complete 50-epoch trainings of seed 42 produced BYTE-IDENTICAL predictions**

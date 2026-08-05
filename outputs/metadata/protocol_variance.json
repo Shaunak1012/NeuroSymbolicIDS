@@ -1,0 +1,108 @@
+{
+ "folds": [
+  {
+   "fold": 1,
+   "macro": 0.6217727564558237,
+   "families": {
+    "Bot": 0.023372556503610628,
+    "Heartbleed": 0.00015494260204911,
+    "Infiltration": 0.00057586194711857,
+    "Web Attack Brute Force": 0.9053709288243005,
+    "Web Attack Sql Injection": 0.455534208552704,
+    "Web Attack XSS": 0.9365747840395602
+   },
+   "epochs": 47,
+   "n_train": 795416,
+   "n_val": 198855
+  },
+  {
+   "fold": 2,
+   "macro": 0.6053858967716805,
+   "families": {
+    "Bot": 0.034106228876851906,
+    "Heartbleed": 0.00019910222994497538,
+    "Infiltration": 0.0006938890613331281,
+    "Web Attack Brute Force": 0.8935789710402094,
+    "Web Attack Sql Injection": 0.4256414721399939,
+    "Web Attack XSS": 0.8884724903979802
+   },
+   "epochs": 23,
+   "n_train": 795417,
+   "n_val": 198854
+  },
+  {
+   "fold": 3,
+   "macro": 0.6383818257129331,
+   "families": {
+    "Bot": 0.07838718515020691,
+    "Heartbleed": 0.00014561431876470118,
+    "Infiltration": 0.0004979058823556191,
+    "Web Attack Brute Force": 0.8997121487475866,
+    "Web Attack Sql Injection": 0.4038977871181609,
+    "Web Attack XSS": 0.9370461432410057
+   },
+   "epochs": 31,
+   "n_train": 795417,
+   "n_val": 198854
+  },
+  {
+   "fold": 4,
+   "macro": 0.6283757457331468,
+   "families": {
+    "Bot": 0.03690798551157006,
+    "Heartbleed": 0.00011875361411819517,
+    "Infiltration": 0.0005471513187777996,
+    "Web Attack Brute Force": 0.9101113466448475,
+    "Web Attack Sql Injection": 0.28713620148353014,
+    "Web Attack XSS": 0.9381079050430229
+   },
+   "epochs": 41,
+   "n_train": 795417,
+   "n_val": 198854
+  },
+  {
+   "fold": 5,
+   "macro": 0.5801899430581531,
+   "families": {
+    "Bot": 0.034612323974750864,
+    "Heartbleed": 0.00017809102275747398,
+    "Infiltration": 0.002184321198874265,
+    "Web Attack Brute Force": 0.8629834553360449,
+    "Web Attack Sql Injection": 0.30102882948982196,
+    "Web Attack XSS": 0.8429740498636633
+   },
+   "epochs": 34,
+   "n_train": 795417,
+   "n_val": 198854
+  }
+ ],
+ "meta": {
+  "n_folds": 5,
+  "epochs": 50,
+  "seed": 42,
+  "noise_floor_sd": 0.0222,
+  "test_set": "FIXED, never re-partitioned"
+ },
+ "kfold": {
+  "mean": 0.6148212335463474,
+  "sd": 0.0227788379617592,
+  "min": 0.5801899430581531,
+  "max": 0.6383818257129331,
+  "ratio_to_noise_floor": 1.0260737820612251
+ },
+ "swa": {
+  "n_snapshots": 5,
+  "base_macro": 0.6217727564558237,
+  "swa_macro": 0.6217419481317116,
+  "delta": -3.080832411217482e-05,
+  "delta_in_sd": -0.0013877623473952621
+ },
+ "predictions": {
+  "D1_data_sd_ge_noise": true,
+  "D2_swa_no_help": true
+ },
+ "cross_dataset": {
+  "status": "BLOCKED \u2014 not attempted",
+  "reason": "CIC-IDS2018 is not present locally (data/ holds only the 2017 raw_csv, raw_csv_full and processed dirs). Phase 6 cross-dataset validation needs a separate data acquisition step; reporting this rather than silently skipping it."
+ }
+}
