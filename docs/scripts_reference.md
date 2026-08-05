@@ -27,6 +27,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Tier B — deep architectures** | **`deep_zoo`** (LSTM · GRU · CNN-LSTM · Transformer) |
 | **Tier D — protocol variance** | **`protocol_variance`** (k-fold + SWA) |
 | **Tier C — benign-only anomaly** | **`anomaly_zoo`** (VAE · Deep SVDD · OC-SVM · LOF) |
 | **Tier A — classic baselines** | **`baselines_classic`** (DT · kNN · NB · LogReg · SVM · MLP) |
@@ -565,6 +566,42 @@ the combiner learned to ignore the symbolic channel.
 > can get a hand-specified zero-day signature into the model at all.
 
 ---
+
+## `scripts/deep_zoo.py`
+
+**Purpose**: **Tier B** — LSTM, GRU, CNN-LSTM and a Transformer encoder. Run last (each needs a full
+training pass) and predicted to teach least, but closes the guaranteed *"why didn't you try an
+LSTM?"* question with a measurement. `DEEP_ARCH=lstm` runs one architecture.
+
+| model | MACRO zd | Bot | Web BF | XSS | FIELD binary | min |
+|---|---:|---:|---:|---:|---:|---:|
+| **deep_cnn_lstm** | **0.6219** | 0.0206 | 0.9079 | 0.9372 | 0.9854 | 25.4 |
+| deep_lstm | 0.3633 | 0.0501 | 0.5875 | 0.4524 | 0.9914 | 94.3 |
+| deep_gru | 0.3029 | 0.0626 | 0.5071 | 0.3390 | 0.9932 | 44.9 |
+| **deep_transformer** | **0.1106** | 0.0609 | 0.1818 | 0.0892 | 0.9894 | 57.9 |
+
+✅ **Only the convolutional front-end matters.** CNN-LSTM sits **0.0031** from the CNN
+(indistinguishable); pure recurrence halves the score. Adding an LSTM on top of a conv stack neither
+helps nor hurts; replacing the stack with recurrence is destructive.
+
+**B1 CONFIRMED** (nothing escapes the top tier upward) · **B2 CONFIRMED** (nothing touches Bot; best
+0.0626 vs the KG's 0.3103).
+
+🔴 **B3 FALSIFIED — the tier's most confident prediction.** The Transformer was predicted to be
+*best*, since self-attention is permutation-equivariant and is the only bias here matching unordered
+tabular features. **It came last (0.1106).** ⚠️ Read as *"an untuned Transformer at a 30-epoch
+budget"*, **not** "attention is unsuited to this task" — flat Adam 1e-3, d=32, 2 blocks, 4 heads, no
+warmup, mean-pooled tokens. A negative result about one under-tuned configuration is not one about
+the architecture class.
+
+⚠️ **Two tier-wide caveats.** (1) The recurrent models run over the **feature axis, not time** — 68
+unordered statistics, not 68 timesteps. This matches what published "LSTM on CIC-IDS2017" work does,
+so it is the right comparison to report, but it is **not evidence about sequence modelling for
+intrusion detection**. (2) **Budgets are not matched**: `deep_lstm` ran all 30 epochs without early
+stopping (budget-limited) while `cnn_paper` gets 50; the others early-stopped.
+
+📊 **The field's metric hides the entire tier**: FIELD binary spans 0.9854–0.9932, and the *worst*
+zero-day model posts 0.9894 while `deep_gru` (macro 0.3029) posts the tier's *highest* at 0.9932.
 
 ## `scripts/protocol_variance.py`
 

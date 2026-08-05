@@ -1,0 +1,77 @@
+{
+ "deep_lstm": {
+  "macro": 0.3633285994570281,
+  "families": {
+   "Bot": 0.05008424012947678,
+   "Heartbleed": 0.0008033812567225133,
+   "Infiltration": 0.0017642876125130592,
+   "Web Attack Brute Force": 0.587545507791756,
+   "Web Attack Sql Injection": 0.10906832179613543,
+   "Web Attack XSS": 0.4523560504498517
+  },
+  "fit_minutes": 94.2718079328537,
+  "params": 30665,
+  "epochs_run": 30,
+  "largest_tie_frac": 0.00785815206963317,
+  "overall_binary_pr_auc": 0.9914424319003781
+ },
+ "deep_gru": {
+  "macro": 0.3029182083680024,
+  "families": {
+   "Bot": 0.06262004390105594,
+   "Heartbleed": 0.0004430640790346049,
+   "Infiltration": 0.011949535129284906,
+   "Web Attack Brute Force": 0.5071039342308227,
+   "Web Attack Sql Injection": 0.05714684706600176,
+   "Web Attack XSS": 0.3390306469721285
+  },
+  "fit_minutes": 44.860607000192005,
+  "params": 23625,
+  "epochs_run": 19,
+  "largest_tie_frac": 0.009087896178199516,
+  "overall_binary_pr_auc": 0.9931944974746549
+ },
+ "deep_cnn_lstm": {
+  "macro": 0.6218977752164222,
+  "families": {
+   "Bot": 0.020618981917922368,
+   "Heartbleed": 0.0005297173331993045,
+   "Infiltration": 0.0034911415144480225,
+   "Web Attack Brute Force": 0.9079080257576648,
+   "Web Attack Sql Injection": 0.14032059485168535,
+   "Web Attack XSS": 0.9371663179736796
+  },
+  "fit_minutes": 25.397163899739585,
+  "params": 48009,
+  "epochs_run": 23,
+  "largest_tie_frac": 0.03049939821032985,
+  "overall_binary_pr_auc": 0.9853815590221946
+ },
+ "deep_transformer": {
+  "macro": 0.11062283190195919,
+  "families": {
+   "Bot": 0.06087881156721499,
+   "Heartbleed": 0.00023894841675668838,
+   "Infiltration": 0.0007935840458039953,
+   "Web Attack Brute Force": 0.18182299685583433,
+   "Web Attack Sql Injection": 0.02913563555466486,
+   "Web Attack XSS": 0.08916668728282821
+  },
+  "fit_minutes": 57.858970892429355,
+  "params": 18505,
+  "epochs_run": 29,
+  "largest_tie_frac": 0.06785396570671039,
+  "overall_binary_pr_auc": 0.9894198440159165
+ },
+ "_predictions": {
+  "B1_none_above_band": true,
+  "B2_no_bot": true
+ },
+ "_meta": {
+  "seed": 42,
+  "epochs_cap": 30,
+  "cnn_n6_reference": 0.625,
+  "threshold": 0.0256,
+  "caveat": "recurrent models applied across the feature axis, not time"
+ }
+}

@@ -4,6 +4,62 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🏗️ TIER B — DEEP ARCHITECTURES (2026-08-05) — `scripts/deep_zoo.py`
+
+LSTM, GRU, CNN-LSTM and a Transformer encoder. Run last because each needs a full training pass, and
+predicted to teach us least — but *"why didn't you try an LSTM?"* is a guaranteed examiner question
+and "we predicted it wouldn't help" is not an answer. n=1, seed 42, 30-epoch cap.
+
+| model | MACRO zd | Bot | lift | Web BF | XSS | FIELD binary | min |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **deep_cnn_lstm** | **0.6219** | 0.0206 | 0.60× | 0.9079 | 0.9372 | 0.9854 | 25.4 |
+| deep_lstm | 0.3633 | 0.0501 | 1.46× | 0.5875 | 0.4524 | 0.9914 | 94.3 |
+| deep_gru | 0.3029 | 0.0626 | 1.83× | 0.5071 | 0.3390 | 0.9932 | 44.9 |
+| **deep_transformer** | **0.1106** | 0.0609 | 1.78× | 0.1818 | 0.0892 | 0.9894 | 57.9 |
+
+*(reference: CNN 0.6250 [n=6] · LTN control 0.6110 · RandomForest 0.5985; indistinguishable if
+|gap| ≤ 0.0256)*
+
+### ✅ The architectural finding: only the convolutional front-end matters
+
+**CNN-LSTM lands 0.0031 from the CNN — indistinguishable.** Pure recurrence *halves* the score
+(0.30–0.36). So bolting an LSTM onto a conv front-end neither helps nor hurts, while replacing the
+front-end with recurrence is destructive. **The Conv1D stack is doing the work**, which is a cleaner
+statement than "LSTMs are bad here."
+
+**B1 CONFIRMED** — nothing escapes the top tier upward. **B2 CONFIRMED** — nothing touches Bot (best
+is deep_gru at 0.0626, against the KG's 0.3103).
+
+### 🔴 B3 FALSIFIED — and it was my most confident prediction in the tier
+
+I predicted the **Transformer would be the tier's best**, on the reasoning that self-attention is
+permutation-equivariant and therefore the only inductive bias here that actually fits 68 *unordered*
+tabular features. **It came last, at 0.1106 — six times worse than CNN-LSTM.**
+
+⚠️ **The honest reading is "an untuned Transformer at a 30-epoch budget", not "attention is unsuited
+to this task."** Transformers are notoriously sensitive to LR warmup and schedule; this one used
+Adam 1e-3 flat, d=32, 2 blocks, 4 heads, no warmup, and mean-pooled its feature tokens. **A negative
+result about a specific under-tuned configuration is not a negative result about the architecture
+class**, and it must not be written up as one.
+
+### ⚠️ Two caveats that travel with this whole tier
+
+1. **The recurrent models run over the FEATURE axis, not time.** Each row is 68 unordered engineered
+   statistics, not 68 timesteps. This mirrors what published *"LSTM on CIC-IDS2017 flow features"*
+   work does, so it is the right comparison to report — but **these are not evidence about sequence
+   modelling for intrusion detection.** The genuinely sequential version needs packet or per-host
+   flow sequences, which this project does not have.
+2. **Training budgets are not matched.** `deep_lstm` ran all 30 epochs without early stopping, so it
+   is **budget-limited**, while `cnn_paper` gets 50. GRU (19), CNN-LSTM (23) and Transformer (29)
+   early-stopped, so the caveat applies to the LSTM specifically.
+
+### 📊 And once again, the field's metric hides all of it
+
+**FIELD binary spans 0.9854–0.9932 across all four** — the *worst* macro-zero-day model here
+(Transformer, 0.1106) scores **0.9894** on the metric the literature publishes, and `deep_gru`
+(macro 0.3029) posts the tier's **highest** field binary at 0.9932. Third independent demonstration
+this session, after Tier A and `comparability.py`.
+
 ## 📐 TIER D — DATA-SPLIT VARIANCE (2026-08-05) — `scripts/protocol_variance.py`
 
 Phase 7.5 Tier 2 #6 and #7. **5-fold CV over the train+val pool with the TEST SET HELD FIXED** —
