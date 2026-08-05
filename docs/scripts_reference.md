@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-05** (45 Python scripts, plus 5 shell launchers).
+> Last verified against source: **2026-08-05** (46 Python scripts, plus 5 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -27,6 +27,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Open-set / OOD** | **`ood_scores`** (post-hoc battery on the CNN) · `novelty` (MSP, Mahalanobis) |
 | **Literature comparability** | **`paper_metrics`** (base-paper Table II + the field's suite) · `comparability` |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
 | **Utilities** | `dashboard_server` · `visual` · `check` |
@@ -561,6 +562,39 @@ the combiner learned to ignore the symbolic channel.
 > can get a hand-specified zero-day signature into the model at all.
 
 ---
+
+## `scripts/ood_scores.py`
+
+**Purpose**: The open-set / OOD scoring functions this project had **not** tried — **max-logit**,
+**energy** (Liu et al. 2020, T ∈ {1,10,100,1000}), **entropy**, **ODIN** (Liang et al. 2018,
+temperature + input perturbation), **logit margin** — all **post-hoc on the trained CNN, no
+retraining**. Closes the most predictable reviewer question for a zero-day paper, which until now
+had the honest answer *"we tried two."*
+
+⚠️ **Nothing is tuned.** ODIN's ε and the temperatures are normally selected on held-out OOD data;
+here that would be fitting the test set (the fusion wall again), so literature defaults are used and
+**every value is reported, not the best one.**
+
+| scorer | macro | Bot | Bot lift | Web BF | XSS |
+|---|---:|---:|---:|---:|---:|
+| CNN p(attack) *(ref)* | **0.6399** | 0.0448 | 1.31× | **0.9226** | **0.9524** |
+| logit margin | 0.5929 | 0.0488 | 1.43× | 0.8763 | 0.8536 |
+| MSP *(ref)* | 0.5884 | 0.0448 | 1.31× | 0.8719 | 0.8485 |
+| max-logit | 0.5702 | 0.0332 | 0.97× | 0.8595 | 0.8179 |
+| **energy T=1000** | **0.0326** | **0.0783** | **2.29×** | 0.0135 | 0.0059 |
+
+**O1 (no scorer materially beats MSP on Bot) — CONFIRMED by a 2 % margin.** Threshold fixed at 0.08
+in advance; best came in at **0.0783**. Reported as borderline, not as a clean pass.
+
+**What disqualifies the winner is the cost, not the margin**: `energy_T1000` buys Bot by destroying
+known-class discrimination (macro **0.0326**), and is still below **every** (B)-family channel
+already measured (AE 0.1314 · RF 0.1311 · Mahalanobis 0.1030 · KG 0.3103). Consistent across
+T=10/100/1000, so real — just useless.
+
+✅ **The "representational, not informational" account now covers the whole standard battery.**
+
+**Writes** `outputs/metadata/ood_scores.json` + `y_prob_ood_<name>_test.npy` per scorer (so any of
+them can be fused or compared like any other channel), and logs each to `runs.jsonl`.
 
 ## `scripts/paper_metrics.py`
 

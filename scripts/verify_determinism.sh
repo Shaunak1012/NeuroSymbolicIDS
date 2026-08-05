@@ -47,7 +47,7 @@ for TAG in "$A" "$B"; do
   echo "=== $TAG ==="
   CNN_SEED=42 CNN_TAG="$TAG" CNN_SUBSET="$SUB" CNN_EPOCHS="$EP" \
     PYTHONIOENCODING=utf-8 "$PY" -u scripts/cnn_paper.py 2>&1 \
-    | grep -aE "DETERMINISM|macro|Traceback|Error|DONE"
+    | grep -a --line-buffered -E "DETERMINISM|macro|Traceback|Error|DONE"
 done
 
 echo
