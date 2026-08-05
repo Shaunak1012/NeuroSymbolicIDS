@@ -1,0 +1,67 @@
+{
+ "vae": {
+  "macro": 0.04443231878464151,
+  "families": {
+   "Bot": 0.07423228851802899,
+   "Heartbleed": 0.058389235464201376,
+   "Infiltration": 0.11350055140752441,
+   "Web Attack Brute Force": 0.042153701365651906,
+   "Web Attack Sql Injection": 0.0009367118489636976,
+   "Web Attack XSS": 0.016910966470243607
+  },
+  "deviation": null,
+  "score_std": 19.65065007183786
+ },
+ "deep_svdd": {
+  "macro": 0.1392569816767838,
+  "families": {
+   "Bot": 0.1558161123741083,
+   "Heartbleed": 0.018976137227351968,
+   "Infiltration": 0.051210122030134586,
+   "Web Attack Brute Force": 0.16559055662829628,
+   "Web Attack Sql Injection": 0.0008224907902036531,
+   "Web Attack XSS": 0.09636427602794685
+  },
+  "deviation": null,
+  "score_std": 0.031975124889752814,
+  "collapsed": false
+ },
+ "ocsvm_sgd": {
+  "macro": 0.02752562657081108,
+  "families": {
+   "Bot": 0.021254011414030185,
+   "Heartbleed": 0.00010891048203560925,
+   "Infiltration": 0.0008442779830083063,
+   "Web Attack Brute Force": 0.0422343561424194,
+   "Web Attack Sql Injection": 0.0031042562863340334,
+   "Web Attack XSS": 0.019088512155983665
+  },
+  "deviation": "SGD linear approximation; exact kernel OC-SVM is O(n^2) at 442k benign rows",
+  "score_std": 0.249792191327206
+ },
+ "lof": {
+  "macro": 0.3367696058460227,
+  "families": {
+   "Bot": 0.03796730879690844,
+   "Heartbleed": 0.001422900052654272,
+   "Infiltration": 0.0027004450243988728,
+   "Web Attack Brute Force": 0.5592112472000478,
+   "Web Attack Sql Injection": 0.006980338416156748,
+   "Web Attack XSS": 0.41313026154111193
+  },
+  "deviation": "fitted on a 50,000-row benign subsample of 441,898; LOF stores its training set and does not finish at full size",
+  "score_std": 85729310.8327571
+ },
+ "_predictions": {
+  "C1_beats_ae_on_bot": true,
+  "C2_web_collapse": false,
+  "C3_svdd_collapsed": false
+ },
+ "_meta": {
+  "seed": 42,
+  "lof_subsample": 50000,
+  "latent": 16,
+  "epochs": 50,
+  "ae_bot_reference": 0.1314
+ }
+}

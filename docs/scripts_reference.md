@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-05** (46 Python scripts, plus 5 shell launchers).
+> Last verified against source: **2026-08-05** (50 Python scripts, plus 5 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -27,6 +27,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
+| **Tier A — classic baselines** | **`baselines_classic`** (DT · kNN · NB · LogReg · SVM · MLP) |
 | **Open-set / OOD** | **`ood_scores`** (post-hoc battery on the CNN) · `novelty` (MSP, Mahalanobis) |
 | **Literature comparability** | **`paper_metrics`** (base-paper Table II + the field's suite) · `comparability` |
 | **Legacy** (temporal split, superseded) | `cnn3` · `eval` · `ltn` |
@@ -562,6 +563,45 @@ the combiner learned to ignore the symbolic channel.
 > can get a hand-specified zero-day signature into the model at all.
 
 ---
+
+## `scripts/baselines_classic.py`
+
+**Purpose**: **Tier A** — the classic baselines every NIDS comparison table carries and this project
+had never run: **Decision Tree, k-NN, Naive Bayes, Logistic Regression, linear SVM, RBF-SVM
+(Nystroem), MLP**. Same protocol as `baselines.py`. `BASELINE_SEED` supported.
+
+| model | MACRO zd | Bot | Web BF | XSS | **FIELD binary** | ties |
+|---|---:|---:|---:|---:|---:|---:|
+| decision_tree | 0.6049 | 0.0342 | 0.8467 | 0.9339 | 0.9807 | **0.501 ⚠️** |
+| mlp | **0.5360** | 0.0219 | 0.8237 | 0.7622 | 0.9854 | 0.020 |
+| knn (k=5) | 0.4270 | 0.0342 | 0.6786 | 0.5682 | 0.9804 | **0.498 ⚠️** |
+| naive_bayes | 0.1264 | 0.0415 | 0.2067 | 0.1310 | 0.8468 | 0.331 ⚠️ |
+| rbf_svm (Nystroem) | 0.0870 | 0.0197 | 0.1671 | 0.0743 | 0.9821 | 0.001 |
+| logistic_regression | 0.0380 | 0.0234 | 0.0630 | 0.0275 | **0.9769** | 0.008 |
+| linear_svm | 0.0374 | 0.0312 | 0.0570 | 0.0241 | 0.9802 | 0.008 |
+
+🔴 **The two columns tell opposite stories, and that is the point.** On the field's binary metric all
+seven score **0.977–0.985** against the CNN's 0.9928; on macro zero-day they span **0.0374 → 0.6049**.
+Logistic regression looks 98 % as good as the CNN on the published metric and is **17× worse** on
+zero-day.
+
+⚠️ **The two that look competitive are score-degenerate.** `decision_tree` is nominally
+indistinguishable from the CNN (gap 0.0201 < 0.0256) but **50.1 % of test rows share one score**;
+k-NN is 49.8 % tied. **PR-AUC over a half-tied ranking is not comparable to a continuous scorer's.**
+The best *valid* result is the **MLP at 0.5360**, which is genuinely below the CNN.
+
+**Predictions**: T1 ✅ · T2 ✅ · **T3 🔴 FALSIFIED** — k-NN was predicted to be the best Tier-A method
+on Bot (the only instance-based one, operating on the same raw-feature substrate as the KG); it was
+not (0.0342 vs naive_bayes 0.0415).
+
+⚠️ **Deviations**: k-NN on a stratified 50,000-row subsample; RBF-SVM via Nystroem(300) + linear SGD
+(exact kernel SVM is O(n²), not runnable at 883k rows). Both printed in the output and stored in
+`runs.jsonl` params.
+
+⚠️ **Scores are saved float64.** The first version cast to float32, which collapsed GaussianNB's
+underflowing probabilities into ties and moved its reloaded macro **0.1264 → 0.0597** — the saved
+array no longer reproduced the logged metric. Same float32-precision class as the 2026-07-27
+saturation bug.
 
 ## `scripts/ood_scores.py`
 

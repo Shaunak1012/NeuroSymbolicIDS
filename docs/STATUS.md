@@ -4,6 +4,48 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 📉 TIER A — CLASSIC BASELINES (2026-08-05) — `scripts/baselines_classic.py`
+
+The comparison table every NIDS paper carries and this project had never run. Same protocol as
+`baselines.py` (paper split, log1p + scaler on train, binary target), n=1 seed 42.
+
+| model | MACRO zd | Bot | lift | Web BF | XSS | **FIELD binary** | ties |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| decision_tree | 0.6049 | 0.0342 | 1.00× | 0.8467 | 0.9339 | 0.9807 | **0.501 ⚠️** |
+| mlp | **0.5360** | 0.0219 | 0.64× | 0.8237 | 0.7622 | 0.9854 | 0.020 |
+| knn (k=5) | 0.4270 | 0.0342 | 1.00× | 0.6786 | 0.5682 | 0.9804 | **0.498 ⚠️** |
+| naive_bayes | 0.1264 | 0.0415 | 1.21× | 0.2067 | 0.1310 | 0.8468 | 0.331 ⚠️ |
+| rbf_svm (Nystroem) | 0.0870 | 0.0197 | 0.58× | 0.1671 | 0.0743 | 0.9821 | 0.001 |
+| logistic_regression | 0.0380 | 0.0234 | 0.69× | 0.0630 | 0.0275 | **0.9769** | 0.008 |
+| linear_svm | 0.0374 | 0.0312 | 0.91× | 0.0570 | 0.0241 | 0.9802 | 0.008 |
+
+### 🔴 The single best demonstration of the protocol gap in this project
+
+**On the field's binary metric every one of these scores 0.977–0.985, against the CNN's 0.9928. On
+macro zero-day they span 0.0374 → 0.6049 — a 16× spread.** Logistic regression looks **98 % as good
+as the CNN** on the metric the literature publishes, and is **17× worse** on the one that measures
+zero-day detection. Same models, same run, two protocols. This is `comparability.py`'s argument made
+across seven models instead of one.
+
+### ⚠️ The two that look competitive are score-degenerate
+
+`decision_tree` (0.6049) is within 0.0201 of the CNN's n=6 mean — nominally **indistinguishable**.
+But its largest tied score block is **50.1 % of the test set** (0.046 % distinct values), because a
+depth-limited tree emits leaf-purity probabilities. **PR-AUC over a ranking where half the rows are
+tied is not comparable to a continuous scorer's**, and the same applies to k-NN (49.8 % tied, k=5
+gives 6 possible values). **Do not report "a decision tree matches the CNN."**
+
+**The best *valid* Tier-A result is the MLP at 0.5360** (2 % ties, clean) — and that is **0.089 below
+the CNN, well above the 0.0256 threshold, so genuinely distinguishable.**
+
+**Predictions:** T1 (none escapes the top tier upward) ✅ **CONFIRMED** · T2 (none reliably detects
+Bot; best is naive_bayes at 0.0415) ✅ **CONFIRMED** · T3 (k-NN would be the best Tier-A method on
+Bot, being the only instance-based one) 🔴 **FALSIFIED** — k-NN 0.0342 vs naive_bayes 0.0415.
+
+⚠️ **Deviations, stated not hidden**: k-NN fitted on a stratified 50,000-row subsample (brute-force
+k-NN over 883,796 train rows is ~10¹¹ distance computations per pass); RBF-SVM approximated by
+Nystroem(300) + linear SGD (exact kernel SVM is O(n²) and not runnable at this scale).
+
 ## 🔬 OOD SCORING BATTERY (2026-08-05) — `scripts/ood_scores.py`. The battery does NOT rescue Bot.
 
 *"Did you try a proper OOD score?"* is the most predictable reviewer question for a zero-day paper,
