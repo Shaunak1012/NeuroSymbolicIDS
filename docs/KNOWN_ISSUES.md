@@ -21,6 +21,45 @@
 
 ## Critical — measurement integrity
 
+### [OPEN 2026-08-05] 🔴 Two n=1 results in the record currently read as findings
+`anomaly_zoo.py`'s **Deep SVDD Bot 0.1558** prints as *"beats the autoencoder"* (C1 CONFIRMED), but
+**0.1558 lies inside the AE's own n=3 range [0.1078, 0.1647]** — it is one draw from a distribution
+that already contains it. Separately, **the entire Tier-A Bot column is n=1**, and Bot rankings are
+provably noise-dominated for closed-set methods (CNN cross-seed ρ = −0.090, RandomForest 0.068).
+**Fix:** `ANOM_SEED=43/44 python scripts/anomaly_zoo.py` and `BASELINE_SEED=43/44 python
+scripts/baselines_classic.py`. Cheap. **This project has retracted five single-seed findings; these
+two are flagged before publication rather than after.**
+
+### [FIXED 2026-08-05] float32 on save silently changed a logged metric
+`baselines_classic.py` evaluated scores in float64 but **saved them as float32**. GaussianNB's
+probabilities underflow toward exactly 0/1, so the narrower mantissa collapsed distinct values into
+ties: the saved channel reloaded to **macro 0.0597 against a logged 0.1264**. Any consumer of the
+saved array would have disagreed with `runs.jsonl` and had no way to know which was right.
+**Same float32-precision class as the 2026-07-27 saturation bug.** **Fix:** save float64 (matching
+`baselines.py`) in `baselines_classic.py`, `anomaly_zoo.py` and `ood_scores.py`. **Rule: the saved
+array must reproduce the logged metric exactly.**
+
+### [FIXED 2026-08-05] 🔴 A wrong model reported as data-split variance
+`protocol_variance.py`'s first version used a loosely "CNN-like" model — 2 conv blocks,
+GlobalAveragePooling, plain cross-entropy, **plus `class_weight` on top of focal α** (the
+double-weighting this file already warns about) — while carrying a comment claiming it was *"the
+same shape as cnn_paper.py."* It was not. Fold 1 returned **0.3244** against the CNN's 0.6250, and
+that 0.30 gap was an **architecture-and-loss difference being reported as data-split variance** —
+the exact confound the script exists to isolate.
+**Fix:** `cnn_paper.py`'s model replicated verbatim (it cannot be imported — importing runs a
+training), after which fold 1 returned **0.6218**, in line with the CNN. That agreement is what
+confirmed the fix.
+⚠️ **The anomaly is what forced the check.** Had the wrong model scored near 0.62, nothing would have
+prompted a look. **A "same as X" comment is not evidence; read X.**
+
+### [FIXED 2026-08-05] An unverified `pkill` wrote 3 wrong-model rows into the research record
+The kill above was issued but **not verified** — the process survived and kept running, writing
+`cnn_kfold1/2/3` (macro 0.3244 / 0.3079 / 0.4077) into `runs.jsonl` alongside the corrected run's
+rows of the same names. **They were not exact duplicates, so `repair_runs_log.py` would not have
+caught them and the integrity lint passed**: two different models under one run name, indefinitely.
+**Fix:** excised by timestamp (< 04:40), safe because `runs.jsonl` is version-controlled.
+**Rule: verify a kill actually killed before relaunching.**
+
 These are the highest-severity class in this project: they do not crash, they produce **numbers that
 look fine and are wrong**. All three were caught only by auditing distributions rather than reading
 summary metrics.
@@ -548,6 +587,34 @@ the magnitude is measured directly.
 > reported as a headline finding. The project's own rule — *"a point-estimate gap is not a result"* —
 > was applied rigorously to old claims and not to a new one of my own. That asymmetry is the failure
 > mode worth remembering here, more than the confound itself.
+
+### [FIXED 2026-08-05] 🔁 FOUR monitoring mechanisms misled in one session — one root cause
+The 2026-08-03 entry below recorded two false alarms from launcher design. On 2026-08-05 it happened
+**four more times**, and the pattern is now clear enough to name:
+
+| # | What | Why it misled |
+|---|---|---|
+| 1 | A long job piped through `tail` | `tail` buffers to EOF → log never grew → job invisible |
+| 2 | `verify_determinism.sh` piped through a bare `grep` | same buffering → **false STALL** while training ran fine |
+| 3 | A monitor re-grepping `tail` each cycle | re-emitted unchanged lines every poll, burning turns |
+| 4 | A duplicate monitor left running after a relaunch | every event fired twice |
+
+🔴 **And the lint check for #2 was structurally unable to fire.**
+`launcher-suppresses-log-growth` required `python` and the pipe on the **same physical line**; the
+offending pipe sat on a backslash continuation. **It reported PASS on the exact file it was written
+to catch.** Fixed by joining continuations into logical lines — and the check was **verified to fire
+on the offending file before the file was fixed**.
+
+**The root cause across all four, and across the `script-count` regex gap found the same day: the
+verification step is the one that gets skipped.** A check is assumed to work because it passes; a
+kill is assumed to have worked because it was issued; a monitor is assumed to cover a job because it
+was armed for it once.
+
+**Rules now in force:**
+- **Test a lint check against the code it is meant to catch**, don't just observe it pass.
+- **Verify a kill actually killed** (`ps` after, not the `pkill` exit code).
+- **Reconcile a job's monitor when you stop or relaunch the job** — stale monitors duplicate.
+- Monitors must **track what they have already reported**, not re-scan the tail.
 
 ### [FIXED 2026-08-03] Heartbeat monitors produced TWO false alarms — both from launcher design
 The heartbeat rule (CLAUDE.md non-negotiable #2) watches **log growth**. Twice in one session the

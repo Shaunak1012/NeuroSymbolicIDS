@@ -111,10 +111,23 @@ every within-tier comparison this project spent months on.
 👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
-**Next action (resume here):** **Phase 7.5 Tier 1 (operational readiness), the ablation, and TF
-determinism flags** — all three in flight as of 2026-08-05. Phase 4 is complete (KG + explainability
-+ faithfulness); Phase 5 has significance, parameter-free fusion and n=6 rigor done, with calibration,
-latency and the *fitted* Decision Fusion outstanding (the last is blocked by THE FUSION WALL).
+**Next action (resume here — as of end of 2026-08-05):**
+1. **Multi-seed two n=1 results that currently read as findings**: `ANOM_SEED=43/44 anomaly_zoo.py`
+   (Deep SVDD's Bot sits *inside* the AE's own n=3 range) and `BASELINE_SEED=43/44
+   baselines_classic.py` (the whole Tier-A Bot column). Cheap; five single-seed retractions precede this.
+2. **C4** — the feature transform is still justified by the contaminated overall-binary metric.
+3. **Decide the write-up spine** — the field-metric gap now has *three* independent demonstrations.
+
+**Done as of 2026-08-05:** Phase 4 complete · Phase 5 partial (significance, parameter-free fusion,
+n=6; calibration/latency/fitted-fusion outstanding) · **Phase 7.5 Tiers 1 AND 2 complete** ·
+**the ablation** (only the KG earns its place) · **the base paper's metric set computed for the first
+time** · **method tiers A/B/C/D** (11 new methods). Phase 6 cross-dataset is **blocked** — no
+CIC-IDS2018 locally.
+
+⚙️ **DETERMINISM IS NOW ON** (`scripts/determinism.py`, intra=16/inter=2 — byte-identical across two
+full 50-epoch runs). **The SD 0.0222 floor applies to PRE-flag runs only, and pre/post-flag runs are
+different populations — do not pool them.** Separately, **data-split SD (0.0228) ≈ training SD
+(0.0222)**: shared-split comparisons cancel it, but **an absolute number carries ≈0.032**.
 
 ### 🔴🔴 THE NOISE FLOOR — read before citing ANY number in this project
 

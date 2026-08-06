@@ -455,10 +455,33 @@ point, ≥0.95 at every coverage) **and useless for novel attacks at any budget 
 honest deployment story is: auto-act on known attacks, and treat zero-day as a *depth* problem the KG
 improves but does not solve. Tier 2 (determinism, k-fold, SWA) is next.
 
-### 📍 CURRENT — 2026-08-05
+### 📍 CURRENT — end of 2026-08-05 session
 
-**Phases 0–4 COMPLETE. Phase 5 partially entered. Next: Phase 7.5 Tier 1 · the ablation · TF
-determinism flags.**
+**Phases 0–4 COMPLETE · Phase 5 partial · Phase 7.5 Tiers 1 & 2 DONE · ablation DONE · the full
+method comparison table is now populated (4 tiers, 11 new methods).**
+
+**▶ START HERE NEXT SESSION — three things, in this order:**
+
+1. **Multi-seed the two n=1 results that currently look like findings but are not.**
+   `ANOM_SEED=43 44 python scripts/anomaly_zoo.py` (Deep SVDD's Bot 0.1558 sits **inside** the AE's
+   own n=3 range, so "beats the AE" is unsupported) and `BASELINE_SEED=43 44 python
+   scripts/baselines_classic.py` (the whole Tier-A Bot column is n=1, and Bot rankings are provably
+   noise-dominated for closed-set methods). **Cheap, and this project has retracted five single-seed
+   findings.**
+2. **C4** — the feature transform is still justified by the contaminated overall-binary metric
+   (`config.yaml` cites *"0.980 vs 0.965"*). Re-run the log1p A/B on macro zero-day. 2 trainings.
+3. **Decide the write-up spine.** The field-metric gap now has **three independent demonstrations**
+   (`comparability.py` on 1 model · Tier A on 7 · Tier B on 4) plus the base paper's own metric set.
+   That is arguably a stronger opening than the double dissociation.
+
+**Blocked, not forgotten:** Phase 6 cross-dataset needs **CIC-IDS2018**, which is not on this machine.
+
+> ⚠️ **Two things the next session must not re-derive wrongly:**
+> - **Determinism is ON** (`determinism.py`, intra=16/inter=2, byte-identical at full scale). The
+>   **SD 0.0222 noise floor applies to pre-flag runs only** — but pre- and post-flag runs are
+>   **different populations and must not be pooled** (pinning threads changes the reduction order).
+> - **Data-split SD (0.0228) ≈ training SD (0.0222).** Comparisons on a shared split cancel it;
+>   **an absolute number carries ≈0.032, not 0.022.**
 
 | Phase | State |
 |---|---|
@@ -2414,7 +2437,8 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline; direction established on 3/3 seeds, **magnitude uncertain 0.027–0.088**) · **n≥6 seeds ✅ DONE 2026-08-04** (`rigor_n6.sh`, all 7 channels — and it showed the top tier is mutually **indistinguishable**). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | ✅ **DONE 2026-08-03 — 3 of 3 + faithfulness** (`explain.py`) | ✅ Neural (Integrated Gradients, completeness-checked) · ✅ Logic (per-axiom SAT, Ax3–Ax6 only — Ax1/Ax2 are label anchors and would be circular) · ✅ KG reasoning paths · ✅ Final Alert assembly · ✅ Tier-A faithfulness (IG top-3 masking is **20.67×** a random-feature control; sufficiency reported as the weaker half). **Phase 4 is therefore complete.** Its most informative output is not a score: on a Bot flow the CNN calls benign, **both other pillars dissent** — no single-pillar system produces that. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ✅ **DONE 2026-08-05** (`ablation.py`) | 🔴 **Result is negative: only the KG earns its place.** The symbolic pillar adds nothing alone (−0.0004, n.s.) and **significantly hurts stacked on the KG** (0.6926 → 0.6708, p<0.0001). See the ablation section. |
-| 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | 🟡 **TIER 1 DONE 2026-08-05** — `operational.py`, all 4 predictions confirmed. **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
+| 8 | **Method comparison tiers A/B/C/D** | ✅ **DONE 2026-08-05** | `baselines_classic` (7 classic) · `anomaly_zoo` (4 benign-only) · `deep_zoo` (4 deep) · `protocol_variance` (k-fold + SWA) · `ood_scores` (open-set battery). **Nothing rescued Bot** (best 0.0626 vs the KG's 0.3103). **Only the conv front-end matters** among deep architectures. ⬜ **Follow-up: multi-seed Deep SVDD and the Tier-A Bot column — both n=1.** |
+| 7 | **Phase 7.5 — OPERATIONAL READINESS (intermission, after the paper)** | ✅ **TIER 1 + TIER 2 DONE 2026-08-05** — `operational.py`, all 4 predictions confirmed. **GATES PHASE R** | See the dedicated section below. Four Tier-1 items that decide whether automated response is *safe*, plus three noise-reduction items. **PR-AUC is the wrong target for a response engine** — it summarises ranking across all thresholds, while the engine acts at ONE. |
 
 Enhancement backlog (not scheduled): [enhancements.md](target/enhancements.md).
 
