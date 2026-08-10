@@ -279,21 +279,41 @@ def _figure(table):
         print(f"  (figure skipped: {e})")
         return
 
-    fig, ax = plt.subplots(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9.5, 6))
+
+    # The argument is about the regime the literature actually publishes in, so
+    # mark it rather than letting the eye average over anomaly scorers that never
+    # claim 99% in the first place.
+    CLUB = 0.98
+    ax.axvspan(CLUB, 1.005, color="#3182ce", alpha=0.07, zorder=0)
+    inside = [d for d in table if d["field"] >= CLUB]
+    if inside:
+        lo = min(d["macro"] for d in inside)
+        hi = max(d["macro"] for d in inside)
+        ax.annotate("", xy=(1.001, hi), xytext=(1.001, lo),
+                    arrowprops=dict(arrowstyle="<->", color="#c53030", lw=1.6))
+        ax.text(1.006, (lo + hi) / 2, f"{hi/max(lo,1e-9):.0f}×\nspread",
+                fontsize=8.5, color="#c53030", va="center", ha="left", weight="bold")
+
     for d in table:
         deg = d["tie_degenerate"]
         ax.scatter(d["field"], d["macro"], s=64,
                    facecolor="none" if deg else "#2b6cb0",
                    edgecolor="#a0aec0" if deg else "#2b6cb0",
                    marker="s" if deg else "o", zorder=3)
-    ax.axhspan(0, 0.1, color="#e53e3e", alpha=0.07, zorder=0)
+
     ax.set_xlabel("FIELD binary PR-AUC  (benign vs all attacks, INCLUDING trained families)\n"
                   "— the metric published CIC-IDS2017 work reports", fontsize=9)
     ax.set_ylabel("MACRO zero-day PR-AUC\n(3 powered families never seen in training)", fontsize=9)
-    ax.set_title("The same models, two metrics: the published number is nearly constant\n"
-                 "while zero-day detection spans the full range", fontsize=11)
+    ax.set_title(f"Inside the field's own reporting regime (shaded, FIELD ≥ {CLUB}), "
+                 f"{len(inside)} methods\nsit within {max(d['field'] for d in inside)-min(d['field'] for d in inside):.3f} "
+                 f"of each other — and span {hi/max(lo,1e-9):.0f}× on zero-day detection",
+                 fontsize=11)
+    ax.set_xlim(right=1.05)
     ax.grid(alpha=0.25, zorder=0)
-    ax.text(0.02, 0.02, "open squares = tie-degenerate scorers (flagged, not dropped)",
+    ax.text(0.02, 0.02,
+            "open squares = tie-degenerate scorers (flagged, not dropped)\n"
+            "rank correlation across all 40 methods is rho = +0.57: a weak proxy, NOT uninformative",
             transform=ax.transAxes, fontsize=8, color="#718096")
     fig.tight_layout()
     outp = os.path.join(paths.FIGURES, "field_gap.png")
