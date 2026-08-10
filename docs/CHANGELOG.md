@@ -2,6 +2,39 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-10d (figures 2–5 built — and one of them caught a statistics error of mine)
+
+### 📊 `paper_figures.py` — all five figures now exist and regenerate from the record
+
+Reads `outputs/metadata/*.json` only: **no training, no scoring, no recomputation**. A figure and the
+outline therefore cannot silently diverge — if they disagree, one is stale and it is discoverable.
+**Each figure prints its own caveat**, because a figure lifted into a talk loses its paragraph.
+
+### 🔑 A statistics error caught by building fig. 4 — read before citing any ablation number
+
+The first version coloured each ablation rung by |Δ| against the **0.0222** noise floor, and rendered
+**`FULL vs CNN+KG` (−0.0218) as noise** — contradicting STATUS, which reports it as established.
+Investigating that disagreement showed **the figure was wrong, not the record**:
+
+**0.0222 is the run-to-run SD of an ABSOLUTE number, and over shared seeds that common variance
+cancels** — exactly as this project already documents for the data-split SD. Against the **paired**
+difference's own SD (0.0013), the effect is **16.3σ across 3/3 seeds**, the tightest in the ablation.
+
+**The correct criterion is direction-consistency across all seeds plus the paired effect size**, and
+the two can disagree:
+
+| rung | Δ | paired σ | seeds |
+|---|---:|---:|---:|
+| CNN + KG vs CNN | +0.0528 | **1.7σ** | **3/3** |
+| FULL vs CNN + KG | −0.0218 | **16.3σ** | **3/3** |
+| CNN + LTN-ctrl vs CNN | +0.0035 | 0.6σ | 2/3 |
+| CNN + LTN-Ax6 vs CNN | −0.0004 | 0.1σ | 2/3 |
+
+**CNN+KG's DIRECTION is certain (3/3) while its MAGNITUDE is not** (1.7σ, spanning 0.027–0.088) —
+which is exactly what STATUS already said, now visible on the figure. ⚠️ **This error ran in the
+*safe* direction** (it would have discarded a real result rather than inventing one), but it is the
+same class as the mistakes that produced false positives here. Recorded in `paper_outline.md §7`.
+
 ## 2026-08-10c (the paper's canonical thesis was stale — retracted, respined, outlined)
 
 ### 🔴 `conference_roadmap.md §0` — the "killer thesis" is RETRACTED

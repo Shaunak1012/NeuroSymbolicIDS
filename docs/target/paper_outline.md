@@ -158,6 +158,16 @@ have to be visibly higher than the field's. This section is the credibility of �
   most transferable methodological lesson here, and it retracts *our own* headline.
 - 🔴 **n=3 is enough for a MEAN and nowhere near enough for a VARIANCE.** Two n=3 SD estimates agreed
   with each other and were both wrong by 5×. **Sample-size adequacy depends on the statistic.**
+- 🔑 **A paired comparison must be judged against the PAIRED difference's own SD, not the
+  absolute-number floor.** The 0.0222 floor is run-to-run variance of a single channel; over shared
+  seeds that common variance **cancels**, exactly as the data-split SD cancels on a shared split.
+  **Caught while building fig. 4**, whose first version applied the unpaired floor to paired deltas
+  and rendered `FULL vs CNN+KG` (−0.0218, **16.3σ paired**, 3/3 seeds) as *noise*. ⚠️ **The error ran
+  in the safe direction — it would have discarded a real result** — but it is the same class of
+  mistake as the ones that manufactured false positives here.
+  **The right criterion is direction-consistency across all seeds plus the paired effect size**, and
+  the two can disagree: **CNN+KG's direction is certain (3/3) while its magnitude is not** (1.7σ,
+  spanning 0.027–0.088). Report the direction as established and the magnitude as a range.
 - ⚠️ `cnn_paper = 0.6446` is the **max of 11 runs**, not a typical result (mean 0.6217). The honest
   reproducible baseline is the **ensemble, 0.6356**.
 
@@ -182,13 +192,20 @@ have to be visibly higher than the field's. This section is the credibility of �
 
 ## Figures
 
-| # | figure | source | status |
+**All five are built and regenerable from the record** — `field_gap.py` for #1, `paper_figures.py`
+for #2–5. **None of them retrains anything**: every value is read from `outputs/metadata/*.json`, the
+same artifacts backing the claims above, so a figure and the text cannot silently diverge.
+
+**Each figure carries its own caveat on its face**, because a figure lifted into a talk loses its
+surrounding paragraph.
+
+| # | figure | file | the caveat printed on it |
 |---|---|---|---|
-| 1 | Field metric vs macro zero-day, 40 methods, ≥0.98 band marked | `field_gap.png` | ✅ built |
-| 2 | Bot: confidently-benign distribution + 0/8 feature overlap | `bot_failure_analysis.py` | needs a figure |
-| 3 | Alert-budget depth curve (KG cuts review depth ~20 pp) | `operational.py` | needs a figure |
-| 4 | Ablation rungs with paired CIs | `ablation.py` | needs a figure |
-| 5 | Variance decomposition (nondeterminism vs seed vs split) | `noise_postdet.json` | needs a figure |
+| 1 | Field metric vs macro zero-day, 40 methods, ≥0.98 band marked | `field_gap.png` | *"ρ = +0.57: a weak proxy, NOT uninformative"* |
+| 2 | Bot confidently BENIGN + cross-seed ranking is noise | `fig2_bot_mechanism.png` | 0/8 feature overlap vs oracle PR-AUC 0.9988; web families absorbed into **DoS slowloris**, not benign |
+| 3 | Alert budget: 0 zero-day in the top 1,000; depth curve | `fig3_alert_budget.png` | *"the failure macro PR-AUC 0.64 does not show"* |
+| 4 | Ablation rungs, paired CIs, σ + seed-consistency per rung | `fig4_ablation.png` | grey = direction not consistent; the 0.0222 floor **cancels** in a paired comparison |
+| 5 | Variance decomposition + the session effect vanishing | `fig5_variance.png` | determinism removed a **confound**, not the uncertainty; absolute numbers still carry 0.0285 |
 
 ---
 

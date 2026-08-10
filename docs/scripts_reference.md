@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-10** (53 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-08-10** (54 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -781,6 +781,37 @@ fail: **knn_k5 (0.3830)**, **deep_svdd (0.0650)**, **mlp (0.0673)**.
 
 ```bash
 python scripts/seed_recheck.py
+```
+
+## `scripts/paper_figures.py`
+
+**Purpose**: Builds write-up figures **2–5** from `outputs/metadata/*.json`. **No training, no
+scoring, no recomputation** — every value comes from the same artifacts that back the claims in
+[paper_outline.md](target/paper_outline.md), so a figure and the text cannot silently diverge. If
+they disagree, exactly one is stale and it is discoverable.
+
+| # | figure | shows |
+|---|---|---|
+| 2 | `fig2_bot_mechanism.png` | Bot 100 % argmax-BENIGN at p=0.998 (web families → **DoS slowloris**, not benign) · cross-seed ranking ρ: CNN −0.090, RF 0.068, **AE 0.827** |
+| 3 | `fig3_alert_budget.png` | 0 zero-day flows in the top 1,000 alerts · review depth for 10/25/50 % of zero-day |
+| 4 | `fig4_ablation.png` | ablation rungs with paired CIs, paired σ and seed-consistency |
+| 5 | `fig5_variance.png` | nondeterminism vs seed vs data-split SD · the session effect appearing and vanishing |
+
+**Every figure prints its own caveat**, because a figure lifted into a talk loses its paragraph.
+
+> 🔑 **A methodological bug caught while building fig. 4, worth knowing before reading any ablation
+> number.** The first version coloured each rung by |Δ| against the **0.0222** noise floor and
+> rendered `FULL vs CNN+KG` (−0.0218) as *noise*. **That is the wrong yardstick: 0.0222 is the
+> run-to-run SD of an ABSOLUTE number, and over shared seeds that common variance cancels** — exactly
+> as the data-split SD cancels on a shared split. Against the **paired** difference's own SD (0.0013)
+> the effect is **16.3σ, 3/3 seeds** — the tightest in the ablation.
+> **The right criterion is direction-consistency across all seeds plus paired effect size**, and the
+> two can disagree: **CNN+KG's direction is certain (3/3) but its magnitude is not** (1.7σ, 0.027–0.088).
+> ⚠️ This error ran in the *safe* direction — it would have discarded a real result rather than
+> inventing one — but it is the same class as the mistakes that produced false positives here.
+
+```bash
+python scripts/paper_figures.py
 ```
 
 ## `scripts/noise_postdet.py` + `scripts/noise_postdet.sh`
