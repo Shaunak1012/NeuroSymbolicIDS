@@ -112,17 +112,23 @@ every within-tier comparison this project spent months on.
 Do not restate it here — that is exactly what kept rotting.
 
 **Next action (resume here — as of end of 2026-08-10):**
-1. **Confirm or kill the post-flag noise estimate.** C4's by-product puts genuine seed variance at
-   **SD ~0.0035**, ~6–7× below the **0.0222** floor that the ~0.0256 threshold rests on (that floor
-   was six runs of *seed 42 with determinism OFF* — nondeterminism, not seed variance). A post-flag
-   `cnn_paper` sweep at **n≥6** settles it. **Highest-leverage open measurement in the project.**
-   🔴 Until then the threshold is **unchanged** and **C2 stays retracted**; the data-split SD 0.0228
-   is untouched by this and still applies to absolute numbers.
-2. **Write.** Spine decided 2026-08-10: **field-metric gap leads, mechanism is the body**, double
-   dissociation demoted to support. ⚠️ Write the **resolution** claim (67/204 method pairs
-   indistinguishable on the published metric while ≥2× apart on zero-day), **not** the *information*
-   claim — ρ=+0.568 refutes the strong form, and `field_gap.py` hard-codes that refutation.
-3. **Phase 5's remaining three** — calibration, latency, the fitted fuser (blocked by the fusion wall).
+1. **Write.** Spine decided: **field-metric gap leads, mechanism is the body**, double dissociation
+   demoted to support. ⚠️ Write the **resolution** claim (67/204 method pairs indistinguishable on the
+   published metric while ≥2× apart on zero-day), **not** the *information* claim — ρ=+0.568 refutes
+   the strong form, and `field_gap.py` hard-codes that refutation.
+2. **Phase 5's remaining three** — calibration, latency, the fitted fuser (blocked by the fusion wall).
+3. **Optional, only if C2 matters to the write-up:** re-run the LTN control **post-flag** at n=6.
+   C2's +0.0204 is pre-flag on both sides, so it can only be reopened *within* the post-flag
+   population. 🔴 **The threshold is 0.0256 and did NOT move** — see the noise floor below.
+
+🔴 **NOISE FLOOR SETTLED 2026-08-10 — the threshold did NOT move.** Post-flag **seed** variance is
+**SD 0.0171 (n=6)**, statistically indistinguishable from the 0.0222 nondeterminism floor
+(F(5,5)=1.69, **p=0.58**). The earlier "seed variance is ~7× smaller" reading came from two **n=3**
+SD estimates that agreed with each other and were both wrong — **n=3 is enough for a MEAN and nowhere
+near enough for a VARIANCE** (seed 45 returned 0.5882 and moved the SD 5×). ✅ Separately, the
+**"session effect" is dead**: ρ vs seed number goes **−0.943 → −0.086** with determinism on, so it
+tracked *run order*, not seed, and **post-flag seeds are comparable across sessions**.
+⚠️ **Data-split SD 0.0228 untouched — an absolute number carries 0.0285.**
 
 **Done 2026-08-10:** both flagged n=1 results settled (**C1 is dead** — the verdict flips seed by
 seed) · **C4 closed** (log1p wins by **+0.4693**, t=163) · spine decided *and its strong forms

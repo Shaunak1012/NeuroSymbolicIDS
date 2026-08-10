@@ -218,7 +218,40 @@ macro zero-day PR-AUC, the actual headline.
 **Fix (proposed, NOT implemented):** re-run the A/B on the headline metric (2 trainings). log1p may
 still win; the issue is that the current justification cites the wrong number.
 
-### [OPEN 2026-08-10] 🟡 The 0.0256 distinguishability threshold may be ~7× too conservative post-flag
+### [CLOSED 2026-08-10] 🔴 The 0.0256 threshold is ~7× too conservative — NO. The n=3 estimate was wrong.
+
+> 🔴 **ANSWERED THE SAME DAY, AND THE ANSWER IS NO** (`scripts/noise_postdet.py`, n=6, predictions
+> committed before the runs finished). **The threshold stands unchanged.**
+>
+> | population | measures | SD |
+> |---|---|---:|
+> | A pre-flag, seed fixed (n=6) | nondeterminism only | **0.0222** |
+> | B pre-flag, seed varies (n=6) | both | 0.0189 |
+> | **C post-flag, seed varies (n=6)** | **seed alone** | **0.0171** |
+>
+> **P1 (post-flag SD < 0.010) — FALSIFIED.** Seed variance is **0.0171**, not 0.0035.
+> **F(5,5) = 1.69, p = 0.58 — statistically INDISTINGUISHABLE from the nondeterminism floor.**
+> Seed choice matters about as much as thread scheduling did; it is not 6–7× smaller.
+>
+> 🔴 **THE LESSON, AND IT IS A NEW ONE FOR THIS PROJECT: n=3 IS ENOUGH FOR A MEAN AND NOWHERE NEAR
+> ENOUGH FOR A VARIANCE.** The claim below came from two n=3 SD estimates (0.0031 and 0.0039) that
+> agreed with each other — which felt like corroboration and was not. C4's log1p arm happened to draw
+> three seeds within 0.006 of one another (0.6298 / 0.6269 / 0.6330); **seed 45 came back at 0.5882**
+> and moved the SD by 5×. An SD estimated at n=3 carries roughly 50 % relative error, so two
+> independent n=3 estimates can agree closely and both be badly wrong.
+>
+> ⚠️ **The project's own rule was FOLLOWED and still produced a wrong number.** "Multi-seed before
+> writing a number down" was satisfied — n=3, twice. The rule is calibrated for *means*, and was
+> applied to a *variance*. **Sample-size adequacy depends on the statistic, not just the count.**
+>
+> ✅ **The flag-then-confirm discipline worked.** This was written as `[OPEN]` and provisional with
+> the confirmation run specified, rather than acted on. Had the threshold been loosened to ~0.006 on
+> the n=3 evidence, **every "within noise" verdict in the project would have flipped**, including
+> potentially un-retracting C2 on a false basis. **Round-trip from flag to answer: one session.**
+
+**Original issue, kept as written:**
+
+### ~~[OPEN 2026-08-10] 🟡 The 0.0256 distinguishability threshold may be ~7× too conservative post-flag~~
 **A by-product of C4, and it is potentially consequential enough to need its own confirmation run.**
 
 The project's ~0.0256 "indistinguishable" threshold derives from the noise floor **SD 0.0222**, which
@@ -623,7 +656,37 @@ consumer that does not filter it** — including, prospectively, the KG.
 
 ## Medium
 
-### [OPEN 2026-08-03] 🔴 SEEDS ARE NOT COMPARABLE ACROSS SESSIONS — a session/environment effect
+### [CLOSED 2026-08-10] 🔴 SEEDS ARE NOT COMPARABLE ACROSS SESSIONS — a session/environment effect
+
+> ✅ **CLOSED BY DIRECT EXPERIMENT** (`noise_postdet.py`, P2, pre-registered). **The "session effect"
+> was nondeterminism under CPU contention, exactly as the "most likely cause" below guessed — and it
+> is now measured rather than argued.**
+>
+> The same seeds, pre-flag and post-flag:
+>
+> | | seeds 42→47 | ρ vs seed number |
+> |---|---|---:|
+> | **pre-flag** (determinism OFF) | 0.6446, 0.6353, 0.6396, 0.6250, 0.6086, 0.5966 | **−0.943** |
+> | **post-flag** (determinism ON) | 0.6298, 0.6269, 0.6330, 0.5882, 0.6212, 0.6328 | **−0.086** |
+>
+> **The perfectly monotonic decline vanishes.** It tracked **run order**, not seed number, and pinning
+> threads removed it. Seeds 45/46/47 — the three that produced the alarming pre-flag slide to 0.5966 —
+> come back at 0.5882 / 0.6212 / 0.6328, in no order at all.
+>
+> ✅ **Post-flag seeds ARE comparable across sessions.** Independently corroborated: `det_verify_a`
+> (2026-08-05) and `c4_log1p_s42` (2026-08-10, a different day and session) agree **to twelve
+> decimals**. The protocol change this issue forced — "compare within session, never pooled" — is
+> **superseded for post-flag runs** and remains in force for pre-flag ones.
+>
+> ⚠️ **This does NOT mean seed variance is small.** It is **SD 0.0171 (n=6)**, statistically
+> indistinguishable from the nondeterminism floor (F(5,5)=1.69, p=0.58). Removing the session effect
+> removed a *confound*, not the *uncertainty*. See the threshold issue above.
+>
+> 🧭 **A claim asserted and withdrawn on 2026-08-03 finally got an experiment instead of an argument.**
+> The withdrawal was correct as a withdrawal — but it left the question open for a week, and the
+> answer took three trainings.
+
+**Original issue, kept as written:**
 **The most consequential methodological finding of the session, and it invalidates a comparison
 this project has been making since Phase 1.**
 
