@@ -1,0 +1,60 @@
+{
+ "A_preflag_fixed_seed": {
+  "runs": {
+   "cnn_paper_logodds": 0.6446365252428516,
+   "cnn_noise_r1": 0.636574791648498,
+   "cnn_noise_r2": 0.6124421413215041,
+   "cnn_noise_r3": 0.5824525501942541,
+   "cnn_noise_r4": 0.6280212401475717,
+   "cnn_repro_s42": 0.6295329411122418
+  },
+  "sd": 0.022238396697680404,
+  "n": 6
+ },
+ "B_preflag_varying_seed": {
+  "runs": {
+   "cnn_paper_logodds": 0.6446365252428516,
+   "cnn_paper_s43_logodds": 0.6353434135009612,
+   "cnn_paper_s44_logodds": 0.6395783484328236,
+   "cnn_paper_s45_logodds": 0.6249941887104794,
+   "cnn_paper_s46_logodds": 0.6086133960609247,
+   "cnn_paper_s47_logodds": 0.5965555203723351
+  },
+  "sd": 0.01888228734115557,
+  "n": 6
+ },
+ "C_postflag_varying_seed": {
+  "runs": {
+   "c4_log1p_s42": 0.629768308212828,
+   "c4_log1p_s43": 0.6268946812643791,
+   "c4_log1p_s44": 0.6330470967531493,
+   "postdet_s45": 0.5881819085280586,
+   "postdet_s46": 0.621167533792367,
+   "postdet_s47": 0.6327564081028388
+  },
+  "sd": 0.017125383752526414,
+  "n": 6
+ },
+ "P1": {
+  "prediction": "post-flag seed SD < 0.010",
+  "sd": 0.017125383752526414,
+  "F": 1.6862669259147292,
+  "p": 0.5803100797963574,
+  "confirmed": false
+ },
+ "P2": {
+  "rho_preflag": -0.942857142857143,
+  "rho_postflag": -0.08571428571428573,
+  "confirmed": true
+ },
+ "P3": {
+  "predicted_B": 0.02806822146760814,
+  "measured_B": 0.01888228734115557,
+  "ratio": 0.6727283152923135,
+  "confirmed": true
+ },
+ "threshold_old": 0.025634351952019387,
+ "threshold_postflag": 0.01977468983899354,
+ "absolute_number_uncertainty": 0.028515237482288232,
+ "c2_reopened": false
+}

@@ -4,6 +4,62 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🔴 THE NOISE FLOOR IS SETTLED (2026-08-10) — `scripts/noise_postdet.py`. THE THRESHOLD STANDS.
+
+The highest-leverage open measurement, run and answered the same session it was raised. Predictions
+were **committed to git before the runs finished**. Population A was **verified** to reproduce the
+documented floor (SD 0.0222, spread 0.0622) rather than assumed.
+
+| population | varies | measures | SD (n=6) |
+|---|---|---|---:|
+| **A** pre-flag, seed FIXED | run order | nondeterminism only | **0.0222** |
+| **B** pre-flag, seed VARIES | seed + run order | both | 0.0189 |
+| **C** post-flag, seed VARIES | seed only | **seed alone** | **0.0171** |
+
+### 🔴 P1 FALSIFIED — seed variance is 0.0171, not 0.0035
+
+**F(5,5) = 1.69, p = 0.58: seed variance is statistically INDISTINGUISHABLE from the nondeterminism
+floor.** Seed choice matters about as much as thread scheduling did. **The ~0.0256 threshold stands
+unchanged, and C2 stays retracted on its own merits.**
+
+> 🔴 **A NEW METHODOLOGICAL LESSON, and the most transferable thing in this session: n=3 is enough
+> for a MEAN and nowhere near enough for a VARIANCE.**
+> The claim came from two n=3 SD estimates (0.0031 and 0.0039) that **agreed with each other** —
+> which felt like corroboration and was not. C4's log1p arm drew three seeds within 0.006
+> (0.6298/0.6269/0.6330); **seed 45 came back at 0.5882** and moved the SD **5×**. An SD at n=3
+> carries ~50 % relative error, so **two independent n=3 estimates can agree closely and both be
+> badly wrong.**
+> ⚠️ **The project's own rule was followed and still produced a wrong number.** "Multi-seed before
+> writing a number down" was satisfied — n=3, twice. The rule is calibrated for *means* and was
+> applied to a *variance*. **Sample-size adequacy depends on the statistic, not the count.**
+> ✅ **Flag-then-confirm worked**: it was filed `[OPEN]`/provisional with the confirmation run
+> specified rather than acted on. Loosening the threshold to ~0.006 would have flipped **every**
+> "within noise" verdict in the project. Round-trip flag → answer: **one session.**
+
+### ✅ P2 CONFIRMED — the "session effect" is explained, and it is gone
+
+| | seeds 42→47 | ρ vs seed number |
+|---|---|---:|
+| pre-flag | 0.6446, 0.6353, 0.6396, 0.6250, 0.6086, 0.5966 | **−0.943** |
+| **post-flag** | 0.6298, 0.6269, 0.6330, 0.5882, 0.6212, 0.6328 | **−0.086** |
+
+**The perfectly monotonic decline vanishes.** It tracked **run order**, not seed. A claim asserted and
+withdrawn on 2026-08-03 now has a direct experimental answer, and **post-flag seeds are comparable
+across sessions** (`det_verify_a` 2026-08-05 == `c4_log1p_s42` 2026-08-10 to twelve decimals).
+⚠️ This removed a **confound**, not the **uncertainty**.
+
+### ✅ P3 CONFIRMED — decomposition consistent (ratio 0.67, within the 0.6–1.6 band at n=6)
+
+### ⚠️ What is still true regardless
+
+**The data-split SD (0.0228) is untouched.** An absolute number carries
+**√(0.0228² + 0.0171²) = 0.0285**. Determinism tightened *comparisons on a shared split*; it did
+**nothing** for the uncertainty on a single quoted value.
+
+**To reopen C2** you must re-run the LTN control **post-flag** at n=6 and compare *within* the
+post-flag population — C2's +0.0204 is pre-flag on both sides, and mixing populations is what
+manufactured the 2026-08-03 "C2 collapse".
+
 ## ✅ C4 IS CLOSED (2026-08-10) — `scripts/c4_transform_ab.sh`. Right answer, wrong reason, now fixed.
 
 The last of the 2026-07-29 audit's open items. `config.yaml` justified `feature_transform: log1p`
