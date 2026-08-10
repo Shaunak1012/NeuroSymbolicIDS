@@ -4,6 +4,73 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🔬 THE TWO FLAGGED n=1 RESULTS ARE SETTLED (2026-08-10) — `scripts/seed_recheck.py`
+
+Remaining Work #1 from the 2026-08-05 session. Both n=1 results were **flagged before publication**
+rather than after — a first for this project after five retractions — and both are now resolved at
+n=3. **The flag was right on one and wrong-for-the-right-outcome on the other.**
+
+### 🔴 R1 — "Deep SVDD beats the autoencoder on Bot" does NOT survive
+
+| seed | Deep SVDD Bot | verdict `anomaly_zoo.py` prints |
+|---|---:|---|
+| 42 | 0.1558 | **CONFIRMED** |
+| 43 | 0.1275 | 🔴 **FALSIFIED** |
+| 44 | 0.1950 | **CONFIRMED** |
+
+**mean 0.1594 ±0.0339** vs the autoencoder's **0.1291 ±0.0199 (n=6)** · delta **+0.0304** · ranges
+**overlap** · Welch **t=1.43, p=0.256** → **NOT ESTABLISHED.**
+
+🔴 **The pre-registered verdict flips with the seed.** The same script, unmodified, reports opposite
+conclusions depending only on which seed happened to run first. **This is the cleanest demonstration
+in the project of why n=1 is not a result** — better than any of the five retractions, because here
+the flip was observed directly instead of inferred after the fact.
+
+### ⚠️ R2 — the Tier-A Bot column is REPRODUCIBLE (ρ = +0.770), and still not citable
+
+**The flag predicted this column would be noise like the CNN's (ρ = −0.090). It is the opposite —
+and the correction matters more than the confirmation would have.** The high correlation is
+degeneracy, not signal:
+
+- **5 of 7 models have Bot SD exactly 0.0000.** GaussianNB, LogisticRegression and
+  LinearSVC(dual=False) have **no stochastic component at all** — `BASELINE_SEED` changes *nothing*
+  about them, so their contribution to a cross-seed correlation is trivially perfect.
+- **2 of 7 sit at exactly the chance value 0.0342** (decision tree, k-NN): their tie blocks swallow
+  every Bot flow, so the PR-AUC *is* chance, every seed.
+- **Whole-tier Bot lift: 0.64×–1.21×.**
+
+**So the ranking is reproducible and meaningless — it orders models by noise that happens to be
+deterministic.** ✅ T2 ("none reliably detects Bot") CONFIRMED at n=3; T3's falsification holds
+(`naive_bayes` wins Bot at all three seeds, constant at 0.0415).
+
+> ⚠️ **`seed_recheck.py` reports reproducibility and informativeness as SEPARATE verdicts** for
+> exactly this reason. A single boolean would have printed *"Bot column is RANKABLE"* — technically
+> true, and the most misleading sentence available. That is `robustness.py`'s "automated verdict that
+> cries wolf" lesson, inverted: **a verdict that declares victory is the same defect.**
+
+### 🔴 R3 — a defect neither flag anticipated, and it is the biggest one
+
+Three models have a seed spread exceeding the **~0.032** an absolute number already carries:
+
+| model | s42 (published) | s43 | s44 | spread |
+|---|---:|---:|---:|---:|
+| **knn_k5** | **0.4270** | 0.4037 | **0.0440** | **0.3830** |
+| mlp | **0.5360** | 0.4686 | 0.4849 | 0.0673 |
+| deep_svdd (macro) | **0.1393** | 0.0743 | 0.1320 | 0.0650 |
+
+🔴 **k-NN's macro collapses 10× at seed 44** (Web BF 0.6786 → 0.0805, XSS 0.5682 → 0.0173). The only
+thing the seed changes for k-NN is **which 50,000 rows it memorises** — so the subsample deviation,
+recorded as "stated not hidden", turns out to *dominate the result*. New issue opened.
+
+⚠️ **The MLP was written up as "the best *valid* Tier-A result at 0.5360". Its 3-seed mean is
+0.4965**, which *widens* the gap to the CNN — the conclusion survives, the number does not.
+**For all three unstable models seed 42 was the highest draw** (p≈0.04 under a uniform null, but they
+were *selected* for instability — an observation, not an established bias).
+
+✅ **What survives untouched:** LOF's macro **0.3360 ±0.0135** — Tier C's actual finding
+(*"benign-only ⇒ collapses on web attacks" is a property of reconstruction-error scoring, not of the
+(B) family*) is **robust at n=3**. So are `vae`, `ocsvm_sgd` and `decision_tree` (spread ≤ 0.0051).
+
 ## 🏗️ TIER B — DEEP ARCHITECTURES (2026-08-05) — `scripts/deep_zoo.py`
 
 LSTM, GRU, CNN-LSTM and a Transformer encoder. Run last because each needs a full training pass, and
@@ -166,7 +233,13 @@ Deep SVDD's **0.1558 sits INSIDE the autoencoder's own n=3 seed range [0.1078, 0
 is **not an established improvement** — it is one draw from a distribution that already contains it.
 **This is the sixth time a single-seed number has looked like a result in this project**; the
 difference is that it was checked against an existing seed range before being written down.
-**Multi-seed with `ANOM_SEED=43/44` before this goes anywhere near the write-up.**
+~~**Multi-seed with `ANOM_SEED=43/44` before this goes anywhere near the write-up.**~~
+
+> ✅ **RESOLVED 2026-08-10 — C1 is DEAD.** n=3 gives 0.1594 ±0.0339 vs the AE's 0.1291 ±0.0199 (n=6):
+> **Welch t=1.43, p=0.256, ranges overlap.** The verdict **flips seed by seed**
+> (CONFIRMED/FALSIFIED/CONFIRMED). ⚠️ **Deep SVDD's macro is unstable too** (spread 0.0650), so the
+> 0.1393 in the table above is the top of its range. Full detail in
+> [R1](#-r1--deep-svdd-beats-the-autoencoder-on-bot-does-not-survive) at the top of this file.
 
 🔴 **C2 "all collapse on the web families" — FALSIFIED, and this is the real finding.**
 **LOF reaches macro 0.3368 with Web BF 0.5592 and XSS 0.4131** — a benign-only method that does
@@ -213,6 +286,14 @@ gives 6 possible values). **Do not report "a decision tree matches the CNN."**
 
 **The best *valid* Tier-A result is the MLP at 0.5360** (2 % ties, clean) — and that is **0.089 below
 the CNN, well above the 0.0256 threshold, so genuinely distinguishable.**
+
+> ⚠️ **MULTI-SEEDED 2026-08-10 — the whole table above is seed 42, and two rows moved.**
+> **MLP's 3-seed mean is 0.4965** (0.5360/0.4686/0.4849), not 0.5360 — which *widens* the gap to the
+> CNN, so the conclusion strengthens while the number retracts. 🔴 **k-NN is not citable at all:
+> 0.4270 / 0.4037 / 0.0440, a 10× collapse driven entirely by which 50,000 rows it memorises.**
+> The Bot column is reproducible (ρ=+0.770) but every value is 0.64×–1.21× chance and 5 of 7 models
+> are seed-invariant, so **no Bot number here is citable either.** See
+> [R2/R3](#-r3--a-defect-neither-flag-anticipated-and-it-is-the-biggest-one) at the top.
 
 **Predictions:** T1 (none escapes the top tier upward) ✅ **CONFIRMED** · T2 (none reliably detects
 Bot; best is naive_bayes at 0.0415) ✅ **CONFIRMED** · T3 (k-NN would be the best Tier-A method on

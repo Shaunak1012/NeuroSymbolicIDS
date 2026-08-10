@@ -2,6 +2,64 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-10 (the two flagged n=1 results are settled — one dies, one is corrected)
+
+### 🔬 `seed_recheck.py` — resolving Remaining Work #1
+
+Both Tier-C C1 and the Tier-A Bot column were **flagged before publication** on 2026-08-05 (a first,
+after five retractions) and are now multi-seeded to n=3. Aggregation reads `runs.jsonl`, not the
+logs, so every number is reproducible from the committed record.
+
+- 🔴 **R1 — "Deep SVDD beats the autoencoder on Bot" is DEAD.** Bot across seeds:
+  **0.1558 / 0.1275 / 0.1950** = 0.1594 ±0.0339, vs the AE's 0.1291 ±0.0199 (n=6). Delta +0.0304,
+  ranges **overlap**, Welch **t=1.43 p=0.256** → **NOT ESTABLISHED**.
+  **The pre-registered verdict flips seed by seed: CONFIRMED / FALSIFIED / CONFIRMED.** The same
+  unmodified script reports opposite conclusions depending only on which seed ran — the clearest
+  demonstration of the n=1 problem this project has produced, because the flip was *observed* rather
+  than inferred after a retraction.
+- ⚠️ **R2 — the Tier-A Bot column is REPRODUCIBLE (ρ = +0.770), and the flag's stated reason was
+  WRONG.** KNOWN_ISSUES predicted noise-domination like the CNN's (ρ = −0.090); it is the opposite.
+  The correlation is **degeneracy, not signal**: **5 of 7 models have Bot SD exactly 0.0000** because
+  GaussianNB / LogisticRegression / LinearSVC have **no stochastic component** — the seed changes
+  nothing about them — and **2 of 7 sit at exactly the chance value 0.0342**, their tie blocks
+  swallowing every Bot flow. Whole-tier lift **0.64×–1.21×**. **Reproducible and meaningless.**
+  The conclusion (don't cite Tier-A Bot numbers) is unchanged; the reason is corrected in place.
+- 🔴 **R3 — the biggest defect was anticipated by neither flag: k-NN's macro collapses 10× at seed
+  44**, 0.4270 → **0.0440** (Web BF 0.6786 → 0.0805, XSS 0.5682 → 0.0173), spread **0.3830**. The
+  only thing the seed changes for k-NN is **which 50,000 rows it memorises**, so the subsample
+  deviation recorded as "stated not hidden" *dominates the result*. New `[OPEN]` issue.
+- ⚠️ **The MLP's "best valid Tier-A result, 0.5360" is a 3-seed mean of 0.4965** — which widens the
+  gap to the CNN, so **the conclusion strengthens while the number retracts**. For all three unstable
+  models **seed 42 was the highest draw** (observation, not established bias — they were selected for
+  instability).
+- ✅ **Tier C's actual finding survives**: LOF macro **0.3360 ±0.0135**, so *"benign-only ⇒ collapses
+  on web attacks" is a property of reconstruction-error scoring, not of the (B) family* is robust.
+- 🔴 **A verdict-design lesson, applied to my own script.** A single boolean would have printed
+  *"Bot column is RANKABLE"* — technically true and the most misleading sentence available.
+  `seed_recheck.py` reports **reproducibility and informativeness separately**. This is
+  `robustness.py`'s "an automated verdict that cries wolf is worse than none", inverted: **a verdict
+  that declares victory is the same defect.**
+
+### ⚙️ C4 enabled — `FEATURE_TRANSFORM` override + `c4_transform_ab.sh`
+
+`config.yaml` still justifies `feature_transform: log1p` with *"0.980 vs 0.965 PR-AUC"* — the
+**overall binary** metric, inflated by the 17 % duplicate overlap and forbidden by `metrics.py` as an
+optimisation target. `cnn_paper.py` gained a `FEATURE_TRANSFORM` env override so the A/B runs
+**without editing `config.yaml`**, which would silently switch every other script's arm.
+
+- **The tag now carries a transform suffix** for the same reason it already carries a seed suffix:
+  without it, `FEATURE_TRANSFORM=raw` at the default seed would overwrite `cnn_paper.keras`, its
+  embeddings and its fusion channel — the reference every other script reads. Behaviour is
+  byte-identical when the variable is unset.
+- **Explicit `c4_<arm>_s<seed>` tags**, because `cnn_paper.py`'s default tag for seed 43 is
+  `cnn_paper_s43`, which **already exists from the pre-determinism-flag era**. Reusing it would put
+  two populations under one run name — the defect that cost three wrong-model rows on 2026-08-05.
+- **Seed 42 log1p is re-run rather than reused** from `det_verify_a` (0.6297683082). If the code edit
+  is inert it must return that value exactly, so one training decisively checks my own change.
+- ⚠️ **Process hazard recorded**: the chains re-invoke `scripts/cnn_paper.py` **from disk** per seed,
+  so switching git branches mid-run would swap the file underneath the experiment and silently run
+  the `raw` arm with the old code. All git work stayed on one branch until the runs finished.
+
 ## 2026-08-05 (method tiers B and D — the comparison table is complete)
 
 ### 🏗️ Tier B — deep architectures (`deep_zoo.py`)

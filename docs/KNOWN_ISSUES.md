@@ -21,7 +21,35 @@
 
 ## Critical — measurement integrity
 
-### [OPEN 2026-08-05] 🔴 Two n=1 results in the record currently read as findings
+### [CLOSED 2026-08-10] 🔴 Two n=1 results in the record currently read as findings
+
+> ✅ **CLOSED — both multi-seeded to n=3 (`scripts/seed_recheck.py`, `outputs/metadata/seed_recheck.json`).
+> The flag was correct on the first count and WRONG ON ITS STATED REASON on the second.**
+>
+> **① C1 does not survive.** Deep SVDD Bot **0.1558 (s42) · 0.1275 (s43) · 0.1950 (s44)** =
+> 0.1594 ±0.0339, against the autoencoder's 0.1291 ±0.0199 (n=6). Delta **+0.0304**, ranges
+> **overlap**, Welch **t=1.43 p=0.256** → **NOT ESTABLISHED**. 🔴 **The pre-registered verdict flips
+> with the seed — CONFIRMED / FALSIFIED / CONFIRMED.** This is the clearest demonstration in the
+> project that an n=1 verdict is a coin-flip: the *same script* reports opposite conclusions
+> depending only on which seed ran.
+>
+> **② The Tier-A Bot column is REPRODUCIBLE (ρ = +0.770), not noise — but it is still not citable,
+> for a different reason than predicted.** This issue asserted the column would be noise-dominated
+> like the CNN's (ρ = −0.090). It is the opposite, and the explanation is degeneracy, not signal:
+> **5 of 7 models have Bot SD exactly 0.0000** (GaussianNB, LogisticRegression, LinearSVC have **no
+> stochastic component**, so the seed changes nothing about them) and **2 of 7 sit at exactly the
+> chance value 0.0342** because their tie blocks swallow every Bot flow. **Whole-tier Bot lift is
+> 0.64×–1.21×.** The ranking is reproducible and meaningless.
+> ⚠️ **Recorded as a correction to this issue's own reasoning, not folded silently into the fix.**
+>
+> **③ A new defect surfaced that neither flag anticipated — and it is the largest.**
+> **k-NN's macro collapses 10× at seed 44: 0.4270 → 0.0440** (Web BF 0.6786 → 0.0805, XSS
+> 0.5682 → 0.0173), spread **0.3830**. The *only* thing the seed changes for k-NN is which 50,000
+> rows it memorises, so the "deviation, stated not hidden" turns out to **dominate the result**.
+> See the new issue below. `mlp` (spread 0.0673) and `deep_svdd` macro (0.0650) also exceed the
+> ~0.032 an absolute number already carries; **for all three, seed 42 was the highest draw.**
+
+Original issue, kept as written:
 `anomaly_zoo.py`'s **Deep SVDD Bot 0.1558** prints as *"beats the autoencoder"* (C1 CONFIRMED), but
 **0.1558 lies inside the AE's own n=3 range [0.1078, 0.1647]** — it is one draw from a distribution
 that already contains it. Separately, **the entire Tier-A Bot column is n=1**, and Bot rankings are
@@ -29,6 +57,23 @@ provably noise-dominated for closed-set methods (CNN cross-seed ρ = −0.090, R
 **Fix:** `ANOM_SEED=43/44 python scripts/anomaly_zoo.py` and `BASELINE_SEED=43/44 python
 scripts/baselines_classic.py`. Cheap. **This project has retracted five single-seed findings; these
 two are flagged before publication rather than after.**
+
+### [OPEN 2026-08-10] 🔴 k-NN's subsample deviation dominates its result, not its method
+`baselines_classic.py` fits k-NN on a **stratified 50,000-row subsample** of the 883,796 train rows,
+because brute-force k-NN at full size is ~10¹¹ distance computations per pass. That was documented as
+a deviation "stated not hidden" — but it was never multi-seeded, and the seed controls **only** which
+rows are memorised. Measured 2026-08-10: **macro 0.4270 (s42) · 0.4037 (s43) · 0.0440 (s44)**, a
+**10× collapse** and a spread of **0.3830** — an order of magnitude, against a ~0.032 uncertainty on
+any absolute number.
+
+**The published Tier-A k-NN row is the top of that range**, and the tier's narrative ("k-NN is
+mid-table, beaten by the MLP") holds at 2 of 3 seeds and inverts at the third.
+
+**This is a measurement-integrity issue, not a performance one.** It does not change any conclusion
+the project draws — every Tier-A model is far below the CNN and at chance on Bot — but a single
+number from a 3-seed range spanning 10× must not appear in a comparison table without its range.
+**Fix (proposed, NOT implemented):** either report k-NN with its range, raise the subsample and
+re-measure the spread, or drop the row and state why. **Do not quote 0.4270.**
 
 ### [FIXED 2026-08-05] float32 on save silently changed a logged metric
 `baselines_classic.py` evaluated scores in float64 but **saved them as float32**. GaussianNB's
