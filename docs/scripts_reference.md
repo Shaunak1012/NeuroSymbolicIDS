@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-10** (51 Python scripts, plus 7 shell launchers).
+> Last verified against source: **2026-08-10** (52 Python scripts, plus 7 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -781,6 +781,42 @@ fail: **knn_k5 (0.3830)**, **deep_svdd (0.0650)**, **mlp (0.0673)**.
 
 ```bash
 python scripts/seed_recheck.py
+```
+
+## `scripts/field_gap.py`
+
+**Purpose**: The **write-up's opening argument**, computed once over **every method the project has
+measured (n=40)** instead of separately in four tier sections. Reads `runs.jsonl`; no training.
+Writes `outputs/metadata/field_gap.json` and `outputs/figures/field_gap.png`.
+
+**Excluded, and why**: replicates of `cnn_paper`'s model (`cnn_kfold*`, `cnn_noise_r*`,
+`det_verify_*`, `cnn_repro_*`) would over-weight one method in a cross-method correlation.
+**`xgboost_oracle` is excluded on separate grounds** — it trains on ~1,000 zero-day labels, so it is
+an upper bound, not a method runnable under this protocol, and as a single extreme high-high point
+(FIELD 1.0000 / MACRO 0.9899) it inflates any correlation containing it. Tie-degenerate scorers are
+**flagged, not dropped**; the correlation is reported both ways.
+
+### 🔴 Two strong forms of the argument are REFUTED here — do not write either
+
+| tempting claim | verdict |
+|---|---|
+| "the published metric carries **no information** about zero-day detection" | 🔴 **FALSE** — Spearman ρ = **+0.568** (p=0.0001); still +0.41 restricted to the field's own ≥0.98 regime. It is a real, if weak, proxy. |
+| "its whole spread is **below its own noise**" | 🔴 **FALSE** — the field metric is *precise*: median run-to-run SD **0.0020**, an order of magnitude below its spread. |
+
+### ✅ What the data does support — a RESOLUTION failure, which is enough
+
+**67 of 204 method pairs (33 %) are indistinguishable on the metric the literature publishes
+(< 0.0058 apart, ≈2 SD of a difference) while differing ≥2× on macro zero-day PR-AUC.**
+
+Worst case: **`deep_cnn_lstm` vs `ltn_anat_w2p0` — 0.0028 apart on the published metric, 18× apart on
+zero-day.** Also `fusion_cnn_kg` vs `deep_transformer`: **0.0006 apart, 6× apart**.
+
+**The published number ranks methods roughly right and cannot resolve the differences that decide
+whether a novel attack is caught** — and the field reports it to 3 decimals with no error bar, which
+presents that as precision.
+
+```bash
+python scripts/field_gap.py
 ```
 
 ## `scripts/c4_transform_ab.sh`

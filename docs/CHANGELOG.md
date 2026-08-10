@@ -40,6 +40,29 @@ logs, so every number is reproducible from the committed record.
   `robustness.py`'s "an automated verdict that cries wolf is worse than none", inverted: **a verdict
   that declares victory is the same defect.**
 
+### 🧭 Write-up spine decided — and its strong form refuted the same day (`field_gap.py`)
+
+**Decision (user): the field-metric gap leads, the mechanism is the body**, the double dissociation
+demoted to a supporting result. `field_gap.py` puts **all 40 measured methods on one axis** for the
+first time (they previously lived in four separate tier sections) and computes the number the
+argument turns on — the rank correlation between the field's metric and ours.
+
+- 🔴 **"The published metric carries no information about zero-day detection" is FALSE.**
+  **ρ = +0.568 (p=0.0001)**, and still **+0.41** restricted to the field's own ≥0.98 reporting
+  regime. It is a real, if weak, proxy. **Do not write the strong form.**
+- 🔴 **"Its spread is below its own noise" is also FALSE.** The field metric is *precise* — median
+  run-to-run **SD 0.0020**, ~10× below its spread.
+- ✅ **What survives is a RESOLUTION failure, and it is enough: 67 of 204 method pairs (33 %) are
+  indistinguishable on the field's metric while differing ≥2× on macro zero-day.** Worst case
+  `deep_cnn_lstm` vs `ltn_anat_w2p0` — **0.0028 apart on the published number, 18× apart on
+  zero-day**; `fusion_cnn_kg` vs `deep_transformer` **0.0006 apart, 6× apart**.
+- ⚠️ **`xgboost_oracle` excluded from the correlation** — it trains on ~1,000 zero-day labels, so it
+  is an upper bound rather than a method under protocol, and as a lone extreme high-high point
+  (FIELD 1.0000 / MACRO 0.9899) it inflates any correlation containing it.
+- **Both refutations are hard-coded into the script's output** so the strong form cannot be
+  re-derived by accident. **The strong form was measured before it was written** — the first time in
+  this project that has happened *before* committing to a framing rather than after retracting one.
+
 ### ⚙️ C4 enabled — `FEATURE_TRANSFORM` override + `c4_transform_ab.sh`
 
 `config.yaml` still justifies `feature_transform: log1p` with *"0.980 vs 0.965 PR-AUC"* — the

@@ -4,6 +4,44 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🧭 WRITE-UP SPINE DECIDED (2026-08-10) — and its strong form is already refuted
+
+**Decision (user, 2026-08-10): the FIELD-METRIC GAP leads; the mechanism is the body.**
+Opening = *the metric the literature publishes cannot resolve zero-day capability*; body = *why a
+closed-set model cannot reach a novel class* (0/8 feature overlap, 100 % of Bot confidently BENIGN,
+oracle PR-AUC 0.9988 so the information **is** present); the double dissociation becomes a supporting
+result, not the lead.
+
+`scripts/field_gap.py` puts **all 40 measured methods on one axis** for the first time — and the
+first rigorous attempt to state the spine quantitatively **refutes the two strongest forms of it.**
+
+| tempting claim | verdict |
+|---|---|
+| the published metric carries **no information** about zero-day detection | 🔴 **FALSE** — Spearman **ρ = +0.568** (p=0.0001); still **+0.41** restricted to the field's own ≥0.98 regime |
+| its whole spread is **below its own noise** | 🔴 **FALSE** — the field metric is **precise**, median run-to-run **SD 0.0020**, ~10× below its spread |
+
+### ✅ What survives is a RESOLUTION failure — and it is enough
+
+**67 of 204 method pairs (33 %) are indistinguishable on the field's metric** (< 0.0058 apart, ≈2 SD
+of a difference) **while differing ≥2× on macro zero-day PR-AUC.**
+
+| pair | apart on the published metric | apart on zero-day |
+|---|---:|---:|
+| `deep_cnn_lstm` vs `ltn_anat_w2p0` | **0.0028** | **18×** |
+| `fusion_cnn_kg` vs `deep_transformer` | **0.0006** | **6×** |
+| `fusion_cnn_kg` vs `linear_svm` | 0.0098 | **19×** |
+
+**The published number ranks methods roughly right and cannot resolve the differences that decide
+whether a novel attack is caught** — and the field reports it to three decimals with no error bar,
+which presents that as precision.
+
+> ⚠️ **Write the resolution claim, not the information claim.** The spine was chosen partly because
+> it had the most demonstrations; the first attempt to state it at full strength failed. That is the
+> project's own rule applied to its own thesis — **the strong form was measured before being
+> written**, and this is the first time that has happened *before* a spine was committed to rather
+> than after. `field_gap.py` hard-codes both refutations in its output so the strong form cannot be
+> re-derived by accident.
+
 ## 🔬 THE TWO FLAGGED n=1 RESULTS ARE SETTLED (2026-08-10) — `scripts/seed_recheck.py`
 
 Remaining Work #1 from the 2026-08-05 session. Both n=1 results were **flagged before publication**
