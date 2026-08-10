@@ -6,13 +6,50 @@
 
 ## 0. The killer thesis (the spine of the paper)
 
-> **Neuro-symbolic *training* (the SOTA Hybrid-LTN) silently fails under realistic class
+> 🔴 **THE THESIS BELOW IS RETRACTED (2026-08-10). Its second half is falsified by our own
+> measurements and must not be written up.** Kept in place per the retract-in-place rule.
+>
+> ~~**Neuro-symbolic *training* (the SOTA Hybrid-LTN) silently fails under realistic class
 > imbalance. We show *when and why* it inverts, and that moving the symbolic knowledge from a
 > training-time constraint to *inference-time fusion* recovers and exceeds the gain — while
-> adding explanation and closed-loop response.**
+> adding explanation and closed-loop response.**~~
+>
+> **What killed it.** *"Inference-time fusion recovers and exceeds the gain"* is false as stated:
+> the **ablation** (2026-08-05, n=3 paired) shows the symbolic pillar adds **−0.0004 (n.s.)** alone
+> and **significantly HURTS** when stacked on the KG (0.6926 → 0.6708, **p<0.0001**). **Only the KG
+> earns its place**, and a KG is not "the symbolic knowledge moved to inference time" in the sense
+> this sentence promises. The **fusion wall** (a fitted combiner cannot learn to weight a zero-day
+> channel, because validation contains no zero-day by construction) makes the general form of the
+> claim unreachable under this protocol.
+> **Do not repair this thesis by weakening it. The evidence supports a different paper.**
 
-This is a contribution, not just a system. Most groups cannot make a "here's where the SOTA
-breaks" claim; we can, with receipts (measured below). Everything else serves this spine.
+### 0b. THE CURRENT SPINE (decided 2026-08-10)
+
+> **The metric the CIC-IDS2017 literature publishes cannot resolve zero-day capability — and
+> underneath it, a closed-set discriminative model cannot reach a novel class whose signature does
+> not overlap the basis it was trained on. We show the first with 40 methods on one axis, the second
+> with a mechanism, and we show that neither more architecture nor more symbolic machinery fixes it.**
+
+**Structure:** the **resolution failure** opens (it explains why the field has not noticed), the
+**mechanism** is the body (it explains why the problem is hard rather than merely unmeasured), and
+the **double dissociation** is a supporting result rather than the lead.
+
+⚠️ **Two strong forms of the opening are already refuted and must not be written** (`field_gap.py`
+hard-codes both refutations in its output):
+
+| tempting claim | verdict |
+|---|---|
+| the published metric carries **no information** about zero-day detection | 🔴 **FALSE** — Spearman **ρ = +0.568** (p=0.0001); +0.41 even inside the field's own ≥0.98 regime |
+| its spread is **below its own noise** | 🔴 **FALSE** — it is precise, median run-to-run **SD 0.0020** |
+
+✅ **Write the resolution claim: 67 of 204 method pairs (33 %) are indistinguishable on the published
+metric while differing ≥2× on macro zero-day PR-AUC** (worst case 0.0028 apart → **18×** apart).
+
+**Why this is still a contribution, not a downgrade.** The original spine promised a *fix*. This one
+delivers a *diagnosis with a mechanism and a negative result that is hard to get*: 11 additional
+methods across 4 tiers, a standard OOD battery, and an ablation of our own architecture all fail in
+the same way, for a reason we can state. Most groups cannot show that; they show one method winning
+on a metric that, as we demonstrate, cannot tell the methods apart.
 
 **Framing upgrade (2026-06-18):** the paper is structured as an anatomy of **three symbolic
 integration points** — (1) *loss-level* (Hybrid-LTN: reproduced, anatomized, fixed via loss-ratio

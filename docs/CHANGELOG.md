@@ -2,6 +2,46 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-10c (the paper's canonical thesis was stale — retracted, respined, outlined)
+
+### 🔴 `conference_roadmap.md §0` — the "killer thesis" is RETRACTED
+
+The canonical thesis statement, unchanged since 2026-06-18 and the thing every write-up decision was
+supposed to serve, promised that **"moving the symbolic knowledge from a training-time constraint to
+inference-time fusion recovers and exceeds the gain."** **Our own measurements falsify the second
+half**, and it had sat there for weeks after they landed:
+
+- The **ablation** (n=3 paired) puts the symbolic pillar at **−0.0004 (n.s.)** alone and shows it
+  **significantly HURTS** stacked on the KG (0.6926 → 0.6708, **p<0.0001**).
+- The **fusion wall** makes the general claim unreachable under this protocol — validation contains
+  no zero-day by construction, so a fitted combiner cannot learn to weight a zero-day channel.
+- **Only the KG earns its place**, and a KG is not "symbolic knowledge moved to inference time" in
+  the sense the sentence promises.
+
+⚠️ **Retracted in place, not repaired.** Weakening the sentence until it survives would have produced
+a thesis nobody measured. **§0b now carries the current spine** (field-metric gap leads, mechanism is
+the body, double dissociation demoted to support), with both refuted strong forms listed inline.
+
+### 📋 `docs/target/paper_outline.md` — claim → evidence → caveat
+
+Section-by-section plan in which **every claim carries its number, the script that produced it, and
+the limit that must be stated with it.** The third column is the point: this project's recurring
+failure is not wrong numbers but **right numbers written without their limits**. *If the caveat
+column is empty, the claim is not ready to write.*
+
+- **DO-NOT-WRITE rows are included deliberately** — each is either something believed here at some
+  point or the obvious stronger version of a supportable claim: "the published metric carries no
+  information" (ρ=+0.568 refutes it), "the conjunction gives 81 % precision" (seed-42 only), the KG's
+  "unexplained cluster" mechanism (lift ≤ 1.00×), the (A)/(B) framing, the modality analogue.
+- Every quoted figure was **cross-checked against `outputs/metadata/*.json`** rather than copied from
+  prose: ρ +0.568 · 67/204 · field noise SD 0.0020 · seed SD 0.0171 (F=1.69, p=0.58) · absolute
+  uncertainty 0.0285 · Deep SVDD R1 NOT ESTABLISHED (p=0.256).
+- **§7 makes measurement discipline a section, not a footnote** — the §1 claim is itself a
+  measurement claim, so our standards have to be visibly higher than the field's.
+- **§8 limitations written before a reviewer writes them**, led by the weakest point: single dataset,
+  cross-dataset blocked on data availability.
+- 4 of 5 figures still to build.
+
 ## 2026-08-10b (the noise floor is settled — the threshold stands, and n=3 was the trap)
 
 ### 🔴 `noise_postdet.py` — P1 falsified, P2 confirmed, threshold unchanged

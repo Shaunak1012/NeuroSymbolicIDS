@@ -4,6 +4,32 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 📋 THE PAPER IS OUTLINED (2026-08-10) — and the canonical thesis was retracted to do it
+
+**[docs/target/paper_outline.md](target/paper_outline.md)** — section-by-section, every claim mapped
+to **its number, the script that produced it, and the caveat that must travel with it.**
+
+> 🔴 **`conference_roadmap.md §0`'s "killer thesis" is RETRACTED.** It promised that *"moving the
+> symbolic knowledge from a training-time constraint to inference-time fusion recovers and exceeds
+> the gain"* — and **our own ablation falsifies the second half** (symbolic pillar: −0.0004 n.s.
+> alone; **significantly HURTS** on the KG, p<0.0001), with the **fusion wall** making the general
+> form unreachable under this protocol. It had stood unchanged since 2026-06-18, weeks after the
+> measurements that killed it. **Retracted in place, not repaired** — weakening it until it survived
+> would have produced a thesis nobody measured. **§0b carries the current spine.**
+
+**The outline's third column is the deliverable.** This project's recurring failure is not wrong
+numbers, it is **right numbers written without their limits** — five single-seed retractions, a
+size-weighted metric, a "same as X" comment that wasn't. **If a claim's caveat cell is empty, the
+claim is not ready to write.** DO-NOT-WRITE rows are listed deliberately: each was believed here at
+some point, or is the obvious stronger version of something supportable.
+
+✅ Every figure quoted in the outline was **cross-checked against `outputs/metadata/*.json`**, not
+copied from prose.
+
+**Still open before submission:** Phase 5's **latency** and the **fitted fuser** (write the blocker as
+a result) · cross-dataset (**blocked on data**) · **figures 2–5** · optionally a post-flag LTN-control
+sweep, the only route to reopening C2.
+
 ## 🔴 THE NOISE FLOOR IS SETTLED (2026-08-10) — `scripts/noise_postdet.py`. THE THRESHOLD STANDS.
 
 The highest-leverage open measurement, run and answered the same session it was raised. Predictions
