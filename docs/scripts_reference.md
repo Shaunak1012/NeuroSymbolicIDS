@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-10** (52 Python scripts, plus 7 shell launchers).
+> Last verified against source: **2026-08-10** (53 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -782,6 +782,39 @@ fail: **knn_k5 (0.3830)**, **deep_svdd (0.0650)**, **mlp (0.0673)**.
 ```bash
 python scripts/seed_recheck.py
 ```
+
+## `scripts/noise_postdet.py` + `scripts/noise_postdet.sh`
+
+**Purpose**: Decompose the project's uncertainty into its actual sources. The ~0.0256
+"indistinguishable" threshold — which retracted C2 and demotes every within-tier comparison — rests on
+the noise floor **SD 0.0222**, and that floor was measured as **six runs of seed 42 with determinism
+OFF**. It is therefore *thread-scheduling nondeterminism at a fixed seed*, and the project has been
+using it as a proxy for *seed-to-seed variance*. `determinism.enable()` separates them for the first
+time.
+
+| population | varies | measures |
+|---|---|---|
+| **A** pre-flag, seed FIXED (n=6) | run order | nondeterminism only |
+| **B** pre-flag, seed VARIES (n=6) | seed + run order | both |
+| **C** post-flag, seed VARIES (n=6) | seed only | **seed alone** |
+
+⚠️ **Population A was identified by verification, not assumption** — the six runs
+(`cnn_paper_logodds`, `cnn_noise_r1–r4`, `cnn_repro_s42`) reproduce the documented **SD 0.0222 and
+spread 0.0622 exactly**.
+
+**Only 3 trainings are needed** (`noise_postdet.sh 45|46|47`): seeds 42/43/44 post-flag already exist
+as C4's log1p arm, which is `cnn_paper.py` verbatim at the config-default transform — verified by
+`c4_log1p_s42` == `det_verify_a` to twelve decimals.
+
+**Pre-registered predictions** (committed before seeds 45–47 finished — see git history): **P1**
+post-flag seed SD < 0.010 · **P2** the withdrawn "session effect" will not reproduce · **P3**
+√(A² + C²) ≈ B.
+
+🔴 **This cannot reopen C2, and the script says so in its own output.** C2's +0.0204 is **pre-flag on
+both sides**; applying a post-flag threshold to pre-flag numbers is the mixing error that
+manufactured the 2026-08-03 "C2 collapse". Reopening it requires a post-flag LTN-control sweep.
+⚠️ **The data-split SD (0.0228) is unaffected** — determinism tightened *comparisons on a shared
+split*, and did nothing for the uncertainty on a single quoted number.
 
 ## `scripts/field_gap.py`
 

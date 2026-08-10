@@ -32,13 +32,28 @@ if [ "${1:-}" = "--watch" ]; then WATCH=1; shift; fi
 [ $# -ge 1 ] || { echo "usage: run_long.sh [--watch] <script.py> [args...]"; exit 2; }
 
 SCRIPT="$1"; shift
-BASE="$(basename "$SCRIPT" .py)"
+BASE="$(basename "$(basename "$SCRIPT" .py)" .sh)"
 LOG="outputs/${BASE}.log"
 mkdir -p outputs
 
-# PYTHONIOENCODING is forced: the console default is cp1252 on Windows, which
-# crashes on any non-ASCII output (hit 3x on 2026-08-03).
-PYTHONIOENCODING=utf-8 "$PY" -u "scripts/$SCRIPT" "$@" >"$LOG" 2>&1 &
+# Shell launchers are accepted too, not just .py.
+#
+# WHY THIS WAS ADDED (2026-08-10): this script used to hardcode the Python
+# interpreter, so a multi-step SHELL launcher -- exactly what a seed sweep or an
+# A/B arm needs -- could not be run through it at all. On 2026-08-10 that pushed
+# two long jobs onto `nohup scripts/<launcher>.sh &`, a bare background launch,
+# violating non-negotiable #2. The launchers themselves were careful; the point is
+# that THE COMPLIANT PATH DID NOT EXIST for them, and this script's whole premise
+# is "make the compliant path the easy path". A rule you cannot follow for a whole
+# class of jobs will be bypassed for that class.
+case "$SCRIPT" in
+  *.sh) RUNNER=(bash "scripts/$SCRIPT") ;;
+  # PYTHONIOENCODING is forced: the console default is cp1252 on Windows, which
+  # crashes on any non-ASCII output (hit 3x on 2026-08-03).
+  *)    RUNNER=("$PY" -u "scripts/$SCRIPT") ;;
+esac
+
+PYTHONIOENCODING=utf-8 "${RUNNER[@]}" "$@" >"$LOG" 2>&1 &
 PID=$!
 echo "launched $SCRIPT (pid $PID) -> $LOG"
 echo "monitor with:  scripts/run_long.sh --watch $SCRIPT"
