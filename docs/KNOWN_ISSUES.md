@@ -185,13 +185,66 @@ exactly** (cnn_paper 0.4982 > control 0.4824 > Ax6-ratio 0.4596 > Ax6-fixed 0.39
 macro-cost finding is robust. But absolute values shift ~0.15.
 **Fix (proposed, NOT implemented):** report the regrouped macro as a robustness row.
 
-### [OPEN 2026-07-29] The feature transform was selected on the contaminated metric
+### [CLOSED 2026-08-10] The feature transform was selected on the contaminated metric
+
+> ✅ **CLOSED — the A/B was re-run on the headline metric exactly as proposed**
+> (`scripts/c4_transform_ab.sh`, 3 seeds per arm, 50 epochs, determinism on).
+> **log1p wins decisively, and the margin is not close to any threshold:**
+>
+> | arm | macro zero-day PR-AUC | Bot | Web BF | XSS |
+> |---|---|---:|---:|---:|
+> | **log1p** | **0.6299 ± 0.0031** | 0.0321 | 0.9147 | 0.9430 |
+> | raw | 0.1606 ± 0.0039 | 0.0204 | 0.2953 | 0.1662 |
+>
+> **Δ = +0.4693**, ranges **do not overlap**, Welch **t = 163, p < 1e-6** — **15× the ~0.032**
+> uncertainty an absolute number carries, and **134×** the observed post-flag seed SD. Per family the
+> transform is worth **5.7× on XSS** and **3.1× on Web BF**; **Bot is at/below chance in both arms**
+> (0.0321 and 0.0204 against a chance of 0.0342), which is consistent with everything else known
+> about Bot and is not evidence about the transform.
+>
+> ⚠️ **The conclusion was right and its justification was wrong — those are separate facts.** The
+> original A/B reached the correct answer on a metric that could not support it. Had raw won on the
+> headline metric, the project would have been running the wrong transform since Phase 0.3 on the
+> strength of a number `metrics.py` forbids as an optimisation target. **The re-run was necessary
+> regardless of which way it came out**; "it would probably have been fine" is not a reason to skip
+> a check. `config.yaml`'s comment now cites these numbers, with the superseded justification kept
+> beside it so the error is not re-made.
+
+**Original issue, kept as written:**
 `config.yaml` pins `feature_transform: log1p` citing *"0.980 vs 0.965 PR-AUC"* — that is the
 **overall binary** metric, i.e. the one inflated by the duplicate leakage above and the one
 `metrics.py` explicitly forbids as an optimisation target. The transform was never A/B'd against
 macro zero-day PR-AUC, the actual headline.
 **Fix (proposed, NOT implemented):** re-run the A/B on the headline metric (2 trainings). log1p may
 still win; the issue is that the current justification cites the wrong number.
+
+### [OPEN 2026-08-10] 🟡 The 0.0256 distinguishability threshold may be ~7× too conservative post-flag
+**A by-product of C4, and it is potentially consequential enough to need its own confirmation run.**
+
+The project's ~0.0256 "indistinguishable" threshold derives from the noise floor **SD 0.0222**, which
+was measured as **six runs of seed 42 with determinism OFF** — i.e. it is *thread-scheduling
+nondeterminism with the seed held constant*, not seed-to-seed variance.
+
+C4 ran **three different seeds with determinism ON**, twice, and both arms agree:
+
+| arm | seeds | SD |
+|---|---|---:|
+| log1p | 42/43/44 | **0.0031** |
+| raw | 42/43/44 | **0.0039** |
+
+**So genuine seed-to-seed variance is ~0.0035 — roughly 6–7× smaller than the nondeterminism the
+project has been treating as its uncertainty.** If that holds, the dominant variance source was never
+the seed; it was thread scheduling, and `determinism.enable()` has largely removed it. Many
+comparisons currently filed as "within noise" would become decidable against a post-flag threshold of
+**~0.006** (2·SE·√2 at n=3, SD 0.0035).
+
+🔴 **DO NOT change the threshold on this evidence.** It is n=3 per arm on **one model**, the two arms
+are not independent replicates of the same configuration, and **the data-split SD (0.0228) is a
+separate source that still applies to any absolute number** regardless of determinism. C2's retraction
+rests on the 0.0222 floor and **stays retracted** until this is confirmed properly.
+**Fix (proposed, NOT implemented):** a post-flag seed sweep on `cnn_paper` at n≥6 to estimate
+post-determinism seed SD directly, then re-derive the threshold for post-flag comparisons only.
+**Pre- and post-flag runs remain different populations and must not be pooled.**
 
 ### [FIXED 2026-08-02] `rescore_logits.py` recorded the wrong seed on every multi-seed entry
 Every `_logodds` entry was written with `seed: 42` regardless of which seed's model was actually being

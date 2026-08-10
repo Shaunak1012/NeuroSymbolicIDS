@@ -4,6 +4,53 @@
 
 ## ▶ RESUME HERE (next session)
 
+## ✅ C4 IS CLOSED (2026-08-10) — `scripts/c4_transform_ab.sh`. Right answer, wrong reason, now fixed.
+
+The last of the 2026-07-29 audit's open items. `config.yaml` justified `feature_transform: log1p`
+with *"0.980 vs 0.965 PR-AUC"* — the **overall binary** metric, inflated by the 17 % duplicate overlap
+and forbidden by `metrics.py` as an optimisation target. Re-run on the headline metric, 3 seeds per
+arm, 50 epochs, determinism on.
+
+| arm | macro zero-day | Bot | Web BF | XSS |
+|---|---|---:|---:|---:|
+| **log1p** | **0.6299 ± 0.0031** | 0.0321 | 0.9147 | 0.9430 |
+| raw | 0.1606 ± 0.0039 | 0.0204 | 0.2953 | 0.1662 |
+
+**Δ = +0.4693 · ranges do not overlap · Welch t = 163, p < 1e-6 · 15× the ~0.032** uncertainty an
+absolute number carries. Worth **5.7× on XSS** and **3.1× on Web BF**. ⚠️ **Bot is at or below chance
+in both arms** (0.0321 / 0.0204 vs chance 0.0342) — consistent with everything else known about Bot,
+and not evidence about the transform either way.
+
+**The conclusion was right and its justification was wrong — those are separate facts.** Had raw won,
+the project would have been running the wrong transform since Phase 0.3 on the strength of a
+forbidden metric. **The re-run was necessary regardless of the outcome**; "it would probably have been
+fine" is not a reason to skip a check.
+
+### ✅ The code change was verified, not asserted
+
+`c4_log1p_s42` returned **0.629768308213** — **identical to `det_verify_a`/`det_verify_b` to twelve
+decimals.** So the `FEATURE_TRANSFORM` override added to `cnn_paper.py` is **provably inert** at the
+config default, and determinism reproduces a **third** time, in a new session on a different day.
+This is the *"a 'same as X' comment is not evidence; read X"* lesson paid forward: one training bought
+a decisive check on my own edit.
+
+### 🟡 An unexpected by-product — the noise floor may be mostly nondeterminism, not seeds
+
+The **SD 0.0222** floor was measured as **six runs of seed 42 with determinism OFF** — thread
+scheduling at *fixed* seed. C4 measured **three different seeds with determinism ON**, twice:
+
+| arm | SD |
+|---|---:|
+| log1p (42/43/44) | **0.0031** |
+| raw (42/43/44) | **0.0039** |
+
+**Genuine seed-to-seed variance looks ~6–7× smaller than the nondeterminism the project has been
+treating as its uncertainty.** If confirmed, the dominant variance source was never the seed.
+
+🔴 **Do NOT act on this yet, and do NOT change the 0.0256 threshold.** n=3 per arm, one model, and
+**the data-split SD 0.0228 is a separate source that still applies to absolute numbers.** **C2 stays
+retracted.** New issue opened with the confirmation run specified.
+
 ## 🧭 WRITE-UP SPINE DECIDED (2026-08-10) — and its strong form is already refuted
 
 **Decision (user, 2026-08-10): the FIELD-METRIC GAP leads; the mechanism is the body.**
@@ -581,17 +628,37 @@ method comparison table is now populated (4 tiers, 11 new methods).**
 
 **▶ START HERE NEXT SESSION — three things, in this order:**
 
-1. **Multi-seed the two n=1 results that currently look like findings but are not.**
+> ✅ **ALL THREE WERE DONE ON 2026-08-10.** Superseded; kept for the record. The current resume
+> pointer is the top of this file. In short: **(1)** both n=1 results multi-seeded — C1 is dead and
+> the Bot-column reasoning is corrected; **(2)** C4 closed, log1p wins by +0.4693; **(3)** the spine
+> is decided (field-metric gap leads) **and its two strongest forms were refuted the same day** —
+> write the *resolution* claim, not the *information* claim.
+
+1. ~~**Multi-seed the two n=1 results that currently look like findings but are not.**~~
    `ANOM_SEED=43 44 python scripts/anomaly_zoo.py` (Deep SVDD's Bot 0.1558 sits **inside** the AE's
    own n=3 range, so "beats the AE" is unsupported) and `BASELINE_SEED=43 44 python
    scripts/baselines_classic.py` (the whole Tier-A Bot column is n=1, and Bot rankings are provably
    noise-dominated for closed-set methods). **Cheap, and this project has retracted five single-seed
    findings.**
-2. **C4** — the feature transform is still justified by the contaminated overall-binary metric
+2. ~~**C4**~~ — the feature transform is still justified by the contaminated overall-binary metric
    (`config.yaml` cites *"0.980 vs 0.965"*). Re-run the log1p A/B on macro zero-day. 2 trainings.
-3. **Decide the write-up spine.** The field-metric gap now has **three independent demonstrations**
+3. ~~**Decide the write-up spine.**~~ The field-metric gap now has **three independent demonstrations**
    (`comparability.py` on 1 model · Tier A on 7 · Tier B on 4) plus the base paper's own metric set.
    That is arguably a stronger opening than the double dissociation.
+
+**▶ NEXT SESSION STARTS HERE (as of 2026-08-10):**
+
+1. **Confirm or kill the post-flag noise estimate.** C4's by-product says genuine seed variance is
+   **SD ~0.0035**, ~6–7× below the 0.0222 floor the project's ~0.0256 threshold rests on. A post-flag
+   `cnn_paper` sweep at **n≥6** settles it. **This is the highest-leverage open measurement in the
+   project** — if it holds, comparisons currently filed as "within noise" become decidable, and it
+   bears directly on whether C2 can ever be reopened. It does **not** touch the data-split SD 0.0228,
+   which still applies to absolute numbers.
+2. **Write.** The spine is decided and its limits are measured. Open with the **resolution** failure
+   (`field_gap.py`: 67/204 method pairs indistinguishable on the published metric while ≥2× apart on
+   zero-day), body = the mechanism, double dissociation as support.
+3. **Phase 5's remaining three** — calibration, latency, the fitted fuser (the last blocked by the
+   fusion wall). Phase 6 still **blocked** on CIC-IDS2018 not being on this machine.
 
 **Blocked, not forgotten:** Phase 6 cross-dataset needs **CIC-IDS2018**, which is not on this machine.
 

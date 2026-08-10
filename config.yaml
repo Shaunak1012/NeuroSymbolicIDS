@@ -16,13 +16,19 @@ protocol:
   test_frac: 0.10
   benign_ratio: 1.0           # benign : known-attack count (1.0 = balanced, paper-faithful)
   # Apply sign(x)*log1p(|x|) before scaling.
-  # (!) JUSTIFICATION IS KNOWN-WEAK (issue C4, flagged 2026-07-29, still open 2026-08-03).
-  # The original A/B (Phase 0.3) cited "signed-log1p beat raw 0.980 vs 0.965 PR-AUC" — but that
-  # 0.980 is the OVERALL BINARY metric, which is (a) inflated by the 17% train/test duplicate
-  # overlap documented in KNOWN_ISSUES C1, and (b) the metric metrics.py explicitly forbids as an
-  # optimisation target. The transform has NEVER been A/B'd on macro zero-day PR-AUC, the actual
-  # headline. log1p may well still win; the point is that the number quoted here does not support it.
-  # Fix = re-run the A/B on the headline metric (2 trainings). Do not cite 0.980 as evidence.
+  #
+  # JUSTIFIED ON THE HEADLINE METRIC (C4 CLOSED 2026-08-10, scripts/c4_transform_ab.sh).
+  #   log1p  macro zero-day PR-AUC  0.6299 +/- 0.0031   (seeds 42/43/44, determinism on)
+  #   raw    macro zero-day PR-AUC  0.1606 +/- 0.0039
+  #   delta +0.4693, ranges do not overlap, Welch t=163 p<1e-6 -- 15x the ~0.032 uncertainty
+  #   that any absolute number carries. Per family: XSS 5.7x, Web BF 3.1x.
+  # log1p wins, decisively, and now for the right reason. Cite THESE numbers, not 0.980.
+  #
+  # Superseded justification, kept so the error is not re-made: the Phase 0.3 A/B cited
+  # "signed-log1p beat raw 0.980 vs 0.965 PR-AUC". That 0.980 is the OVERALL BINARY metric,
+  # which is (a) inflated by the 17% train/test duplicate overlap and (b) the metric
+  # metrics.py explicitly forbids as an optimisation target. The right answer was reached
+  # on the wrong evidence -- which is why it had to be re-run rather than assumed.
   feature_transform: log1p
 
 # 8 known attacks + BENIGN = 9 known classes (kept in train/val/test)

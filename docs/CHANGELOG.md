@@ -63,6 +63,33 @@ argument turns on — the rank correlation between the field's metric and ours.
   re-derived by accident. **The strong form was measured before it was written** — the first time in
   this project that has happened *before* committing to a framing rather than after retracting one.
 
+### ✅ C4 CLOSED — the transform is now justified on the metric that matters
+
+The last open item from the 2026-07-29 audit. 3 seeds per arm, 50 epochs, determinism on.
+
+| arm | macro zero-day | Bot | Web BF | XSS |
+|---|---|---:|---:|---:|
+| **log1p** | **0.6299 ± 0.0031** | 0.0321 | 0.9147 | 0.9430 |
+| raw | 0.1606 ± 0.0039 | 0.0204 | 0.2953 | 0.1662 |
+
+- ✅ **log1p wins by Δ +0.4693**, ranges do not overlap, Welch **t=163 p<1e-6** — **15×** the ~0.032
+  uncertainty an absolute number carries. Worth **5.7× on XSS**, **3.1× on Web BF**.
+  ⚠️ **Bot is at/below chance in both arms** (0.0321 / 0.0204 vs chance 0.0342) — not evidence about
+  the transform.
+- ⚠️ **The conclusion was right and the justification was wrong; those are separate facts.** Had raw
+  won, the project would have been running the wrong transform since Phase 0.3 on the strength of a
+  metric `metrics.py` forbids. **The re-run was necessary regardless of outcome.** `config.yaml` now
+  cites these numbers with the superseded justification kept beside it.
+- ✅ **The code change was verified, not asserted.** `c4_log1p_s42` returned **0.629768308213**,
+  identical to `det_verify_a`/`det_verify_b` **to twelve decimals** — so the `FEATURE_TRANSFORM`
+  override is provably inert at the config default, and determinism reproduces a third time in a new
+  session. One training bought a decisive check on my own edit.
+- 🟡 **Unexpected by-product: the noise floor may be mostly nondeterminism, not seeds.** SD 0.0222 was
+  six runs of *seed 42 with determinism OFF*. C4 ran *three different seeds with determinism ON*,
+  twice, and got **SD 0.0031 / 0.0039** — ~6–7× smaller. If confirmed, the dominant variance source
+  was never the seed. 🔴 **Not acted on: n=3, one model, and data-split SD 0.0228 still applies to
+  absolute numbers. The 0.0256 threshold is unchanged and C2 stays retracted.** New issue opened.
+
 ### ⚙️ C4 enabled — `FEATURE_TRANSFORM` override + `c4_transform_ab.sh`
 
 `config.yaml` still justifies `feature_transform: log1p` with *"0.980 vs 0.965 PR-AUC"* — the

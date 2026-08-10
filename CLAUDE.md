@@ -111,12 +111,22 @@ every within-tier comparison this project spent months on.
 👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
-**Next action (resume here — as of end of 2026-08-05):**
-1. **Multi-seed two n=1 results that currently read as findings**: `ANOM_SEED=43/44 anomaly_zoo.py`
-   (Deep SVDD's Bot sits *inside* the AE's own n=3 range) and `BASELINE_SEED=43/44
-   baselines_classic.py` (the whole Tier-A Bot column). Cheap; five single-seed retractions precede this.
-2. **C4** — the feature transform is still justified by the contaminated overall-binary metric.
-3. **Decide the write-up spine** — the field-metric gap now has *three* independent demonstrations.
+**Next action (resume here — as of end of 2026-08-10):**
+1. **Confirm or kill the post-flag noise estimate.** C4's by-product puts genuine seed variance at
+   **SD ~0.0035**, ~6–7× below the **0.0222** floor that the ~0.0256 threshold rests on (that floor
+   was six runs of *seed 42 with determinism OFF* — nondeterminism, not seed variance). A post-flag
+   `cnn_paper` sweep at **n≥6** settles it. **Highest-leverage open measurement in the project.**
+   🔴 Until then the threshold is **unchanged** and **C2 stays retracted**; the data-split SD 0.0228
+   is untouched by this and still applies to absolute numbers.
+2. **Write.** Spine decided 2026-08-10: **field-metric gap leads, mechanism is the body**, double
+   dissociation demoted to support. ⚠️ Write the **resolution** claim (67/204 method pairs
+   indistinguishable on the published metric while ≥2× apart on zero-day), **not** the *information*
+   claim — ρ=+0.568 refutes the strong form, and `field_gap.py` hard-codes that refutation.
+3. **Phase 5's remaining three** — calibration, latency, the fitted fuser (blocked by the fusion wall).
+
+**Done 2026-08-10:** both flagged n=1 results settled (**C1 is dead** — the verdict flips seed by
+seed) · **C4 closed** (log1p wins by **+0.4693**, t=163) · spine decided *and its strong forms
+refuted* · **the last 2026-07-29 audit item is now closed**.
 
 **Done as of 2026-08-05:** Phase 4 complete · Phase 5 partial (significance, parameter-free fusion,
 n=6; calibration/latency/fitted-fusion outstanding) · **Phase 7.5 Tiers 1 AND 2 complete** ·
