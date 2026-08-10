@@ -2,6 +2,114 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-10 (the two flagged n=1 results are settled — one dies, one is corrected)
+
+### 🔬 `seed_recheck.py` — resolving Remaining Work #1
+
+Both Tier-C C1 and the Tier-A Bot column were **flagged before publication** on 2026-08-05 (a first,
+after five retractions) and are now multi-seeded to n=3. Aggregation reads `runs.jsonl`, not the
+logs, so every number is reproducible from the committed record.
+
+- 🔴 **R1 — "Deep SVDD beats the autoencoder on Bot" is DEAD.** Bot across seeds:
+  **0.1558 / 0.1275 / 0.1950** = 0.1594 ±0.0339, vs the AE's 0.1291 ±0.0199 (n=6). Delta +0.0304,
+  ranges **overlap**, Welch **t=1.43 p=0.256** → **NOT ESTABLISHED**.
+  **The pre-registered verdict flips seed by seed: CONFIRMED / FALSIFIED / CONFIRMED.** The same
+  unmodified script reports opposite conclusions depending only on which seed ran — the clearest
+  demonstration of the n=1 problem this project has produced, because the flip was *observed* rather
+  than inferred after a retraction.
+- ⚠️ **R2 — the Tier-A Bot column is REPRODUCIBLE (ρ = +0.770), and the flag's stated reason was
+  WRONG.** KNOWN_ISSUES predicted noise-domination like the CNN's (ρ = −0.090); it is the opposite.
+  The correlation is **degeneracy, not signal**: **5 of 7 models have Bot SD exactly 0.0000** because
+  GaussianNB / LogisticRegression / LinearSVC have **no stochastic component** — the seed changes
+  nothing about them — and **2 of 7 sit at exactly the chance value 0.0342**, their tie blocks
+  swallowing every Bot flow. Whole-tier lift **0.64×–1.21×**. **Reproducible and meaningless.**
+  The conclusion (don't cite Tier-A Bot numbers) is unchanged; the reason is corrected in place.
+- 🔴 **R3 — the biggest defect was anticipated by neither flag: k-NN's macro collapses 10× at seed
+  44**, 0.4270 → **0.0440** (Web BF 0.6786 → 0.0805, XSS 0.5682 → 0.0173), spread **0.3830**. The
+  only thing the seed changes for k-NN is **which 50,000 rows it memorises**, so the subsample
+  deviation recorded as "stated not hidden" *dominates the result*. New `[OPEN]` issue.
+- ⚠️ **The MLP's "best valid Tier-A result, 0.5360" is a 3-seed mean of 0.4965** — which widens the
+  gap to the CNN, so **the conclusion strengthens while the number retracts**. For all three unstable
+  models **seed 42 was the highest draw** (observation, not established bias — they were selected for
+  instability).
+- ✅ **Tier C's actual finding survives**: LOF macro **0.3360 ±0.0135**, so *"benign-only ⇒ collapses
+  on web attacks" is a property of reconstruction-error scoring, not of the (B) family* is robust.
+- 🔴 **A verdict-design lesson, applied to my own script.** A single boolean would have printed
+  *"Bot column is RANKABLE"* — technically true and the most misleading sentence available.
+  `seed_recheck.py` reports **reproducibility and informativeness separately**. This is
+  `robustness.py`'s "an automated verdict that cries wolf is worse than none", inverted: **a verdict
+  that declares victory is the same defect.**
+
+### 🧭 Write-up spine decided — and its strong form refuted the same day (`field_gap.py`)
+
+**Decision (user): the field-metric gap leads, the mechanism is the body**, the double dissociation
+demoted to a supporting result. `field_gap.py` puts **all 40 measured methods on one axis** for the
+first time (they previously lived in four separate tier sections) and computes the number the
+argument turns on — the rank correlation between the field's metric and ours.
+
+- 🔴 **"The published metric carries no information about zero-day detection" is FALSE.**
+  **ρ = +0.568 (p=0.0001)**, and still **+0.41** restricted to the field's own ≥0.98 reporting
+  regime. It is a real, if weak, proxy. **Do not write the strong form.**
+- 🔴 **"Its spread is below its own noise" is also FALSE.** The field metric is *precise* — median
+  run-to-run **SD 0.0020**, ~10× below its spread.
+- ✅ **What survives is a RESOLUTION failure, and it is enough: 67 of 204 method pairs (33 %) are
+  indistinguishable on the field's metric while differing ≥2× on macro zero-day.** Worst case
+  `deep_cnn_lstm` vs `ltn_anat_w2p0` — **0.0028 apart on the published number, 18× apart on
+  zero-day**; `fusion_cnn_kg` vs `deep_transformer` **0.0006 apart, 6× apart**.
+- ⚠️ **`xgboost_oracle` excluded from the correlation** — it trains on ~1,000 zero-day labels, so it
+  is an upper bound rather than a method under protocol, and as a lone extreme high-high point
+  (FIELD 1.0000 / MACRO 0.9899) it inflates any correlation containing it.
+- **Both refutations are hard-coded into the script's output** so the strong form cannot be
+  re-derived by accident. **The strong form was measured before it was written** — the first time in
+  this project that has happened *before* committing to a framing rather than after retracting one.
+
+### ✅ C4 CLOSED — the transform is now justified on the metric that matters
+
+The last open item from the 2026-07-29 audit. 3 seeds per arm, 50 epochs, determinism on.
+
+| arm | macro zero-day | Bot | Web BF | XSS |
+|---|---|---:|---:|---:|
+| **log1p** | **0.6299 ± 0.0031** | 0.0321 | 0.9147 | 0.9430 |
+| raw | 0.1606 ± 0.0039 | 0.0204 | 0.2953 | 0.1662 |
+
+- ✅ **log1p wins by Δ +0.4693**, ranges do not overlap, Welch **t=163 p<1e-6** — **15×** the ~0.032
+  uncertainty an absolute number carries. Worth **5.7× on XSS**, **3.1× on Web BF**.
+  ⚠️ **Bot is at/below chance in both arms** (0.0321 / 0.0204 vs chance 0.0342) — not evidence about
+  the transform.
+- ⚠️ **The conclusion was right and the justification was wrong; those are separate facts.** Had raw
+  won, the project would have been running the wrong transform since Phase 0.3 on the strength of a
+  metric `metrics.py` forbids. **The re-run was necessary regardless of outcome.** `config.yaml` now
+  cites these numbers with the superseded justification kept beside it.
+- ✅ **The code change was verified, not asserted.** `c4_log1p_s42` returned **0.629768308213**,
+  identical to `det_verify_a`/`det_verify_b` **to twelve decimals** — so the `FEATURE_TRANSFORM`
+  override is provably inert at the config default, and determinism reproduces a third time in a new
+  session. One training bought a decisive check on my own edit.
+- 🟡 **Unexpected by-product: the noise floor may be mostly nondeterminism, not seeds.** SD 0.0222 was
+  six runs of *seed 42 with determinism OFF*. C4 ran *three different seeds with determinism ON*,
+  twice, and got **SD 0.0031 / 0.0039** — ~6–7× smaller. If confirmed, the dominant variance source
+  was never the seed. 🔴 **Not acted on: n=3, one model, and data-split SD 0.0228 still applies to
+  absolute numbers. The 0.0256 threshold is unchanged and C2 stays retracted.** New issue opened.
+
+### ⚙️ C4 enabled — `FEATURE_TRANSFORM` override + `c4_transform_ab.sh`
+
+`config.yaml` still justifies `feature_transform: log1p` with *"0.980 vs 0.965 PR-AUC"* — the
+**overall binary** metric, inflated by the 17 % duplicate overlap and forbidden by `metrics.py` as an
+optimisation target. `cnn_paper.py` gained a `FEATURE_TRANSFORM` env override so the A/B runs
+**without editing `config.yaml`**, which would silently switch every other script's arm.
+
+- **The tag now carries a transform suffix** for the same reason it already carries a seed suffix:
+  without it, `FEATURE_TRANSFORM=raw` at the default seed would overwrite `cnn_paper.keras`, its
+  embeddings and its fusion channel — the reference every other script reads. Behaviour is
+  byte-identical when the variable is unset.
+- **Explicit `c4_<arm>_s<seed>` tags**, because `cnn_paper.py`'s default tag for seed 43 is
+  `cnn_paper_s43`, which **already exists from the pre-determinism-flag era**. Reusing it would put
+  two populations under one run name — the defect that cost three wrong-model rows on 2026-08-05.
+- **Seed 42 log1p is re-run rather than reused** from `det_verify_a` (0.6297683082). If the code edit
+  is inert it must return that value exactly, so one training decisively checks my own change.
+- ⚠️ **Process hazard recorded**: the chains re-invoke `scripts/cnn_paper.py` **from disk** per seed,
+  so switching git branches mid-run would swap the file underneath the experiment and silently run
+  the `raw` arm with the old code. All git work stayed on one branch until the runs finished.
+
 ## 2026-08-05 (method tiers B and D — the comparison table is complete)
 
 ### 🏗️ Tier B — deep architectures (`deep_zoo.py`)

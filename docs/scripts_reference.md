@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-05** (50 Python scripts, plus 5 shell launchers).
+> Last verified against source: **2026-08-10** (52 Python scripts, plus 7 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -653,7 +653,17 @@ channels that touch Bot all model normality rather than a decision boundary.
 
 🔴 **C1 reads CONFIRMED in the output — do not cite it that way.** Deep SVDD's Bot **0.1558 sits
 inside the autoencoder's own n=3 range [0.1078, 0.1647]**, so at n=1 it is not an established
-improvement. **Multi-seed with `ANOM_SEED=43/44` first.**
+improvement. ~~**Multi-seed with `ANOM_SEED=43/44` first.**~~
+
+> ✅ **RESOLVED 2026-08-10 — multi-seeded, and C1 does NOT survive** (`seed_recheck.py`).
+> Deep SVDD Bot across seeds: **0.1558 (s42) · 0.1275 (s43) · 0.1950 (s44)** — mean 0.1594 ±0.0339
+> against the autoencoder's **0.1291 ±0.0199 (n=6)**. Delta **+0.0304**, ranges **overlap**,
+> Welch **t=1.43, p=0.256** → **NOT ESTABLISHED.**
+> 🔴 **The verdict the script prints flips with the seed: CONFIRMED / FALSIFIED / CONFIRMED.**
+> That is the cleanest demonstration in this project that an n=1 pre-registered verdict is a
+> coin-flip, not a result. The flag written here on 2026-08-05 was correct.
+> ⚠️ **Deep SVDD's macro is also unstable** — 0.1393 / 0.0743 / 0.1320, spread **0.0650**, twice
+> the ~0.032 an absolute number already carries. The published 0.1393 is the top of its range.
 
 🔴 **C2 FALSIFIED, and that is the real finding.** LOF reaches macro **0.3368** (Web BF 0.5592, XSS
 0.4131) — a benign-only method that does *not* collapse on web attacks, landing where **Mahalanobis**
@@ -702,10 +712,134 @@ not (0.0342 vs naive_bayes 0.0415).
 (exact kernel SVM is O(n²), not runnable at 883k rows). Both printed in the output and stored in
 `runs.jsonl` params.
 
+> 🔴 **MULTI-SEEDED 2026-08-10 (`seed_recheck.py`) — the table above is seed 42 only, and two rows
+> are not citable.**
+>
+> | model | s42 (published) | s43 | s44 | spread |
+> |---|---:|---:|---:|---:|
+> | **knn (k=5)** | **0.4270** | 0.4037 | **0.0440** | **0.3830** |
+> | **mlp** | **0.5360** | 0.4686 | 0.4849 | **0.0673** |
+> | decision_tree | 0.6049 | 0.6064 | 0.6100 | 0.0051 |
+> | naive_bayes / logistic_regression / linear_svm | — | *identical* | *identical* | **0.0000** |
+>
+> 🔴 **k-NN's macro collapses 10× at seed 44** (0.4270 → 0.0440; Web BF 0.6786 → 0.0805, XSS
+> 0.5682 → 0.0173). **The only thing the seed changes for k-NN is which 50,000 rows it memorises** —
+> the deviation noted above as "stated not hidden" turns out to dominate the result. **The published
+> 0.4270 is the top of a range spanning an order of magnitude.**
+>
+> ⚠️ **The MLP was called "the best *valid* Tier-A result" at 0.5360. Its 3-seed mean is 0.4965**,
+> which widens the gap to the CNN rather than narrowing it — the conclusion survives, the number does
+> not. **For all three unstable models seed 42 happened to be the highest draw** (p≈0.04 under a
+> uniform null, but these three were *selected* for being unstable, so read it as an observation, not
+> an established bias).
+>
+> ✅ **T2 CONFIRMED at n=3, and T3's falsification holds** — `naive_bayes` wins Bot at all three seeds
+> (0.0415, constant). But see `seed_recheck.py` below: **that ranking is reproducible and
+> meaningless.**
+
 ⚠️ **Scores are saved float64.** The first version cast to float32, which collapsed GaussianNB's
 underflowing probabilities into ties and moved its reloaded macro **0.1264 → 0.0597** — the saved
 array no longer reproduced the logged metric. Same float32-precision class as the 2026-07-27
 saturation bug.
+
+## `scripts/seed_recheck.py`
+
+**Purpose**: Settle the two **n=1 results that were flagged before publication** on 2026-08-05
+(Tier C's C1, and Tier A's whole Bot column). Reads `runs.jsonl` — the version-controlled record, not
+the logs — so every number it prints is reproducible from the committed repo. No training, no
+scoring; pure aggregation. Writes `outputs/metadata/seed_recheck.json`.
+
+**Why the comparison is at the SEED level, not the flow level.** A flow-level paired bootstrap
+answers *"would this hold on different traffic"*; the question here is *"would this hold if we
+retrained"*. Getting that backwards is what retracted C2.
+
+**R1 — Deep SVDD vs the autoencoder on Bot: 🔴 NOT ESTABLISHED.** +0.0304 of means, ranges overlap,
+Welch t=1.43 **p=0.256**. The per-seed verdict **flips CONFIRMED / FALSIFIED / CONFIRMED**.
+
+**R2 — the Tier-A Bot column: REPRODUCIBLE (ρ = +0.770) but NOT INFORMATIVE.** This is the result
+that needed the most care, because the headline correlation is *misleading in the optimistic
+direction*:
+
+- **5 of 7 models have Bot SD exactly 0.0000** — GaussianNB, LogisticRegression and
+  LinearSVC(dual=False) have **no stochastic component at all**, so `BASELINE_SEED` changes nothing
+  about them. Their contribution to a cross-seed correlation is trivially perfect.
+- **2 of 7 are pinned at exactly the chance value 0.0342** (decision tree, k-NN) because their tied
+  score blocks swallow every Bot flow. Perfectly reproducible, perfectly uninformative.
+- **Bot lift across the whole tier is 0.64×–1.21×.**
+
+So the ranking is stable *and* meaningless — it orders models by noise that happens to be
+deterministic. ⚠️ **This is a partial correction to how the issue was originally framed.**
+KNOWN_ISSUES predicted the column would be *noise-dominated* like the CNN's (ρ = −0.090); it is the
+opposite, ρ = +0.770. **The conclusion — do not cite a Bot number from Tier A — is unchanged, but the
+reason is not the predicted one.** The verdict logic reports reproducibility and informativeness
+**separately** for exactly this reason; collapsing them to one boolean is what would have produced a
+false "stable" headline (the `robustness.py` lesson applied to a new script).
+
+**R3 — which macro numbers are safe to quote**: flags any model whose seed spread exceeds the
+**~0.032** an absolute number already carries (√(0.0228² + 0.0222²), data split + training). Three
+fail: **knn_k5 (0.3830)**, **deep_svdd (0.0650)**, **mlp (0.0673)**.
+
+```bash
+python scripts/seed_recheck.py
+```
+
+## `scripts/field_gap.py`
+
+**Purpose**: The **write-up's opening argument**, computed once over **every method the project has
+measured (n=40)** instead of separately in four tier sections. Reads `runs.jsonl`; no training.
+Writes `outputs/metadata/field_gap.json` and `outputs/figures/field_gap.png`.
+
+**Excluded, and why**: replicates of `cnn_paper`'s model (`cnn_kfold*`, `cnn_noise_r*`,
+`det_verify_*`, `cnn_repro_*`) would over-weight one method in a cross-method correlation.
+**`xgboost_oracle` is excluded on separate grounds** — it trains on ~1,000 zero-day labels, so it is
+an upper bound, not a method runnable under this protocol, and as a single extreme high-high point
+(FIELD 1.0000 / MACRO 0.9899) it inflates any correlation containing it. Tie-degenerate scorers are
+**flagged, not dropped**; the correlation is reported both ways.
+
+### 🔴 Two strong forms of the argument are REFUTED here — do not write either
+
+| tempting claim | verdict |
+|---|---|
+| "the published metric carries **no information** about zero-day detection" | 🔴 **FALSE** — Spearman ρ = **+0.568** (p=0.0001); still +0.41 restricted to the field's own ≥0.98 regime. It is a real, if weak, proxy. |
+| "its whole spread is **below its own noise**" | 🔴 **FALSE** — the field metric is *precise*: median run-to-run SD **0.0020**, an order of magnitude below its spread. |
+
+### ✅ What the data does support — a RESOLUTION failure, which is enough
+
+**67 of 204 method pairs (33 %) are indistinguishable on the metric the literature publishes
+(< 0.0058 apart, ≈2 SD of a difference) while differing ≥2× on macro zero-day PR-AUC.**
+
+Worst case: **`deep_cnn_lstm` vs `ltn_anat_w2p0` — 0.0028 apart on the published metric, 18× apart on
+zero-day.** Also `fusion_cnn_kg` vs `deep_transformer`: **0.0006 apart, 6× apart**.
+
+**The published number ranks methods roughly right and cannot resolve the differences that decide
+whether a novel attack is caught** — and the field reports it to 3 decimals with no error bar, which
+presents that as precision.
+
+```bash
+python scripts/field_gap.py
+```
+
+## `scripts/c4_transform_ab.sh`
+
+**Purpose**: Runs the **log1p-vs-raw feature-transform A/B on macro zero-day PR-AUC** — the C4 issue.
+`config.yaml` justifies `feature_transform: log1p` with *"0.980 vs 0.965 PR-AUC"*, which is the
+**overall binary** metric: inflated by the 17 % train/test duplicate overlap, and the one `metrics.py`
+forbids as an optimisation target. 3 seeds per arm, 50 epochs, determinism on.
+
+Uses explicit `c4_<arm>_s<seed>` tags. **`cnn_paper.py`'s default tag for seed 43 is `cnn_paper_s43`,
+which already exists from the pre-determinism-flag era** — reusing it would put two populations under
+one run name, the defect that cost three wrong-model rows on 2026-08-05.
+
+Driven by the `FEATURE_TRANSFORM` env override added to `cnn_paper.py`, rather than by editing
+`config.yaml`, so the arms stay isolated: a config edit would silently switch every other script's arm
+too. The tag carries a transform suffix for the same reason it already carries a seed suffix —
+without it, `FEATURE_TRANSFORM=raw` at the default seed would overwrite `cnn_paper.keras` and its
+fusion channel.
+
+```bash
+scripts/c4_transform_ab.sh raw      # -> outputs/c4_raw.log
+scripts/c4_transform_ab.sh log1p    # -> outputs/c4_log1p.log
+```
 
 ## `scripts/ood_scores.py`
 

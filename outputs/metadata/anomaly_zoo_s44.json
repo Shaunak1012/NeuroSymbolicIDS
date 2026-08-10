@@ -1,0 +1,67 @@
+{
+ "vae_s44": {
+  "macro": 0.04571133069220216,
+  "families": {
+   "Bot": 0.07267999036782274,
+   "Heartbleed": 0.04704545267922745,
+   "Infiltration": 0.07989979653187602,
+   "Web Attack Brute Force": 0.04569364506047657,
+   "Web Attack Sql Injection": 0.0008681730352778854,
+   "Web Attack XSS": 0.018760356648307153
+  },
+  "deviation": null,
+  "score_std": 13.734807617331066
+ },
+ "deep_svdd_s44": {
+  "macro": 0.1320316320569114,
+  "families": {
+   "Bot": 0.19498561318930072,
+   "Heartbleed": 0.7274697039362734,
+   "Infiltration": 0.1502040455493784,
+   "Web Attack Brute Force": 0.13084284403646024,
+   "Web Attack Sql Injection": 0.0022136454038508236,
+   "Web Attack XSS": 0.07026643894497327
+  },
+  "deviation": null,
+  "score_std": 0.3205206346103136,
+  "collapsed": false
+ },
+ "ocsvm_sgd_s44": {
+  "macro": 0.02780180853156644,
+  "families": {
+   "Bot": 0.021238473240735963,
+   "Heartbleed": 0.0001089799084346294,
+   "Infiltration": 0.0008353821646128233,
+   "Web Attack Brute Force": 0.0428575616709938,
+   "Web Attack Sql Injection": 0.00301190956639936,
+   "Web Attack XSS": 0.019309390682969572
+  },
+  "deviation": "SGD linear approximation; exact kernel OC-SVM is O(n^2) at 442k benign rows",
+  "score_std": 0.17080737838212193
+ },
+ "lof_s44": {
+  "macro": 0.3491060987788542,
+  "families": {
+   "Bot": 0.037689971967914154,
+   "Heartbleed": 0.0012939035731198414,
+   "Infiltration": 0.0025713595373514945,
+   "Web Attack Brute Force": 0.5764924632284024,
+   "Web Attack Sql Injection": 0.0060972360223344735,
+   "Web Attack XSS": 0.43313586114024616
+  },
+  "deviation": "fitted on a 50,000-row benign subsample of 441,898; LOF stores its training set and does not finish at full size",
+  "score_std": 81739507.83862971
+ },
+ "_predictions": {
+  "C1_beats_ae_on_bot": true,
+  "C2_web_collapse": false,
+  "C3_svdd_collapsed": false
+ },
+ "_meta": {
+  "seed": 44,
+  "lof_subsample": 50000,
+  "latent": 16,
+  "epochs": 50,
+  "ae_bot_reference": 0.1314
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "vae_s43": {
+  "macro": 0.05075430925290153,
+  "families": {
+   "Bot": 0.07860167182283925,
+   "Heartbleed": 0.02485447282916538,
+   "Infiltration": 0.09170199621923801,
+   "Web Attack Brute Force": 0.05129997708972749,
+   "Web Attack Sql Injection": 0.0009286283757291115,
+   "Web Attack XSS": 0.02236127884613783
+  },
+  "deviation": null,
+  "score_std": 16.055492074447947
+ },
+ "deep_svdd_s43": {
+  "macro": 0.07425240973435006,
+  "families": {
+   "Bot": 0.12746391350795092,
+   "Heartbleed": 0.3468761367477018,
+   "Infiltration": 0.21262453931327188,
+   "Web Attack Brute Force": 0.06496299844464154,
+   "Web Attack Sql Injection": 0.0035614372365203465,
+   "Web Attack XSS": 0.030330317250457737
+  },
+  "deviation": null,
+  "score_std": 0.032278261572305976,
+  "collapsed": false
+ },
+ "ocsvm_sgd_s43": {
+  "macro": 0.03152862016662846,
+  "families": {
+   "Bot": 0.02094783121155087,
+   "Heartbleed": 0.00010894557975898661,
+   "Infiltration": 0.0008347065037595486,
+   "Web Attack Brute Force": 0.05047061453324076,
+   "Web Attack Sql Injection": 0.0029194381783662687,
+   "Web Attack XSS": 0.023167414755093763
+  },
+  "deviation": "SGD linear approximation; exact kernel OC-SVM is O(n^2) at 442k benign rows",
+  "score_std": 0.25667322200251946
+ },
+ "lof_s43": {
+  "macro": 0.32222299979161356,
+  "families": {
+   "Bot": 0.04548876084783248,
+   "Heartbleed": 0.0007520971011578262,
+   "Infiltration": 0.0025151731087530087,
+   "Web Attack Brute Force": 0.5381052241647023,
+   "Web Attack Sql Injection": 0.00841736036926818,
+   "Web Attack XSS": 0.3830750143623059
+  },
+  "deviation": "fitted on a 50,000-row benign subsample of 441,898; LOF stores its training set and does not finish at full size",
+  "score_std": 84360769.24715738
+ },
+ "_predictions": {
+  "C1_beats_ae_on_bot": false,
+  "C2_web_collapse": false,
+  "C3_svdd_collapsed": false
+ },
+ "_meta": {
+  "seed": 43,
+  "lof_subsample": 50000,
+  "latent": 16,
+  "epochs": 50,
+  "ae_bot_reference": 0.1314
+ }
+}

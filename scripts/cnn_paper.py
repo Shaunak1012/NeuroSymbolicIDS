@@ -39,7 +39,15 @@ SEED = int(os.environ.get("CNN_SEED", _DEFAULT_SEED))
 DET = determinism.enable(SEED, intra=int(os.environ.get("TF_THREADS", "16")),
                          inter=int(os.environ.get("TF_THREADS_INTER", "2")))
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
-TFM = cfg["protocol"]["feature_transform"]
+# C4 (KNOWN_ISSUES): feature_transform was selected on the OVERALL BINARY metric
+# ("0.980 vs 0.965"), i.e. the one inflated by train/test duplicate overlap and the
+# one metrics.py forbids as an optimisation target. It has never been A/B'd on macro
+# zero-day PR-AUC, the actual headline. FEATURE_TRANSFORM overrides the config default
+# so the A/B runs WITHOUT mutating config.yaml mid-experiment -- editing the config
+# would silently switch every other script's arm too, and there is no record in
+# runs.jsonl of which arm a given historical run used beyond this `transform` param.
+_TFM_DEFAULT = cfg["protocol"]["feature_transform"]
+TFM = os.environ.get("FEATURE_TRANSFORM", _TFM_DEFAULT)
 
 EPOCHS = int(os.environ.get("CNN_EPOCHS", "50"))
 SUBSET = int(os.environ.get("CNN_SUBSET", "0"))
@@ -48,8 +56,14 @@ SUBSET = int(os.environ.get("CNN_SUBSET", "0"))
 # config default (42) -- so the existing reference model/embeddings are never at risk
 # of being overwritten by a differently-seeded run. Other seeds get an _s<seed> suffix,
 # matching the ltn_paper.py convention (ltn_ctrl_w0_s43, etc.).
-TAG = os.environ.get("CNN_TAG", "cnn_paper" if SEED == _DEFAULT_SEED else f"cnn_paper_s{SEED}")
-print(f"CONFIG: seed={SEED} tag={TAG}")
+# The transform suffix exists for the same reason the seed suffix does: a non-default
+# arm must NEVER be able to overwrite the reference cnn_paper artifacts. Without it,
+# FEATURE_TRANSFORM=raw at the default seed would silently clobber cnn_paper.keras,
+# its embeddings and its fusion channel -- the reference every other script reads.
+_TFM_SFX = "" if TFM == _TFM_DEFAULT else f"_{TFM}"
+_DEFAULT_TAG = f"cnn_paper{_TFM_SFX}" if SEED == _DEFAULT_SEED else f"cnn_paper{_TFM_SFX}_s{SEED}"
+TAG = os.environ.get("CNN_TAG", _DEFAULT_TAG)
+print(f"CONFIG: seed={SEED} transform={TFM} tag={TAG}")
 
 # ---- load paper split ----
 def load(split):

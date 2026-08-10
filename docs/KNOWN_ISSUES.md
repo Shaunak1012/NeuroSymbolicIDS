@@ -21,7 +21,35 @@
 
 ## Critical — measurement integrity
 
-### [OPEN 2026-08-05] 🔴 Two n=1 results in the record currently read as findings
+### [CLOSED 2026-08-10] 🔴 Two n=1 results in the record currently read as findings
+
+> ✅ **CLOSED — both multi-seeded to n=3 (`scripts/seed_recheck.py`, `outputs/metadata/seed_recheck.json`).
+> The flag was correct on the first count and WRONG ON ITS STATED REASON on the second.**
+>
+> **① C1 does not survive.** Deep SVDD Bot **0.1558 (s42) · 0.1275 (s43) · 0.1950 (s44)** =
+> 0.1594 ±0.0339, against the autoencoder's 0.1291 ±0.0199 (n=6). Delta **+0.0304**, ranges
+> **overlap**, Welch **t=1.43 p=0.256** → **NOT ESTABLISHED**. 🔴 **The pre-registered verdict flips
+> with the seed — CONFIRMED / FALSIFIED / CONFIRMED.** This is the clearest demonstration in the
+> project that an n=1 verdict is a coin-flip: the *same script* reports opposite conclusions
+> depending only on which seed ran.
+>
+> **② The Tier-A Bot column is REPRODUCIBLE (ρ = +0.770), not noise — but it is still not citable,
+> for a different reason than predicted.** This issue asserted the column would be noise-dominated
+> like the CNN's (ρ = −0.090). It is the opposite, and the explanation is degeneracy, not signal:
+> **5 of 7 models have Bot SD exactly 0.0000** (GaussianNB, LogisticRegression, LinearSVC have **no
+> stochastic component**, so the seed changes nothing about them) and **2 of 7 sit at exactly the
+> chance value 0.0342** because their tie blocks swallow every Bot flow. **Whole-tier Bot lift is
+> 0.64×–1.21×.** The ranking is reproducible and meaningless.
+> ⚠️ **Recorded as a correction to this issue's own reasoning, not folded silently into the fix.**
+>
+> **③ A new defect surfaced that neither flag anticipated — and it is the largest.**
+> **k-NN's macro collapses 10× at seed 44: 0.4270 → 0.0440** (Web BF 0.6786 → 0.0805, XSS
+> 0.5682 → 0.0173), spread **0.3830**. The *only* thing the seed changes for k-NN is which 50,000
+> rows it memorises, so the "deviation, stated not hidden" turns out to **dominate the result**.
+> See the new issue below. `mlp` (spread 0.0673) and `deep_svdd` macro (0.0650) also exceed the
+> ~0.032 an absolute number already carries; **for all three, seed 42 was the highest draw.**
+
+Original issue, kept as written:
 `anomaly_zoo.py`'s **Deep SVDD Bot 0.1558** prints as *"beats the autoencoder"* (C1 CONFIRMED), but
 **0.1558 lies inside the AE's own n=3 range [0.1078, 0.1647]** — it is one draw from a distribution
 that already contains it. Separately, **the entire Tier-A Bot column is n=1**, and Bot rankings are
@@ -29,6 +57,23 @@ provably noise-dominated for closed-set methods (CNN cross-seed ρ = −0.090, R
 **Fix:** `ANOM_SEED=43/44 python scripts/anomaly_zoo.py` and `BASELINE_SEED=43/44 python
 scripts/baselines_classic.py`. Cheap. **This project has retracted five single-seed findings; these
 two are flagged before publication rather than after.**
+
+### [OPEN 2026-08-10] 🔴 k-NN's subsample deviation dominates its result, not its method
+`baselines_classic.py` fits k-NN on a **stratified 50,000-row subsample** of the 883,796 train rows,
+because brute-force k-NN at full size is ~10¹¹ distance computations per pass. That was documented as
+a deviation "stated not hidden" — but it was never multi-seeded, and the seed controls **only** which
+rows are memorised. Measured 2026-08-10: **macro 0.4270 (s42) · 0.4037 (s43) · 0.0440 (s44)**, a
+**10× collapse** and a spread of **0.3830** — an order of magnitude, against a ~0.032 uncertainty on
+any absolute number.
+
+**The published Tier-A k-NN row is the top of that range**, and the tier's narrative ("k-NN is
+mid-table, beaten by the MLP") holds at 2 of 3 seeds and inverts at the third.
+
+**This is a measurement-integrity issue, not a performance one.** It does not change any conclusion
+the project draws — every Tier-A model is far below the CNN and at chance on Bot — but a single
+number from a 3-seed range spanning 10× must not appear in a comparison table without its range.
+**Fix (proposed, NOT implemented):** either report k-NN with its range, raise the subsample and
+re-measure the spread, or drop the row and state why. **Do not quote 0.4270.**
 
 ### [FIXED 2026-08-05] float32 on save silently changed a logged metric
 `baselines_classic.py` evaluated scores in float64 but **saved them as float32**. GaussianNB's
@@ -140,13 +185,66 @@ exactly** (cnn_paper 0.4982 > control 0.4824 > Ax6-ratio 0.4596 > Ax6-fixed 0.39
 macro-cost finding is robust. But absolute values shift ~0.15.
 **Fix (proposed, NOT implemented):** report the regrouped macro as a robustness row.
 
-### [OPEN 2026-07-29] The feature transform was selected on the contaminated metric
+### [CLOSED 2026-08-10] The feature transform was selected on the contaminated metric
+
+> ✅ **CLOSED — the A/B was re-run on the headline metric exactly as proposed**
+> (`scripts/c4_transform_ab.sh`, 3 seeds per arm, 50 epochs, determinism on).
+> **log1p wins decisively, and the margin is not close to any threshold:**
+>
+> | arm | macro zero-day PR-AUC | Bot | Web BF | XSS |
+> |---|---|---:|---:|---:|
+> | **log1p** | **0.6299 ± 0.0031** | 0.0321 | 0.9147 | 0.9430 |
+> | raw | 0.1606 ± 0.0039 | 0.0204 | 0.2953 | 0.1662 |
+>
+> **Δ = +0.4693**, ranges **do not overlap**, Welch **t = 163, p < 1e-6** — **15× the ~0.032**
+> uncertainty an absolute number carries, and **134×** the observed post-flag seed SD. Per family the
+> transform is worth **5.7× on XSS** and **3.1× on Web BF**; **Bot is at/below chance in both arms**
+> (0.0321 and 0.0204 against a chance of 0.0342), which is consistent with everything else known
+> about Bot and is not evidence about the transform.
+>
+> ⚠️ **The conclusion was right and its justification was wrong — those are separate facts.** The
+> original A/B reached the correct answer on a metric that could not support it. Had raw won on the
+> headline metric, the project would have been running the wrong transform since Phase 0.3 on the
+> strength of a number `metrics.py` forbids as an optimisation target. **The re-run was necessary
+> regardless of which way it came out**; "it would probably have been fine" is not a reason to skip
+> a check. `config.yaml`'s comment now cites these numbers, with the superseded justification kept
+> beside it so the error is not re-made.
+
+**Original issue, kept as written:**
 `config.yaml` pins `feature_transform: log1p` citing *"0.980 vs 0.965 PR-AUC"* — that is the
 **overall binary** metric, i.e. the one inflated by the duplicate leakage above and the one
 `metrics.py` explicitly forbids as an optimisation target. The transform was never A/B'd against
 macro zero-day PR-AUC, the actual headline.
 **Fix (proposed, NOT implemented):** re-run the A/B on the headline metric (2 trainings). log1p may
 still win; the issue is that the current justification cites the wrong number.
+
+### [OPEN 2026-08-10] 🟡 The 0.0256 distinguishability threshold may be ~7× too conservative post-flag
+**A by-product of C4, and it is potentially consequential enough to need its own confirmation run.**
+
+The project's ~0.0256 "indistinguishable" threshold derives from the noise floor **SD 0.0222**, which
+was measured as **six runs of seed 42 with determinism OFF** — i.e. it is *thread-scheduling
+nondeterminism with the seed held constant*, not seed-to-seed variance.
+
+C4 ran **three different seeds with determinism ON**, twice, and both arms agree:
+
+| arm | seeds | SD |
+|---|---|---:|
+| log1p | 42/43/44 | **0.0031** |
+| raw | 42/43/44 | **0.0039** |
+
+**So genuine seed-to-seed variance is ~0.0035 — roughly 6–7× smaller than the nondeterminism the
+project has been treating as its uncertainty.** If that holds, the dominant variance source was never
+the seed; it was thread scheduling, and `determinism.enable()` has largely removed it. Many
+comparisons currently filed as "within noise" would become decidable against a post-flag threshold of
+**~0.006** (2·SE·√2 at n=3, SD 0.0035).
+
+🔴 **DO NOT change the threshold on this evidence.** It is n=3 per arm on **one model**, the two arms
+are not independent replicates of the same configuration, and **the data-split SD (0.0228) is a
+separate source that still applies to any absolute number** regardless of determinism. C2's retraction
+rests on the 0.0222 floor and **stays retracted** until this is confirmed properly.
+**Fix (proposed, NOT implemented):** a post-flag seed sweep on `cnn_paper` at n≥6 to estimate
+post-determinism seed SD directly, then re-derive the threshold for post-flag comparisons only.
+**Pre- and post-flag runs remain different populations and must not be pooled.**
 
 ### [FIXED 2026-08-02] `rescore_logits.py` recorded the wrong seed on every multi-seed entry
 Every `_logodds` entry was written with `seed: 42` regardless of which seed's model was actually being
