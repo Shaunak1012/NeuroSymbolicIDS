@@ -30,6 +30,33 @@ This was flagged as a gap in the previous version of this doc ("latest" was true
 
 **Verified 2026-07-29:** started via `preview_start`, screenshotted through the Browser pane — CPU/RAM/branch/uncommitted-count/log-tail/run-history all populated with real values (e.g. branch `main`, 4 uncommitted files, `p2_rescore3.log` tail, full `runs.jsonl` table sorted newest-first). Zero console errors. Stopped cleanly after verification.
 
+## Phase-4 knowledge graph on the console — ✅ added (2026-08-20)
+
+The live console now carries the KG work, not just the ops state. Three additions to
+`scripts/dashboard_server.py` (the static Artifact structurally cannot poll any of this, so it was
+**not** mirrored there — see "When to update which one" below):
+
+- **`kg_summary()`** — reads every `outputs/metadata/kg*_report.json` fresh on each poll (seeds 42/43/44
+  today) and returns graph structure, the burstiness metrics, the lateness-confound table, sample
+  explanation paths and the report's own `caveats` list.
+- **`figures_available()`** — lists `outputs/figures/*.png`.
+- **Routes:** `/kg` serves the interactive `outputs/figures/kg_graph.html`; `/figures/<name>` serves a
+  tracked figure. Both go through `_send_file`, which takes `os.path.basename()` of the client path
+  and allow-lists the extension — `/figures/../../config.yaml` returns 404 (verified).
+
+🔴 **The panel renders the across-seed RANGE next to every seed-42 value, by construction.** Lift
+`6.1125×` ships with `n=3 seeds: 5.658–6.112`, precision `0.4303` with `0.398–0.430`. This is deliberate:
+the retracted "conjunction gives 81 % precision" claim was clustering-seed 42 only, and a console that
+displays a bare point estimate is a machine for recreating that mistake. If a future report file adds
+seeds, the range widens on its own — nothing to remember to update.
+
+⚠️ The panel also renders the report's four caveats verbatim, including the **lateness confound**
+(a trivial "later in the week" baseline scores Bot 0.1575 globally). The global and within-window Bot
+figures are shown side by side; do not read the global column alone.
+
+**Verified 2026-08-20:** started via `preview_start`, screenshotted through the Browser pane — KG panel,
+figure grid and the interactive graph (215 nodes) all populated from real files, zero console errors.
+
 ## Starting it manually (outside the "open preview" phrase)
 
 ```bash
@@ -42,6 +69,7 @@ Then open `http://localhost:8787` directly, or let Claude do it via `preview_sta
 
 - `scripts/dashboard_server.py` — the live server (repo-tracked, real source, not a generated artifact).
 - `.claude/launch.json` — the `preview_start` config (`"phase2-dashboard"`).
+- `outputs/figures/kg_graph.html` — the interactive KG canvas, written by `scripts/kg_visualize.py` and served by the console at `/kg`. Regenerate it there; do not hand-edit.
 - `<scratchpad>/phase2_console.html` — the static Artifact's HTML source. Session-scratchpad path, not committed (it's a generated snapshot, not source). A future session regenerating/editing it should recreate it there and republish to the **same URL** above via the Artifact tool's `url` parameter — never mint a new URL for what is conceptually the same snapshot.
 
 ## When to update which one
