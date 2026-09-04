@@ -1555,6 +1555,17 @@ Bot" means 3.8× chance vs 1.3× chance — a robust *relative* difference, not 
 
 ### ~~The refined account — modality analogue, not (A) vs (B)~~ (superseded by the box above)
 
+> 🔴 **A SECOND, SEPARATE CORRECTION (2026-09-05) — this section is struck for the wrong reason
+> alone.** The box above supersedes the *modality-analogue mechanism*. It does **not** touch the
+> first bullet's other claim — that web attacks are undetectable in flow space because *"what makes
+> them malicious is payload content, which this feature set does not contain"* — and a reader can
+> lift that sentence out believing it survived. **It does not.** `bot_failure_analysis.py`'s H4
+> oracle probe separates **Web BF 0.9999 · XSS 0.9984 · Bot 0.9988** PR-AUC from the 68 flow features
+> alone (`outputs/metadata/bot_failure_analysis.json`). **The information is present; what is absent
+> is a way to surface it without labels.** The AE's 0.0000 recall is a fact about benign-only density
+> modelling, not about the modality. See Open Decisions → *Input modality*.
+
+
 The autoencoder catches **Heartbleed and Infiltration almost perfectly** and misses **every web
 attack entirely**. That is not a performance gradient, it is a categorical split, and it has a
 mechanical explanation:
@@ -2764,7 +2775,7 @@ delta as a **multiple of it** — that ratio, not the raw number, decides whethe
 |----------|----------------|----------|
 | KG backend | NetworkX | If scale demands, → Neo4j |
 | Fusion mechanism | Fixed weights (Phase 1) → logistic (Phase 2) | After KG exists |
-| Input modality | Flow-feature CSVs | PCAP/payload is future work |
+| 🔴 **Input modality — add payload / raw PCAP?** | ✅ **DECIDED 2026-09-05 — NO. Flow-feature CSVs stand; payload is out of scope, not deferred-and-desirable.** | **Settled by a measurement already in the record.** The H4 oracle probe (`bot_failure_analysis.py`, `outputs/metadata/bot_failure_analysis.json`) separates every adequately-powered zero-day family from benign **using the 68 flow features alone** — **Bot 0.9988 · Web BF 0.9999 · XSS 0.9984** PR-AUC. There is no missing information for payload to supply, so the Bot gap (oracle 0.9988 → CNN 0.0321, chance 0.0342) is **100 % a closed-set-supervision gap and 0 % a modality gap**. ⚠️ **The mechanism is basis-agnostic**: H3 shows Bot's oracle top-8 has **0/8 overlap** with the known-class task's (Web BF 1/8), and a closed-set model on payload bytes would select payload features separating the same nine classes — **relocating the failure, not removing it**. Corroborated by the base paper, which **is** the payload version: Bizzarri et al. use 1500 payload bytes and we beat them 18–29 pp on all four known-class views while their 1D CNN's zero-day number matches ours (**48.34 % vs 47.85 %**) — payload costs known-class performance and buys nothing on zero-day. **Where payload would genuinely help is the wrong place**: it would replace the web families' *absorption* (~90 % assigned to `DoS slowloris`) with real detection — an honesty gain, not a metric one, since Web BF/XSS already score 0.91–0.95 and **all the headroom is in Bot, where payload adds no information**. Costs if ever revisited: ~48 GB of PCAP not held locally, packet→flow alignment through the one field with two documented defects (D/M/YYYY, 12-hour no AM/PM), a new header/User-Agent leakage surface `audit_leakage.py` does not cover, plaintext-2017 ecological validity, and a **forked record** — the noise floor, ablation, double dissociation and field-metric gap are all defined on the 68-feature basis. **Revisit only** for basis-independence of the mechanism (does 0-overlap → ρ≈0 reproduce on payload bytes?), which is a separate paper, not a Phase-5 task. |
 | "Hard" vs soft axioms | Soft (SAT loss) + optional inference guard | During LTN rework |
 | KG clustering | Static (fit once on train embeddings) | If drift observed |
 | Decay "time" | Flow-count (reproducible) | — |

@@ -26,9 +26,17 @@
 | `Wednesday-workingHours.pcap_ISCX.csv` | Wednesday | DoS Hulk, DoS Slowhttptest, DoS Slowloris, DoS GoldenEye, Heartbleed |
 | `Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv` | Thursday AM | Web Attacks (XSS, SQLi, Brute Force) |
 | `Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv` | Thursday PM | Infiltration |
-| `Friday-WorkingHours-Morning.pcap_ISCX.csv` | Friday AM | Bot (Mirai) |
+| `Friday-WorkingHours-Morning.pcap_ISCX.csv` | Friday AM | Bot (**Ares**, not Mirai — see note below) |
 | `Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv` | Friday PM | PortScan |
 | `Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv` | Friday PM | DDoS |
+
+⚠️ **Correction (2026-09-05) — the botnet is Ares, not Mirai.** This table said *"Bot (Mirai)"*
+from project start. CIC-IDS2017's Friday-morning botnet activity was generated with **Ares**, a
+Python-based open-source HTTP C2 framework; Mirai is a different (IoT/telnet) botnet that does not
+appear in this capture. The label is unaffected — only the attribution was wrong — but it matters for
+any argument about **what a payload channel would see**: Ares C2 is plaintext HTTP, so a
+payload-modality claim reasoned from Mirai's telnet behaviour would be reasoning about the wrong
+traffic. `docs/archive/` still carries the old attribution and is deliberately left frozen.
 
 ## Train / Test Split Strategy
 
