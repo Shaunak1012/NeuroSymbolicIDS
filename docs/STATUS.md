@@ -27,10 +27,15 @@ some point, or is the obvious stronger version of something supportable.
 copied from prose.
 
 **Still open before submission:** cross-dataset (**blocked on data**) · optionally a post-flag
-LTN-control sweep, the only route to reopening C2 · 🔴 **rewrite §5's fitted-fuser row** — the
-falsifier fired. ~~the fitted fuser~~ ✅ **run 2026-09-05** · ~~Phase 5's latency~~ ✅
-**2026-09-05** · ~~figures 2–5~~ ✅ **built 2026-08-10** — this line listed the last two as open for
-weeks after they landed.
+LTN-control sweep, the only route to reopening C2 · **related work** and the **reproducibility-artifact
+section**, the two parts of the draft not yet written · a **venue decision** (no template chosen, so
+the draft is Markdown by design). ~~rewrite §5's fitted-fuser row~~ ✅ **done** — §5 now carries only
+the surviving structural limit and the positive half moved to §6 · ~~the fitted fuser~~ ✅ · ~~Phase
+5's latency~~ ✅ · ~~figures 2–5~~ ✅ **built 2026-08-10**.
+
+📝 **THE FIRST PROSE DRAFT EXISTS (2026-09-05): [paper_draft.md](target/paper_draft.md).** All nine
+sections written from the outline, not independently of it. **Every DO-NOT-WRITE row in the outline
+was checked against the draft** — all six appear only as claims explicitly refused.
 
 ## 🔴🔴 THE FUSION WALL WAS OVERSTATED (2026-09-05) — `scripts/fitted_fusion.py`. **PHASE 5 IS COMPLETE.**
 
@@ -125,13 +130,13 @@ claim. Two arms (determinism on/off), median + IQR over 15 repeats, warm-up disc
 | `kg_update` (NetworkX, amortised) | **0.519** | — | 6.5 % |
 | `transform` (log1p + scaler) | **0.680** | 1.4 M | 8.6 % |
 | **`cnn` (forward pass)** | **6.293** | **158,919** | **79 %** |
-| **full detection pipeline** | **7.952** | **125,750** | 100 % |
+| **full detection pipeline** | **7.952** | **125,762** | 100 % |
 | 🔴 **`explain_ig` (per flow)** | **11,946** | **84** | **1,898×** the CNN |
 
 ### The three results worth writing down
 
 **① Detection is not the bottleneck, and the paper should not claim throughput as a contribution.**
-125,750 flows/s end-to-end. The entire 114,658-flow test set is scored in **0.91 s**.
+125,762 flows/s end-to-end. The entire 114,658-flow test set is scored in **0.91 s**.
 
 **② The KG is essentially free — and this is the answer to "KG adds Y ms".** Assignment + amortised
 graph update = **0.58 µs/flow**, i.e. **+9.2 % on top of the CNN** and **7.3 % of the detection
