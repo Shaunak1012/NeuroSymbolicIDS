@@ -182,6 +182,15 @@ have to be visibly higher than the field's. This section is the credibility of �
    Robustness row: regrouping shifts values ~0.11–0.15 but **preserves every ordering**.
 3. **Flow features, not payload** — a deviation from the base paper's modality. Our 18–29 pp advantage
    on known-class views is a **modality** advantage, **not** an algorithmic one. Say so.
+   ✅ **But answer the "why not payload?" question rather than conceding it** (decided 2026-09-05,
+   STATUS → Open Decisions → *Input modality*): the H4 oracle probe separates every powered family
+   from benign **in the flow-feature basis alone** — **Bot 0.9988 · Web BF 0.9999 · XSS 0.9984**
+   PR-AUC — so the Bot gap is a **closed-set-supervision gap, not a modality gap**, and §4's
+   mechanism (0/8 feature overlap → ρ ≈ 0 ranking) would **relocate** to a payload basis rather than
+   dissolve. Corroborated by the base paper itself, the payload version: its 1D CNN's zero-day number
+   matches ours (**48.34 % vs 47.85 %**). ⚠️ **State the honest cost too** — payload would replace the
+   web families' *absorption* into `DoS slowloris` with genuine detection, which is an honesty gain
+   this paper does not get to claim.
 4. **Scripted attack windows** inflate any growth/temporal result (§6).
 5. **Behaviour predicates are approximations**: `HighEntropy` is packet-length **standard deviation**,
    not Shannon entropy — any "entropy ⇒ encryption" phrasing is overclaiming.

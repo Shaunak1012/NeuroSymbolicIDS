@@ -2,6 +2,76 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05 (the payload question, answered from the record — and two doc defects it exposed)
+
+### 🔴 DECIDED: payload / raw PCAP is OUT OF SCOPE, not deferred-and-desirable
+
+Asked whether adding payload to the pipeline would improve results. **No — and it was already
+measured.** No new runs; the answer came out of `outputs/metadata/bot_failure_analysis.json`.
+
+The **H4 oracle probe** (XGBoost, family-vs-benign, fit/eval split inside the test set) separates
+every adequately-powered zero-day family from benign **using the 68 flow features alone**:
+
+| family | oracle PR-AUC (flow features, *with* labels) | CNN, closed-set | chance |
+|---|---:|---:|---:|
+| Bot | **0.9988** | 0.0321 | 0.0342 |
+| Web Attack Brute Force | **0.9999** | 0.9147 | — |
+| Web Attack XSS | **0.9984** | 0.9430 | — |
+
+**There is no missing information for payload to supply.** The Bot gap — 0.9988 down to 0.0321 — is
+**100 % a closed-set-supervision gap and 0 % a modality gap.**
+
+⚠️ **And the mechanism is basis-agnostic, which is the load-bearing argument.** H3 shows Bot's oracle
+top-8 has **0/8 overlap** with the features the 9-known-class task selects (Web BF: 1/8). A closed-set
+model trained on payload bytes learns whatever *payload* features separate those same nine classes, so
+a novel class is again reachable only through overlap — **the failure relocates, it does not dissolve.**
+
+✅ **Corroborated by the base paper, which *is* the payload version.** Bizzarri et al. use 1500 payload
+bytes: we beat them **18–29 pp on all four known-class views** while their 1D CNN's zero-day number
+matches ours (**48.34 % vs 47.85 %**). Payload costs known-class performance and buys nothing on
+zero-day.
+
+⚠️ **Where payload *would* genuinely help is the wrong place.** It would replace the web families'
+**absorption** (~90 % of Web BF/XSS assigned to `DoS slowloris`, a known *attack* class) with real
+detection — an **honesty** gain, not a metric one, since those families already score 0.91–0.95.
+**All the headroom is in Bot, and Bot is exactly where payload adds no information.** The payload gain
+and the performance headroom are in different families.
+
+Recorded in [STATUS.md](STATUS.md) → Open Decisions → *Input modality* (with the full cost side: ~48 GB
+of PCAP not held locally, packet→flow alignment through the one field with two documented defects, a
+header/User-Agent leakage surface `audit_leakage.py` does not cover, plaintext-2017 ecological
+validity, and a forked record). **Revisit only** to test basis-independence of the mechanism — a
+separate paper, not a Phase-5 task. It does **not** touch the fusion wall, which is the actual blocker.
+
+### 🔴 The strongest pro-payload sentence in this file was wrong — corrected in place
+
+The 2026-08-02 entry says web attacks are undetectable in flow space because *"what makes them
+malicious is payload content, which this feature set lacks."* **Wrong as an information claim**, and
+contradicted by a measurement taken the next day — the same file's 2026-08-03 entry already asks
+*"given the oracle result proves the information is present in the features"* without anyone
+reconciling the two. Annotated in place per the retract-in-place convention, **not rewritten**.
+
+**The narrower statement survives and is the one to cite:** web attacks sit inside the benign region
+*of a benign-only reconstruction manifold*, so the AE's 0.0000 recall is a fact about **unsupervised
+density modelling**, not about the modality. The same correction is added to
+[STATUS.md](STATUS.md)'s already-struck "modality analogue" section — which was struck for the
+*modality-analogue mechanism* only, leaving this sub-claim liftable as though it had survived.
+
+### 🔴 `dataset.md` misattributed the botnet for the whole life of the project
+
+Friday-morning Bot was labelled **Mirai**. CIC-IDS2017 used **Ares**, a Python HTTP C2 framework;
+Mirai (IoT/telnet) is not in this capture. Labels unaffected — attribution only — but it is exactly the
+fact a payload argument turns on: **Ares C2 is plaintext HTTP**, so reasoning about a payload channel
+from Mirai's telnet behaviour would be reasoning about the wrong traffic. `docs/archive/` keeps the old
+attribution and is deliberately left frozen.
+
+### Also
+
+[paper_outline.md](target/paper_outline.md) §8.3 now **answers** "why not payload?" instead of
+conceding it, and states the honesty cost the paper does not get to claim.
+
+**No result changed. No script ran.** Every number above was already in `outputs/metadata/`.
+
 ## 2026-08-20 (the live console now shows the Phase-4 knowledge graph)
 
 ### 🖥️ `dashboard_server.py` — KG panel, figure grid, and two static routes
@@ -1083,6 +1153,24 @@ Housekeeping pass to leave the repository in a clean state before Phase 4 begins
   supervised method sits at 1.5–1.8× and only distance/reconstruction methods win.
   **Governing variable: does the unseen class share a behavioural modality with some known class?**
   Yes → (A) wins. No → (B) wins. Neither family dominates; they are complementary.
+  > 🔴 **CORRECTION (2026-09-05) to the parenthesis above — kept in place, not rewritten.**
+  > *"what makes them malicious is payload content, which this feature set lacks"* is **wrong as an
+  > INFORMATION claim**, and it was already contradicted by a measurement taken the very next day.
+  > `bot_failure_analysis.py`'s H4 oracle probe (XGBoost, family-vs-benign, fit/eval split inside the
+  > test set) separates the web families from benign **using the 68 flow features alone**:
+  > **Web Attack Brute Force 0.9999 · Web XSS 0.9984 · Bot 0.9988** PR-AUC
+  > (`outputs/metadata/bot_failure_analysis.json` → `H4_raw_oracle_separability`).
+  > The discriminating information **is present in the flow features**; what the feature set lacks is
+  > any way to surface it **without labels**.
+  > **The narrower statement survives and is the one to cite:** web attacks sit inside the benign
+  > region *of a benign-only reconstruction manifold*, so the AE's 0.0000 recall is the honest
+  > expected result — a property of unsupervised density modelling, not of the modality.
+  > ⚠️ As written, this parenthesis was **the strongest pro-payload sentence in the record**; the
+  > 2026-09-05 payload assessment turns on exactly this distinction. n=1 (seed 42) — but at 0.998+
+  > with a held-out half, seed sensitivity is not the live risk; the live caveats are that an oracle
+  > is an *upper bound given labels*, and that Bot's top-8 includes capture-setup artifacts
+  > (`Destination Port` 8080, `Init_Win_bytes_forward` 8192).
+
 - **This makes the fusion wall the central architectural problem rather than a side issue.** Each
   family covers exactly what the other misses, so the system needs a per-flow **router** — and the
   router is precisely what cannot be *fitted*, since any combiner is calibrated on validation data
