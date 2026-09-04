@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (55 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (56 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1325,6 +1325,36 @@ out of 55,237, which is why their FPR column reads exactly 1.0000.
 ```bash
 python scripts/operational.py
 ```
+
+## `scripts/fitted_fusion.py`
+
+**Purpose**: **Phase 5's last open item** — run the *fitted* fuser the spec asks for, so *"blocked by
+THE FUSION WALL"* stops being an argument and becomes a **result with a number**.
+
+The project had never run it. What it had was `fusion_beaconlike.py`, a **two-channel special case**
+(CNN log-odds + the BeaconLike behaviour) returning `[2.35, 0.02]` — and `paper_outline.md` §5
+generalised from that one experiment to *"structurally impossible here."* **Generalising a blocker
+from a special case is the same defect class this project keeps retracting, pointed at a negative
+claim instead of a positive one.**
+
+**Method**: score CNN (`1 − p(BENIGN)`) and the autoencoder (per-row reconstruction MSE) on **val**
+and **test** for seeds 42/43/44; standardise on val; fit `LogisticRegression` on val (benign vs
+**known** attack — val has no zero-day by construction, and the script **asserts** this rather than
+assuming it); apply blind to test. Compared against CNN alone, AE alone, and **parameter-free
+equal-weight rank fusion of the same two channels**, with **paired per-seed deltas** (the 0.0222
+floor is the SD of an absolute number and cancels over shared seeds).
+
+🔴 **The KG is excluded, and the exclusion is itself the result.** `kg.py`'s burstiness is defined by
+streaming the **test** set into windows — there is **no validation-side KG score by construction**.
+So **the one channel that demonstrably helps (+0.0527, 3/3 seeds) is the one a fitted combiner
+structurally cannot weight.** That sentence is the fusion wall in its sharpest form and does not
+depend on any measured number.
+
+⚠️ **What this does NOT claim**: that no fitted combiner can ever work — only that one fitted on a
+zero-day-free validation set, over the channels that can produce validation scores, does not. LOCO
+remains untried and was deprioritised separately (no known class in CIC-IDS2017 beacons).
+
+**Writes** `outputs/metadata/fitted_fusion.json`.
 
 ## `scripts/latency.py`
 
