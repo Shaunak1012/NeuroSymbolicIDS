@@ -86,6 +86,7 @@ import sys
 import ast
 import json
 import time
+import pickle
 import platform
 
 import numpy as np
@@ -187,7 +188,12 @@ km = MiniBatchKMeans(n_clusters=K, random_state=SEED, n_init=5,
 
 model = tf.keras.models.load_model(
     os.path.join(paths.MODELS, "cnn_paper.keras"), compile=False)
-classes = np.load(os.path.join(P, "class_names.npy"), allow_pickle=True).tolist()
+# Class order comes from the FITTED LABEL ENCODER, exactly as explain.py does it.
+# There is no class_names.npy under the paper split -- the only such file in the
+# project belongs to the superseded temporal pipeline and carries a
+# wrong-protocol zero-day list (see paths.METADATA_LEGACY).
+with open(os.path.join(paths.MODELS, "label_encoder_paper.pkl"), "rb") as fh:
+    classes = list(pickle.load(fh).classes_)
 BEN = classes.index("BENIGN")
 thr = behavior.load_thresholds()
 BEH = behavior.active_behaviour_names()
@@ -202,10 +208,28 @@ with open(kg_path, encoding="utf-8") as fh:
 kg_tree = ast.parse(kg_src)
 kg_cls = next(n for n in kg_tree.body
               if isinstance(n, ast.ClassDef) and n.name == "KnowledgeGraph")
-ns = {"nx": nx, "np": np}
+
+# The exec'd class still closes over kg.py's MODULE scope -- on the first run it
+# raised NameError on `behavior`, which `__init__` uses for BEHAVIOUR_KIND. That
+# is the exec approach earning its keep: a hand-copied class would have silently
+# dropped the same dependency. Rather than hardcode the list, resolve kg.py's
+# module-level imports/assignments against the ones latency.py already holds, so
+# a new dependency in kg.py is picked up instead of needing a fix here.
+kg_mod_names = set()
+for _n in kg_tree.body:
+    if isinstance(_n, (ast.Import, ast.ImportFrom)):
+        for _a in _n.names:
+            kg_mod_names.add(_a.asname or _a.name.split(".")[0])
+    elif isinstance(_n, ast.Assign):
+        for _t in _n.targets:
+            if isinstance(_t, ast.Name):
+                kg_mod_names.add(_t.id)
+ns = {n: globals()[n] for n in kg_mod_names if n in globals()}
 exec(compile(ast.Module(body=[kg_cls], type_ignores=[]), "kg.py", "exec"), ns)
 KnowledgeGraph = ns["KnowledgeGraph"]
-print("[setup] KnowledgeGraph exec'd from kg.py source (line %d)" % kg_cls.lineno)
+print("[setup] KnowledgeGraph exec'd from kg.py source (line %d), "
+      "globals bridged: %s" % (kg_cls.lineno, ", ".join(sorted(
+          n for n in kg_mod_names if n in globals()))))
 
 OUT = {
     "arm": ARM,

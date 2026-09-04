@@ -116,6 +116,7 @@ failure.
 |---|---|---|
 | **CNN + KG: +0.0528** [+0.0466, +0.0592], p<0.0001, 3/3 seeds, Bot 0.0446 → 0.2518 | `ablation.py`, `fusion_kg.py` | Only the KG earns its place. |
 | **The operational statement is better than the PR-AUC one**: reaching 50 % of zero-day flows needs reviewing **52 %** of all traffic with the CNN, **29–32 %** with the KG/fusion | `operational.py` | 🔑 **At any deployable alert budget you see ONLY known attacks** — precision ~1.000 at every budget, **0 zero-day flows in the top 1,000**. This is the honest deployment story and PR-AUC 0.64 does not show it. |
+| **Cost is not the objection to any of this** — full detection path **7.95 µs/flow (125,750 flows/s)** at batch 8192; **the KG adds 0.58 µs/flow, +9.2 % over the CNN** | `latency.py` | 🔑 **But explanation costs 1,898× detection** (IG **11.95 ms/flow, 84 flows/s**): explaining all 114,658 test flows takes **23 min**, explaining **100 alerts takes 1.19 s**. **So: explain alerts, not flows** — which composes with the alert-budget row above rather than fighting it. ⚠️ **Never imply per-flow explanation**; that is a 4-orders-of-magnitude claim. ⚠️ Throughput is **meaningless without its batch size** — batch 1 is 256 flows/s, batch 8192 is 158,919, a **620× spread**. ⚠️ Upstream **flow-feature extraction is not measured** and may dominate a real deployment. |
 | KG emerging-pattern rule works on **growth rate**: lift **5.94× [5.66, 6.11]**, ~81 % recall | `kg_criteria.py`, n=3 | ⚠️ **Two caveats that must reach the write-up.** ① Growth works substantially because CIC-IDS2017's attacks are **scripted into fixed windows** — a real network with continuous low-rate C2 would not produce this signal, and Bot's real signature is persistence, not bursts. ② **"Temporal burstiness of a raw-feature cluster" does not need a knowledge graph** — a reviewer will say this, so say it first. The KG's justification rests on explanation/corroboration. |
 | 🔴 **DO-NOT-WRITE:** "the conjunction gives 81 % precision" | — | Clustering-seed 42 only. n=3 gives lift 1.73–11.57× and precision 0.122–0.814. |
 | 🔴 **DO-NOT-WRITE:** the KG's specified "unexplained cluster" mechanism detects zero-day | — | **Lift ≤ 1.00× — at or below chance**, across 3 representations × 3 thresholds. The spec's mechanism is dead; scope is corroboration + explainability. |
@@ -220,8 +221,13 @@ surrounding paragraph.
 
 ## Open before submission
 
-1. **Phase 5's remaining three** — calibration writeup ✅ done, **latency ❌**, **fitted fuser ❌**
-   (blocked by the fusion wall — write the blocker as a result).
+1. **Phase 5's remaining ONE** — calibration ✅ done, latency ✅ **done 2026-09-05**
+   (`latency.py`), **fitted fuser ❌** (blocked by the fusion wall — write the blocker as a result).
 2. **Cross-dataset** — blocked on data.
 3. **Optional:** post-flag LTN-control sweep at n=6, the only route to reopening C2.
-4. **Figures 2–5.**
+4. ~~**Figures 2–5.**~~ ✅ **built 2026-08-10** (`paper_figures.py`).
+5. 🔴 **NEW — decide how to report the transductive fusion caveat.** `fusion_multi.py` fuses by
+   `rankdata(score)/n`, a **global** operation over the scored set, so the **+0.0527 is a
+   transductive estimate and cannot be streamed**. Not leakage and not a bug — but §6's operational
+   framing implies deployability, so it must be stated. The streaming variant is **unmeasured**; do
+   not weaken the claim on the flag alone. See KNOWN_ISSUES for the confirming experiment.
