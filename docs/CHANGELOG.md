@@ -2,6 +2,54 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05d (the paper has prose — first draft, and §5 restructured around yesterday's retraction)
+
+### 📝 `docs/target/paper_draft.md` — all nine sections, drafted FROM the outline
+
+The project has had a claim-by-claim outline since 2026-08-10 and **no prose at all**. It now has
+both. Every number traces to the outline's second column and every caveat to its third; the two files
+share section numbering so they stay diffable.
+
+✅ **All six DO-NOT-WRITE rows were checked against the draft and none survived as a claim** — each
+appears only as a claim the paper explicitly refuses: the metric carries *no* information (ρ=+0.568)
+· its spread is below its own noise (it is precise, SD 0.0020) · the conjunction gives 81 % precision
+(seed 42 only) · the "unexplained cluster" mechanism detects zero-day (lift ≤ 1.00×) · the double
+dissociation is an (A)-vs-(B) family result (RandomForest ties the AE on Bot) · the modality-analogue
+explanation for web-attack transfer (falsified).
+
+⚠️ **Not drafted:** related work, the reproducibility-artifact section. **Markdown by design** — no
+venue template is chosen (NeSy / MILCOM-adjacent), and committing to LaTeX first buys nothing.
+
+### 🔧 §5 restructured — a section called "what does not fix it" had a success in it
+
+Yesterday's retraction was crammed into one table cell, which left **§5 containing a partial positive
+result**. Split along the real seam:
+
+- **§5 keeps the structural limit that survives** — a fitted combiner cannot include the KG **at
+  all**, because `kg.py`'s burstiness is defined over *test* windows and there is no validation-side
+  score by construction. The channel with the largest gain cannot enter a fitted combiner under any
+  protocol that fits on held-out data.
+- **§6 gains the positive half** — the fitted combiner over CNN + autoencoder (**0.6502 vs 0.6399**,
+  +0.0103 3/3 at 0.80σ; **+0.0604 over equal-weight rank fusion**, 2.5σ), with its bound stated.
+- **§7 gains the lesson**, next to the other self-critical ones: **a negative claim needs the same
+  evidentiary standard as a positive one.** Every safeguard in this project was pointed at
+  over-claiming a *positive* result; this was an over-claimed **blocker**, and nothing was watching
+  that direction.
+
+### 🔴 `conference_roadmap.md` §0's retraction reasoning corrected in place
+
+The retracted killer thesis justified itself partly on *"the fusion wall makes the general form
+unreachable"* — **that clause is now overstated and is struck.** ✅ **The retraction itself stands on
+the ablation alone** (symbolic pillar −0.0004 n.s.; **significantly harmful** on the KG, p<0.0001),
+which nothing in the fitted-fusion result touches. Corrected rather than left to be read as still
+load-bearing.
+
+### One number corrected against the record
+
+The draft, STATUS, CHANGELOG and outline all quoted the detection path at **125,750 flows/s**; the
+JSON says **125,762**. Fixed in all four. Small, but a quoted number that does not match the record is
+the defect class this project spends most of its discipline on.
+
 ## 2026-09-05c (the fusion wall was OVERSTATED — a pre-registered falsifier fired. **Phase 5 complete.**)
 
 ### 🔴 `paper_outline.md` §5's "a fitted fuser is structurally impossible here" is RETRACTED
@@ -85,7 +133,7 @@ desktop is right-skewed.
 | `kg_update` (amortised) | 0.519 | — |
 | `transform` | 0.680 | 1.4 M |
 | **`cnn`** | **6.293** | **158,919** |
-| **full detection path** | **7.952** | **125,750** |
+| **full detection path** | **7.952** | **125,762** |
 | 🔴 **`explain_ig`** | **11,946** | **84** |
 
 **① Detection is not the bottleneck** — the whole test set scores in **0.91 s**. Do not claim

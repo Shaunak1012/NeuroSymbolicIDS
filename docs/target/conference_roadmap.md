@@ -18,9 +18,20 @@
 > the **ablation** (2026-08-05, n=3 paired) shows the symbolic pillar adds **−0.0004 (n.s.)** alone
 > and **significantly HURTS** when stacked on the KG (0.6926 → 0.6708, **p<0.0001**). **Only the KG
 > earns its place**, and a KG is not "the symbolic knowledge moved to inference time" in the sense
-> this sentence promises. The **fusion wall** (a fitted combiner cannot learn to weight a zero-day
+> this sentence promises. ~~The **fusion wall** (a fitted combiner cannot learn to weight a zero-day
 > channel, because validation contains no zero-day by construction) makes the general form of the
-> claim unreachable under this protocol.
+> claim unreachable under this protocol.~~
+>
+> 🔴 **CORRECTION 2026-09-05 — the fusion-wall clause above is OVERSTATED and is struck; the
+> retraction itself STANDS on the ablation alone.** `fitted_fusion.py` ran the fitted combiner this
+> clause said was impossible: over CNN + autoencoder it scores **0.6502 vs the CNN's 0.6399**
+> (+0.0103, 3/3 seeds) and gives the anomaly channel **17.9 % of absolute weight, positive every
+> seed**. A combiner *can* learn to weight a channel that helps on unseen classes — provided that
+> channel also has value on the known-class fitting data, which the autoencoder does and
+> `BeaconLike` does not. **What survives is narrower and sufficient: the KG — the channel with the
+> largest measured gain — has no validation-side score at all, by construction, so it cannot enter a
+> fitted combiner.** The thesis stays retracted because **the ablation** (symbolic pillar −0.0004
+> n.s. alone, and **significantly harmful** on the KG, p<0.0001) is untouched by any of this.
 > **Do not repair this thesis by weakening it. The evidence supports a different paper.**
 
 ### 0b. THE CURRENT SPINE (decided 2026-08-10)
