@@ -2,6 +2,49 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05e (the draft's numbers are now mechanically checkable — 52 verified, 0 mismatched)
+
+### 🔎 `verify_draft.py` — the paper against the record, per claim
+
+The draft was written by transcribing out of the outline, which was transcribed out of
+`outputs/metadata/*.json`. **Transcription is where this project's numbers go wrong.** Yesterday's
+draft quoted the detection path at **125,750 flows/s** when the record said **125,762** — caught **by
+accident**, while re-deriving something else, not by any check. **A paper is the one artifact where a
+transcription slip is unrecoverable after submission.**
+
+For each claim the script pulls the value from the JSON that produced it, formats it the way the
+draft should state it, and asserts that string is present. **Result: 52 verified · 1 not quoted ·
+6 unbacked · 0 MISMATCHED.**
+
+### 🔑 The first run reported 5 mismatches and every one was the CHECKER'S fault
+
+A range in the prose (*"0.92–0.95"*, *"29–32 %"*), a value the draft states only as a paired delta,
+and a figure taken from a different source file. **A checker that cries wolf stops being read for
+exactly the same reason a check that cannot fire does** — the failure this project has already hit
+twice, in the other direction. Fixed with an `alt=` list of accepted renderings for the same claim
+and a `quoted=False` marker, so *"the draft omits this"* and *"the draft gets this wrong"* are
+reported as the different findings they are.
+
+### ⚠️ UNBACKED is reported, never hidden
+
+Six draft claims have **no machine-readable record**: the split sizes (`config.yaml`), the zero-day
+family counts (derived at runtime), the base paper's figures, the Tier A/B per-method numbers, the
+double-dissociation SD multiples, and the Web BF/XSS correlation. **That list is the set a human must
+check by hand**, and it should stay small and stable. Silently skipping what it cannot verify would
+make the check worse than nothing.
+
+### 📌 One record discrepancy surfaced and deliberately not papered over
+
+`ood_scores.json` puts the CNN's Bot PR-AUC at **0.0448**; `ablation.json` at **0.0446** — different
+score files averaged over the same three seeds, a gap **~100× below the noise floor**. Neither is
+"right". The draft quotes the ablation's because that is the comparison it appears in, and the
+checker accepts both rather than forcing a false choice. Recorded in the script rather than resolved
+by fiat.
+
+⚠️ **It verifies TRANSCRIPTION, not INTERPRETATION** — it cannot tell you a caveat is missing, a claim
+overreaches, or a paired delta is being judged against an unpaired floor. Added to CLAUDE.md's
+end-of-session checklist next to the convention lint.
+
 ## 2026-09-05d (the paper has prose — first draft, and §5 restructured around yesterday's retraction)
 
 ### 📝 `docs/target/paper_draft.md` — all nine sections, drafted FROM the outline
