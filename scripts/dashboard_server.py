@@ -172,6 +172,53 @@ def runs_summary():
     return out
 
 
+def kg_summary():
+    """Phase-4 knowledge-graph state, read fresh from outputs/metadata/kg*_report.json.
+
+    Rendered multi-seed on purpose. Seed 42 alone is a documented trap here: the
+    "conjunction gives 81 % precision" claim was clustering-seed 42 only and had
+    to be retracted (CLAUDE.md), so this panel always ships the across-seed range
+    beside the seed-42 value rather than a bare point estimate.
+    """
+    reports = sorted(glob.glob(os.path.join(paths.METADATA, "kg*_report.json")))
+    seeds = []
+    for path in reports:
+        try:
+            # explicit utf-8: the platform default is cp1252 (same bug class as runs_summary)
+            with open(path, encoding="utf-8") as f:
+                d = json.load(f)
+        except Exception:
+            continue
+        cfg, g, e = d.get("config", {}), d.get("graph", {}), d.get("emerging", {})
+        seeds.append({
+            "seed": cfg.get("seed"),
+            "k": cfg.get("k"),
+            "representation": cfg.get("representation"),
+            "scope": cfg.get("scope"),
+            "nodes": g.get("nodes"), "edges": g.get("edges"), "clusters": g.get("clusters"),
+            "behaviours": [b if isinstance(b, str) else b.get("name") for b in g.get("behaviours", [])],
+            "attack_types": [a if isinstance(a, str) else a.get("name") for a in g.get("attack_types", [])],
+            "n_emerging": e.get("n_clusters"),
+            "lift": e.get("lift"), "precision": e.get("precision"),
+            "recall": e.get("recall"), "base_rate": e.get("base_rate"),
+            "explanations": d.get("explanations", [])[:4],
+            "caveats": d.get("caveats", []),
+            "confound": d.get("confound_control", {}),
+        })
+    seeds.sort(key=lambda s: (s["seed"] is None, s["seed"]))
+    return {
+        "available": bool(seeds),
+        "seeds": seeds,
+        "graph_html": os.path.exists(os.path.join(paths.FIGURES, "kg_graph.html")),
+    }
+
+
+def figures_available():
+    files = sorted(glob.glob(os.path.join(paths.FIGURES, "*.png")))
+    return [{"name": os.path.basename(f), "mtime": os.path.getmtime(f),
+             "size_kb": round(os.path.getsize(f) / 1024)} for f in files]
+
+
 def build_status():
     return {
         "ts": time.time(),
@@ -180,6 +227,8 @@ def build_status():
         "training": running_training_processes(),
         "log": latest_log_tail(),
         "runs": runs_summary(),
+        "kg": kg_summary(),
+        "figures": figures_available(),
     }
 
 
@@ -254,6 +303,28 @@ PAGE = """<!doctype html>
     font-family: ui-monospace,Consolas,monospace; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
   .log-meta { color: var(--text-muted); font-size: 11.5px; margin-bottom: 6px; }
   .table-wrap { overflow-x: auto; }
+  .kg-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .btn-link { font: inherit; font-size: 12px; padding: 4px 10px; border-radius: 999px; text-decoration: none;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); }
+  .btn-link:hover { border-color: var(--accent); color: var(--accent); }
+  .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 12px; margin-top: 12px; }
+  .metric { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .metric .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .metric .value { font: 600 18px/1.3 ui-monospace,Consolas,monospace; }
+  .metric .range { font-size: 11.5px; color: var(--text-muted); font-family: ui-monospace,Consolas,monospace; }
+  .pathline { font-family: ui-monospace,Consolas,monospace; font-size: 11.5px; color: var(--text-secondary);
+    background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    border-radius: 6px; padding: 8px 10px; margin-top: 8px; word-break: break-word; }
+  .caveat { font-size: 12px; color: var(--text-secondary); border-left: 3px solid var(--status-warn);
+    padding: 4px 0 4px 10px; margin-top: 8px; }
+  .subhead { font: 600 11px/1 ui-monospace,Consolas,monospace; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--text-muted); margin: 18px 0 4px; }
+  .fig-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px,1fr)); gap: 12px; }
+  .fig { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-2);
+    text-decoration: none; color: inherit; display: block; }
+  .fig img { width: 100%; display: block; background: #fff; }
+  .fig .cap { font-family: ui-monospace,Consolas,monospace; font-size: 11px; color: var(--text-secondary);
+    padding: 6px 8px; border-top: 1px solid var(--border); }
 </style>
 <div class="wrap">
   <header>
@@ -267,6 +338,16 @@ PAGE = """<!doctype html>
   <div class="card">
     <h2>System</h2>
     <div class="stat-grid" id="stat-grid"><div class="empty">loading…</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Knowledge graph &mdash; Phase 4 (corroboration + explanation)</h2>
+    <div id="kg-body"><div class="empty">loading&hellip;</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Figures</h2>
+    <div class="fig-grid" id="fig-grid"><div class="empty">loading&hellip;</div></div>
   </div>
 
   <div class="card">
@@ -354,12 +435,88 @@ function renderRuns(d) {
   }).join('');
 }
 
+function renderKG(d) {
+  const el = document.getElementById('kg-body');
+  const kg = d.kg;
+  if (!kg || !kg.available) { el.innerHTML = '<div class="empty">no kg*_report.json in outputs/metadata &mdash; run scripts/kg.py</div>'; return; }
+  const ss = kg.seeds, base = ss[0];
+  const f4 = v => (v === null || v === undefined) ? '&mdash;' : Number(v).toFixed(4);
+  const rng = k => {
+    const vs = ss.map(s => s[k]).filter(v => v !== null && v !== undefined);
+    if (vs.length < 2) return 'n=1 &mdash; provisional';
+    return 'n=' + vs.length + ' seeds: ' + Math.min(...vs).toFixed(3) + '&ndash;' + Math.max(...vs).toFixed(3);
+  };
+  const metric = (label, val, sub) =>
+    `<div class="metric"><div class="label">${label}</div><div class="value mono">${val}</div><div class="range">${sub}</div></div>`;
+
+  const head = `<div class="kg-head">
+      ${chip(base.representation || 'raw_features', 'good')}
+      ${chip('k=' + base.k, 'neutral')}
+      ${chip('growth-rate criterion only', 'neutral')}
+      ${kg.graph_html ? '<a class="btn-link" href="/kg" target="_blank" rel="noopener">Open interactive graph &#8599;</a>' : ''}
+    </div>
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">Scope: ${base.scope || 'corroboration + explanation, NOT primary detection'}</div>`;
+
+  const structure = `<div class="stat-grid" style="margin-top:12px">
+      <div class="stat"><div class="label">Nodes</div><div class="value mono">${base.nodes}</div></div>
+      <div class="stat"><div class="label">Edges</div><div class="value mono">${base.edges}</div></div>
+      <div class="stat"><div class="label">Clusters</div><div class="value mono">${base.clusters}</div></div>
+      <div class="stat"><div class="label">Behaviours</div><div class="value mono">${(base.behaviours || []).length}</div></div>
+      <div class="stat"><div class="label">Attack types</div><div class="value mono">${(base.attack_types || []).length}</div></div>
+      <div class="stat"><div class="label">Emerging clusters</div><div class="value mono">${base.n_emerging}</div></div>
+    </div>`;
+
+  const emerging = '<div class="subhead">Emerging-pattern rule (burstiness)</div><div class="metric-row">'
+    + metric('Lift', f4(base.lift) + '&times;', rng('lift'))
+    + metric('Precision', f4(base.precision), rng('precision'))
+    + metric('Recall', f4(base.recall), rng('recall'))
+    + metric('Base rate', f4(base.base_rate), 'zero-day share of test flows')
+    + '</div>';
+
+  let confound = '';
+  const cf = base.confound || {};
+  const keys = Object.keys(cf);
+  if (keys.length) {
+    confound = '<div class="subhead">Lateness confound &mdash; Bot PR-AUC, global vs within-window</div>'
+      + '<div class="table-wrap"><table><thead><tr><th>Channel</th><th>Global</th><th>Global lift</th><th>Within-window</th><th>Within-window lift</th></tr></thead><tbody>'
+      + keys.map(k => {
+          const v = cf[k];
+          return `<tr><td class="mono">${k}</td><td class="mono">${f4(v.bot_global)}</td><td class="mono">${f4(v.bot_global_lift)}&times;</td>
+                  <td class="mono">${f4(v.bot_within_window)}</td><td class="mono">${f4(v.bot_within_window_lift)}&times;</td></tr>`;
+        }).join('')
+      + '</tbody></table></div>';
+  }
+
+  const expl = (base.explanations || []).length
+    ? '<div class="subhead">Explanation paths (sample)</div>'
+      + base.explanations.map(e => `<div class="pathline">${e.path}</div>`).join('')
+    : '';
+
+  const caveats = (base.caveats || []).length
+    ? '<div class="subhead">Caveats that travel with these numbers</div>'
+      + base.caveats.map(c => `<div class="caveat">${c}</div>`).join('')
+    : '';
+
+  el.innerHTML = head + structure + emerging + confound + expl + caveats;
+}
+
+function renderFigures(d) {
+  const el = document.getElementById('fig-grid');
+  const figs = d.figures || [];
+  if (!figs.length) { el.innerHTML = '<div class="empty">no figures in outputs/figures</div>'; return; }
+  el.innerHTML = figs.map(f =>
+    `<a class="fig" href="/figures/${f.name}" target="_blank" rel="noopener">
+       <img src="/figures/${f.name}" alt="${f.name}" loading="lazy">
+       <div class="cap">${f.name} &middot; ${f.size_kb} KB</div>
+     </a>`).join('');
+}
+
 async function poll(manual) {
   try {
     const res = await fetch('/api/status', {cache: 'no-store'});
     if (!res.ok) throw new Error('status ' + res.status);
     const d = await res.json();
-    renderStats(d); renderProcs(d); renderLog(d); renderRuns(d);
+    renderStats(d); renderKG(d); renderFigures(d); renderProcs(d); renderLog(d); renderRuns(d);
     const badge = document.getElementById('badge');
     badge.className = 'live-badge ok';
     document.getElementById('badge-text').textContent = 'live · updated ' + fmtAgo(d.ts);
@@ -381,6 +538,20 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass  # keep stdout clean; the console itself is the feedback loop
 
+    def _send_file(self, path, ctype):
+        if not os.path.exists(path):
+            self.send_response(404)
+            self.end_headers()
+            return
+        with open(path, "rb") as f:
+            body = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self):
         if self.path.startswith("/api/status"):
             body = json.dumps(build_status()).encode("utf-8")
@@ -397,6 +568,19 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
+        elif self.path.split("?")[0] in ("/kg", "/kg/"):
+            self._send_file(os.path.join(paths.FIGURES, "kg_graph.html"),
+                            "text/html; charset=utf-8")
+        elif self.path.startswith("/figures/"):
+            # basename() only -- never join a client-supplied path component (traversal)
+            name = os.path.basename(self.path.split("?")[0])
+            ext = os.path.splitext(name)[1].lower()
+            if ext not in (".png", ".html"):
+                self.send_response(404)
+                self.end_headers()
+                return
+            self._send_file(os.path.join(paths.FIGURES, name),
+                            "image/png" if ext == ".png" else "text/html; charset=utf-8")
         elif self.path == "/favicon.ico":
             self.send_response(204)
             self.end_headers()

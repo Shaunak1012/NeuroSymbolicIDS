@@ -2,6 +2,31 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-08-20 (the live console now shows the Phase-4 knowledge graph)
+
+### 🖥️ `dashboard_server.py` — KG panel, figure grid, and two static routes
+
+The console reported ops state (CPU/RAM, git, processes, log tail, `runs.jsonl`) but nothing about the
+KG, which is the largest built artifact in the project. Added, all read fresh per 4 s poll:
+
+- **KG panel** from `outputs/metadata/kg*_report.json`: graph structure (215 nodes / 1190 edges /
+  200 clusters / 53 emerging), the burstiness metrics, the lateness-confound table, sample explanation
+  paths, and the report's `caveats` rendered verbatim.
+- **Figure grid** over `outputs/figures/*.png` (8 figures).
+- **`/kg`** serves the interactive `kg_graph.html`; **`/figures/<name>`** serves a tracked figure.
+  Path handling is `os.path.basename()` + extension allow-list; traversal verified 404.
+
+### 🔴 Every KG number on the panel carries its across-seed range
+
+Lift renders as `6.1125×` **with** `n=3 seeds: 5.658–6.112`; precision `0.4303` with `0.398–0.430`. The
+range is computed from however many `kg*_report.json` files exist, so it widens automatically rather
+than needing a doc update. **A console that displays a bare point estimate is a machine for recreating
+the retracted "81 % precision" claim** — which was clustering-seed 42 only. `n=1` renders as
+"n=1 — provisional", not as a number.
+
+**No result changed.** This is a presentation layer over existing `outputs/metadata/*.json` — it computes
+nothing, so it cannot diverge from the record. Detail in [DASHBOARD.md](DASHBOARD.md).
+
 ## 2026-08-10d (figures 2–5 built — and one of them caught a statistics error of mine)
 
 ### 📊 `paper_figures.py` — all five figures now exist and regenerate from the record
