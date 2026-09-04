@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (56 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (57 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1325,6 +1325,43 @@ out of 55,237, which is why their FPR column reads exactly 1.0000.
 ```bash
 python scripts/operational.py
 ```
+
+## `scripts/verify_draft.py`
+
+**Purpose**: check every quantitative claim in [paper_draft.md](target/paper_draft.md) against
+`outputs/metadata/*.json`, **mechanically**. For each claim it pulls the value from the JSON that
+produced it, formats it the way the draft should state it, and asserts that string is in the draft.
+
+**Why**: the draft was written by transcribing out of the outline, which was transcribed out of the
+JSONs — **transcription is where this project's numbers go wrong**. The first draft quoted the
+detection path at 125,750 flows/s when the record said **125,762**, and that was caught *by accident*
+while re-deriving something else. **A paper is the one artifact where a transcription slip is
+unrecoverable after submission**, so the check must not depend on someone happening to look.
+
+| outcome | meaning |
+|---|---|
+| ✅ **OK** | the record's value (or an accepted alternate rendering) appears in the draft |
+| 🔴 **MISMATCH** | the record's value does **not** appear — draft stale or wrong. Exit code 1. |
+| **not quoted** | the record has it and the draft deliberately omits it (e.g. a paired result stated only as a delta). Informational. |
+| ⚠️ **UNBACKED** | a draft claim with **no machine-readable record** — the set a human must check by hand |
+
+🔑 **`alt=` accepts other renderings of the same claim** (a range like `0.92-0.95` where the draft
+summarises two family figures). Without it the checker fires on legitimate prose, and **a check that
+cries wolf stops being read for the same reason a check that cannot fire does.**
+
+⚠️ **UNBACKED is reported, never hidden.** Split sizes come from `config.yaml`, the base paper's
+figures from the base paper. Listing them *is* the point — that list should stay small and stable.
+
+⚠️ **Verifies TRANSCRIPTION, not INTERPRETATION.** It cannot tell you a caveat is missing, a claim
+overreaches its evidence, or a paired delta is being judged against an unpaired floor.
+
+📌 **One discrepancy it surfaced and did not paper over:** `ood_scores.json` puts the CNN's Bot
+PR-AUC at **0.0448** and `ablation.json` at **0.0446** — different score files averaged over the same
+3 seeds, a gap ~100× below the noise floor. Neither is "right"; the draft quotes the ablation's,
+because that is the comparison it appears in, and the checker accepts both rather than forcing a
+false choice.
+
+**Current state: 52 verified · 1 not quoted · 6 unbacked · 0 mismatched.**
 
 ## `scripts/fitted_fusion.py`
 

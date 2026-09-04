@@ -37,6 +37,12 @@ the surviving structural limit and the positive half moved to §6 · ~~the fitte
 sections written from the outline, not independently of it. **Every DO-NOT-WRITE row in the outline
 was checked against the draft** — all six appear only as claims explicitly refused.
 
+🔎 **And its numbers are now mechanically checkable: `scripts/verify_draft.py` — 52 verified,
+0 mismatched.** Run it whenever the draft changes. ⚠️ **6 claims are UNBACKED** (split sizes,
+zero-day family counts, base-paper figures, Tier A/B per-method numbers, the double-dissociation SD
+multiples, the Web BF/XSS correlation) — **that list is what a human must check by hand.**
+⚠️ It verifies **transcription, not interpretation**.
+
 ## 🔴🔴 THE FUSION WALL WAS OVERSTATED (2026-09-05) — `scripts/fitted_fusion.py`. **PHASE 5 IS COMPLETE.**
 
 **A pre-registered falsifier fired. `paper_outline.md` §5's *"a fitted fuser is structurally

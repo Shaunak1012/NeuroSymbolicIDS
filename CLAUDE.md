@@ -70,6 +70,15 @@ actually lapsed, and names the incident behind each one:
 python scripts/lint_conventions.py
 ```
 
+**If you touched [docs/target/paper_draft.md](docs/target/paper_draft.md), also run the draft check.**
+It compares every quantitative claim in the draft against `outputs/metadata/*.json` and exits 1 on a
+mismatch. It exists because the first draft quoted a throughput figure that disagreed with the record
+and it was caught *by accident*, not by any check:
+
+```bash
+python scripts/verify_draft.py
+```
+
 ✅ **Component status now has ONE home (fixed 2026-08-03).** Change it in
 **[docs/STATUS.md](docs/STATUS.md) → "Component Status"** and nowhere else. This file,
 `docs/target/roadmap_gap_analysis.md` and `docs/target/target_architecture.md` used to carry
@@ -317,7 +326,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 56 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **8 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 57 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **8 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -330,7 +339,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 56 Python scripts + 8 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 57 Python scripts + 8 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
