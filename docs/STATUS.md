@@ -26,10 +26,88 @@ some point, or is the obvious stronger version of something supportable.
 ✅ Every figure quoted in the outline was **cross-checked against `outputs/metadata/*.json`**, not
 copied from prose.
 
-**Still open before submission:** the **fitted fuser** (write the blocker as a result) ·
-cross-dataset (**blocked on data**) · optionally a post-flag LTN-control sweep, the only route to
-reopening C2. ~~Phase 5's latency~~ ✅ **measured 2026-09-05** (`latency.py`) · ~~figures 2–5~~ ✅
-**built 2026-08-10** (`paper_figures.py`) — this line listed both as open for weeks after they landed.
+**Still open before submission:** cross-dataset (**blocked on data**) · optionally a post-flag
+LTN-control sweep, the only route to reopening C2 · 🔴 **rewrite §5's fitted-fuser row** — the
+falsifier fired. ~~the fitted fuser~~ ✅ **run 2026-09-05** · ~~Phase 5's latency~~ ✅
+**2026-09-05** · ~~figures 2–5~~ ✅ **built 2026-08-10** — this line listed the last two as open for
+weeks after they landed.
+
+## 🔴🔴 THE FUSION WALL WAS OVERSTATED (2026-09-05) — `scripts/fitted_fusion.py`. **PHASE 5 IS COMPLETE.**
+
+**A pre-registered falsifier fired. `paper_outline.md` §5's *"a fitted fuser is structurally
+impossible here"* is RETRACTED.** The claim had never been tested on the real channel set — it was
+generalised from `fusion_beaconlike.py`, a **two-channel special case** (CNN log-odds + the
+`BeaconLike` behaviour) that returned `[2.35, 0.02]`. **Generalising a blocker from a special case is
+the same defect class this project keeps retracting, pointed at a negative claim instead of a
+positive one.**
+
+Logistic combiner over **CNN** (1−p(BENIGN)) + **autoencoder** (reconstruction MSE), fitted on
+**validation** (benign vs *known* attack; **0 zero-day flows, asserted in code**), applied blind to
+test. Seeds 42/43/44. Achieved FPR **0.0100 exactly on all three** — no tie-block degeneracy.
+
+| channel | macro | range | Bot | Web BF | XSS |
+|---|---:|---|---:|---:|---:|
+| CNN | 0.6399 | [0.6355, 0.6446] | 0.0448 | 0.9226 | 0.9524 |
+| autoencoder | 0.0970 | [0.0894, 0.1014] | 0.1314 | 0.1048 | 0.0547 |
+| **fitted (logistic)** | **0.6502** | [0.6413, 0.6606] | **0.1007** | 0.9126 | 0.9371 |
+| equal-weight rank fusion | 0.5898 | [0.5732, 0.6003] | 0.0940 | 0.8401 | 0.8352 |
+
+**Coefficients (standardised): CNN +12.76 / +10.08 / +11.25 · AE +1.53 / +1.86 / +4.27 — both
+POSITIVE in all three seeds, AE holding 10.7 % / 15.6 % / 27.5 % (mean 17.9 %) of absolute weight.**
+
+### All three predictions falsified — read the paired numbers, not the raw ones
+
+| paired delta | mean | 3-seed σ | ÷σ | seeds | verdict |
+|---|---:|---:|---:|---:|---|
+| fitted − equal-weight rank | **+0.0604** | 0.0241 | **2.51** | 3/3 | ✅ established |
+| **equal-weight rank − CNN** | **−0.0501** | 0.0116 | **4.34** | 3/3 | ✅ established (it **HURTS**) |
+| fitted − CNN | +0.0103 | 0.0129 | **0.80** | 3/3 | ⚠️ **direction only** |
+| fitted − CNN, **Bot** | +0.0560 | 0.0405 | 1.38 | 3/3 | ⚠️ **direction only** (2.2× Bot) |
+
+- 🔴 **F1 FALSIFIED** — the combiner does **not** learn to ignore the anomaly channel. 17.9 % of
+  absolute weight, positive every seed.
+- 🔴 **F2 FALSIFIED** — it **beats** parameter-free equal-weight rank fusion of the same two channels
+  by **+0.0604, 3/3 seeds, 2.5σ**.
+- 🔴 **F3 FALSIFIED** — the gap is not concentrated on Bot in the predicted direction; fitted Bot
+  (0.1007) sits **above** both rank fusion (0.0940) and the CNN (0.0448).
+- 🔴 **F4 TRIGGERED** — the falsifier stated in advance. The retraction below is its consequence.
+
+### What is refuted, and what survives — these are different things
+
+🔴 **REFUTED:** *"a fitted fuser is structurally impossible here"* · *"a combiner learns to ignore
+the zero-day-useful channel"* · *"zero macro change"*. All three are false for CNN+AE. The
+`[2.35, 0.02]` coefficients were a property of **BeaconLike**, not of fitted fusion.
+
+✅ **SURVIVES, and is now the WHOLE of the wall:** **the KG cannot be fitted at all.** `kg.py`'s
+burstiness is defined by streaming the **test** set into windows — there is **no validation-side KG
+score, by construction**. So the channel with the largest measured gain (**+0.0527, 3/3**) is the one
+a fitted combiner structurally cannot weight. That sentence needs no number and is untouched.
+
+🔑 **WHY the wall was overstated, which is the transferable part.** Its premise — *a channel whose
+value is specifically on NOVEL classes is invisible to a zero-day-free fitting objective* — is
+**correct** and simply **does not apply to the autoencoder**. Known attacks are anomalous too, so
+reconstruction error separates benign from *known* attacks on validation, the fitter sees real
+signal, and that weight transfers. `BeaconLike` genuinely **is** zero-day-specific (fires on 97.6 %
+of PortScan and **0.0 % of every other known attack**), which is exactly why *it* got 0.02.
+**The wall applies to zero-day-SPECIFIC channels, and the KG is the example.**
+
+⚠️ **Do not upgrade this into a headline.** fitted − CNN is **+0.0103 at 0.80σ** — direction
+consistent 3/3, **magnitude not established**. It does **not** replace CNN+KG (+0.0527, magnitude
+0.027–0.088). The honest sentence is *"a fitted combiner is possible and marginally positive"*, not
+*"fitted fusion works"*.
+
+### 🔴 And a qualification of the project's OWN parameter-free result
+
+**Equal-weight rank fusion of CNN+AE loses to the CNN by −0.0501 (3/3, 4.34σ).** Parameter-free
+fusion is **not** universally the safe choice — it works for CNN+KG and actively harms with a much
+weaker partner, because equal weights cannot express "this channel is worth a sixth of that one."
+**`fusion_multi.py`'s +0.0527 is a result about the KG, not about equal weighting.**
+
+### ✅ PHASE 5 IS COMPLETE
+
+significance ✅ · parameter-free fusion ✅ · n≥6 seeds ✅ · calibration ✅ (2026-08-05) ·
+latency ✅ (2026-09-05) · **fitted fuser ✅ (2026-09-05)**. **Record:**
+`outputs/metadata/fitted_fusion.json`.
 
 ## ⏱️ LATENCY MEASURED (2026-09-05) — `scripts/latency.py`. Phase 5's last open measurement.
 
@@ -811,11 +889,11 @@ method comparison table is now populated (4 tiers, 11 new methods).**
 2. **Write.** The spine is decided and its limits are measured. Open with the **resolution** failure
    (`field_gap.py`: 67/204 method pairs indistinguishable on the published metric while ≥2× apart on
    zero-day), body = the mechanism, double dissociation as support.
-3. **Phase 5's remaining ONE** — the *fitted* fuser, blocked by the fusion wall; the task is to
-   **write the blocker as a result**, not to unblock it. ~~calibration~~ ✅ **was already delivered
-   2026-08-05** by `operational.py` (Tier-1 item 2) and this line said otherwise for a month — see
-   the drift note below. ~~latency~~ ✅ **measured 2026-09-05** (`latency.py`).
-   Phase 6 still **blocked** on CIC-IDS2018 not being on this machine.
+3. ~~**Phase 5's remaining ONE**~~ ✅ **PHASE 5 IS COMPLETE (2026-09-05).** calibration ✅
+   (2026-08-05, `operational.py` — this line said otherwise for a month, see the drift note) ·
+   latency ✅ (`latency.py`) · **fitted fuser ✅ (`fitted_fusion.py`) — and it FALSIFIED the
+   "structurally impossible" claim it was meant to document.** Phase 6 still **blocked** on
+   CIC-IDS2018 not being on this machine.
 
 **Blocked, not forgotten:** Phase 6 cross-dataset needs **CIC-IDS2018**, which is not on this machine.
 
@@ -830,7 +908,7 @@ method comparison table is now populated (4 tiers, 11 new methods).**
 |---|---|
 | 0–3 (split, CNN, LTN, autoencoder) | ✅ done |
 | **4 — Knowledge Graph + explainability** | ✅ **COMPLETE** — `kg.py`, `kg_visualize.py`, `explain.py`; faithfulness measured |
-| **5 — Decision Fusion + rigor** | 🟡 **PARTIAL** — ✅ significance · ✅ parameter-free rank fusion · ✅ n=6 on all 7 channels · ✅ **calibration** (delivered 2026-08-05 by `operational.py`; ⚠️ scalar ECE per subset is persisted, per-bin **reliability curves are not**) · ✅ **latency** (2026-09-05, `latency.py`). ❌ the *fitted* fuser — blocked by THE FUSION WALL, and the deliverable is to **write the blocker as a result** |
+| **5 — Decision Fusion + rigor** | ✅ **COMPLETE 2026-09-05** — ✅ significance · ✅ parameter-free rank fusion · ✅ n=6 on all 7 channels · ✅ **calibration** (delivered 2026-08-05 by `operational.py`; ⚠️ scalar ECE per subset is persisted, per-bin **reliability curves are not**) · ✅ **latency** (2026-09-05, `latency.py`). ✅ **the *fitted* fuser** (2026-09-05, `fitted_fusion.py`) — 🔴 it **works**, and the "structurally impossible" claim is **retracted**; what survives is that the **KG** cannot be fitted at all |
 | 6, 7 | ⬜ not started |
 | **7.5 — operational readiness** | 🟡 **Tier 1 ✅ DONE 2026-08-05** (`operational.py`, 4/4 predictions confirmed); Tier 2 in progress. **Gates Phase R** |
 | R — response engine | ⬜ not started |

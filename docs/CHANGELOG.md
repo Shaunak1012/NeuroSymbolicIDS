@@ -2,6 +2,72 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05c (the fusion wall was OVERSTATED — a pre-registered falsifier fired. **Phase 5 complete.**)
+
+### 🔴 `paper_outline.md` §5's "a fitted fuser is structurally impossible here" is RETRACTED
+
+`fitted_fusion.py`. The claim had **never been tested on the real channel set** — it was generalised
+from `fusion_beaconlike.py`, a **two-channel special case** (CNN log-odds + the `BeaconLike`
+behaviour) returning `[2.35, 0.02]`. **Generalising a blocker from a special case is the same defect
+class this project keeps retracting, pointed at a negative claim instead of a positive one.**
+
+Logistic combiner over **CNN** + **autoencoder**, fitted on validation (benign vs *known* attack;
+**0 zero-day flows, asserted in code, not assumed**), applied blind to test, seeds 42/43/44.
+Achieved FPR **0.0100 exactly on all three** — no tie-block degeneracy.
+
+| channel | macro | Bot | Web BF | XSS |
+|---|---:|---:|---:|---:|
+| CNN | 0.6399 | 0.0448 | 0.9226 | 0.9524 |
+| autoencoder | 0.0970 | 0.1314 | 0.1048 | 0.0547 |
+| **fitted (logistic)** | **0.6502** | **0.1007** | 0.9126 | 0.9371 |
+| equal-weight rank fusion | 0.5898 | 0.0940 | 0.8401 | 0.8352 |
+
+Coefficients (standardised): **CNN +12.76 / +10.08 / +11.25 · AE +1.53 / +1.86 / +4.27** — both
+**positive every seed**, AE holding **17.9 % of absolute weight** on average.
+
+| paired delta | mean | σ | ÷σ | seeds |
+|---|---:|---:|---:|---:|
+| fitted − equal-weight rank | **+0.0604** | 0.0241 | **2.51** | 3/3 |
+| **equal-weight rank − CNN** | **−0.0501** | 0.0116 | **4.34** | 3/3 |
+| fitted − CNN | +0.0103 | 0.0129 | 0.80 | 3/3 |
+| fitted − CNN (Bot) | +0.0560 | 0.0405 | 1.38 | 3/3 |
+
+**F1, F2 and F3 all FALSIFIED; F4 — the falsifier written down in advance — TRIGGERED.**
+
+### What is refuted and what survives are different things
+
+🔴 **REFUTED**: *"structurally impossible"* · *"the combiner learns to ignore the zero-day-useful
+channel"* · *"zero macro change"*. All false for CNN+AE. `[2.35, 0.02]` was a property of
+**BeaconLike**, not of fitted fusion.
+
+✅ **SURVIVES, and is now the WHOLE wall**: **the KG cannot be fitted at all** — its burstiness is
+defined by streaming the **test** set into windows, so there is **no validation-side score by
+construction**, and the channel with the largest measured gain (+0.0527) is the one a combiner
+structurally cannot weight. Needs no number; untouched by this run.
+
+🔑 **Why the wall was overstated — the transferable part.** Its premise (*a channel whose value is
+specifically on NOVEL classes is invisible to a zero-day-free objective*) is **correct** and simply
+**does not apply to the autoencoder**: known attacks are anomalous too, so reconstruction error
+separates benign from *known* attacks on validation and that weight transfers. `BeaconLike` genuinely
+**is** zero-day-specific (97.6 % of PortScan, **0.0 %** of every other known attack) — which is
+exactly why it got 0.02. **The wall applies to zero-day-SPECIFIC channels; the KG is the example.**
+
+⚠️ **Not a headline.** fitted − CNN is **+0.0103 at 0.80σ** — direction 3/3, **magnitude not
+established**. It does not replace CNN+KG (+0.0527, magnitude 0.027–0.088).
+
+### 🔴 A qualification of the project's OWN parameter-free result
+
+**Equal-weight rank fusion of CNN+AE loses to the CNN by −0.0501 (3/3, 4.34σ).** Parameter-free
+fusion is **not** universally the safe choice: equal weights cannot express *"this channel is worth a
+sixth of that one"*, so they help with a comparable partner and harm with a weak one.
+**`fusion_multi.py`'s +0.0527 is a result about the KG, not about equal weighting** — and the outline
+now says so next to it.
+
+### ✅ PHASE 5 IS COMPLETE
+
+significance ✅ · parameter-free fusion ✅ · n≥6 seeds ✅ · calibration ✅ · latency ✅ ·
+**fitted fuser ✅**. Record: `outputs/metadata/fitted_fusion.json`.
+
 ## 2026-09-05b (latency measured — Phase 5's last open measurement, and a fifth status-drift defect)
 
 ### ⏱️ `latency.py` — per-component, per-batch, two determinism arms

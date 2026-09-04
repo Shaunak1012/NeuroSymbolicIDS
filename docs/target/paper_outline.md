@@ -104,7 +104,7 @@ failure.
 | **More classical baselines** (Tier A) | 16× spread, none competitive | see §3 degeneracy caveats |
 | **Benign-only anomaly methods** (Tier C: VAE, Deep SVDD, OC-SVM, LOF) | **LOF macro 0.3360 ± 0.0135** does *not* collapse on web attacks | ✅ **A real correction to our own framing**: "benign-only ⇒ collapses on web attacks" is a property of **reconstruction-error scoring**, not of the (B) family. 🔴 **Deep SVDD "beats the AE on Bot" is NOT established** — verdict flips by seed, p=0.256. |
 | **The symbolic pillar itself** | **−0.0004 (n.s.)** alone; **significantly HURTS** on top of the KG (0.6926 → 0.6708, **p<0.0001**), diluting Bot 0.2518 → 0.2043 | 🔑 This is a **negative result about our own architecture** — lead with it rather than burying it. |
-| **A fitted fuser** | Structurally impossible here: validation contains **no zero-day by construction**, so a combiner cannot learn to weight a zero-day channel. Measured: coefficients `[2.35, 0.02]`, zero macro change | LOCO (manufacture synthetic zero-day from known classes) was **refuted before compute was spent**: no known class in CIC-IDS2017 beacons, so the rotation is predictably null. |
+| ~~**A fitted fuser**~~ 🔴 **RETRACTED 2026-09-05** — ~~structurally impossible here~~ | **It works.** A logistic combiner over CNN + autoencoder, fitted on zero-day-free validation, scores **0.6502 vs the CNN's 0.6399** (+0.0103, 3/3 seeds) and **beats parameter-free equal-weight rank fusion of the same channels by +0.0604 (3/3, 2.5σ)**. It gives the AE **17.9 % of absolute weight, positive every seed** — it does *not* learn to ignore it. `fitted_fusion.py`, a **pre-registered falsifier that fired**. | 🔑 **The old claim generalised from `fusion_beaconlike.py`, a two-channel special case** whose `[2.35, 0.02]` was a property of **BeaconLike**, not of fitted fusion. ✅ **What survives is the whole wall now: the KG cannot be fitted AT ALL** — its burstiness is defined over *test* windows, so there is no validation-side score by construction, and the channel with the largest gain (+0.0527) is the one a combiner structurally cannot weight. 🔑 **The premise was right and its scope was wrong**: a zero-day-*specific* channel is invisible to a zero-day-free objective, and the AE is not one — known attacks are anomalous too. ⚠️ **Do not headline it**: +0.0103 is **0.80σ**, direction only. LOCO still untried. |
 | **Calibration** | Isotonic reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) | **The better the calibration, the wider the gap** (287×). Operational consequence: `p=0.9` means 90 % for known attacks and **nothing** for novel ones. ⚠️ Isotonic is unusable as an operating point (74 distinct values → threshold lands in a tie block, FPR 0.70 vs 0.01 target). **Calibrate with isotonic, threshold with Platt.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage | Predicted in advance from the mechanism: **a confidence rule cannot catch confident-and-wrong.** |
 
@@ -114,6 +114,7 @@ failure.
 
 | claim | evidence | caveat |
 |---|---|---|
+| ⚠️ **Parameter-free fusion is not universally safe — say this next to the row below** | Equal-weight rank fusion of **CNN + autoencoder loses to the CNN by −0.0501** (3/3 seeds, **4.34σ**) | `fitted_fusion.py` | **+0.0527 is a result about the KG, not about equal weighting.** Equal weights cannot express "this channel is worth a sixth of that one", so they help with a comparable partner and harm with a weak one. |
 | **CNN + KG: +0.0528** [+0.0466, +0.0592], p<0.0001, 3/3 seeds, Bot 0.0446 → 0.2518 | `ablation.py`, `fusion_kg.py` | Only the KG earns its place. |
 | **The operational statement is better than the PR-AUC one**: reaching 50 % of zero-day flows needs reviewing **52 %** of all traffic with the CNN, **29–32 %** with the KG/fusion | `operational.py` | 🔑 **At any deployable alert budget you see ONLY known attacks** — precision ~1.000 at every budget, **0 zero-day flows in the top 1,000**. This is the honest deployment story and PR-AUC 0.64 does not show it. |
 | **Cost is not the objection to any of this** — full detection path **7.95 µs/flow (125,750 flows/s)** at batch 8192; **the KG adds 0.58 µs/flow, +9.2 % over the CNN** | `latency.py` | 🔑 **But explanation costs 1,898× detection** (IG **11.95 ms/flow, 84 flows/s**): explaining all 114,658 test flows takes **23 min**, explaining **100 alerts takes 1.19 s**. **So: explain alerts, not flows** — which composes with the alert-budget row above rather than fighting it. ⚠️ **Never imply per-flow explanation**; that is a 4-orders-of-magnitude claim. ⚠️ Throughput is **meaningless without its batch size** — batch 1 is 256 flows/s, batch 8192 is 158,919, a **620× spread**. ⚠️ Upstream **flow-feature extraction is not measured** and may dominate a real deployment. |
@@ -221,8 +222,9 @@ surrounding paragraph.
 
 ## Open before submission
 
-1. **Phase 5's remaining ONE** — calibration ✅ done, latency ✅ **done 2026-09-05**
-   (`latency.py`), **fitted fuser ❌** (blocked by the fusion wall — write the blocker as a result).
+1. ~~**Phase 5's remaining ONE**~~ ✅ **PHASE 5 COMPLETE 2026-09-05** — calibration ✅, latency ✅
+   (`latency.py`), fitted fuser ✅ (`fitted_fusion.py`). 🔴 **But §5's fitted-fuser row is now a
+   RETRACTION and must be rewritten as one** — the pre-registered falsifier fired.
 2. **Cross-dataset** — blocked on data.
 3. **Optional:** post-flag LTN-control sweep at n=6, the only route to reopening C2.
 4. ~~**Figures 2–5.**~~ ✅ **built 2026-08-10** (`paper_figures.py`).
