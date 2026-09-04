@@ -2,6 +2,90 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05b (latency measured — Phase 5's last open measurement, and a fifth status-drift defect)
+
+### ⏱️ `latency.py` — per-component, per-batch, two determinism arms
+
+`enhancements.md` #6 scoped this as *"one benchmark — 'X flows/sec on CPU, KG adds Y ms'"*.
+**The script deliberately refuses to emit that single number**: the CNN runs at **256 flows/s at
+batch 1 and 158,919 at batch 8192, a 620× spread.** A throughput figure without its batch size is
+not a claim. Median + IQR over 15 repeats, warm-up discarded, never a mean — latency on a shared
+desktop is right-skewed.
+
+| component (batch 8192) | µs/flow | flows/s |
+|---|---:|---:|
+| `behaviours` | 0.094 | 10.6 M |
+| `kg_assign` | 0.059 | 16.9 M |
+| `kg_update` (amortised) | 0.519 | — |
+| `transform` | 0.680 | 1.4 M |
+| **`cnn`** | **6.293** | **158,919** |
+| **full detection path** | **7.952** | **125,750** |
+| 🔴 **`explain_ig`** | **11,946** | **84** |
+
+**① Detection is not the bottleneck** — the whole test set scores in **0.91 s**. Do not claim
+throughput as a contribution.
+**② The KG is essentially free** — 0.58 µs/flow, **+9.2 % over the CNN**. That is the answer to
+"KG adds Y ms", and it means cost is not the objection to the KG.
+**③ 🔴 Explanation costs 1,898× detection.** IG is 32 forward+backward passes per flow.
+Explaining all 114,658 flows = **23 min**; explaining **100 alerts = 1.19 s**. **Explain alerts, not
+flows** — which composes with Tier 1's alert-budget result instead of fighting it. ⚠️ **The
+project's selling point is the expensive half**; an "explainable IDS" claim implying per-flow
+explanation is a 4-orders-of-magnitude error.
+
+### 🔴 P3 FALSIFIED — and the reasoning error is the transferable part
+
+Predicted `kg_assign` (200 distances/flow) would dominate `kg_update` (a few edge writes per window).
+**The opposite, by 9×** — update 0.519 µs/flow vs assign 0.059. `km.predict` on a batch is one BLAS
+matmul; `observe()` is a **Python loop** over ~200 clusters × 6 behaviours doing NetworkX dict
+updates. **The prediction reasoned from algorithmic work when the determinant was
+vectorised-vs-interpreted execution.** Nothing downstream changes — both are trivial — but the
+reasoning was wrong and is recorded as wrong.
+
+### ✅ Determinism costs 2–7 % throughput — the noise-floor fix was nearly free
+
+`cnn` 6.293 → 6.744 µs/flow (1.07×), full path 7.952 → 8.128 (1.02×). ⚠️ **Do not read `kg_update`'s
+1.44× as a determinism effect** — it is pure Python, untouched by TF threading, and the OFF arm's
+IQR (2.824–4.359) contains the ON median. Run-to-run noise, which is why the script reports IQR.
+
+### 🔑 The `KnowledgeGraph` class is `exec`'d from `kg.py`'s own source, and it earned its keep
+
+`kg.py` cannot be imported (top-to-bottom script), so the class node is located with `ast` and
+exec'd from source rather than hand-copied. **The first run then raised `NameError: behavior`** —
+a module-scope dependency in `__init__` that a hand-copied class would have silently dropped, leaving
+the benchmark measuring a subtly different object. The fix resolves `kg.py`'s module-level names
+against the ones `latency.py` already holds, so a *new* dependency is picked up rather than needing
+another fix.
+
+### 🔴 NEW CRITICAL ISSUE, raised BY the latency work: the fusion gain is transductive
+
+`fusion_multi.py` fuses with `rankdata(score)/n` — **a global operation over the scored set**, so a
+flow's fused score depends on the other 114,657. The project's **only positive result** (CNN+KG
+**+0.0527**) is therefore a **transductive** estimate. **Not leakage, not a bug** — but Phase 5's
+purpose is deployability and **a streaming IDS cannot compute this score.** How much a frozen-
+reference variant would move it is **unmeasured**, and the issue asserts nothing about direction.
+🔴 The KG channel is transductive *by construction* (burstiness is defined over test windows), so a
+streaming variant is a **design change, not a re-scoring**. Filed in
+[KNOWN_ISSUES](KNOWN_ISSUES.md) with the confirming experiment specified.
+
+### 🔴 FIFTH COMPONENT-STATUS DRIFT DEFECT — a different shape from the first four
+
+Non-negotiable #7 was **satisfied**: one Component Status table, in STATUS.md. The drift was *inside*
+STATUS. **Calibration is scope for BOTH Phase 5 and Phase 7.5 Tier 1.** `operational.py` delivered it
+2026-08-05, Tier 1's row was flipped, and the three Phase-5 sites plus `conference_roadmap.md` were
+not — so the project believed it owed a deliverable it had already shipped, and the 2026-08-10
+session listed it as outstanding twice. **The single-table rule fixes duplication across FILES and
+does nothing about duplication across PHASES.** `paper_outline.md` had it right on 2026-08-10, in a
+file nobody reconciled against STATUS.
+
+Also corrected: STATUS's "still open before submission" listed **figures 2–5** (built 2026-08-10) and
+**latency**; `conference_roadmap.md` listed Phase 7.5 as **"⬜ not started"** (Tiers 1 & 2 done
+2026-08-05) and n≥6 seeds as outstanding (done 2026-08-04). ✅ **Honest limit on the calibration fix:**
+`operational.json` persists **scalar ECE per subset**, not per-bin reliability curves — recorded as a
+partial rather than rounded up to done.
+
+**Phase 5 now has exactly one item left: the *fitted* fuser, and the deliverable is to write the
+blocker as a result.**
+
 ## 2026-09-05 (the payload question, answered from the record — and two doc defects it exposed)
 
 ### 🔴 DECIDED: payload / raw PCAP is OUT OF SCOPE, not deferred-and-desirable

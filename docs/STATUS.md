@@ -1,6 +1,6 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-08-05**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-05**.
 
 ## ▶ RESUME HERE (next session)
 
@@ -26,9 +26,81 @@ some point, or is the obvious stronger version of something supportable.
 ✅ Every figure quoted in the outline was **cross-checked against `outputs/metadata/*.json`**, not
 copied from prose.
 
-**Still open before submission:** Phase 5's **latency** and the **fitted fuser** (write the blocker as
-a result) · cross-dataset (**blocked on data**) · **figures 2–5** · optionally a post-flag LTN-control
-sweep, the only route to reopening C2.
+**Still open before submission:** the **fitted fuser** (write the blocker as a result) ·
+cross-dataset (**blocked on data**) · optionally a post-flag LTN-control sweep, the only route to
+reopening C2. ~~Phase 5's latency~~ ✅ **measured 2026-09-05** (`latency.py`) · ~~figures 2–5~~ ✅
+**built 2026-08-10** (`paper_figures.py`) — this line listed both as open for weeks after they landed.
+
+## ⏱️ LATENCY MEASURED (2026-09-05) — `scripts/latency.py`. Phase 5's last open measurement.
+
+**The question `enhancements.md` #6 asked was *"X flows/sec on CPU, KG adds Y ms"*. That question has
+no single answer and the script refuses to give one** — the CNN runs at **256 flows/s at batch 1 and
+158,919 flows/s at batch 8192, a 620× spread.** A throughput figure without its batch size is not a
+claim. Two arms (determinism on/off), median + IQR over 15 repeats, warm-up discarded.
+
+### Per-flow cost of each pillar (batch 8192, determinism ON, AMD 32-core CPU)
+
+| component | µs/flow | flows/s | share of detection path |
+|---|---:|---:|---:|
+| `behaviours` (symbolic input) | **0.094** | 10.6 M | 1.2 % |
+| `kg_assign` (k-means, K=200) | **0.059** | 16.9 M | 0.7 % |
+| `kg_update` (NetworkX, amortised) | **0.519** | — | 6.5 % |
+| `transform` (log1p + scaler) | **0.680** | 1.4 M | 8.6 % |
+| **`cnn` (forward pass)** | **6.293** | **158,919** | **79 %** |
+| **full detection pipeline** | **7.952** | **125,750** | 100 % |
+| 🔴 **`explain_ig` (per flow)** | **11,946** | **84** | **1,898×** the CNN |
+
+### The three results worth writing down
+
+**① Detection is not the bottleneck, and the paper should not claim throughput as a contribution.**
+125,750 flows/s end-to-end. The entire 114,658-flow test set is scored in **0.91 s**.
+
+**② The KG is essentially free — and this is the answer to "KG adds Y ms".** Assignment + amortised
+graph update = **0.58 µs/flow**, i.e. **+9.2 % on top of the CNN** and **7.3 % of the detection
+pipeline**. Whatever the argument against the KG is, cost is not it.
+
+**③ 🔴 EXPLANATION COSTS 1,898× DETECTION, and that is the operationally load-bearing number.**
+Integrated Gradients runs 32 forward+backward passes for **one** flow: **11.95 ms/flow, 84 flows/s**.
+Explaining every test flow takes **1,370 s (23 min)**; explaining **100 alerts takes 1.19 s.**
+**So: explain alerts, not flows** — and Tier 1 already established that a deployable alert budget is
+~100–1,000, so the two results compose into a working deployment story rather than a conflict.
+⚠️ **The project's selling point is the expensive half.** Any "explainable IDS" claim that implies
+per-flow explanation is a 4-orders-of-magnitude error; say the alert-scoped version.
+
+### 🔴 P3 FALSIFIED — the KG's cost is the GRAPH, not the distance computation
+
+Predicted: `kg_assign` (200 distances per flow) dominates `kg_update` (a few edge writes per window).
+**Measured the opposite — update 0.519 µs/flow vs assign 0.059 µs/flow, a 9× miss.**
+`km.predict` on a batch is **one BLAS matmul**; `observe()` is a **Python loop** over ~200 clusters ×
+6 behaviours doing NetworkX dict updates. **I predicted from algorithmic work and the real
+determinant was vectorised-vs-interpreted execution.** Both are trivial in absolute terms, so nothing
+downstream changes — but the reasoning was wrong and is recorded as wrong.
+
+### ✅ Determinism is nearly free — the noise-floor fix cost 2–7 % throughput
+
+| path | determinism ON | OFF | ratio |
+|---|---:|---:|---:|
+| `cnn` @8192 | 6.293 µs/flow | 6.744 | **1.07×** |
+| full detection | 7.952 µs/flow | 8.128 | **1.02×** |
+| `explain_ig` | 11.95 ms | 11.75 | 0.98× |
+
+Pinning intra=16/inter=2 costs **~2–7 % on the detection path and nothing measurable elsewhere.**
+⚠️ **Do not read the `kg_update` 1.44× as a determinism effect** — it is pure Python, untouched by TF
+threading, and the OFF arm's IQR (2.824–4.359) is wide enough to contain the ON median. That is
+run-to-run noise on a shared desktop, which is exactly why this script reports IQR.
+
+### ⚠️ Two things this measurement is NOT
+
+- **Not a deployment benchmark.** One CPU-only Windows desktop, warm page cache, no packet capture,
+  no flow assembly, no I/O. The **flow-feature extraction step upstream of all of this is not
+  measured at all** — CICFlowMeter is not in the loop here, and in a real deployment it may well
+  dominate everything in the table above.
+- **Not a claim about the fusion's deployability.** Timing `rankdata` measured the cost of the
+  operation *as implemented*; **rank fusion is transductive and cannot be streamed** — filed in
+  [KNOWN_ISSUES](KNOWN_ISSUES.md) as a new critical-section issue, with the confirming experiment
+  specified. This was raised *by* the latency work, not by a failed run.
+
+**Record:** `outputs/metadata/latency_determinism_{on,off}.json`.
 
 ## 🔴 THE NOISE FLOOR IS SETTLED (2026-08-10) — `scripts/noise_postdet.py`. THE THRESHOLD STANDS.
 
@@ -739,8 +811,11 @@ method comparison table is now populated (4 tiers, 11 new methods).**
 2. **Write.** The spine is decided and its limits are measured. Open with the **resolution** failure
    (`field_gap.py`: 67/204 method pairs indistinguishable on the published metric while ≥2× apart on
    zero-day), body = the mechanism, double dissociation as support.
-3. **Phase 5's remaining three** — calibration, latency, the fitted fuser (the last blocked by the
-   fusion wall). Phase 6 still **blocked** on CIC-IDS2018 not being on this machine.
+3. **Phase 5's remaining ONE** — the *fitted* fuser, blocked by the fusion wall; the task is to
+   **write the blocker as a result**, not to unblock it. ~~calibration~~ ✅ **was already delivered
+   2026-08-05** by `operational.py` (Tier-1 item 2) and this line said otherwise for a month — see
+   the drift note below. ~~latency~~ ✅ **measured 2026-09-05** (`latency.py`).
+   Phase 6 still **blocked** on CIC-IDS2018 not being on this machine.
 
 **Blocked, not forgotten:** Phase 6 cross-dataset needs **CIC-IDS2018**, which is not on this machine.
 
@@ -755,10 +830,34 @@ method comparison table is now populated (4 tiers, 11 new methods).**
 |---|---|
 | 0–3 (split, CNN, LTN, autoencoder) | ✅ done |
 | **4 — Knowledge Graph + explainability** | ✅ **COMPLETE** — `kg.py`, `kg_visualize.py`, `explain.py`; faithfulness measured |
-| **5 — Decision Fusion + rigor** | 🟡 **PARTIAL** — ✅ significance · ✅ parameter-free rank fusion · ✅ n=6 on all 7 channels. ❌ calibration · ❌ latency · ❌ the *fitted* fuser (blocked by THE FUSION WALL) |
+| **5 — Decision Fusion + rigor** | 🟡 **PARTIAL** — ✅ significance · ✅ parameter-free rank fusion · ✅ n=6 on all 7 channels · ✅ **calibration** (delivered 2026-08-05 by `operational.py`; ⚠️ scalar ECE per subset is persisted, per-bin **reliability curves are not**) · ✅ **latency** (2026-09-05, `latency.py`). ❌ the *fitted* fuser — blocked by THE FUSION WALL, and the deliverable is to **write the blocker as a result** |
 | 6, 7 | ⬜ not started |
 | **7.5 — operational readiness** | 🟡 **Tier 1 ✅ DONE 2026-08-05** (`operational.py`, 4/4 predictions confirmed); Tier 2 in progress. **Gates Phase R** |
 | R — response engine | ⬜ not started |
+
+> 🔴 **FIFTH OCCURRENCE OF THE COMPONENT-STATUS DRIFT DEFECT — found 2026-09-05, and it is a
+> DIFFERENT shape from the first four.** Non-negotiable #7 ("component status lives ONLY in
+> STATUS.md") was **satisfied**: there is exactly one Component Status table and it is in this file.
+> The defect is *inside* STATUS instead. **Calibration is scope for BOTH Phase 5 and Phase 7.5
+> Tier 1.** `operational.py` delivered it on 2026-08-05, Tier 1's row was flipped, and the three
+> Phase-5 sites (RESUME HERE, the phase table, Remaining Work #4) plus
+> [conference_roadmap.md](target/conference_roadmap.md) were not — so the project spent a month
+> believing it owed a deliverable it had already shipped, and the 2026-08-10 session listed it as
+> outstanding twice.
+>
+> ⚠️ **The lesson is narrower than "update the docs", which is what the first four already said and
+> did not prevent this one: a deliverable that appears under TWO PHASES has two rows and only one
+> gets flipped.** The single-table rule fixes duplication *across files* and does nothing about
+> duplication *across phases*. [paper_outline.md](target/paper_outline.md) §"Open before submission"
+> had it right — *"calibration writeup ✅ done, latency ❌"* — so the correct state was written down
+> on 2026-08-10 in a file nobody reconciled against this one.
+>
+> ✅ **Honest limit on the fix:** `operational.json` persists **scalar ECE per subset**
+> (all / known-class / zero-day) and the distinct-value counts, **not per-bin reliability-curve
+> data.** The spec asked for "ECE *and* reliability curves". The conclusion drawn from it —
+> *calibration reaches ECE 0.0001 on known classes and moves zero-day ECE not at all* — rests on the
+> scalars and is unaffected. Recorded as a partial rather than rounded up to done.
+
 
 **The three things in flight, in order:** (a) **Phase 7.5 Tier 1** — ship the ensemble, calibration
 + ECE, precision @ alert budget, abstention curve; (b) **the ablation** CNN → +LTN → +KG → full
@@ -2713,7 +2812,7 @@ Ordered build queue. ✅ done · ▶ next · ⬜ pending.
 | 2b | **Anomaly pillar — benign-only autoencoder (canonical Phase 3)** | ✅ **DONE 2026-08-02** | Ran. Closes the "why not an autoencoder?" objection with a number, and produced the modality-analogue refinement that reframes the whole architecture. Was nearly skipped by a phase-number collision. **Follow-up (not scheduled): multi-seed it (n=1 today), and measure modality similarity to test the refined account.** |
 | 2c | **Pre-Phase-4 remediation + significance + Bot analysis** | ✅ **DONE 2026-08-03** | All audit discrepancies fixed (research record version-controlled, component status collapsed to one table, `kg_precheck` now persists, baselines on n=3 + current schema, legacy artifact collision resolved). Plus three research outputs: **significance tests run** (C2 closed; one retraction reversed), **the (A)/(B) strong form falsified** by RandomForest, and **the CNN's Bot failure explained**. |
 | 3 | **Knowledge Graph (NetworkX) — canonical Phase 4** | ✅ **BUILT & multi-seeded 2026-08-03** (the KG half of Phase 4; explainability half is item 5) | **Prerequisites now measured** (`kg_readiness.py`). ✅ Representation decided on evidence: **raw features** (Bot purity 77.6/80.6 %, no training lottery) — *not* the AE bottleneck, whose 52.1 pp spread was the worst of all options. 🔴 **Scope forced by measurement: corroboration + explainability, NOT primary detection** — the "unexplained cluster" criterion scores **lift ≤ 1.00× (at or below chance)** across every representation and threshold, so that mechanism is dead. ✅ **Last gate CLOSED 2026-08-03**: all three emerging-pattern criteria measured — **growth works** (lift 5.94x [5.66, 6.11], n=3, ~81% recall), unexplained is dead, co-occurrence is weak. ✅ Decay decided: **keep it adaptive**, flow-count over true chronological order. Spec: [knowledge_graph.md](target/knowledge_graph.md). |
-| 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline; direction established on 3/3 seeds, **magnitude uncertain 0.027–0.088**) · **n≥6 seeds ✅ DONE 2026-08-04** (`rigor_n6.sh`, all 7 channels — and it showed the top tier is mutually **indistinguishable**). **NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL) · calibration · latency. Spec: [decision_fusion.md](target/decision_fusion.md). |
+| 4 | Decision Fusion — canonical Phase 5 | 🟡 **PARTIALLY DONE — entered without being scheduled** | ⚠️ **Scope note (2026-08-03):** Phase 5 is *"Fusion + rigor (seeds, significance, calibration, latency)"*, and parts of it were done while answering other questions rather than as a planned phase start. **Done:** `significance.py` (paired bootstrap) · `fusion_kg.py` + `fusion_multi.py` (parameter-free rank fusion, **+0.0527 macro, p<0.001** — the first result to beat the CNN baseline; direction established on 3/3 seeds, **magnitude uncertain 0.027–0.088**) · **n≥6 seeds ✅ DONE 2026-08-04** (`rigor_n6.sh`, all 7 channels — and it showed the top tier is mutually **indistinguishable**). **Also done:** ✅ **calibration** — delivered 2026-08-05 by `operational.py` (Tier-1 item 2); this row said "NOT done" for a month, see the drift note above. ⚠️ scalar ECE per subset is persisted, per-bin reliability curves are not. ✅ **latency** — 2026-09-05, `latency.py`. **STILL NOT done:** the *fitted* Decision Fusion the spec actually describes (blocked by THE FUSION WALL — the deliverable is to write the blocker as a result). Spec: [decision_fusion.md](target/decision_fusion.md). |
 | 5 | **Explainability / Final Alert — the REST of canonical Phase 4** | ✅ **DONE 2026-08-03 — 3 of 3 + faithfulness** (`explain.py`) | ✅ Neural (Integrated Gradients, completeness-checked) · ✅ Logic (per-axiom SAT, Ax3–Ax6 only — Ax1/Ax2 are label anchors and would be circular) · ✅ KG reasoning paths · ✅ Final Alert assembly · ✅ Tier-A faithfulness (IG top-3 masking is **20.67×** a random-feature control; sufficiency reported as the weaker half). **Phase 4 is therefore complete.** Its most informative output is not a score: on a Bot flow the CNN calls benign, **both other pillars dissent** — no single-pillar system produces that. Spec: [explainability.md](target/explainability.md). |
 | 6 | Ablation (CNN → +LTN → +KG → full) | ✅ **DONE 2026-08-05** (`ablation.py`) | 🔴 **Result is negative: only the KG earns its place.** The symbolic pillar adds nothing alone (−0.0004, n.s.) and **significantly hurts stacked on the KG** (0.6926 → 0.6708, p<0.0001). See the ablation section. |
 | 8 | **Method comparison tiers A/B/C/D** | ✅ **DONE 2026-08-05** | `baselines_classic` (7 classic) · `anomaly_zoo` (4 benign-only) · `deep_zoo` (4 deep) · `protocol_variance` (k-fold + SWA) · `ood_scores` (open-set battery). **Nothing rescued Bot** (best 0.0626 vs the KG's 0.3103). **Only the conv front-end matters** among deep architectures. ⬜ **Follow-up: multi-seed Deep SVDD and the Tier-A Bot column — both n=1.** |

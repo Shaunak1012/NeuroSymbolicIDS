@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-08-10** (54 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (55 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1325,6 +1325,42 @@ out of 55,237, which is why their FPR column reads exactly 1.0000.
 ```bash
 python scripts/operational.py
 ```
+
+## `scripts/latency.py`
+
+**Purpose**: **Phase 5's last unmeasured rigor item** — how fast the pipeline is, and *which part*
+is slow. Deliberately does **not** emit a single headline rate: **a throughput number without its
+batch size is not a claim**, so everything is reported per-component and per-batch.
+
+| component | what it is |
+|---|---|
+| `transform` | log1p + `StandardScaler` — the floor the others are compared against |
+| `behaviours` | `behavior.active_behaviour_matrix` — the symbolic pillar's input |
+| `cnn` | `model(x, training=False)` — the neural pillar |
+| `kg_assign` | `MiniBatchKMeans.predict` over K=200 centroids — the KG's **per-flow** cost |
+| `kg_update` / `kg_decay` | `KnowledgeGraph.observe()` / `.decay()` — **window** ops by construction |
+| `kg_burst` | `burstiness()` — O(K × windows), batch-independent |
+| `fusion` | `rankdata` per channel + mean, exactly as `fusion_multi.py` does it |
+| `explain_ig` | Integrated Gradients at 32 steps, **per flow** |
+
+🔑 **The `KnowledgeGraph` class is `exec`'d from `kg.py`'s own source via `ast`**, not reimplemented —
+`kg.py` is a top-to-bottom script and cannot be imported, and a hand-copied class would silently
+measure a different thing the moment either copy changed. *"A 'same as X' comment is not evidence;
+read X"*, applied to a benchmark.
+
+⚠️ **Reports median + IQR, never a mean.** Latency on a shared desktop is right-skewed — one
+scheduler hiccup drags a mean and not a median. Same discipline the project applies to seeds.
+
+⚠️ **The transductive caveat, in timing form.** `fusion_multi.py` fuses by `rankdata(scores)/n`, a
+**global** operation over the scored set — so scoring one flow requires the whole test distribution.
+This script measures the **cost** of that operation as implemented; it does **not** establish what a
+streaming variant (frozen reference distribution) would score. See KNOWN_ISSUES.
+
+**Env**: `LATENCY_DETERMINISM=0` runs the unpinned-threads arm (determinism pins intra=16/inter=2,
+which changes the threadpool and therefore throughput; thread counts must be set before TF
+initialises, so the two arms are separate invocations).
+
+**Writes** `outputs/metadata/latency_{determinism_on,determinism_off}.json`.
 
 ## `scripts/ablation.py`
 

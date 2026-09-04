@@ -21,6 +21,47 @@
 
 ## Critical — measurement integrity
 
+### [OPEN 2026-09-05] 🔴 The fusion gain is a TRANSDUCTIVE estimate — rank fusion cannot be streamed
+
+**Raised while measuring latency (`latency.py`), not by a failed run.** `fusion_multi.py` /
+`fusion_kg.py` fuse channels with `rankdata(score) / n` and then average. **`rankdata` is a global
+operation over the scored set**, so a flow's fused score depends on the other 114,657 flows in the
+test set. The project's **only positive result** — CNN+KG **+0.0527 macro, 3/3 seeds** — is therefore
+measured transductively.
+
+**What this is NOT.** It is **not label leakage** — no labels are touched — and it is **not a
+scoring bug**; ranking within an evaluated set is ordinary practice for a rank-based metric, and the
+PR-AUC of any *single* channel is invariant to it. The number is not wrong for what it reports.
+
+**What it IS.** Phase 5's stated purpose is *deployability*, and **a streaming IDS cannot compute
+this score.** Serving one flow would require a **frozen reference distribution** — the empirical CDF
+of some held-out set — instead of the evaluated set's own CDF. Those are different monotone maps per
+channel, and **averaging two different maps gives a different fused ranking**, so the fused macro can
+move. By how much is **unmeasured**, and this issue asserts nothing about the direction.
+
+⚠️ **Do not weaken the claim in the write-up on the strength of this flag alone** — that would repeat
+the C2 pattern in reverse (acting on an unmeasured quantity). **State it as a property**: the fusion
+result is transductive, and the streaming variant is untested.
+
+**The confirming experiment, specified rather than assumed:**
+1. Score CNN and the autoencoder on **validation** (zero-day-free by construction) and keep those
+   score vectors as the frozen reference per channel.
+2. Map each test score to its percentile in that reference with `np.searchsorted`, in place of
+   `rankdata(test)/n`. Re-fuse and re-evaluate macro zero-day PR-AUC.
+3. Report the delta against the transductive number, over the same 3 seeds, **paired**.
+
+🔴 **The KG channel is the hard part and must not be fudged.** `kg.py`'s burstiness score is defined
+by streaming the **test** set into 20 windows, so it has **no validation-side reference at all** — the
+KG channel is transductive *by construction*, not merely by scoring convention. A fully streaming
+variant needs a different KG scoring rule (e.g. burstiness against a rolling window with a warm-up
+period), which is **a design change, not a re-scoring**. Step 1–3 above therefore bound the
+**supervised** channels only; say so when reporting it.
+
+**Related:** THE FUSION WALL — any *fitted* combiner is calibrated on validation data containing no
+zero-day flows. This is the same constraint reaching the *parameter-free* fuser, which was adopted
+precisely to sidestep it.
+
+
 ### [CLOSED 2026-08-10] 🔴 Two n=1 results in the record currently read as findings
 
 > ✅ **CLOSED — both multi-seeded to n=3 (`scripts/seed_recheck.py`, `outputs/metadata/seed_recheck.json`).

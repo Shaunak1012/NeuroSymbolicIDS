@@ -86,10 +86,10 @@ of them caused a real scoping error (see the box beneath the table).
 | **Phase 2** | Symbolic pillar — LTN, axioms, failure anatomy, aux head | Phase A (partial) | ✅ concluded |
 | **Phase 3** | **Anomaly pillar — benign-only autoencoder** | (not in that scheme) | ✅ **done 2026-08-02** (n=3) |
 | **Phase 4** | **Knowledge Graph + explainability** | Phase B + D | ✅ **DONE 2026-08-03** — KG + 3 explanations + faithfulness |
-| **Phase 5** | Fusion + rigor (seeds, significance, calibration, latency) | Phase C + E | 🟡 **partially done unplanned** — significance + parameter-free fusion landed 2026-08-03; fitted fusion, n≥6 seeds, calibration, latency outstanding |
+| **Phase 5** | Fusion + rigor (seeds, significance, calibration, latency) | Phase C + E | 🟡 **partial** — ✅ significance + parameter-free fusion (2026-08-03) · ✅ **n≥6 seeds** (2026-08-04) · ✅ **calibration** (2026-08-05, `operational.py`) · ✅ **latency** (2026-09-05, `latency.py`). ❌ **the *fitted* fuser only** — blocked by the fusion wall. 🔴 This cell listed n≥6, calibration and latency as outstanding for a month after each landed; see STATUS's drift note. |
 | **Phase 6** | Cross-dataset (CIC-IDS2018) | (not in that scheme) | ⬜ |
 | **Phase 7** | Paper + reproducibility artifact | (not in that scheme) | ⬜ |
-| **Phase 7.5** | **Operational readiness (INTERMISSION)** — calibration, operating points, abstention, ensembling | (new, added 2026-08-03) | ⬜ **gates Phase R** |
+| **Phase 7.5** | **Operational readiness (INTERMISSION)** — calibration, operating points, abstention, ensembling | (new, added 2026-08-03) | 🟡 **Tiers 1 & 2 ✅ DONE 2026-08-05** (`operational.py`, 4/4 predictions confirmed; determinism/k-fold/SWA). Tier 3 deferred. **Gates Phase R.** 🔴 Read "⬜ not started" here until 2026-09-05. |
 | **Phase R** | Response engine (solo, last) | (not in that scheme) | ⬜ |
 
 > 🔴 **The collision this resolves, and the work it nearly lost.**
