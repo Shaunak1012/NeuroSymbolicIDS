@@ -203,6 +203,35 @@ have to be visibly higher than the field's. This section is the credibility of �
 
 ---
 
+## §9 Related work
+
+| positioning | against | the line that must survive editing |
+|---|---|---|
+| **Dataset-quality critiques are ADJACENT, not the same claim** | Sharafaldin (the dataset) · Engelen (label/flow defects) · Goldschmidt & Chudá (89-dataset survey) | They ask whether the labels are right; we ask what the metric can resolve. 🔑 **Our duplicate result sits on the join**: 17 % inflates the field metric, 0.0 % overlap on every zero-day family leaves ours untouched. |
+| **We are downstream of the two methodology critiques and try to supply what they ask for** | Sommer & Paxson 2010 (closed world) · Arp et al. 2022 (pitfalls) | Sommer & Paxson is **qualitative**; §4 gives a mechanism and §1 the quantitative counterpart. Against Arp, §7 measures our own reproducibility floor **and reports what it retracted**. |
+| **The base paper: CNN reproduced, symbolic gain not** | Bizzarri et al. ICCCN 2024 · LTN (Badreddine et al.) · their 2025 survey | 47.85 % vs 48.34 %; `ltn_repro` 47.24 %. ⚠️ **Form, not head-to-head** (§3d). ⚠️ **Say our own pillar fails too** — otherwise it reads as an attack on theirs. |
+| **Nine OOD scorers, none rescues Bot** | Hendrycks & Gimpel (MSP) · Liang (ODIN) · Liu (energy) · Rudd (open-set IDS) | ⚠️ Bounded negative result **about this problem**, not a claim about OOD detection generally. Threshold was fixed at 0.08 in advance and best was 0.0783 — **passed by 2 %, do not round it**. |
+| 🔴 **DO-NOT-WRITE:** any citation not verified against a primary source | — | **[10]–[13] are cited from knowledge and flagged in the draft as needing a bibliographic pass.** An unchecked citation gets the same treatment as an unchecked number. |
+
+---
+
+## §10 Reproducibility
+
+| claim | evidence | caveat |
+|---|---|---|
+| 58 scripts, config, pinned deps, 9 figures, 70 metadata files, 190-row append-only run record, MIT | the repository | **Dataset not redistributed** (own terms); **weights not released** (large, per-seed, regenerable). |
+| One entry point: `run_all.py`, 19 stages, artifacts declared per stage; default checks rather than executes | `run_all.py` | ⚠️ **CHECKED end to end, never EXECUTED end to end in one pass.** Do not imply a validated one-command reproduction. |
+| Determinism on, byte-identical across sessions 5 days apart | `verify_determinism.sh` | ⚠️ **Forward-looking only** — pre-flag results carry SD 0.0222 and are not reproducible at fixed seed. |
+| Two mechanical checks ship with it | `lint_conventions.py` · `verify_draft.py` (52 verified, 0 mismatched) | ⚠️ `verify_draft.py` checks **transcription, not interpretation**. **6 claims are UNBACKED** and listed. |
+
+---
+
+## §11 Conclusion
+
+Diagnosis + mechanism + the cost of the negative result. ⚠️ **Do not end on the partial successes** — both are bounded (KG magnitude 1.7σ; fitted fuser 0.80σ), and overselling them in the last paragraph is the easiest way to undo §7.
+
+---
+
 ## Figures
 
 **All five are built and regenerable from the record** — `field_gap.py` for #1, `paper_figures.py`

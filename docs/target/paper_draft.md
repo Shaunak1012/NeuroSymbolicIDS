@@ -9,10 +9,9 @@
 > [conference_roadmap.md §4](conference_roadmap.md)), and committing to LaTeX before the venue is
 > chosen buys nothing. **Section numbering matches the outline** so the two stay diffable.
 >
-> ⚠️ **Not yet drafted: related work.** It is blocked on a literature sweep, not on writing — only
-> the base paper is held locally, and a section whose job is to say what others have and have not
-> measured cannot be written from memory. §10 (reproducibility) is drafted. Figures are built
-> (`paper_figures.py`, `field_gap.py`) and referenced by number.
+> ✅ **All eleven sections are drafted (§9 related work added 2026-09-05).** ⚠️ **Four of the
+> thirteen references still need a bibliographic pass** — see the note above the reference list.
+> Figures are built (`paper_figures.py`, `field_gap.py`) and referenced by number.
 
 ---
 
@@ -418,6 +417,100 @@ which beats the mean and *not* the maximum — because the maximum was never a t
 
 ---
 
+## §9 Related work
+
+**The dataset, and what is already known to be wrong with it.** CIC-IDS2017 was released by
+Sharafaldin et al. [1] and has become one of the most reported-on benchmarks in the field. Engelen
+et al. [2] audited it and found defects in traffic generation, flow construction, feature extraction
+and labelling, releasing corrected processing; a follow-up quantified how much detection performance
+those errors move [3]. Goldschmidt and Chudá [4] survey 89 NIDS datasets and argue that data quality
+and reporting practice, rather than data scarcity alone, now limit the field.
+
+**Our claim is adjacent to theirs and not the same one.** That line of work asks whether the *labels
+and flows* are correct. We take the data as given and ask what the *metric computed on it* can
+resolve. The two are complementary, and one of our results sits precisely at the join: 17 % of test
+rows are exact duplicates of training rows, which inflates the published metric — but **all six
+zero-day families measure 0.0 % overlap**, so the contamination is asymmetric and leaves the
+zero-day metric untouched. A data-quality critique would flag the duplication; only a
+metric-resolution analysis shows that it matters for one number and not the other.
+
+**Methodological critiques of machine learning in security.** Sommer and Paxson [5] argued that
+intrusion detection is unusually hostile to machine learning, in large part because the interesting
+events lie *outside the closed world* the model was trained on; the argument received a
+Test-of-Time award and remains the reference statement of the problem. Arp et al. [6] catalogue ten
+recurring pitfalls across 30 top-tier security papers and give recommendations for avoiding them.
+
+**We are downstream of both, and we try to supply what they ask for.** Sommer and Paxson's claim is
+qualitative — machine learning struggles with novelty. §4 supplies a **mechanism** for one instance
+of it (empty overlap between the novel class's discriminative features and the trained basis) and
+shows the failure is not merely inaccuracy but **instability**: the model's ranking of that class is
+noise, cross-seed ρ = −0.090. §1 supplies the **quantitative** counterpart — 33 % of method pairs are
+indistinguishable on the published metric while differing ≥2× on the capability at issue. Against
+Arp et al., §7 attempts what their recommendations imply and few papers actually do: measure the
+pipeline's own reproducibility floor, express every delta as a multiple of it, and **report the
+claims of ours that the floor retracted**.
+
+**Neuro-symbolic intrusion detection.** Logic Tensor Networks [7] provide the fuzzy-logic-to-loss
+machinery this line of work builds on. Bizzarri et al. [8] apply it to NIDS: a 1D CNN trained with a
+hybrid cross-entropy plus satisfiability loss, reporting improved unknown-attack accuracy over a
+vanilla CNN on CIC-IDS2017. That paper is our starting point, and a recent survey by the same group
+[9] places it in a fast-growing literature.
+
+🔴 **We reproduce their CNN and cannot reproduce their symbolic gain.** On their own metric our
+figures are 47.85 % against their 48.34 % for the 1D CNN — close agreement — while our nearest
+reproduction of their hybrid model scores 47.24 %, no better than our own CNN (§3d). We report this
+as a comparison **in form, not head-to-head**: the modality differs (flow features versus payload
+bytes), the zero-day membership differs by a swap, and the class sizes differ, with composition
+accounting for roughly 4 of the missing 12 points. We also identify two arithmetic defects in the
+metric that gain is reported on (§3b). **And our own symbolic pillar fares no better** — it is null
+alone and significantly harmful in combination (§5), which is a negative result about our
+architecture, not only about theirs.
+
+**Open-set recognition and out-of-distribution scoring.** Treating unseen attack families as an
+open-set problem has a long history in this domain [10], and the general OOD literature supplies
+post-hoc scorers that need no retraining: maximum softmax probability [11], temperature-scaled and
+input-perturbed variants [12], and energy-based scores [13]. §4 evaluates nine such scorers against a
+falsification threshold fixed in advance. **None rescues the hard family**, and the one that moves it
+at all does so by destroying known-class discrimination. We report that as a bounded negative result
+about post-hoc scoring on this problem, not as a claim about OOD detection in general.
+
+### References
+
+> ⚠️ **Citation-verification status, stated because this project treats an unchecked citation the
+> same way it treats an unchecked number.** [1]–[9] were confirmed against a primary or authoritative
+> source while drafting (publisher page, DOI, or — for [8] — the PDF held in this repository).
+> **[10]–[13] are well-established works cited from knowledge, and their venue and page details still
+> need a bibliographic pass** before submission. Do not typeset the bibliography until that pass is
+> done.
+
+1. I. Sharafaldin, A. H. Lashkari, A. A. Ghorbani. *Toward Generating a New Intrusion Detection
+   Dataset and Intrusion Traffic Characterization.* ICISSP 2018, pp. 108–116.
+2. G. Engelen, V. Rimmer, W. Joosen. *Troubleshooting an Intrusion Detection Dataset: the CICIDS2017
+   Case Study.* IEEE Security and Privacy Workshops (SPW), 2021.
+3. *Errors in the CICIDS2017 Dataset and the Significant Differences in Detection Performances It
+   Makes.* Springer, 2023. ⚠️ author list to be completed.
+4. P. Goldschmidt, D. Chudá. *Network Intrusion Datasets: A Survey, Limitations, and
+   Recommendations.* Computers & Security, vol. 156, 2025, art. 104510.
+5. R. Sommer, V. Paxson. *Outside the Closed World: On Using Machine Learning for Network Intrusion
+   Detection.* IEEE Symposium on Security and Privacy, 2010, pp. 305–316.
+6. D. Arp, E. Quiring, F. Pendlebury, A. Warnecke, F. Pierazzi, C. Wressnegger, L. Cavallaro,
+   K. Rieck. *Dos and Don'ts of Machine Learning in Computer Security.* USENIX Security Symposium,
+   2022, pp. 3971–3988.
+7. S. Badreddine, A. d'Avila Garcez, L. Serafini, M. Spranger. *Logic Tensor Networks.* Artificial
+   Intelligence, vol. 303, 2022, art. 103649. doi:10.1016/j.artint.2021.103649
+8. A. Bizzarri, B. Jalaian, F. Riguzzi, N. D. Bastian. *A Neuro-Symbolic Artificial Intelligence
+   Network Intrusion Detection System.* ICCCN 2024.
+9. A. Bizzarri et al. *Neurosymbolic AI for Network Intrusion Detection Systems: A Survey.* 2025.
+   ⚠️ journal and volume to be completed.
+10. E. M. Rudd et al. *Open Set Intrusion Recognition for Fine-Grained Attack Categorization.* 2017.
+11. D. Hendrycks, K. Gimpel. *A Baseline for Detecting Misclassified and Out-of-Distribution Examples
+    in Neural Networks.* ICLR 2017.
+12. S. Liang, Y. Li, R. Srikant. *Enhancing the Reliability of Out-of-Distribution Image Detection in
+    Neural Networks.* ICLR 2018.
+13. W. Liu, X. Wang, J. Owens, Y. Li. *Energy-Based Out-of-Distribution Detection.* NeurIPS 2020.
+
+---
+
 ## §10 Reproducibility
 
 **What is released.** All 58 analysis and pipeline scripts, the protocol configuration
@@ -479,7 +572,7 @@ by hand, and a checker that silently skips what it cannot verify is worse than n
 
 ---
 
-## §9 Conclusion
+## §11 Conclusion
 
 The metric the CIC-IDS2017 literature publishes is precise, weakly informative about zero-day
 capability, and **too coarse in its own reporting regime to separate methods on that axis** — a third

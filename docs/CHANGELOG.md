@@ -2,6 +2,53 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05g (related work drafted from a literature sweep — the paper is complete in draft)
+
+### 📚 §9 Related work, positioned against thirteen references
+
+The last undrafted section. It could not be written from what was on disk — only `basepaper.pdf` is
+held locally — so it came from an actual sweep, and **nine of the thirteen references were confirmed
+against a primary or authoritative source while drafting** (publisher page, DOI, or the local PDF).
+
+**The positioning, in four moves:**
+
+- **Dataset-quality critiques are adjacent, not the same claim.** Sharafaldin et al. (the dataset),
+  Engelen et al. (label/flow defects), Goldschmidt & Chudá (89-dataset survey) ask whether the
+  *labels* are right; we ask what the *metric* can resolve. 🔑 **Our duplicate result sits exactly on
+  that join**: 17 % inflates the field's metric while all six zero-day families measure 0.0 %
+  overlap, so the contamination is asymmetric — a data-quality critique flags the duplication, only a
+  metric-resolution analysis shows it matters for one number and not the other.
+- **We are downstream of the two methodology critiques and try to supply what they ask for.**
+  Sommer & Paxson's *"outside the closed world"* is **qualitative**; §4 supplies a mechanism and §1
+  the quantitative counterpart. Against Arp et al.'s pitfall catalogue, §7 does the thing the
+  recommendations imply and few papers do — measure the pipeline's own floor **and report what it
+  retracted**.
+- **The base paper: CNN reproduced, symbolic gain not** (47.85 % vs 48.34 %; `ltn_repro` 47.24 %).
+  ⚠️ Written with *"our own symbolic pillar fares no better"* attached, so it does not read as an
+  attack on theirs.
+- **Nine OOD scorers, none rescues Bot** — framed as a bounded negative result about *this problem*,
+  not a claim about OOD detection generally.
+
+### ⚠️ Citation-verification status is stated IN the draft, not assumed
+
+**[10]–[13] are cited from knowledge and flagged as needing a bibliographic pass**, with an
+instruction not to typeset the bibliography until that pass is done. **An unchecked citation gets the
+same treatment here as an unchecked number** — the alternative is a plausible-looking reference list
+nobody checked, which is the citation-shaped version of the defect `verify_draft.py` exists to catch.
+
+### 🔧 Two structural fixes
+
+**① A section-ordering slip of mine:** §10 Reproducibility had been inserted *before* §9 Conclusion.
+Order is now §8 → §9 Related work → §10 Reproducibility → §11 Conclusion, with the conclusion
+renumbered.
+**② The outline now carries §9–§11 too.** The draft header claims *"section numbering matches the
+outline"*, and adding three sections to one file and not the other would have made that claim false —
+the same drift defect, in a new pair of files. The outline's §11 row carries the caveat that matters
+most: **do not end on the partial successes**, both are bounded (1.7σ and 0.80σ), and overselling
+them in the last paragraph is the easiest way to undo §7.
+
+**All eleven sections are now drafted.** `verify_draft.py` still reports 52 verified, 0 mismatched.
+
 ## 2026-09-05f (the reproducibility artifact — `run_all.py`, and §10 drafted)
 
 ### ⚙️ `run_all.py` — the pipeline declared ONCE, as data rather than prose

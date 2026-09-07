@@ -27,10 +27,13 @@ some point, or is the obvious stronger version of something supportable.
 copied from prose.
 
 **Still open before submission:** cross-dataset (**blocked on data**) · optionally a post-flag
-LTN-control sweep, the only route to reopening C2 · **related work — the only undrafted section, and
-blocked on a LITERATURE SWEEP rather than on writing** (only `basepaper.pdf` is held locally) · a
-**venue decision** (no template chosen, so the draft is Markdown by design). ~~reproducibility-artifact
-section~~ ✅ **§10 drafted 2026-09-05**, backed by `run_all.py` (19 stages, 0 artifacts missing). ~~rewrite §5's fitted-fuser row~~ ✅ **done** — §5 now carries only
+LTN-control sweep, the only route to reopening C2 · a **venue decision** (no template chosen, so the
+draft is Markdown by design) · 🔴 **a bibliographic pass on references [10]–[13]**, which are cited
+from knowledge and flagged in the draft as unverified. ~~related work~~ ✅ **§9 drafted 2026-09-05**
+from an actual literature sweep, 9 of 13 references confirmed against a primary source ·
+~~reproducibility-artifact section~~ ✅ **§10**, backed by `run_all.py` (19 stages, 0 missing).
+
+✅ **ALL ELEVEN SECTIONS OF THE PAPER ARE DRAFTED.** ~~rewrite §5's fitted-fuser row~~ ✅ **done** — §5 now carries only
 the surviving structural limit and the positive half moved to §6 · ~~the fitted fuser~~ ✅ · ~~Phase
 5's latency~~ ✅ · ~~figures 2–5~~ ✅ **built 2026-08-10**.
 
