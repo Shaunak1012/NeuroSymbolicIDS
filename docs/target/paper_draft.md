@@ -9,7 +9,9 @@
 > [conference_roadmap.md §4](conference_roadmap.md)), and committing to LaTeX before the venue is
 > chosen buys nothing. **Section numbering matches the outline** so the two stay diffable.
 >
-> ⚠️ **Not yet drafted:** related work, and the reproducibility-artifact section. Figures are built
+> ⚠️ **Not yet drafted: related work.** It is blocked on a literature sweep, not on writing — only
+> the base paper is held locally, and a section whose job is to say what others have and have not
+> measured cannot be written from memory. §10 (reproducibility) is drafted. Figures are built
 > (`paper_figures.py`, `field_gap.py`) and referenced by number.
 
 ---
@@ -413,6 +415,67 @@ which beats the mean and *not* the maximum — because the maximum was never a t
    deployment could not compute it without a frozen reference distribution, which is a different
    estimator. **We have not measured that variant** and make no claim about its direction.
 7. **No adversarial evaluation.** Named as future work rather than implied.
+
+---
+
+## §10 Reproducibility
+
+**What is released.** All 58 analysis and pipeline scripts, the protocol configuration
+(`config.yaml`), pinned dependencies, the 9 figures, the 70 metadata files that every number in this
+paper is drawn from, and the **append-only research record** — 190 logged runs with their seeds,
+parameters and results. The code is MIT-licensed.
+
+**What is not, and why.** The **CIC-IDS2017 dataset is not redistributed**; it carries its own usage
+terms and is obtained from its publisher. **Trained model weights are not released either** — they
+are large, per-seed, and regenerable, and the determinism guarantee below makes regeneration the
+better path than download.
+
+**Environment.** Python 3.11.9, TensorFlow 2.15.1 (Keras 2), CPU only, dependencies pinned to exact
+versions. All results in this paper were produced on one 32-core AMD workstation; no GPU is used or
+required.
+
+**Determinism.** Deterministic operations are enabled and thread counts are **pinned** rather than
+left to the core-count default, because op-level determinism alone does not fix reduction order.
+This was verified rather than assumed: two full 50-epoch runs of the same seed produce **byte-
+identical** output, and a third run five days later in a different session reproduced the same figure
+to twelve decimal places. §7 reports what that cost — 2–7 % throughput, and nothing measurable
+elsewhere.
+
+⚠️ **The determinism guarantee is forward-looking only.** Results computed **before** the flags
+landed came from a process with a run-to-run SD of 0.0222 and are **not** reproducible at fixed seed.
+Pre- and post-flag runs are different populations and we never pool them. A reader re-running the
+pipeline today should reproduce the post-flag figures and should **not** expect to reproduce the
+pre-flag ones exactly; where a number in this paper is pre-flag, §7's floor is the honest error bar.
+
+**One entry point.** `run_all.py` declares the 19 pipeline stages in order together with the
+artifacts each writes. Its **default mode verifies rather than executes** — it reports which stage
+outputs are present on disk — and `--run` executes the sequence, with `--from <stage>` to resume.
+Making a full CPU retrain the default behaviour of something called `run_all` would be a foot-gun.
+
+⚠️ **An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
+never been *executed* end to end in one pass.** Every stage has run individually, most of them dozens
+of times, but *"each stage works"* and *"the sequence works from a clean checkout"* are different
+claims and only the first is evidenced. `--run` is offered as a convenience, not as a validated
+reproduction path.
+
+**Two mechanical checks ship with the artifact**, both of which exist because the corresponding
+mistake was actually made here:
+
+- `lint_conventions.py` enforces the conventions that have lapsed in this project, **naming the
+  incident behind each one** — an encoding bug fixed three times as separate incidents, a timestamp
+  parser that silently reordered every test row, a script count that disagreed with disk.
+- `verify_draft.py` checks **every quantitative claim in this paper against the metadata files that
+  produced it**: it pulls each value from its source JSON, formats it as the paper should state it,
+  and asserts the string is present. Current state: **52 verified, 0 mismatched.** It exists because
+  the first draft misquoted a throughput figure and that was caught by accident rather than by any
+  check. ⚠️ It verifies **transcription, not interpretation** — it cannot tell you a caveat is
+  missing or a claim overreaches its evidence.
+
+**Six claims in this paper have no machine-readable record** and are flagged as such by that checker:
+the split sizes, the zero-day family counts, the base paper's published figures, the per-method
+figures in Tiers A and B, the double-dissociation standard-deviation multiples, and the Web Brute
+Force / XSS correlation. We list them rather than hiding them; that set is what a reader must check
+by hand, and a checker that silently skips what it cannot verify is worse than no checker.
 
 ---
 

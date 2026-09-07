@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (57 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (58 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1325,6 +1325,44 @@ out of 55,237, which is why their FPR column reads exactly 1.0000.
 ```bash
 python scripts/operational.py
 ```
+
+## `scripts/run_all.py`
+
+**Purpose**: the pipeline **declared once**, in order, with the artifacts each stage writes.
+Phase 7's reproducibility package called for a `run_all` and it had never existed — the pipeline
+lived in three prose lists instead (`README.md`, `CLAUDE.md`, this file), which is the same
+duplication that produced five component-status drift defects. **A pipeline documented in three
+places is a pipeline that will disagree with itself.**
+
+What it adds over prose is that the stage list and each stage's artifacts are **data**, so the
+default mode reports what is actually on disk rather than what a README believes.
+
+```bash
+python scripts/run_all.py                  # check artifacts, print the order (DEFAULT)
+python scripts/run_all.py --run            # execute every stage in order
+python scripts/run_all.py --run --from kg  # resume from a named stage
+```
+
+**Default is check, not run** — a full reproduction retrains every model on CPU and takes hours;
+making that the default behaviour of something called `run_all` is a foot-gun. Exit 1 if any declared
+artifact is missing.
+
+⚠️ **Honest limit, stated in the paper too: the sequence has been CHECKED end to end and never
+EXECUTED end to end in one pass.** Every stage has run individually, most dozens of times, but *"each
+stage works"* and *"the sequence works from a clean checkout"* are different claims and only the
+first is evidenced.
+
+🔑 **A stage that declares no artifact cannot fail the check**, so the summary line counts and warns
+about them — the same shape as the script-count regex that passed on a wrong count in 2026-08-05.
+Currently **0 such stages**: `novelty` and `significance` were closed out when the warning surfaced
+them.
+
+🔴 **Every printed string is ASCII, deliberately.** The Windows console default is cp1252 and
+non-ASCII output raises `UnicodeEncodeError`. This script is meant to run directly, not only through
+`run_long.sh` (which forces UTF-8) — and the first version **crashed on its own warning banner**,
+which is the bug CLAUDE.md records being fixed three times as separate incidents.
+
+**Current state: 19 stages · 0 artifacts missing · 0 unchecked stages.**
 
 ## `scripts/verify_draft.py`
 
