@@ -2,6 +2,49 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-05f (the reproducibility artifact — `run_all.py`, and §10 drafted)
+
+### ⚙️ `run_all.py` — the pipeline declared ONCE, as data rather than prose
+
+Phase 7's package called for a `run_all` and it had never existed. The pipeline lived in **three
+prose lists** — `README.md`, `CLAUDE.md`, `scripts_reference.md` — which is the same duplication that
+produced five component-status drift defects. **A pipeline documented in three places is a pipeline
+that will disagree with itself.**
+
+19 stages, each with the artifacts it writes. **Default mode checks rather than executes** (a full
+CPU retrain as the default behaviour of `run_all` is a foot-gun); `--run` executes, `--run --from
+<stage>` resumes. **Current state: 19 stages · 0 artifacts missing · 0 unchecked.**
+
+### 🔑 Two defects the script found in itself, both of a named class
+
+**① It crashed on its own warning banner.** The first version printed `⚠️` and `🔴`; the Windows
+console default is cp1252, so a bare `python scripts/run_all.py` raised `UnicodeEncodeError` — **the
+exact bug CLAUDE.md records being fixed three times as separate incidents**, and the reason
+`lint_conventions.py` exists. It survived earlier scripts only because `run_long.sh` forces UTF-8.
+Every printed string is now ASCII, with the reason in a comment so it is not re-broken.
+
+**② Two stages declared no artifact, so they could not fail the check.** `novelty` and
+`significance` were listed with empty artifact lists — **a check that cannot fire, the same shape as
+the 2026-08-05 script-count regex that passed on a wrong count.** The summary line now counts and
+warns about such stages, which is how these two were spotted; both are closed out and the count is 0.
+
+### 📄 §10 Reproducibility drafted
+
+What is released (58 scripts, `config.yaml`, pinned deps, 9 figures, 70 metadata files, the
+190-row append-only run record, MIT) and what is not (**the dataset**, which has its own terms, and
+**model weights**, which are large, per-seed and regenerable).
+
+⚠️ **Two limits stated rather than smoothed over.** The stage sequence has been **checked** end to
+end and **never executed** end to end in one pass — *"each stage works"* and *"the sequence works from
+a clean checkout"* are different claims and only the first is evidenced. And **the determinism
+guarantee is forward-looking only**: pre-flag results came from a process with SD 0.0222 and are not
+reproducible at fixed seed, so a reader should reproduce the post-flag figures and not expect the
+pre-flag ones exactly.
+
+**Related work remains the only undrafted section**, and it is blocked on a literature sweep rather
+than on writing: only `basepaper.pdf` is held locally, and a section whose job is to say what others
+have and have not measured cannot be written from memory.
+
 ## 2026-09-05e (the draft's numbers are now mechanically checkable — 52 verified, 0 mismatched)
 
 ### 🔎 `verify_draft.py` — the paper against the record, per claim

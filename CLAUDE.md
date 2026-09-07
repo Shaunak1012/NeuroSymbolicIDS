@@ -304,6 +304,13 @@ A working virtualenv lives at **`.venv/`** (Python 3.11.9, TensorFlow 2.15.1 / K
 
 Run from the project root, in order, **using the venv interpreter**. Each step consumes the previous step's artifacts (organised under `data/processed/`, `models/`, `outputs/` — see `scripts/paths.py`).
 
+**The pipeline is now declared once, in [`scripts/run_all.py`](scripts/run_all.py)** — 19 stages
+with the artifacts each writes. `python scripts/run_all.py` checks what is on disk (default);
+`--run` executes; `--run --from <stage>` resumes. ⚠️ The sequence has been **checked** end to end and
+**never executed** end to end in one pass — say so rather than implying a validated one-command
+reproduction. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
+is the one that is executable.**
+
 **Current pipeline (paper-aligned split — this is what all reported results use):**
 
 ```bash
@@ -326,7 +333,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 57 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **8 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 58 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **8 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -339,7 +346,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 57 Python scripts + 8 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 58 Python scripts + 8 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
