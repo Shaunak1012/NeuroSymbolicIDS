@@ -1,0 +1,213 @@
+{
+  "n_rows": 16137183,
+  "n_features": 67,
+  "feature_names": [
+    "Destination Port",
+    "Flow Duration",
+    "Total Fwd Packets",
+    "Total Backward Packets",
+    "Total Length of Fwd Packets",
+    "Total Length of Bwd Packets",
+    "Fwd Packet Length Max",
+    "Fwd Packet Length Min",
+    "Fwd Packet Length Mean",
+    "Fwd Packet Length Std",
+    "Bwd Packet Length Max",
+    "Bwd Packet Length Min",
+    "Bwd Packet Length Mean",
+    "Bwd Packet Length Std",
+    "Flow Bytes/s",
+    "Flow Packets/s",
+    "Flow IAT Mean",
+    "Flow IAT Std",
+    "Flow IAT Max",
+    "Flow IAT Min",
+    "Fwd IAT Total",
+    "Fwd IAT Mean",
+    "Fwd IAT Std",
+    "Fwd IAT Max",
+    "Fwd IAT Min",
+    "Bwd IAT Total",
+    "Bwd IAT Mean",
+    "Bwd IAT Std",
+    "Bwd IAT Max",
+    "Bwd IAT Min",
+    "Fwd PSH Flags",
+    "Fwd Header Length",
+    "Bwd Header Length",
+    "Fwd Packets/s",
+    "Bwd Packets/s",
+    "Min Packet Length",
+    "Max Packet Length",
+    "Packet Length Mean",
+    "Packet Length Std",
+    "Packet Length Variance",
+    "FIN Flag Count",
+    "SYN Flag Count",
+    "RST Flag Count",
+    "PSH Flag Count",
+    "ACK Flag Count",
+    "URG Flag Count",
+    "ECE Flag Count",
+    "Down/Up Ratio",
+    "Average Packet Size",
+    "Avg Fwd Segment Size",
+    "Avg Bwd Segment Size",
+    "Subflow Fwd Packets",
+    "Subflow Fwd Bytes",
+    "Subflow Bwd Packets",
+    "Subflow Bwd Bytes",
+    "Init_Win_bytes_forward",
+    "Init_Win_bytes_backward",
+    "act_data_pkt_fwd",
+    "min_seg_size_forward",
+    "Active Mean",
+    "Active Std",
+    "Active Max",
+    "Active Min",
+    "Idle Mean",
+    "Idle Std",
+    "Idle Max",
+    "Idle Min"
+  ],
+  "features_intentionally_unmapped": [
+    "Fwd Header Length.1"
+  ],
+  "class_counts_lower_bound": {
+    "BENIGN": 13390249,
+    "DDOS attack-HOIC": 686012,
+    "DDoS attacks-LOIC-HTTP": 576191,
+    "DoS attacks-Hulk": 461912,
+    "Bot": 286191,
+    "FTP-BruteForce": 193354,
+    "SSH-Bruteforce": 187589,
+    "Infilteration": 160639,
+    "DoS attacks-SlowHTTPTest": 139890,
+    "DoS attacks-GoldenEye": 41508,
+    "DoS attacks-Slowloris": 10990,
+    "DDOS attack-LOIC-UDP": 1730,
+    "Brute Force -Web": 611,
+    "Brute Force -XSS": 230,
+    "SQL Injection": 87
+  },
+  "equivalent_2017_annotation": {
+    "Bot": "Bot",
+    "DoS attacks-Hulk": "DoS Hulk",
+    "DoS attacks-SlowHTTPTest": "DoS Slowhttptest",
+    "DoS attacks-GoldenEye": "DoS GoldenEye",
+    "DoS attacks-Slowloris": "DoS slowloris",
+    "DDoS attacks-LOIC-HTTP": "DDoS (different tool)",
+    "DDOS attack-HOIC": "DDoS (different tool)",
+    "DDOS attack-LOIC-UDP": "DDoS (different tool)",
+    "FTP-BruteForce": "FTP-Patator (different tool)",
+    "SSH-Bruteforce": "SSH-Patator (different tool)",
+    "Brute Force -Web": "Web Attack Brute Force",
+    "Brute Force -XSS": "Web Attack XSS",
+    "SQL Injection": "Web Attack Sql Injection",
+    "Infilteration": "Infiltration"
+  },
+  "constant_columns_dropped": [],
+  "per_file": [
+    {
+      "file": "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 0,
+      "rows_kept": 1048575
+    },
+    {
+      "file": "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 1,
+      "rows_kept": 1048574
+    },
+    {
+      "file": "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 0,
+      "rows_kept": 1048575
+    },
+    {
+      "file": "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 7948748,
+      "identifier_cols_dropped": [
+        "Flow ID",
+        "Src IP",
+        "Src Port",
+        "Dst IP"
+      ],
+      "header_rows_dropped": 0,
+      "rows_kept": 7948748
+    },
+    {
+      "file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 331125,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 25,
+      "rows_kept": 331100
+    },
+    {
+      "file": "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 0,
+      "rows_kept": 1048575
+    },
+    {
+      "file": "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 0,
+      "rows_kept": 1048575
+    },
+    {
+      "file": "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 0,
+      "rows_kept": 1048575
+    },
+    {
+      "file": "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 1048575,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 0,
+      "rows_kept": 1048575
+    },
+    {
+      "file": "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "rows_raw": 613104,
+      "identifier_cols_dropped": [],
+      "header_rows_dropped": 33,
+      "rows_kept": 613071
+    }
+  ],
+  "timestamps_written": false,
+  "timestamps_reason": "2018 has the 12-hour-no-AM/PM defect and timeline.py is 2017-only; storing unparsed strings would invite the naive sort that reordered all 114,658 test rows in 2017",
+  "truncation_caveat": "published CSVs are cut at Excel's 2^20 row limit, chronologically; all class counts are lower bounds (see outputs/metadata/ids2018_audit.json)",
+  "split_written": true,
+  "zero_day_classes": [
+    "Bot",
+    "Brute Force -Web",
+    "Brute Force -XSS",
+    "Infilteration",
+    "SQL Injection"
+  ],
+  "n_train": 883796,
+  "n_val": 110474,
+  "n_test": 558233,
+  "match_2017_train": true,
+  "n_train_2017_reference": 883796,
+  "power_bar_2017_smallest_retained": 652,
+  "zero_day_powered": {
+    "Bot": 286191,
+    "Infilteration": 160639
+  },
+  "zero_day_underpowered": {
+    "Brute Force -Web": 611,
+    "Brute Force -XSS": 230,
+    "SQL Injection": 87
+  }
+}
