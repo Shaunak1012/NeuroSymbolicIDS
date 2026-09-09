@@ -81,7 +81,14 @@ def _c1():
     for p in _py_files():
         for i, line in enumerate(_read(p).splitlines(), 1):
             s = line.strip()
-            if "open(" not in line or "encoding" in line or s.startswith("#"):
+            # \b so that urlopen( / fdopen( / gzip.open( -style calls that are
+            # NOT builtin open() do not match. Added 2026-09-09: the bare
+            # substring flagged urllib.request.urlopen() in three Phase-6
+            # scripts, and a check that fires on correct code stops being read
+            # -- the same failure this module exists to prevent, pointed at
+            # itself.
+            if (not re.search(r"(?<![\w.])open\(", line)
+                    or "encoding" in line or s.startswith("#")):
                 continue
             if binary.search(line):
                 continue
