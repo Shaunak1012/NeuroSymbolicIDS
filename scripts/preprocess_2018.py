@@ -51,7 +51,23 @@ test rows. So this script **drops the column**. The 4-architecture replication
 does not need it; only the KG does, and extending `timeline.py` to 2018 is the
 prerequisite for that. Filed in KNOWN_ISSUES.
 
-Run:  scripts/run_long.sh preprocess_2018.py
+TRAINING-SET SIZE IS MATCHED TO 2017 BY DEFAULT, AND THAT IS A CONTROL
+-----------------------------------------------------------------------
+2018's known pool yields **3,678,681** training rows against 2017's **883,796**
+-- 4.16x. Left alone, any 2018-vs-2017 difference would be confounded with
+having four times the training data, and the mechanism under test is about
+FEATURE-BASIS OVERLAP, not data volume.
+
+So `MATCH_2017_TRAIN` (default **on**) stratified-subsamples the KNOWN pool so
+the train split lands on 883,796 rows exactly. Set it to 0 for the full-size
+secondary run, which measures the scale effect deliberately rather than
+inheriting it.
+
+⚠️ **Zero-day rows are never subsampled** -- they are test-only, and their count
+is the whole point of the power analysis. Only the known pool shrinks.
+
+Run:  scripts/run_long.sh preprocess_2018.py          # matched to 2017
+      MATCH_2017_TRAIN=0 scripts/run_long.sh preprocess_2018.py   # full size
 Out:  data/processed/paper_2018/  +  outputs/metadata/preprocess_2018.json
 """
 import os
@@ -71,6 +87,10 @@ cfg = config.get()
 SEED = cfg["seed"]
 P = cfg["protocol"]
 OUT = os.path.join(paths.PROCESSED, "paper_2018")
+
+# 2017's train split, to the row. See MATCH_2017_TRAIN below.
+N_TRAIN_2017 = 883796
+MATCH_2017 = os.environ.get("MATCH_2017_TRAIN", "1") == "1"
 
 IDENT_COLS = ["Flow ID", "Src IP", "Src Port", "Dst IP"]   # only in the 84-col file
 NON_FEATURE = ["Protocol", "Timestamp", "Label"]           # Dst Port IS kept as a feature
@@ -158,7 +178,10 @@ def main():
     feats = df.drop(columns=["Label"])
 
     before = len(feats)
-    feats = feats.apply(pd.to_numeric, errors="coerce")
+    # float32 during conversion, not after. 16M x 67 is 8.0 GB in float64 and
+    # pandas copies during apply(), so the peak would be several times that on a
+    # 62 GB box. The pipeline saves float32 regardless, so this loses nothing.
+    feats = feats.apply(pd.to_numeric, errors="coerce", downcast="float")
     feats.replace([np.inf, -np.inf], np.nan, inplace=True)
     good = feats.notna().all(axis=1)
     feats = feats[good].reset_index(drop=True)
@@ -219,6 +242,20 @@ def main():
         rng = np.random.RandomState(SEED)
         ben_keep = rng.choice(np.where(is_ben)[0], n_keep, replace=False)
         pool = np.concatenate([ben_keep, np.where(is_known)[0]])
+
+        # Match 2017's train size so data VOLUME is not a confound. Subsample the
+        # pool (stratified) to N_TRAIN_2017 / train_frac, so the 80/10/10 that
+        # follows lands train on 883,796.
+        n_pool_target = int(round(N_TRAIN_2017 / (1.0 - P["val_frac"] - P["test_frac"])))
+        if MATCH_2017 and len(pool) > n_pool_target:
+            pool, _ = train_test_split(pool, train_size=n_pool_target,
+                                       random_state=SEED, stratify=y[pool])
+            print("  MATCH_2017_TRAIN: known pool subsampled to {:,} "
+                  "so train lands on ~{:,} (2017 = {:,})".format(
+                      len(pool), N_TRAIN_2017, N_TRAIN_2017))
+        elif not MATCH_2017:
+            print("  MATCH_2017_TRAIN=0: FULL-SIZE run, train will be ~4x 2017")
+
         tr, tmp = train_test_split(pool, test_size=P["val_frac"] + P["test_frac"],
                                    random_state=SEED, stratify=y[pool])
         rel = P["test_frac"] / (P["val_frac"] + P["test_frac"])
@@ -229,11 +266,27 @@ def main():
         for nm, idx in (("train", tr), ("val", va), ("test", te)):
             np.save(os.path.join(OUT, "X_%s.npy" % nm), X[idx])
             np.save(os.path.join(OUT, "y_%s_mc.npy" % nm), y[idx])
+            # autoencoder_paper.py needs the binary view; 0 = benign, 1 = attack
+            np.save(os.path.join(OUT, "y_%s_bin.npy" % nm),
+                    (y[idx] != "BENIGN").astype(np.int64))
             print("  %-6s %8d rows" % (nm, len(idx)))
         np.save(os.path.join(OUT, "zero_day_classes.npy"), np.array(sorted(zd)))
         np.save(os.path.join(OUT, "known_classes.npy"), np.array(sorted(set(y[tr]))))
+        # 2017's smallest RETAINED zero-day family is Web XSS at 652; its
+        # smallest EXCLUDED one is Infiltration at 36. Report which 2018
+        # families clear that precedent rather than inventing a new bar.
+        BAR_2017 = 652
+        powered = {k: counts[k] for k in sorted(zd) if counts.get(k, 0) >= BAR_2017}
+        under = {k: counts.get(k, 0) for k in sorted(zd) if counts.get(k, 0) < BAR_2017}
+        print("\n  adequately powered zero-day (>= %d, 2017's smallest retained): %s"
+              % (BAR_2017, powered or "NONE"))
+        print("  underpowered, never report to 4 dp: %s" % (under or "none"))
         meta.update({"split_written": True, "zero_day_classes": sorted(zd),
-                     "n_train": len(tr), "n_val": len(va), "n_test": len(te)})
+                     "n_train": len(tr), "n_val": len(va), "n_test": len(te),
+                     "match_2017_train": bool(MATCH_2017),
+                     "n_train_2017_reference": N_TRAIN_2017,
+                     "power_bar_2017_smallest_retained": BAR_2017,
+                     "zero_day_powered": powered, "zero_day_underpowered": under})
 
     p = os.path.join(paths.METADATA, "preprocess_2018.json")
     with open(p, "w", encoding="utf-8") as f:

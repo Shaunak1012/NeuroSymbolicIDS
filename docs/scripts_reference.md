@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (62 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (62 Python scripts, plus 9 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1424,6 +1424,38 @@ well-powered version of a problem that was defined by being rare. Defaulting tha
 replication ends up answering a different question than the one it claims.
 
 **Writes** `data/processed/paper_2018/` + `outputs/metadata/preprocess_2018.json`.
+
+## `scripts/replicate_2018.sh` — Phase 6
+
+**Purpose**: the four-architecture replication on CSE-CIC-IDS2018 — **12 trainings** (CNN, LTN
+control, LTN+Ax6, autoencoder × seeds 42/43/44).
+
+**Resumable and fail-soft**, because 12 CPU trainings is long enough that both matter and this
+project has already lost a session to a power cut:
+
+- **RESUMABLE** — a run whose `models/<tag>.keras` exists is skipped. Re-run after any interruption
+  and it continues where it stopped; nothing is recomputed.
+- **FAIL-SOFT** — a failing run does **not** abort the batch. Losing 11 good runs to 1 bad one is the
+  failure mode this guards against. Every failure is named in the summary and the exit code is
+  non-zero if any occurred. It also treats *"exited 0 but wrote no model"* as a failure.
+
+🔑 **The LTN configs were recovered from `runs.jsonl`, not guessed.**
+control = `axioms=base omega=0.0 fixed` · +Ax6 = `axioms=both omega=1.0 ratio`.
+**The tag `ltn_ax6_ratio_w1p0` does not decode to those on its own** — `LTN_AXIOMS` has no `ax6`
+value — so inferring from the name would have run a different experiment wearing the right label.
+This is what the run record exists for.
+
+🔑 **The four trainers are NOT forked.** `PAPER_SUBDIR=paper_2018` is an additive env override,
+verified inert when unset — the same pattern C4 used for `FEATURE_TRANSFORM` and verified to twelve
+decimals. Forking scripts that produced every number in the paper is how a record starts diverging.
+
+⚠️ **Training data is matched to 2017's 883,796 rows** (`MATCH_2017_TRAIN`, default on), so
+2018-vs-2017 differences are not confounded with 4× the data.
+
+```bash
+scripts/run_long.sh replicate_2018.sh      # the batch
+scripts/replicate_2018.sh --dry-run        # print the plan, run nothing
+```
 
 ## `scripts/run_all.py`
 

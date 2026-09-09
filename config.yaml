@@ -31,6 +31,46 @@ protocol:
   # on the wrong evidence -- which is why it had to be re-run rather than assumed.
   feature_transform: log1p
 
+# ============================================================
+# PHASE 6: CSE-CIC-IDS2018 zero-day split.
+#
+# OPTION A CHOSEN 2026-09-09 -- mirror the 2017 FAMILY NAMES, and deliberately
+# accept that Bot is no longer rare (286,191 flows vs 1,966 in 2017).
+#
+# WHY A AND NOT "MATCH ON RARITY". The mechanism this replication tests is about
+# FEATURE-BASIS OVERLAP, not scarcity: "a novel class is reachable exactly to the
+# extent its signature overlaps the basis the model was trained on" (Bot: 0/8
+# overlap, cross-seed rho = -0.090). Rarity appears nowhere in that claim -- it
+# was incidental to 2017's Bot.
+#
+# So testing on an ABUNDANT novel family is the cleaner experiment: it removes
+# scarcity as a confound and gives the overlap and rank-correlation analyses far
+# more power than 1,966 flows ever did. The prediction is sharp and falsifiable:
+# if the mechanism holds, 2018's Bot is STILL unreachable despite being the 5th
+# largest attack class, because abundance in TEST cannot help a model that never
+# trained on it. If it turns out reachable, that is a major finding about our own
+# 2017 result -- it would mean scarcity was doing work we attributed to overlap.
+#
+# 🔴 THE ARGUMENT AGAINST OPTION B, which was the earlier lean and is now
+# rejected: 2018's rare families are rare PARTLY BECAUSE OF THE TRUNCATION WE
+# JUST FOUND. Friday-23-02 (the web-attack day) is cut at 09:04, 46 minutes in.
+# Building the headline replication on classes whose size is an artefact of a
+# spreadsheet row limit would invite exactly the objection the audit exists to
+# raise.
+#
+# ⚠️ 2018 has no Heartbleed, so this is 5 zero-day families, not 6.
+# ⚠️ Powered subset expected: Bot (286,191) and Infilteration (161,934); Web BF
+#    (611) sits just under 2017's smallest kept family (XSS, 652) and is
+#    marginal; XSS (230) and SQL Injection (87) are underpowered and must not be
+#    reported to 4 dp -- the same rule metrics.py enforces for 2017.
+# ============================================================
+zero_day_classes_2018:
+  - Bot
+  - Infilteration
+  - Brute Force -Web
+  - Brute Force -XSS
+  - SQL Injection
+
 # 8 known attacks + BENIGN = 9 known classes (kept in train/val/test)
 known_attacks:
   - DDoS

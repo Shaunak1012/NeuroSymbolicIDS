@@ -58,7 +58,13 @@ SEED = int(os.environ.get("AE_SEED", _DEFAULT_SEED))
 # on the CNN). Must run before any op is created. TF_DETERMINISM=0 opts out.
 DET = determinism.enable(SEED, intra=int(os.environ.get("TF_THREADS", "16")),
                          inter=int(os.environ.get("TF_THREADS_INTER", "2")))
-PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
+# PAPER_SUBDIR lets Phase 6 point this trainer at data/processed/paper_2018
+# without forking it. Unset, this is byte-identical to the previous line --
+# same pattern as the FEATURE_TRANSFORM override, which C4 verified inert to
+# twelve decimals. Do NOT fork these scripts: they produced every number in
+# the paper.
+PAPER = os.path.join(paths.PROCESSED,
+                     os.environ.get("PAPER_SUBDIR", cfg["paths"]["paper_subdir"]))
 TFM = cfg["protocol"]["feature_transform"]
 
 EPOCHS = int(os.environ.get("AE_EPOCHS", "50"))
