@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (58 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (61 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1325,6 +1325,75 @@ out of 55,237, which is why their FPR column reads exactly 1.0000.
 ```bash
 python scripts/operational.py
 ```
+
+## `scripts/fetch_ids2018.py` — Phase 6
+
+**Purpose**: download the CSE-CIC-IDS2018 processed flow CSVs (10 files, **6.41 GB**) from the public
+AWS Registry of Open Data bucket. **No AWS account and no AWS CLI** — the bucket is listable and
+fetchable over plain HTTPS. Resumable: a file already matching the bucket's size is skipped.
+
+**Why it is a script and not a one-liner**: Phase 6 was recorded as *"blocked — the data is not
+available to us"* from the roadmap onward, and that was wrong. This makes the correction
+**executable** — running it *is* the proof the data is obtainable.
+
+⚠️ Fetches only `Processed Traffic Data for ML Algorithms/`. The raw PCAP side is **~470 GB** and is
+deliberately skipped: the Input-modality decision rules payload out of scope.
+
+**Writes** `data/raw_2018/*.csv` + `outputs/metadata/ids2018_manifest.json`.
+
+## `scripts/schema_2018.py` — Phase 6
+
+**Purpose**: map this project's 68 CIC-IDS2017 features onto the 2018 column schema and **assert the
+mapping is total**. Exit 1 if any feature has no counterpart.
+
+**Result: 67 of 68 map.** The expectation going in was a messy partial mapping; measured, every
+apparent gap was a CICFlowMeter-V3 **rename** (`Total Fwd Packets` → `Tot Fwd Pkts`,
+`Init_Win_bytes_forward` → `Init Fwd Win Byts`, …). The 2017-only and 2018-only column sets are the
+same size and pair exactly, which is the evidence they are renames rather than substitutions.
+
+🔴 **The one genuine casualty is a 2017 bug.** 2017's CICFlowMeter emitted `Fwd Header Length`
+**twice**; pandas disambiguated the second as `Fwd Header Length.1` and this project has carried a
+**duplicated column** as its 68th feature ever since. 2018 emits it once. The 2018 side therefore runs
+with **67 features**, and mapping the duplicate would have silently double-counted one. State this in
+any cross-dataset claim.
+
+⚠️ **Two schemas inside 2018, and the difference is not features.** Nine files have 80 columns;
+`Thuesday-20-02-2018` has 84 — the same 80 plus `Flow ID`/`Src IP`/`Src Port`/`Dst IP`. Those wide
+string identifiers are the whole reason that file is 3.9 GB against ~340 MB. Drop them and every day
+is schema-identical.
+
+**Writes** `outputs/metadata/schema_map_2018.json`.
+
+## `scripts/audit_2018.py` — Phase 6
+
+**Purpose**: data-quality audit of the published 2018 CSVs, because Phase 6 was about to consume them
+as a clean successor to 2017.
+
+🔴 **THE PUBLISHED CSVs ARE TRUNCATED AT EXCEL'S ROW LIMIT.** Multiple independent capture days
+contain **exactly 1,048,575 data rows** — 2²⁰ − 1, which with the header is exactly Excel's maximum
+sheet size. Different days do not coincidentally hold identical flow counts. Corroborating: the one
+file that *exceeds* the limit is the 84-column one that also kept its identifier columns, i.e. the
+file that evidently did not go through a spreadsheet.
+
+🔴 **The cut is chronological, so the loss is biased, not random.** `Friday-23-02` retains flows from
+**08:18 to 09:04** — 46 minutes of a full working day — and that is the file carrying the web attacks.
+Every published per-class count is a **lower bound**, and families scheduled later in a day are
+under-counted by an unknown amount.
+
+Also checks: **repeated header rows mid-file** (`Label` as a label value), and the **12-hour
+timestamps with no AM/PM** — the *same* defect this project documents for 2017 and built
+`timeline.py` to fix.
+
+🔑 **Guarded against partial downloads.** A file still downloading reads as short, and a short file
+reads as *not* truncated — the audit would report the exact opposite of the defect it exists to find.
+It cross-checks the fetch manifest and, absent one, prints a PROVISIONAL banner rather than a
+clean-looking table built on partial data.
+
+⚠️ **It does not quantify how many flows were lost.** That ground truth is in the ~470 GB of PCAP this
+project does not fetch. Report the truncation as a defect of the distributed artefact; do not attach a
+loss figure the data cannot support.
+
+**Writes** `outputs/metadata/ids2018_audit.json`.
 
 ## `scripts/run_all.py`
 

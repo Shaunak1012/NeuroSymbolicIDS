@@ -14,6 +14,9 @@ __pycache__/
 data/raw_csv/
 data/raw_csv_full/
 data/raw_pcaps/
+# Phase 6: CSE-CIC-IDS2018 processed CSVs, 6.41 GB, refetch with
+# scripts/fetch_ids2018.py (public bucket, no credentials needed).
+data/raw_2018/
 data/processed/*
 # …but the paper split's PROTOCOL DEFINITION is small and is the provenance for
 # every reported number (which classes are known, which are zero-day, exact row

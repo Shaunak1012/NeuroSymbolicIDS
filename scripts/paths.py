@@ -9,6 +9,7 @@ Layout
 ------
 data/raw_csv_full/   input CIC-IDS2017 CSVs (CURRENT)  -> RAW_CSV_FULL
 data/raw_csv/        legacy ML-CVE variant (superseded) -> RAW_CSV
+data/raw_2018/       CSE-CIC-IDS2018 CSVs (Phase 6)     -> RAW_2018
 data/processed/      cleaned data, features, labels    -> PROCESSED
 data/processed/paper/ paper-aligned split + meta       -> PAPER
 models/              trained models + fitted scalers   -> MODELS
@@ -32,6 +33,10 @@ RAW_CSV_FULL = os.path.join(ROOT, "data", "raw_csv_full")
 # LEGACY source: the MachineLearningCVE variant (no identifiers). Superseded 2026-06-18;
 # kept only so older scripts and docs resolve. Do not use for new work.
 RAW_CSV = os.path.join(ROOT, "data", "raw_csv")
+# PHASE 6: CSE-CIC-IDS2018 processed flow CSVs, fetched by fetch_ids2018.py.
+# 6.41 GB, gitignored. The raw PCAP side of that bucket (~470 GB) is out of
+# scope -- see STATUS -> Open Decisions -> Input modality.
+RAW_2018 = os.path.join(ROOT, "data", "raw_2018")
 
 # --- Intermediate data ---
 PROCESSED = os.path.join(ROOT, "data", "processed")
