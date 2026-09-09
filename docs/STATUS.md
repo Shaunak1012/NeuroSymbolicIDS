@@ -528,7 +528,26 @@ Averaging the last 5 epochs' weights moved fold 1 from 0.6218 to **0.6217**. Pre
 the solution with respect to the **known-class** loss it averages over, and zero-day performance is
 not what that loss measures. **Checkpoint averaging is not a route to zero-day stability.**
 
-### ⬜ Cross-dataset (Phase 6) — ~~BLOCKED, not skipped~~ NOT RUN
+### 🟡 Cross-dataset (Phase 6) — ~~BLOCKED, not skipped~~ ~~NOT RUN~~ **DATA IN, SPLIT UNDECIDED**
+
+> ✅ **2026-09-09: 6.41 GB fetched and verified, 67/68 features mapped, full audit run.**
+> `fetch_ids2018.py` · `schema_2018.py` · `audit_2018.py` · `preprocess_2018.py`.
+>
+> 🔴 **7 of 10 published CSVs are truncated at Excel's 2²⁰ row limit**, chronologically, with 59
+> repeated header rows. `Friday-23-02` retains 46 minutes of a working day and is the web-attack
+> file. **All published class counts are lower bounds.**
+>
+> 🔴 **THE OPEN DECISION: 2018 is a different problem shape, not 2017 with new numbers.**
+> Bot goes **1,966 → 286,191** and Infiltration **36 → 161,934**, so the two families the §4
+> mechanism rests on have inverted. Holding Bot out in 2018 asks whether a *well-populated* novel
+> family is reachable — **not the question §4 answers.** Options put to the user:
+> **(A)** same family names, accepting the regime change · **(B)** families matched on *rarity*
+> (`DDOS-LOIC-UDP` 1,730 · `Brute Force -Web` 611 · XSS 230 · SQLi 87), preserving the regime at the
+> cost of comparing different attack types. **Lean: B, with A as secondary.**
+> ⚠️ Only `DDOS-LOIC-UDP` clears the ~1,500 power bar — a 2018 macro may have **one member**.
+>
+> 🔴 **Scope reduction: no KG result is reachable on 2018** — see KNOWN_ISSUES, `timeline.py` is
+> 2017-only and the KG needs a chronological stream. The 4-architecture replication is unaffected.
 
 > 🔴 **RETRACTED 2026-09-09 — the blocker is scope, not access.** CSE-CIC-IDS2018 is on the AWS Registry of Open Data (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`, no account needed, redistribution permitted with citation). Flow CSVs are a few GB. **We have not run it; we were never unable to.**
 

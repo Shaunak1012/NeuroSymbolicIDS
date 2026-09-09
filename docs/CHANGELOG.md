@@ -2,6 +2,70 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-09c (Phase 6 data is IN — and the published 2018 CSVs are truncated)
+
+### ✅ 6.41 GB fetched, 67/68 features mapped, full audit run
+
+`fetch_ids2018.py` · `schema_2018.py` · `audit_2018.py` · `preprocess_2018.py`.
+CSE-CIC-IDS2018's 10 processed CSVs are on disk and verified byte-for-byte against the fetch
+manifest. **No AWS account, no AWS CLI** — the bucket is public over plain HTTPS.
+
+### 🔴 7 OF 10 PUBLISHED CSVs ARE TRUNCATED AT EXCEL'S ROW LIMIT
+
+Seven files contain **exactly 1,048,575 data rows** — 2²⁰ − 1, which with the header is exactly
+Excel's maximum sheet size. Independent capture days do not coincidentally hold identical flow
+counts. **59 repeated header rows** were also found mid-file (the literal string `Label` as a label
+value).
+
+🔑 **Corroboration that it is a spreadsheet round-trip and not a capture limit:** the one file that
+*exceeds* 2²⁰ is `Thuesday-20-02`, the 84-column file that also kept its identifier columns — i.e.
+the file that evidently did not go through Excel.
+
+🔴 **The cut is chronological, so the loss is biased rather than random.** `Friday-23-02` retains
+**08:18 → 09:04**, 46 minutes of a full working day, and that is the file carrying the web attacks.
+**Every published per-class count is a lower bound.**
+
+### The class counts, and why they change what Phase 6 can claim
+
+| family | 2018 (lower bound) | 2017 |
+|---|---:|---:|
+| Bot | **286,191** | **1,966** |
+| Infilteration | **161,934** | **36** |
+| Brute Force -Web | 611 | 1,507 |
+| Brute Force -XSS | 230 | 652 |
+| SQL Injection | 87 | 21 |
+
+🔴 **This is not 2017 with different numbers — it is a different problem shape.** The two families the
+mechanism story rests on have **inverted**: Bot goes from the rare, unreachable family (0/8 feature
+overlap, ρ = −0.090) to the 5th largest attack class, and Infiltration from *excluded as underpowered*
+to a major class. Holding Bot out in 2018 tests whether a **well-populated** novel family is
+reachable — a real question, but **not the one §4 answers**.
+
+⚠️ **Power problem either way:** only `DDOS attack-LOIC-UDP` (1,730) clears the ~1,500 bar the 2017
+protocol uses. A 2018 macro over adequately-powered zero-day families may have **one member**.
+
+**`preprocess_2018.py` therefore refuses to invent the split** — without `zero_day_classes_2018` in
+`config.yaml` it writes features and stops with a banner. Defaulting it silently is how a replication
+ends up answering a different question than the one it claims.
+
+### 🔴 A scope reduction on Phase 6, stated now rather than discovered later
+
+**2018 carries the same 12-hour-no-AM/PM timestamp defect as 2017**, and `timeline.py` validates
+against the **2017** capture schedule so it cannot be pointed at 2018. `preprocess_2018.py` **drops
+the Timestamp column** rather than leaving raw strings for someone to sort by — that naive sort is
+what reordered all 114,658 test rows in 2017.
+
+**Consequence: no KG result is reachable on 2018** until `timeline.py` gains 2018 support, because
+the KG's entire emerging-pattern rule is burstiness over a chronological stream. The 4-architecture
+replication is unaffected. Filed in [KNOWN_ISSUES](KNOWN_ISSUES.md).
+
+### Fixes the groundwork exposed
+
+`.gitignore` did not cover `data/raw_2018/` (6.41 GB was committable) · `paths.py` gained `RAW_2018` ·
+🔑 **`lint_conventions.py`'s `open-without-encoding` check matched `open(` inside `urlopen(`**,
+flagging correct urllib calls in three new scripts. Now word-bounded. *A check that fires on correct
+code stops being read* — the failure that module exists to prevent, pointed at itself.
+
 ## 2026-09-09b (bibliographic pass — and it retracted "Phase 6 is blocked on data")
 
 ### ✅ All thirteen references verified against a primary source

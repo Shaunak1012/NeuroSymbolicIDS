@@ -1,0 +1,164 @@
+{
+  "excel_max_data_rows": 1048575,
+  "n_files": 10,
+  "n_truncated": 7,
+  "n_repeated_header_rows": 59,
+  "provisional_no_manifest": false,
+  "class_totals_after_truncation": {
+    "Benign": 13484708,
+    "Bot": 286191,
+    "DoS attacks-Hulk": 461912,
+    "DoS attacks-SlowHTTPTest": 139890,
+    "Brute Force -Web": 611,
+    "Brute Force -XSS": 230,
+    "SQL Injection": 87,
+    "DDoS attacks-LOIC-HTTP": 576191,
+    "Infilteration": 161934,
+    "DoS attacks-GoldenEye": 41508,
+    "DoS attacks-Slowloris": 10990,
+    "FTP-BruteForce": 193360,
+    "SSH-Bruteforce": 187589,
+    "DDOS attack-HOIC": 686012,
+    "DDOS attack-LOIC-UDP": 1730
+  },
+  "files": [
+    {
+      "file": "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 0,
+      "first_timestamp": "02/03/2018 08:47:38",
+      "last_timestamp": "02/03/2018 02:08:33",
+      "labels": {
+        "Benign": 762384,
+        "Bot": 286191
+      }
+    },
+    {
+      "file": "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 1,
+      "first_timestamp": "16/02/2018 08:27:23",
+      "last_timestamp": "16/02/2018 10:36:33",
+      "labels": {
+        "DoS attacks-Hulk": 461912,
+        "Benign": 446772,
+        "DoS attacks-SlowHTTPTest": 139890
+      }
+    },
+    {
+      "file": "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 0,
+      "first_timestamp": "23/02/2018 08:18:29",
+      "last_timestamp": "23/02/2018 09:04:11",
+      "labels": {
+        "Benign": 1048009,
+        "Brute Force -Web": 362,
+        "Brute Force -XSS": 151,
+        "SQL Injection": 53
+      }
+    },
+    {
+      "file": "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 84,
+      "data_rows": 7948748,
+      "truncated_at_excel_limit": false,
+      "repeated_header_rows": 0,
+      "first_timestamp": "20/02/2018 08:34:07",
+      "last_timestamp": "20/02/2018 04:07:01",
+      "labels": {
+        "Benign": 7372557,
+        "DDoS attacks-LOIC-HTTP": 576191
+      }
+    },
+    {
+      "file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 331125,
+      "truncated_at_excel_limit": false,
+      "repeated_header_rows": 25,
+      "first_timestamp": "01/03/2018 08:17:11",
+      "last_timestamp": "01/03/2018 12:59:58",
+      "labels": {
+        "Benign": 238037,
+        "Infilteration": 93063
+      }
+    },
+    {
+      "file": "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 0,
+      "first_timestamp": "15/02/2018 08:25:18",
+      "last_timestamp": "15/02/2018 09:02:01",
+      "labels": {
+        "Benign": 996077,
+        "DoS attacks-GoldenEye": 41508,
+        "DoS attacks-Slowloris": 10990
+      }
+    },
+    {
+      "file": "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 0,
+      "first_timestamp": "22/02/2018 08:26:03",
+      "last_timestamp": "22/02/2018 04:34:32",
+      "labels": {
+        "Benign": 1048213,
+        "Brute Force -Web": 249,
+        "Brute Force -XSS": 79,
+        "SQL Injection": 34
+      }
+    },
+    {
+      "file": "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 0,
+      "first_timestamp": "14/02/2018 08:31:01",
+      "last_timestamp": "14/02/2018 10:53:28",
+      "labels": {
+        "Benign": 667626,
+        "FTP-BruteForce": 193360,
+        "SSH-Bruteforce": 187589
+      }
+    },
+    {
+      "file": "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 1048575,
+      "truncated_at_excel_limit": true,
+      "repeated_header_rows": 0,
+      "first_timestamp": "21/02/2018 08:33:25",
+      "last_timestamp": "21/02/2018 02:33:29",
+      "labels": {
+        "DDOS attack-HOIC": 686012,
+        "Benign": 360833,
+        "DDOS attack-LOIC-UDP": 1730
+      }
+    },
+    {
+      "file": "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "n_columns": 80,
+      "data_rows": 613104,
+      "truncated_at_excel_limit": false,
+      "repeated_header_rows": 33,
+      "first_timestamp": "28/02/2018 08:22:13",
+      "last_timestamp": "28/02/2018 11:12:18",
+      "labels": {
+        "Benign": 544200,
+        "Infilteration": 68871
+      }
+    }
+  ]
+}
