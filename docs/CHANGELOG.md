@@ -2,6 +2,45 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-09b (bibliographic pass — and it retracted "Phase 6 is blocked on data")
+
+### ✅ All thirteen references verified against a primary source
+
+The pass the draft told us not to skip. Six needed completing; **one was wrong.**
+
+- 🔴 **[10] was drafted as "E. M. Rudd et al." from memory. The first author is Steve Cruz** — full
+  list **Cruz, Coleman, Rudd, Boult**, IEEE HST 2017. **This is exactly what the
+  "an unchecked citation gets the same treatment as an unchecked number" policy was for.**
+- **[3]** completed: Lanvin, Gimenez, Han, Majorczyk, Mé, Totel — CRiSIS 2022, LNCS 13857, Springer
+  2023, doi:10.1007/978-3-031-31108-6_2.
+- **[9]** completed: Bizzarri, Yu, Jalaian, Riguzzi, Bastian — *Journal of Information Security and
+  Applications* **94** (2025), art. 104205.
+- **[11]** Hendrycks & Gimpel, ICLR 2017 · **[12]** Liang, Li, Srikant, ICLR 2018 · **[13]** Liu,
+  Wang, Owens, Li, NeurIPS **33** (2020) — all confirmed against arXiv/proceedings records.
+
+### 🔴 THE PASS ALSO RETRACTED A CLAIM THAT WAS NOT A CITATION
+
+**"Cross-dataset validation on CIC-IDS2018 is blocked — the data is not available to us" is WRONG.**
+CSE-CIC-IDS2018 is published on the **AWS Registry of Open Data** and downloads **without an AWS
+account**:
+
+```
+aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request
+```
+
+under a licence that explicitly **permits redistribution with citation**. The processed flow CSVs are
+a few GB; only the raw logs are ~450 GB.
+
+**So the honest limitation is that we did not run it, not that we could not.** ⚠️ This matters beyond
+tidiness: §8.1 is the paper's stated weakest point, and it was framed as an *access* excuse a
+reviewer could disprove in under a minute. A scope limitation is defensible; a false access claim is
+not. Retracted in place in **four** locations (STATUS ×3, paper_outline ×2, paper_draft §8.1).
+
+🔑 **Nobody re-examined the claim — it fell out of verifying something else.** The Phase-6 blocker had
+been repeated unchallenged since the roadmap was written, in a project that checks everything, because
+**it was never a number and so was never in the path of any check.** `verify_draft.py` covers
+quantities; this was a sentence.
+
 ## 2026-09-09 (reviewer pass on the draft — the headline was inflated, and the record had moved)
 
 ### 🔴 THE HEADLINE RESOLUTION-FAILURE NUMBER WAS COMPUTED OVER METHODS THE PAPER ITSELF DISQUALIFIES

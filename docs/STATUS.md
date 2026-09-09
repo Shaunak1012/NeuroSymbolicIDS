@@ -26,7 +26,14 @@ some point, or is the obvious stronger version of something supportable.
 ✅ Every figure quoted in the outline was **cross-checked against `outputs/metadata/*.json`**, not
 copied from prose.
 
-**Still open before submission:** cross-dataset (**blocked on data**) · optionally a post-flag
+🔴 **CORRECTION 2026-09-09 — "Phase 6 is blocked on data" was WRONG and is retracted.**
+CSE-CIC-IDS2018 is on the **AWS Registry of Open Data**, downloadable with no AWS account
+(`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`) under a licence that permits
+redistribution with citation. Processed flow CSVs are a few GB; raw logs ~450 GB. **The blocker was
+never access — it is that nobody has run it.** Found while verifying references, not by revisiting
+the claim. Every "blocked on data" line below is superseded by this note.
+
+**Still open before submission:** cross-dataset (**NOT blocked on access — see the 2026-09-09 correction; we simply have not run it**) · optionally a post-flag
 LTN-control sweep, the only route to reopening C2 · a **venue decision** (no template chosen, so the
 draft is Markdown by design) · 🔴 **a bibliographic pass on references [10]–[13]**, which are cited
 from knowledge and flagged in the draft as unverified. ~~related work~~ ✅ **§9 drafted 2026-09-05**
@@ -521,7 +528,10 @@ Averaging the last 5 epochs' weights moved fold 1 from 0.6218 to **0.6217**. Pre
 the solution with respect to the **known-class** loss it averages over, and zero-day performance is
 not what that loss measures. **Checkpoint averaging is not a route to zero-day stability.**
 
-### ⬜ Cross-dataset (Phase 6) — BLOCKED, not skipped
+### ⬜ Cross-dataset (Phase 6) — ~~BLOCKED, not skipped~~ NOT RUN
+
+> 🔴 **RETRACTED 2026-09-09 — the blocker is scope, not access.** CSE-CIC-IDS2018 is on the AWS Registry of Open Data (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`, no account needed, redistribution permitted with citation). Flow CSVs are a few GB. **We have not run it; we were never unable to.**
+
 
 **CIC-IDS2018 is not present locally** (`data/` holds only the 2017 `raw_csv`, `raw_csv_full` and
 `processed`). Recorded in `protocol_variance.json` rather than silently omitted; it needs a separate
@@ -925,7 +935,7 @@ method comparison table is now populated (4 tiers, 11 new methods).**
    "structurally impossible" claim it was meant to document.** Phase 6 still **blocked** on
    CIC-IDS2018 not being on this machine.
 
-**Blocked, not forgotten:** Phase 6 cross-dataset needs **CIC-IDS2018**, which is not on this machine.
+**Not run, not blocked:** Phase 6 cross-dataset needs **CIC-IDS2018**, which is not on this machine ~~and is unavailable~~ — 🔴 **RETRACTED 2026-09-09 — the blocker is scope, not access.** CSE-CIC-IDS2018 is on the AWS Registry of Open Data (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`, no account needed, redistribution permitted with citation). Flow CSVs are a few GB. **We have not run it; we were never unable to.**
 
 > ⚠️ **Two things the next session must not re-derive wrongly:**
 > - **Determinism is ON** (`determinism.py`, intra=16/inter=2, byte-identical at full scale). The
