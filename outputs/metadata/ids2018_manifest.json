@@ -1,0 +1,70 @@
+{
+  "bucket": "https://cse-cic-ids2018.s3.amazonaws.com",
+  "prefix": "Processed Traffic Data for ML Algorithms/",
+  "dest": "C:\\Users\\shaun\\Downloads\\NeuroSymbolicIDS\\data\\raw_2018",
+  "n_files": 10,
+  "total_bytes": 6886649507,
+  "all_complete": true,
+  "files": [
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Friday-02-03-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 352368373,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Friday-16-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 333723605,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Friday-23-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 382840456,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Thuesday-20-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 4054925350,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Thursday-01-03-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 107842858,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Thursday-15-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 375945899,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Thursday-22-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 382636202,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Wednesday-14-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 358223333,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Wednesday-21-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 328893673,
+      "complete": true
+    },
+    {
+      "key": "Processed Traffic Data for ML Algorithms/Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "file": "Wednesday-28-02-2018_TrafficForML_CICFlowMeter.csv",
+      "bytes": 209249758,
+      "complete": true
+    }
+  ]
+}

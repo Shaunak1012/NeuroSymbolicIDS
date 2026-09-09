@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (61 Python scripts, plus 8 shell launchers).
+> Last verified against source: **2026-09-05** (62 Python scripts, plus 8 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1394,6 +1394,36 @@ project does not fetch. Report the truncation as a defect of the distributed art
 loss figure the data cannot support.
 
 **Writes** `outputs/metadata/ids2018_audit.json`.
+
+## `scripts/preprocess_2018.py` — Phase 6
+
+**Purpose**: CSE-CIC-IDS2018 → the paper-aligned split. Mirrors `preprocess.py` + `preprocess_paper.py`
+so the replication runs the **same protocol on the same feature basis**. Four deviations, each forced
+by 2018 and each stated rather than absorbed:
+
+1. **Two schemas normalised** — the four identifier columns dropped from the 84-column file.
+2. **Feature renames are READ from `schema_map_2018.json`**, not duplicated, so the map and the
+   preprocessor cannot drift.
+3. **67 features, not 68** — `Fwd Header Length.1` (a 2017 CICFlowMeter duplicate) has no counterpart.
+   ⚠️ **Any cross-dataset claim must state this**: the two feature matrices are not the same width.
+4. **Repeated header rows dropped**, count reported per file.
+
+🔴 **The truncation caveat travels with every number it produces.** Published class counts are
+**lower bounds** (see `audit_2018.py`); this script cannot correct that without the PCAP, it only
+refuses to let the numbers read as complete.
+
+🔑 **Class names stay 2018's own, deliberately.** Rewriting `DoS attacks-Hulk` → 2017's `DoS Hulk`
+would manufacture a correspondence the data does not establish — 2018's DDoS is **three different
+tools**, and its `FTP-BruteForce` is not a rerun of 2017's `FTP-Patator`. `EQUIVALENT_2017` is
+annotation for the write-up only and is **not applied to the data**.
+
+🔴 **It refuses to invent the zero-day split.** Without `zero_day_classes_2018` in `config.yaml` it
+writes the features and stops with a banner. Mirroring the 2017 split would **not** reproduce the
+2017 regime: **Bot has ~286k flows in 2018 against 1,956 in 2017**, so making it zero-day tests a
+well-powered version of a problem that was defined by being rare. Defaulting that silently is how a
+replication ends up answering a different question than the one it claims.
+
+**Writes** `data/processed/paper_2018/` + `outputs/metadata/preprocess_2018.json`.
 
 ## `scripts/run_all.py`
 

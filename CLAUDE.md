@@ -333,7 +333,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 61 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **8 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 62 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **8 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -346,7 +346,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 61 Python scripts + 8 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 62 Python scripts + 8 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline
@@ -355,7 +355,8 @@ NeuroSymbolicIDS/
 │   ├── kg, kg_visualize, explain                  ← PHASE 4 (KG + explainability)
 │   ├── fusion_kg, fusion_multi, significance,     ← PHASE 5 (fusion + rigor)
 │   │   significance_seed, latency, fitted_fusion
-│   ├── fetch_ids2018, schema_2018, audit_2018     ← PHASE 6 (cross-dataset)
+│   ├── fetch_ids2018, schema_2018, audit_2018,    ← PHASE 6 (cross-dataset)
+│   │   preprocess_2018
 │   ├── skyline_oracle, rescore_logits,            ← analysis / one-off
 │   │   fusion_beaconlike, modality_analysis,
 │   │   kg_precheck, kg_readiness, kg_criteria,

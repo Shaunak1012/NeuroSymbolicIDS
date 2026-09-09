@@ -498,6 +498,35 @@ The separation is now structural rather than a recurring cleanup chore.
 
 ## High
 
+### [OPEN 2026-09-09] 🔴 `timeline.py` is 2017-only, so Phase 6 has no usable temporal axis
+
+**2018 carries the same timestamp defect as 2017** — a 12-hour clock with no AM/PM.
+`audit_2018.py` shows `Friday-02-03-2018` with a first stamp of **08:47:38** and a last of
+**02:08:33**: the capture cannot run backwards, so the clock is ambiguous and a naive sort reorders
+it. This is the defect that **moved all 114,658 test rows** in 2017 and that non-negotiable #8 exists
+to prevent.
+
+**But `timeline.py` cannot be pointed at 2018.** It corrects the 2017 format *and validates against
+the published 2017 capture schedule*, raising on mismatch — which is what makes it trustworthy and
+also what makes it 2017-specific. 2018 is a different three-week schedule in Feb–Mar 2018.
+
+✅ **Mitigated, not ignored: `preprocess_2018.py` DROPS the Timestamp column rather than carrying the
+raw strings.** Storing them would leave a loaded gun in `data/processed/paper_2018/` — the next
+person sorts by them and silently reorders the capture. Dropping the column makes the gap explicit at
+the point of use rather than discoverable after a wrong result.
+
+⚠️ **What this blocks.** The 4-architecture replication (CNN / LTN control / LTN+Ax6 / autoencoder)
+does **not** need timestamps and is unaffected. **The KG does** — its entire emerging-pattern rule is
+burstiness over a chronological stream — so *no KG result can be produced on 2018* until this is
+fixed. Any claim that the KG's growth signal does or does not replicate is **out of reach right now**,
+and the write-up must not imply otherwise.
+
+**Fix, when needed:** extend `timeline.py` with a 2018 schedule table and an AM/PM disambiguation
+pass, keeping the self-test contract (validate against the published schedule, raise on mismatch).
+⚠️ **Do not simply parse with `dayfirst=True` and move on** — that is precisely what produced the
+2017 defect, and the 2017 experience is that it fails silently rather than loudly.
+
+
 ### [OPEN 2026-07-29] 🔑 Inference-time fusion cannot learn to weight a zero-day signal
 **The structural wall, and the proposed way through it.** A fitted combiner must be calibrated on
 validation data, which under this protocol contains **no zero-day flows by construction**. So it
