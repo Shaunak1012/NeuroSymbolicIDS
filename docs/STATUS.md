@@ -1,6 +1,6 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-05**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-09**.
 
 ## ▶ RESUME HERE (next session)
 
@@ -33,7 +33,22 @@ from knowledge and flagged in the draft as unverified. ~~related work~~ ✅ **§
 from an actual literature sweep, 9 of 13 references confirmed against a primary source ·
 ~~reproducibility-artifact section~~ ✅ **§10**, backed by `run_all.py` (19 stages, 0 missing).
 
-✅ **ALL ELEVEN SECTIONS OF THE PAPER ARE DRAFTED.** ~~rewrite §5's fitted-fuser row~~ ✅ **done** — §5 now carries only
+✅ **ALL ELEVEN SECTIONS OF THE PAPER ARE DRAFTED**, and the draft has had **one adversarial
+review pass (2026-09-09)** — five findings, all applied.
+
+🔴 **The headline moved and everyone should know why.** The resolution-failure figure was computed
+over **all** methods while **11 are tie-degenerate** (~half of all flows in one tie block), which
+§3b already says makes their PR-AUC incomparable. Re-running also showed the record had grown to
+**42** methods, not the 40 quoted. Corrected and now **cited from the record**:
+**37 of 169 pairs (22 %)** over **31** non-degenerate methods, worst valid pair `deep_cnn_lstm` vs
+`linear_svm` at **0.0052 apart / 16.6×**, ≥0.98 regime **22 methods spanning 18.5×**, ρ **+0.582**.
+The inclusive figures (75/249, 30 %) are **disclosed beside them**, not dropped.
+⚠️ **The old showcase pair was itself disqualified** — `ltn_anat_w2p0` is tie-degenerate.
+
+🔑 **`verify_draft.py` reported 0 mismatches against the corrected draft before it was strengthened**,
+because the inclusive numbers still appear in the disclosure paragraph. It now checks **both**
+populations — **62 verified, 0 mismatched**. A checker that passes a wrong headline is *a check that
+cannot fire*, in a new costume. ~~rewrite §5's fitted-fuser row~~ ✅ **done** — §5 now carries only
 the surviving structural limit and the positive half moved to §6 · ~~the fitted fuser~~ ✅ · ~~Phase
 5's latency~~ ✅ · ~~figures 2–5~~ ✅ **built 2026-08-10**.
 

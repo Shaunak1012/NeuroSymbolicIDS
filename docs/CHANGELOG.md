@@ -2,6 +2,65 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-09 (reviewer pass on the draft — the headline was inflated, and the record had moved)
+
+### 🔴 THE HEADLINE RESOLUTION-FAILURE NUMBER WAS COMPUTED OVER METHODS THE PAPER ITSELF DISQUALIFIES
+
+An adversarial read-through of `paper_draft.md` — interpretation, not transcription, so
+`verify_draft.py` could not have caught it — found the §1/abstract headline computed over **all**
+methods when **11 of them are tie-degenerate**: they place ~half of all flows in a single tie block.
+**§3b already states why that makes their PR-AUC incomparable to a continuous scorer's**, and a
+"≥2× apart on macro" test is exactly a comparison of PR-AUCs. The paper applied that caveat to two
+Tier-A models and never to its own headline.
+
+**A second staleness surfaced on re-running:** the record now holds **42** methods, not the 40 the
+draft quoted — channels were added since the figure was last generated.
+
+| | as drafted | corrected (cited) | inclusive (disclosed) |
+|---|---:|---:|---:|
+| methods | 40 | **31** | 42 |
+| pairs ≥2× apart / comparable | 67 / 204 | **37 / 169** | 75 / 249 |
+| headline fraction | 33 % | **22 %** | 30 % |
+| worst pair | `deep_cnn_lstm` vs `ltn_anat_w2p0`, 0.0028 / 18× | **`deep_cnn_lstm` vs `linear_svm`, 0.0052 / 16.6×** | 0.0028 / 17.9× |
+| ≥0.98 regime | 25 methods, span 20× | **22 methods, span 18.5×** | 27, 19.9× |
+| Spearman ρ | +0.568 | **+0.582** (p=0.0006) | +0.589 |
+
+🔴 **The showcase example was itself disqualified** — `ltn_anat_w2p0` is on the tie-degenerate list.
+✅ **The claim survives every correction**, and ρ *improves*. The draft now leads with the excluded
+population and **discloses the inclusive figures beside it**, rather than quietly picking the larger
+number.
+
+### 🔧 Both populations are now computed by the script, and both are checked
+
+`field_gap.py` emits `discrimination` **and** `discrimination_excl_tie_degenerate` (with the worst
+pair for each), so the corrected headline comes from the record rather than from an ad-hoc
+recomputation.
+
+🔑 **`verify_draft.py` needed strengthening for the same reason the defect existed.** Pointed only at
+the inclusive population, it reported **0 mismatches against the corrected draft** — because the
+inclusive numbers still appear in the disclosure paragraph. **A checker that passes a draft whose
+headline is wrong is "a check that cannot fire" in a new costume.** It now verifies both populations
+explicitly: **62 verified, 0 mismatched** (was 52).
+
+### Four further review findings, all applied
+
+- **§4's ρ = −0.090 is a dispersion statistic on n = 3, and §7 says n = 3 cannot estimate dispersion.**
+  The defence existed and was unwritten; it now is: *a three-seed estimate cannot tell us Bot's ρ is
+  −0.090 rather than −0.02, but it is entirely adequate to tell us it is not 0.7* — and only the
+  second claim is load-bearing.
+- **The 42 methods are all ours**, and §1 said "40 methods" without saying whose. The step from our
+  zoo to *the literature* is now labelled an **argument**, resting on two checkable things: the 42
+  span the families the field publishes, and they land inside its reported 0.977–0.993 band.
+- **§5's table cell read as the opposite of §6** for anyone skimming tables ("structurally
+  impossible" vs "does work"). Scope qualifier moved inline.
+- **"One cause, four symptoms" separated into measured and inferred.** RF's instability and the CNN's
+  are measured on the same axis; the purity lottery and Mahalanobis spread are explained, not
+  isolated by a manipulation. Labelled as an explanatory claim, not a fifth measurement.
+
+Minor: abstract/contributions disagreed on the retraction count (now "two — one positive, one
+negative"); three drafting-scaffolding phrases cut; the review-depth claim now carries the
+scripted-window caveat locally instead of only in §8.
+
 ## 2026-09-05g (related work drafted from a literature sweep — the paper is complete in draft)
 
 ### 📚 §9 Related work, positioned against thirteen references

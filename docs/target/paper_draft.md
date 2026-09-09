@@ -19,11 +19,11 @@
 
 Published intrusion-detection results on CIC-IDS2017 cluster above 99 % on the metric the field
 reports, and are routinely used to claim capability against novel attacks. We show that this metric
-**cannot resolve that capability**: across 40 methods evaluated identically, **67 of 204 method pairs
-(33 %) are statistically indistinguishable on the published metric while differing by a factor of two
-or more in macro zero-day PR-AUC**, the worst pair sitting 0.0028 apart on the former and **18×**
+**cannot resolve that capability**: across 31 methods evaluated identically, **37 of 169 method pairs
+(22 %) are statistically indistinguishable on the published metric while differing by a factor of two
+or more in macro zero-day PR-AUC**, the worst pair sitting 0.0052 apart on the former and **16.6×**
 apart on the latter. The metric is not noisy and not uninformative — its run-to-run standard
-deviation is 0.0020 and it correlates with zero-day performance at ρ = +0.568 — it is simply too
+deviation is 0.0021 and it correlates with zero-day performance at ρ = +0.582 — it is simply too
 coarse, in the regime the field reports in, to separate methods on the axis the claims are about.
 
 Underneath that measurement failure we identify a mechanism. A closed-set discriminative model learns
@@ -39,8 +39,9 @@ We then show what does not remove it: four deep architectures, seven classical b
 benign-only anomaly methods, a nine-scorer out-of-distribution battery, calibration, abstention, and
 **our own symbolic pillar**, which contributes −0.0004 (n.s.) alone and *significantly harms* the
 system when stacked on the knowledge graph. We report one partial success (a knowledge-graph channel,
-+0.0528 macro, direction established on 3/3 seeds and magnitude only bounded to 0.027–0.088) and one
-retraction of our own negative claim. Throughout, we report a measured reproducibility floor
++0.0528 macro, direction established on 3/3 seeds and magnitude only bounded to 0.027–0.088) and
+**two retractions of our own claims — one positive, one negative**. Throughout, we report a measured
+reproducibility floor
 (SD 0.0222) and express every delta as a multiple of it; doing so retracted one of our own headline
 results.
 
@@ -54,34 +55,51 @@ claim what they measure — separating benign traffic from attack families the m
 They are not. They are routinely offered as evidence of capability against *novel* attacks, which is
 the capability that matters operationally and the one the metric is least able to speak to.
 
-We make that gap quantitative. Evaluating 40 methods under one protocol and scoring each on both the
-published metric (overall binary detection across all fifteen classes) and on **macro zero-day
-PR-AUC** over held-out attack families, we find:
+We make that gap quantitative. ⚠️ **The 40 methods are ours, and that matters for how the claim
+should be read.** They are not 40 published systems re-run; they are 40 models we trained under one
+protocol — classical baselines, deep architectures, benign-only anomaly detectors, neuro-symbolic
+variants and fusions — precisely so that every one is scored identically on both axes, which
+published numbers never are. **The step from "these 40" to "the literature" is therefore an
+argument, not a measurement**, and it rests on two things we can check: the 40 span the algorithm
+families the field publishes, and **they land inside the field's own reported band** (0.977–0.993 on
+the published metric). Scoring each on that metric and on **macro zero-day PR-AUC** over held-out
+families, we find:
 
-- **67 of 204 comparable method pairs (33 %) are indistinguishable on the published metric while
-  differing ≥2× on zero-day capability.** "Indistinguishable" means a difference below **0.0058**,
-  which is two standard deviations of a *difference* derived from a measured median run-to-run
-  SD of **0.0020**. We state the band rather than the count alone, because the count is meaningless
+- **37 of 169 comparable method pairs (22 %) are indistinguishable on the published metric while
+  differing ≥2× on zero-day capability.** "Indistinguishable" means a difference below **0.0060**,
+  two standard deviations of a *difference* derived from a measured median run-to-run SD of
+  **0.0021**. We state the band rather than the count alone, because the count is meaningless
   without it.
-- The extreme case, `deep_cnn_lstm` versus `ltn_anat_w2p0`, sits **0.0028 apart on the published
-  metric and 18× apart on zero-day**. We give the extreme only alongside the distribution above; on
-  its own it would be cherry-picking.
-- Restricting to the field's own reporting regime — the 25 methods scoring ≥0.98, which is where
-  published work lives — those methods sit **within 0.014 of one another and span 20×** on zero-day.
-  The ≥0.98 cut is chosen *because it is the field's regime*, not because it separates the data.
+- The extreme case, `deep_cnn_lstm` versus `linear_svm`, sits **0.0052 apart on the published metric
+  and 16.6× apart on zero-day**. We give the extreme only alongside the distribution above; on its
+  own it would be cherry-picking.
+- Restricting to the field's own reporting regime — the 22 methods scoring ≥0.98, which is where
+  published work lives — those methods sit **within 0.0144 of one another and span 18.5×** on
+  zero-day. The ≥0.98 cut is chosen *because it is the field's regime*, not because it separates the
+  data.
+
+🔴 **These figures exclude 11 tie-degenerate scorers, and the exclusion is not optional.** Of the 42
+methods we evaluated, eleven — `decision_tree`, `knn_k5`, `naive_bayes`, four LTN variants and the
+four knowledge-graph channels — place roughly half of all flows in a **single tie block**. §3b
+explains why that makes their PR-AUC incomparable to a continuous scorer's, and a "≥2× apart on
+macro" test is precisely a comparison of PR-AUCs. Including them gives **75 of 249 pairs (30 %)** and
+a headline extreme of 17.9×; both are inflated by the same artefact the paper elsewhere warns about,
+so we report the excluded population and give the inclusive figures here rather than quietly
+choosing the larger one. **The claim survives the exclusion — 22 % and 16.6× — and the rank
+correlation barely moves (+0.589 → +0.582).**
 
 **Two stronger versions of this claim are false and we do not make them.** The published metric is
-not uninformative about zero-day performance: Spearman ρ = **+0.568** (p = 0.0001) across the 40
-methods, and **+0.41** even within the ≥0.98 regime. Nor is its spread within its own noise: it is a
-*precise* measurement, with a median run-to-run SD of 0.0020, roughly ten times below its spread
-across methods. The metric is precise, weakly informative, and **too coarse in the regime that
+not uninformative about zero-day performance: Spearman ρ = **+0.582** (p = 0.0006) over the
+non-degenerate methods, **+0.589** over all 42, and it stays positive within the ≥0.98 regime. Nor is
+its spread within its own noise: it is a *precise* measurement, with a median run-to-run SD of
+0.0021, roughly ten times below its spread across methods. The metric is precise, weakly informative, and **too coarse in the regime that
 matters** — which is a narrower and more useful statement than either strong form, and it is the one
 our data support. Both refutations are hard-coded into the output of the script that produces the
 figure, so the strong forms cannot be reintroduced by accident.
 
 **Contributions.**
 
-1. A resolution failure, demonstrated across 40 methods on a single axis (§3, Fig. 1).
+1. A resolution failure, demonstrated across 42 methods scored on a single axis (§3, Fig. 1).
 2. A mechanism for why zero-day detection is hard rather than merely unmeasured, with four
    independent symptoms traced to one cause (§4).
 3. A negative result that is expensive to obtain: four categories of method, a standard OOD battery,
@@ -130,14 +148,16 @@ are separate facts, and the re-run was necessary regardless of which way it came
 
 **(a) One model, two protocols.** Holding the model fixed and changing only the evaluation protocol
 moves XGBoost from **0.9936 to 0.6372** and our CNN from **0.9928 to 0.6446** — a gap of **0.3564**
-produced by nothing but the question asked. This is the paper's opening argument and a reader cannot
-be expected to notice it unprompted.
+produced by nothing but the question asked.
 
 **(b) Seven classical baselines.** All seven land in **0.977–0.985** on the published metric, against
 the CNN's 0.9928 — the field's regime. On zero-day they span **0.0374 to 0.6049, a factor of 16**.
 Logistic regression is **98 % as good as the CNN on the published metric and 17× worse on zero-day.**
 ⚠️ Two members of this tier are **score-degenerate**: `decision_tree` and `knn` place 50.1 % and
 49.8 % of all flows in a single tie block, so their PR-AUC is not comparable to a continuous scorer's.
+**This is the same property that removes eleven methods from §1's headline** — it is a general
+exclusion criterion in this paper, not a Tier-A footnote, and `field_gap.py` reports both populations
+so the effect of applying it is visible rather than assumed.
 The best *valid* Tier-A result is the MLP at a three-seed mean of **0.4965** — not the n = 1 figure of
 0.5360 that a single run reported. **k-NN is not citable at all**: its macro spans 0.0440–0.4270
 across seeds, because the only thing the seed changes is which 50,000 rows it memorises.
@@ -175,8 +195,7 @@ defect described in §2.
 
 ## §4 The mechanism — why a closed-set model cannot reach a novel class
 
-This is the body of the paper. The gap in §3 is not merely unmeasured; it is hard, and we can say
-why.
+The gap in §3 is not merely unmeasured; it is hard, and we can say why.
 
 **The synthesis.** A closed-set discriminative model learns only those features that separate the
 classes present in its training objective. A novel class is therefore reachable exactly to the extent
@@ -195,16 +214,28 @@ We establish this on Bot, where the overlap is empty:
   0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
   does not (ρ = 0.827)**. The property therefore belongs to *closed-set discriminative learning*, not
   to neural networks.
+  ⚠️ **This is a stability statistic computed over three seeds, and §7 warns that n = 3 is far too
+  few to estimate a dispersion.** We rely on it here for one reason, which we state rather than
+  assume: the quantity is not marginal. Bot sits at ρ ≈ 0 while every other family sits at 0.68–0.83
+  — a categorical separation, not a difference of degree — and it reproduces across two unrelated
+  model families while the autoencoder, on the same three seeds, returns 0.827. **A three-seed
+  estimate cannot tell us that Bot's ρ is −0.090 rather than −0.02 or +0.05; it is entirely adequate
+  to tell us it is not 0.7.** Only the second claim is load-bearing.
 - **The information is present.** An oracle given Bot labels reaches PR-AUC **0.9988** from the same
   68 flow features (Web BF 0.9999, XSS 0.9984). ⚠️ The oracle trains on zero-day labels; it is an
   **upper bound, not a method**, and it is excluded from every method comparison in this paper. Its
   role is to establish that the barrier is supervision, not information — and, in passing, that it is
   not modality either: there is no missing information for packet payloads to supply.
 
-**One cause, four symptoms.** This single mechanism accounts for four otherwise unrelated
-observations: the clustering-purity lottery we encountered building the knowledge graph, the spread
-in Mahalanobis Bot scores, RandomForest's Bot swing across seeds, and the CNN's own failure. We
-regard the unification, rather than any individual measurement, as the contribution.
+**One cause, four symptoms — and we separate what is measured from what is inferred.** The
+mechanism accounts for four otherwise unrelated observations: the clustering-purity lottery we hit
+building the knowledge graph, the spread in Mahalanobis Bot scores, RandomForest's Bot swing across
+seeds, and the CNN's own failure. ⚠️ **Two of those links are measured and two are argued.**
+RandomForest's instability is measured on the same axis as the CNN's (ρ = 0.068 against 0.827 for the
+autoencoder), and the CNN's is the direct observation. The purity lottery and the Mahalanobis spread
+are **independently observed phenomena that the mechanism explains**; we did not run a manipulation
+that isolates the mechanism as their cause. We regard the unification as the contribution, and we
+label it as an explanatory claim rather than a fifth measurement.
 
 **No standard out-of-distribution score rescues it.** We ran nine scorers — MSP, max-logit, energy at
 four temperatures, entropy, ODIN at two settings, and margin — against a falsification threshold of
@@ -228,7 +259,7 @@ architecture as much as anyone else's.
 | **The symbolic pillar itself** | **−0.0004 (n.s.)** alone, and it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043. |
 | **Calibration** | Isotonic regression reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) — a **287×** gap. **The better the calibration, the wider the gap.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage. |
-| **A fitted fuser over the channel that actually helps** | **Structurally impossible.** The knowledge-graph channel's score is defined by streaming the *test* set into windows, so it has **no validation-side score at all** — the channel with the largest measured gain cannot enter a combiner fitted on held-out data under any protocol. |
+| **A fitted fuser over the channel that actually helps** — ⚠️ **scope: this row is about the knowledge-graph channel only; a fitted combiner over other channels *does* work, see §6** | **Structurally impossible for this channel.** The knowledge-graph score is defined by streaming the *test* set into windows, so it has **no validation-side score at all** — the channel with the largest measured gain cannot enter a combiner fitted on held-out data under any protocol. |
 
 Three of these deserve their consequence stated rather than left implicit.
 
@@ -269,7 +300,10 @@ established and the magnitude as a range.
 **The operational statement is better than the PR-AUC one.** Reaching half of the zero-day flows
 requires reviewing **52 %** of all traffic with the CNN, and **29–32 %** with the knowledge graph or
 the fusion. That 20-point reduction in review depth is the clearest operational statement of what the
-knowledge graph buys, and it is more meaningful than any PR-AUC delta. 🔑 The accompanying finding is
+knowledge graph buys, and it is more meaningful than any PR-AUC delta. ⚠️ **It inherits the
+scripted-window caveat below**: the knowledge-graph channel's advantage rests on temporal
+concentration that this capture's attack schedule creates, so the depth reduction should be read as
+an upper bound on what a real network would give. 🔑 The accompanying finding is
 worse news and more important: **at any deployable alert budget you see only known attacks** —
 precision is ~1.000 at every budget, with **zero zero-day flows in the top 1,000**. A 100 %-precise
 alert stream containing no novel attacks is exactly the failure a headline PR-AUC of 0.64 does not
