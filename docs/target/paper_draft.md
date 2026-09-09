@@ -9,9 +9,9 @@
 > [conference_roadmap.md §4](conference_roadmap.md)), and committing to LaTeX before the venue is
 > chosen buys nothing. **Section numbering matches the outline** so the two stay diffable.
 >
-> ✅ **All eleven sections are drafted (§9 related work added 2026-09-05).** ⚠️ **Four of the
-> thirteen references still need a bibliographic pass** — see the note above the reference list.
-> Figures are built (`paper_figures.py`, `field_gap.py`) and referenced by number.
+> ✅ **All eleven sections are drafted, all thirteen references verified, and one adversarial review
+> pass applied (2026-09-09).** Figures are built (`paper_figures.py`, `field_gap.py`) and referenced
+> by number.
 
 ---
 
@@ -423,9 +423,16 @@ which beats the mean and *not* the maximum — because the maximum was never a t
 
 ## §8 Limitations
 
-1. **Single dataset.** Cross-dataset validation on CIC-IDS2018 is **blocked** — the data is not
-   available to us — rather than skipped. This is the weakest point in the paper and we state it
-   plainly rather than framing it as future work.
+1. **Single dataset — and we correct our own framing of why.** ~~Cross-dataset validation on
+   CIC-IDS2018 is *blocked* — the data is not available to us.~~ 🔴 **That was wrong, and checking it
+   during the bibliographic pass is what caught it.** CSE-CIC-IDS2018 is published on the AWS
+   Registry of Open Data and downloads without an AWS account
+   (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`), under a licence that explicitly
+   permits redistribution with citation; the processed flow CSVs are a few GB, the raw logs ~450 GB.
+   **So the honest limitation is that we did not do it, not that we could not.** This remains the
+   weakest point in the paper, and it is a scope limitation rather than an access one — a reviewer
+   can verify the dataset's availability in under a minute, and an access excuse would not have
+   survived that check.
 2. **Three adequately powered zero-day families, not six.** And Web Brute Force and XSS correlate at
    **r = +0.992** (same capture window, same tool), so the macro average is effectively ⅓ Bot and ⅔
    *one* web signal. Regrouping shifts values by 0.11–0.15 but **preserves every ordering** we report.
@@ -510,19 +517,22 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
 
 ### References
 
-> ⚠️ **Citation-verification status, stated because this project treats an unchecked citation the
-> same way it treats an unchecked number.** [1]–[9] were confirmed against a primary or authoritative
-> source while drafting (publisher page, DOI, or — for [8] — the PDF held in this repository).
-> **[10]–[13] are well-established works cited from knowledge, and their venue and page details still
-> need a bibliographic pass** before submission. Do not typeset the bibliography until that pass is
-> done.
+> ✅ **Citation-verification status: all thirteen references were confirmed against a primary or
+> authoritative source (publisher page, arXiv record, DOI, or — for [8] — the PDF held in this
+> repository).** The bibliographic pass was completed 2026-09-09.
+>
+> 🔴 **It caught a real error, which is why the pass was not skipped.** Reference [10] was drafted as
+> *"E. M. Rudd et al."* from memory; the first author is **Steve Cruz**, and Rudd is third. An
+> unchecked citation gets the same treatment here as an unchecked number, and this is what that
+> policy bought.
 
 1. I. Sharafaldin, A. H. Lashkari, A. A. Ghorbani. *Toward Generating a New Intrusion Detection
    Dataset and Intrusion Traffic Characterization.* ICISSP 2018, pp. 108–116.
 2. G. Engelen, V. Rimmer, W. Joosen. *Troubleshooting an Intrusion Detection Dataset: the CICIDS2017
    Case Study.* IEEE Security and Privacy Workshops (SPW), 2021.
-3. *Errors in the CICIDS2017 Dataset and the Significant Differences in Detection Performances It
-   Makes.* Springer, 2023. ⚠️ author list to be completed.
+3. M. Lanvin, P.-F. Gimenez, Y. Han, F. Majorczyk, L. Mé, É. Totel. *Errors in the CICIDS2017
+   Dataset and the Significant Differences in Detection Performances It Makes.* CRiSIS 2022, Lecture
+   Notes in Computer Science vol. 13857, Springer, 2023. doi:10.1007/978-3-031-31108-6_2
 4. P. Goldschmidt, D. Chudá. *Network Intrusion Datasets: A Survey, Limitations, and
    Recommendations.* Computers & Security, vol. 156, 2025, art. 104510.
 5. R. Sommer, V. Paxson. *Outside the Closed World: On Using Machine Learning for Network Intrusion
@@ -534,14 +544,18 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
    Intelligence, vol. 303, 2022, art. 103649. doi:10.1016/j.artint.2021.103649
 8. A. Bizzarri, B. Jalaian, F. Riguzzi, N. D. Bastian. *A Neuro-Symbolic Artificial Intelligence
    Network Intrusion Detection System.* ICCCN 2024.
-9. A. Bizzarri et al. *Neurosymbolic AI for Network Intrusion Detection Systems: A Survey.* 2025.
-   ⚠️ journal and volume to be completed.
-10. E. M. Rudd et al. *Open Set Intrusion Recognition for Fine-Grained Attack Categorization.* 2017.
+9. A. Bizzarri, C. Yu, B. Jalaian, F. Riguzzi, N. D. Bastian. *Neurosymbolic AI for Network
+   Intrusion Detection Systems: A Survey.* Journal of Information Security and Applications,
+   vol. 94, 2025, art. 104205.
+10. S. Cruz, C. Coleman, E. M. Rudd, T. E. Boult. *Open Set Intrusion Recognition for Fine-Grained
+    Attack Categorization.* IEEE International Symposium on Technologies for Homeland Security (HST),
+    2017.
 11. D. Hendrycks, K. Gimpel. *A Baseline for Detecting Misclassified and Out-of-Distribution Examples
     in Neural Networks.* ICLR 2017.
 12. S. Liang, Y. Li, R. Srikant. *Enhancing the Reliability of Out-of-Distribution Image Detection in
     Neural Networks.* ICLR 2018.
-13. W. Liu, X. Wang, J. Owens, Y. Li. *Energy-Based Out-of-Distribution Detection.* NeurIPS 2020.
+13. W. Liu, X. Wang, J. D. Owens, Y. Li. *Energy-Based Out-of-Distribution Detection.* Advances in
+    Neural Information Processing Systems (NeurIPS), vol. 33, 2020.
 
 ---
 

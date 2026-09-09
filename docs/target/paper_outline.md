@@ -179,7 +179,7 @@ have to be visibly higher than the field's. This section is the credibility of �
 
 ## §8 Limitations (write these before a reviewer does)
 
-1. **Single dataset.** Cross-dataset (CIC-IDS2018) is **blocked**, not skipped — not available locally.
+1. **Single dataset.** Cross-dataset (CIC-IDS2018) ~~is **blocked**, not skipped — not available locally~~ **was NOT RUN.** 🔴 **RETRACTED 2026-09-09 — the blocker is scope, not access.** CSE-CIC-IDS2018 is on the AWS Registry of Open Data (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`, no account needed, redistribution permitted with citation). Flow CSVs are a few GB. **We have not run it; we were never unable to.**
    This is the weakest point in the paper; state it plainly.
 2. **Three powered zero-day families**, not six. Bot / Web BF / XSS. And **Web BF and XSS correlate at
    r = +0.992** (same Thursday campaign, same tool), so macro is ⅓ Bot + ⅔ *one* web signal.
@@ -256,7 +256,7 @@ surrounding paragraph.
 1. ~~**Phase 5's remaining ONE**~~ ✅ **PHASE 5 COMPLETE 2026-09-05** — calibration ✅, latency ✅
    (`latency.py`), fitted fuser ✅ (`fitted_fusion.py`). 🔴 **But §5's fitted-fuser row is now a
    RETRACTION and must be rewritten as one** — the pre-registered falsifier fired.
-2. **Cross-dataset** — blocked on data.
+2. **Cross-dataset** — ~~blocked on data~~ **not run**; freely downloadable, see §8.1.
 3. **Optional:** post-flag LTN-control sweep at n=6, the only route to reopening C2.
 4. ~~**Figures 2–5.**~~ ✅ **built 2026-08-10** (`paper_figures.py`).
 5. 🔴 **NEW — decide how to report the transductive fusion caveat.** `fusion_multi.py` fuses by
