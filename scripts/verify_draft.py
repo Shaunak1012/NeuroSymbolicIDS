@@ -109,13 +109,39 @@ def unbacked(label, why):
 
 fg = REC["field_gap"]
 if fg:
+    # BOTH POPULATIONS ARE CHECKED, and this is the point of the block.
+    #
+    # A 2026-09-09 review found the draft quoting the headline over ALL methods
+    # when 11 of them are tie-degenerate and the paper's own 3b says their
+    # PR-AUC is not comparable. The draft now leads with the EXCLUDED figures and
+    # reports the inclusive ones beside them, so the checker has to verify both --
+    # checking only the inclusive set would pass a draft whose headline was wrong,
+    # which is the "a check that cannot fire" failure in a new costume.
     d = fg["discrimination"]
-    chk("field: pairs 2x apart on macro", "field_gap", d["pairs_2x_apart_on_macro"], "{:d}")
-    chk("field: comparable pairs", "field_gap", d["pairs_indistinguishable"], "{:d}")
+    k = fg["discrimination_excl_tie_degenerate"]
+    chk("field: run-to-run SD", "field_gap", d["field_noise_sd"], "{:.4f}")
     chk("field: indistinguishable band", "field_gap", d["indistinguishable_band"], "{:.4f}")
-    chk("field: run-to-run SD", "field_gap", fg["discrimination"]["field_noise_sd"], "{:.4f}")
-    chk("field: n methods", "field_gap", fg["n_methods"], "{:d}")
-    chk("field: spearman rho", "field_gap", fg["spearman"]["rho"], "+{:.3f}")
+    chk("field: n methods evaluated", "field_gap", fg["n_methods"], "{:d}")
+    chk("field: spearman rho (all)", "field_gap", fg["spearman"]["rho"], "+{:.3f}")
+    chk("field: spearman rho (excl tie-degenerate)", "field_gap",
+        fg["spearman_excl_tie_degenerate"]["rho"], "+{:.3f}")
+
+    # inclusive population -- must appear, because the draft discloses it
+    chk("field: pairs 2x apart (ALL)", "field_gap", d["pairs_2x_apart_on_macro"], "{:d}")
+    chk("field: comparable pairs (ALL)", "field_gap", d["pairs_indistinguishable"], "{:d}")
+    chk("field: fraction (ALL)", "field_gap", 100 * d["fraction"], "{:.0f} %")
+
+    # excluded population -- THE CITABLE ONE, and the headline the draft leads with
+    chk("field: n methods after exclusion", "field_gap", k["n_methods"], "{:d}")
+    chk("field: pairs 2x apart (EXCL)", "field_gap", k["pairs_2x_apart_on_macro"], "{:d}")
+    chk("field: comparable pairs (EXCL)", "field_gap", k["pairs_indistinguishable"], "{:d}")
+    chk("field: fraction (EXCL)", "field_gap", 100 * k["fraction"], "{:.0f} %")
+    chk("field: worst valid pair, field gap", "field_gap",
+        k["worst_pair_field_gap"], "{:.4f}")
+    chk("field: worst valid pair, macro ratio", "field_gap",
+        k["worst_pair_macro_ratio"], "{:.1f}")
+    for m in k["worst_pair"]:
+        chk("field: worst valid pair names (%s)" % m, "field_gap", m, "{}")
 
 ab = REC["ablation"]
 if ab:

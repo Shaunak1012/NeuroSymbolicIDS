@@ -196,28 +196,65 @@ def main():
     print(f"  median run-to-run SD of the FIELD metric (multi-seed methods) : {noise:.4f}")
     print(f"  => two methods are INDISTINGUISHABLE on it if they differ by  < {band:.4f}")
 
-    pairs, bad = 0, []
-    for i in range(len(table)):
-        for j in range(i + 1, len(table)):
-            a, b = table[i], table[j]
-            if abs(a["field"] - b["field"]) < band:
-                pairs += 1
-                lo = min(a["macro"], b["macro"])
-                if lo > 1e-6 and max(a["macro"], b["macro"]) / lo >= 2.0:
-                    bad.append((a, b, max(a["macro"], b["macro"]) / lo))
-    frac = len(bad) / pairs if pairs else float("nan")
-    bad.sort(key=lambda t: -t[2])
-    print(f"  method pairs indistinguishable on the FIELD metric            : {pairs}")
-    print(f"  ...of those, pairs differing >=2x on MACRO zero-day           : "
-          f"{len(bad)}  ({frac:.0%})")
-    if bad:
-        w = bad[0]
-        print(f"  worst case: {w[0]['method']} vs {w[1]['method']} — "
-              f"{abs(w[0]['field']-w[1]['field']):.4f} apart on the published metric, "
-              f"{w[2]:.0f}x apart on zero-day")
-    RES_DISC = {"field_noise_sd": float(noise), "indistinguishable_band": float(band),
+    def discriminate(pop):
+        """Pair count + >=2x-apart count over one population of methods."""
+        pairs, bad = 0, []
+        for i in range(len(pop)):
+            for j in range(i + 1, len(pop)):
+                a, b = pop[i], pop[j]
+                if abs(a["field"] - b["field"]) < band:
+                    pairs += 1
+                    lo = min(a["macro"], b["macro"])
+                    if lo > 1e-6 and max(a["macro"], b["macro"]) / lo >= 2.0:
+                        bad.append((a, b, max(a["macro"], b["macro"]) / lo))
+        bad.sort(key=lambda t: -t[2])
+        frac = len(bad) / pairs if pairs else float("nan")
+        return pairs, bad, frac
+
+    def _report(label, pop, pairs, bad, frac):
+        print(f"\n  [{label}]  n = {len(pop)}")
+        print(f"  method pairs indistinguishable on the FIELD metric            : {pairs}")
+        print(f"  ...of those, pairs differing >=2x on MACRO zero-day           : "
+              f"{len(bad)}  ({frac:.0%})")
+        if bad:
+            w = bad[0]
+            print(f"  worst case: {w[0]['method']} vs {w[1]['method']} — "
+                  f"{abs(w[0]['field']-w[1]['field']):.4f} apart on the published metric, "
+                  f"{w[2]:.1f}x apart on zero-day")
+
+    def _pack(pop, pairs, bad, frac):
+        w = bad[0] if bad else None
+        return {"n_methods": len(pop),
+                "field_noise_sd": float(noise), "indistinguishable_band": float(band),
                 "pairs_indistinguishable": pairs, "pairs_2x_apart_on_macro": len(bad),
-                "fraction": float(frac)}
+                "fraction": float(frac),
+                "worst_pair": ([w[0]["method"], w[1]["method"]] if w else None),
+                "worst_pair_field_gap": (float(abs(w[0]["field"] - w[1]["field"])) if w else None),
+                "worst_pair_macro_ratio": (float(w[2]) if w else None)}
+
+    # ------------------------------------------------------------------
+    # 🔴 BOTH POPULATIONS ARE COMPUTED, AND THE EXCLUDED ONE IS THE CITABLE ONE.
+    #
+    # Added 2026-09-09 after a review pass caught the headline being quoted over
+    # ALL 40 methods. 11 of them are tie-degenerate -- they place ~half the flows
+    # in a single tie block, and this file already flags them and already excludes
+    # them from the Spearman above. Their PR-AUC is not comparable to a continuous
+    # scorer's, which is exactly what a ">=2x apart on macro" test compares.
+    #
+    # So including them in the discrimination count contradicts the paper's own
+    # stated caveat. The all-40 figure is kept and reported because dropping it
+    # silently would hide that the headline moved (33 % -> 25 %), but the number
+    # to cite is `discrimination_excl_tie_degenerate`.
+    # ------------------------------------------------------------------
+    pairs, bad, frac = discriminate(table)
+    _report("ALL METHODS - inflated, see comment", table, pairs, bad, frac)
+    pairs_k, bad_k, frac_k = discriminate(keep)
+    _report("EXCLUDING TIE-DEGENERATE - CITE THIS ONE", keep, pairs_k, bad_k, frac_k)
+    print(f"\n  Excluding the {len(table)-len(keep)} tie-degenerate scorers moves the headline "
+          f"{frac:.0%} -> {frac_k:.0%}. The claim survives; the number changes.")
+
+    RES_DISC = _pack(table, pairs, bad, frac)
+    RES_DISC_KEEP = _pack(keep, pairs_k, bad_k, frac_k)
 
     # The single most quotable line: methods that are indistinguishable on the
     # field's metric but an order of magnitude apart on ours.
@@ -258,6 +295,7 @@ def main():
            "pearson": {"r": float(r), "p": float(pr)},
            "spearman_excl_tie_degenerate": {"rho": float(rho2), "p": float(p2)},
            "discrimination": RES_DISC,
+           "discrimination_excl_tie_degenerate": RES_DISC_KEEP,
            "strong_form_supported": False,
            "excluded_replicate_rows": skipped}
     outp = os.path.join(paths.METADATA, "field_gap.json")

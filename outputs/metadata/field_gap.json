@@ -29,6 +29,13 @@
    "tie_degenerate": false
   },
   {
+   "method": "c4_log1p",
+   "field": 0.9887183571607308,
+   "macro": 0.6299033620767855,
+   "n_runs": 3,
+   "tie_degenerate": false
+  },
+  {
    "method": "cnn_paper",
    "field": 0.9888633423329124,
    "macro": 0.6231847737721405,
@@ -40,6 +47,13 @@
    "field": 0.9853815590221946,
    "macro": 0.6218977752164222,
    "n_runs": 1,
+   "tie_degenerate": false
+  },
+  {
+   "method": "postdet",
+   "field": 0.9894700456233075,
+   "macro": 0.6140352834744215,
+   "n_runs": 3,
    "tie_degenerate": false
   },
   {
@@ -198,9 +212,9 @@
   },
   {
    "method": "c4_raw",
-   "field": 0.982324388182422,
-   "macro": 0.1576322124424575,
-   "n_runs": 1,
+   "field": 0.9823554744121376,
+   "macro": 0.16060381269095977,
+   "n_runs": 3,
    "tie_degenerate": false
   },
   {
@@ -281,7 +295,7 @@
    "tie_degenerate": false
   }
  ],
- "n_methods": 40,
+ "n_methods": 42,
  "field_range": [
   0.4917571409056487,
   0.9945801690971905
@@ -291,23 +305,44 @@
   0.692604470965369
  ],
  "spearman": {
-  "rho": 0.5677298311444654,
-  "p": 0.00013306019500337042
+  "rho": 0.5888501742160279,
+  "p": 4.093644628979022e-05
  },
  "pearson": {
-  "r": 0.2464360583285754,
-  "p": 0.12529404081650497
+  "r": 0.26337502322409495,
+  "p": 0.09193944488319772
  },
  "spearman_excl_tie_degenerate": {
-  "rho": 0.5798029556650245,
-  "p": 0.0009790419172164579
+  "rho": 0.5822580645161292,
+  "p": 0.000589440413964126
  },
  "discrimination": {
-  "field_noise_sd": 0.002033995147939535,
-  "indistinguishable_band": 0.0057530070480343205,
-  "pairs_indistinguishable": 204,
-  "pairs_2x_apart_on_macro": 67,
-  "fraction": 0.3284313725490196
+  "n_methods": 42,
+  "field_noise_sd": 0.002118332266553122,
+  "indistinguishable_band": 0.005991548441943928,
+  "pairs_indistinguishable": 249,
+  "pairs_2x_apart_on_macro": 75,
+  "fraction": 0.30120481927710846,
+  "worst_pair": [
+   "deep_cnn_lstm",
+   "ltn_anat_w2p0"
+  ],
+  "worst_pair_field_gap": 0.002835166875967521,
+  "worst_pair_macro_ratio": 17.864499174102303
+ },
+ "discrimination_excl_tie_degenerate": {
+  "n_methods": 31,
+  "field_noise_sd": 0.002118332266553122,
+  "indistinguishable_band": 0.005991548441943928,
+  "pairs_indistinguishable": 169,
+  "pairs_2x_apart_on_macro": 37,
+  "fraction": 0.21893491124260356,
+  "worst_pair": [
+   "deep_cnn_lstm",
+   "linear_svm"
+  ],
+  "worst_pair_field_gap": 0.00518797313746866,
+  "worst_pair_macro_ratio": 16.61920165359274
  },
  "strong_form_supported": false,
  "excluded_replicate_rows": 13
