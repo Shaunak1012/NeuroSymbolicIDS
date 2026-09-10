@@ -2,6 +2,34 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-10 (LOCO #4b — falsifier held; the arm contrast is the result)
+
+Four pilot runs, two arms × two seeds, merged reject class (9 → 7 classes).
+
+🔴 **Falsifier NOT triggered** — hetero **0.6351**, homog **0.6334**, neither above the CNN's
+0.6399 on any seed. The pre-registered prediction holds and §4's scope stands.
+
+✅ **The positive finding is the CONTRAST, not either arm.** `p(UNKNOWN)` mean percentile rank as a
+distance from chance:
+
+| arm | Bot | Web BF | Web XSS |
+|---|---:|---:|---:|
+| HETERO (`DDoS`+`FTP-Patator`+`PortScan`) | **+0.043 ⚠️ sign flips** | +0.189 | +0.217 |
+| HOMOG (three DoS variants) | **−0.199** (2/2) | +0.257 | +0.270 |
+
+**Merge composition controls the reject region's reach.** A homogeneous merge yields a unit that
+*anti-ranks* Bot — a "DoS-like" detector. A heterogeneous merge lifts Bot ~0.24, to **chance**. The
+region's breadth is a property of what is merged into it. 🔴 **But its ceiling is chance:** Bot is
+not reached by any label-space restructuring buildable from the known classes.
+
+⚠️ n=2 is a mean, not a variance; seed 44 is running for both arms. ⚠️ The web families rank above
+chance under every reject configuration tried — absorption reappearing, not corroboration.
+
+🔧 Also fixed: `loco_reject.py` printed per-family ranks next to the **benign** row, which invites
+a real misreading (benign sits low exactly when the reject unit works, so families at chance look
+detected — I made that error once). Ranks are now anchored to **chance** and flagged within 0.05 of
+it.
+
 ## 2026-09-10 (THE DRAFT CATCHES UP — cross-dataset, k sweep, FPR sweep)
 
 ### ✅ The double dissociation replicates in DIRECTION, not in magnitude

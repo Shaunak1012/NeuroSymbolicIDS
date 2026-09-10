@@ -128,6 +128,48 @@
         "zd_Web Attack XSS": 0.7651749837098901
       }
     },
+    "locoR_homog_s43": {
+      "held_out": [
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest"
+      ],
+      "n_classes": 7,
+      "classes": [
+        "BENIGN",
+        "DDoS",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "SSH-Patator",
+        "UNKNOWN"
+      ],
+      "is_rename_noop": false,
+      "1-p(BENIGN)": {
+        "macro_pr_auc": 0.6374442279637621,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)": {
+        "macro_pr_auc": 0.4689422666794252,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)|attack": {
+        "macro_pr_auc": 0.014613235957669404,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "mean_percentile_rank": {
+        "held_out_families": 0.8927425284376213,
+        "real_zero_day": 0.5575308220407238,
+        "benign": 0.4819133717915663,
+        "n_held_out_test": 24593,
+        "zd_Bot": 0.3214801894536115,
+        "zd_Web Attack Brute Force": 0.7718939095213863,
+        "zd_Web Attack XSS": 0.7745656140154122
+      }
+    },
     "loco_DDoS_s42": {
       "held_out": [
         "DDoS"
@@ -204,28 +246,31 @@
       }
     },
     "homog": {
-      "n_seeds": 1,
-      "p_unknown_macro_mean": 0.45190685367871647,
-      "headline_macro_mean": 0.6293228708541774,
+      "n_seeds": 2,
+      "p_unknown_macro_mean": 0.46042456017907085,
+      "headline_macro_mean": 0.6333835494089697,
       "per_family_vs_chance": {
         "Bot": {
-          "mean_minus_chance": -0.22030705006559742,
+          "mean_minus_chance": -0.19941343030599296,
           "per_seed": [
-            0.28
+            0.28,
+            0.321
           ],
           "sign_flip": false
         },
         "Web Attack Brute Force": {
-          "mean_minus_chance": 0.24231591511355144,
+          "mean_minus_chance": 0.2571049123174689,
           "per_seed": [
-            0.742
+            0.742,
+            0.772
           ],
           "sign_flip": false
         },
         "Web Attack XSS": {
-          "mean_minus_chance": 0.2651749837098901,
+          "mean_minus_chance": 0.2698702988626511,
           "per_seed": [
-            0.765
+            0.765,
+            0.775
           ],
           "sign_flip": false
         }

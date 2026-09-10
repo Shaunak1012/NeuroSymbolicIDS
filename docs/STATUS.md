@@ -16,7 +16,7 @@ selection half and is **−0.0008** on the reporting half.
 | 2 | **KG cluster count k** | ✅ done | ✅ **k=800: 0.7123, +0.0724 over CNN**, held-out 2.86σ |
 | 3 | Weighted / multi-resolution fusion | ✅ done | 🔴 **−0.0008, direction inconsistent.** w=0.5 was already optimal |
 | 4a | ~~LOCO, single hold-out~~ | 🔴 **RETRACTED — the code was a no-op** | renamed a class; 9 classes before and after |
-| 4b | **LOCO, merged reject class** | ▶ **RUNNING** | redesigned: 3 families → one `UNKNOWN`, 9 → 7 classes |
+| 4b | **LOCO, merged reject class** | 🟡 **PILOT DONE (n=2/arm), seed 44 running** | 🔴 falsifier NOT triggered · ✅ but the ARM CONTRAST is a positive finding |
 | 5 | **Cross-dataset augmented training** | ⬜ **NEXT** | user's idea, aims straight at the mechanism |
 
 ✅ **Phase 6 is folded into the paper (2026-09-10).** §4 gains the abundance control (2018's Bot is
@@ -123,6 +123,37 @@ which is what hid #4a for a whole run.
 ⚠️ **A drop in the `1 - p(BENIGN)` headline is EXPECTED and is not the result** — three known
 classes leave the supervised task. Pilot is 2 seeds × 2 arms; seed 44 is added only if something
 moves.
+
+### 🔴 #4b result — the falsifier held, and the CONTRAST is the finding
+
+**Pre-registered prediction confirmed.** Neither arm's headline beats the CNN's 0.6399 on any seed
+(hetero **0.6351**, homog **0.6334**), so §4's scope stands as claimed.
+
+**Mean percentile rank under `p(UNKNOWN)`, as a distance from chance (0.500), n=2 per arm:**
+
+| arm | merged into `UNKNOWN` | **Bot** | Web BF | Web XSS |
+|---|---|---:|---:|---:|
+| **HETERO** | `DDoS` + `FTP-Patator` + `PortScan` | **+0.043 ⚠️ sign flips** | +0.189 | +0.217 |
+| **HOMOG** | three DoS variants | **−0.199** (2/2 consistent) | +0.257 | +0.270 |
+
+✅ **The positive result: merge composition controls the reject region's reach.** A *homogeneous*
+merge yields a unit that **actively anti-ranks Bot** (−0.199, direction-consistent) — it has become a
+"DoS-like" detector. A *heterogeneous* merge pulls Bot up by ~0.24, to **chance**. So the reject
+region is not an arbitrary "none of the above": **its breadth is a property of what you merge into
+it**, which is a mechanistic statement rather than a null result.
+
+🔴 **And the ceiling of that mechanism is chance, not detection.** Maximally heterogeneous merging
+buys Bot 0.043 above chance **with the sign flipping between seeds**. Bot is not reached by any
+label-space restructuring we can construct from the known classes — exactly §4's claim, now tested
+against the strongest version of the counter-proposal rather than the no-op version.
+
+⚠️ **n=2 is a MEAN and nowhere near enough for a VARIANCE** (the project's own hard-won rule — seed
+45 once moved an SD 5×). Seed 44 is running for both arms to take the contrast to n=3; until it
+lands, "HOMOG is direction-consistent" means 2/2, not established.
+
+⚠️ **The web families rank above chance under EVERY reject configuration tried** (+0.19 to +0.35,
+including the retracted rename). They are the absorption families; this is that mechanism reappearing
+in an experiment not designed to look for it, not independent corroboration of anything.
 
 ### ⬜ #5 Cross-dataset augmented training — worth doing, and it has a trap
 
