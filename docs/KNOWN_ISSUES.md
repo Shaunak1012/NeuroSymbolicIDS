@@ -8,6 +8,24 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🟡 2026-09-10 — [OPEN] Two non-negotiables lapsed in one long tool-heavy session
+
+Recorded because the point of the block at the top of CLAUDE.md is that these lapse **during long
+tool-heavy stretches**, which is exactly when they matter — and both did, in the session that added
+the cross-dataset comparison.
+
+1. **#5 (branch → PR → local `--no-ff` merge) broken once.** Commit `73a985f`
+   (*docs: record the cross-dataset verdict…*) went **straight to `main`** with no branch and no PR.
+   Not rewritten, because it was already pushed and a force-push to `main` is a worse remedy than a
+   visible note. Every other commit in the session followed the flow (PRs #57, #58, #59).
+2. **#1 (`→ Next model:` on every response) broken repeatedly.** It stopped appearing across a long
+   run of tool-heavy turns — the *exact* failure mode the rule names, and the second recorded
+   instance.
+
+⚠️ **Neither is a measurement defect** — no number is affected. They are recorded because the
+project's credibility model is that lapses are visible, and because "I was mid-flow on something
+important" is precisely the condition under which both rules were written.
+
 ## 🔴 2026-09-10 — [FIXED] An experiment's knob did not do what the experiment claimed
 
 **`CNN_LOCO_HOLDOUT` renamed a class rather than building a reject class.** Nine classes before and
