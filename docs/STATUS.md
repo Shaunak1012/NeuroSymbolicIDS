@@ -528,7 +528,32 @@ Averaging the last 5 epochs' weights moved fold 1 from 0.6218 to **0.6217**. Pre
 the solution with respect to the **known-class** loss it averages over, and zero-day performance is
 not what that loss measures. **Checkpoint averaging is not a route to zero-day stability.**
 
-### 🟡 Cross-dataset (Phase 6) — ~~BLOCKED, not skipped~~ ~~NOT RUN~~ **DATA IN, SPLIT UNDECIDED**
+### ✅ Cross-dataset (Phase 6) — ~~BLOCKED~~ ~~NOT RUN~~ ~~DATA IN~~ **RUN 2026-09-10**
+
+> ✅ **12/12 trainings, 0 failures.** `replication_2018.json`. Training size matched to 2017's
+> 883,796 so nothing is confounded with 4× the data.
+>
+> 🔴 **THE MECHANISM REPLICATES.** 2018's Bot is **abundant** (286,191 flows, 84 % prevalence) and
+> **still at chance — lift 0.83×** (2017: 1,966 flows, 1.31×). Abundance in TEST does not make a
+> novel class reachable. 🔑 **The inversion is the finding:** the CNN detects the *rare* zero-day
+> families at **20–48× chance** and the *abundant* ones at chance.
+>
+> 🔴 **METRIC TRAP — READ BEFORE QUOTING ANY 2018 NUMBER.** Bot's raw PR-AUC is 0.6958 vs 2017's
+> 0.0446, which reads as "Bot became detectable" and is **an artefact of prevalence** (84 % ⇒ chance
+> ≈ 0.84, so 0.6958 is *below* chance). **Cross-dataset macro PR-AUC comparison is INVALID** —
+> prevalences span 0.0016–0.84 against 2017's ~0.03. **Use lift.** Within-2018 paired deltas are fine.
+> ~~"2018 CNN 0.4559 vs 2017's 0.6399, ~0.18 lower"~~ 🔴 **retracted the same session.**
+>
+> ✅ **The symbolic pillar hurts again, monotonically: CNN > LTN control > LTN +Ax6, 3/3 at every
+> rung** (1.54σ / 1.31σ — direction established, magnitude not). 🔑 **The harm is visible per-family:**
+> Ax6 takes XSS **47.34× → 1.35×** and SQLi **47.96× → 0.83×**. The axioms *suppress* the detection
+> the CNN had, rather than merely failing to add.
+>
+> 🔴 **The double dissociation does NOT replicate**: CNN − AE is **2/3, 0.13σ**. Seed 42 alone showed
+> the AE ahead and was flagged as untrustworthy at n=1; seeds 43/44 flipped it twice. **Sixth
+> single-seed trap, second caught pre-publication.**
+>
+> ⚠️ **No KG arm** — `timeline.py` is 2017-only, so no chronological stream exists for 2018.
 
 > ✅ **2026-09-09: 6.41 GB fetched and verified, 67/68 features mapped, full audit run.**
 > `fetch_ids2018.py` · `schema_2018.py` · `audit_2018.py` · `preprocess_2018.py`.
