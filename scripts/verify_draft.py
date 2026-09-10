@@ -61,14 +61,20 @@ def load(name):
 REC = {n: load(n) for n in (
     "field_gap", "ablation", "operational", "ood_scores", "noise_postdet",
     "comparability", "kg_criteria", "bot_failure_analysis", "fitted_fusion",
-    "latency_determinism_on")}
+    "latency_determinism_on", "ksweep_fusion", "ksweep_heldout",
+    "operational_best", "crossdata_lift", "replication_2018")}
 
 with open(DRAFT, encoding="utf-8") as f:
     TEXT = f.read()
 
 # The draft uses a Unicode minus in prose and ASCII hyphen in tables; normalise
 # both sides rather than requiring the author to remember which is which.
-NORM = TEXT.replace("−", "-").replace("–", "-").replace(" ", " ")
+# Prose uses a Unicode minus and an en-dash; tables use ASCII hyphens; lift is
+# written with a real multiplication sign. Normalise BOTH sides rather than
+# requiring the author to remember which is which -- a checker that fires on
+# typography stops being read.
+NORM = (TEXT.replace("−", "-").replace("–", "-").replace(" ", " ")
+            .replace("×", "x"))
 
 OK, BAD, UNBACKED = [], [], []
 
@@ -254,6 +260,75 @@ if lat:
     chk("latency: IG ms/flow", "latency", c["explain_ig_per_flow"]["median_ms"], "{:.2f}")
     chk("latency: IG/detection ratio", "latency",
         lat["predictions"]["P2_explanation_dominates"]["ratio"], "{:,.0f}")
+
+# ---- the k sweep: every cell of the draft's table --------------------------
+ks = REC["ksweep_fusion"]
+if ks:
+    for variant, label in (("s_kg", "s_kg"), ("causal", "causal")):
+        for k in ("100", "200", "400", "800"):
+            v = ks["variants"].get(variant, {}).get(k, {}).get("fused_mean")
+            chk("k-sweep %s k=%s" % (label, k), "ksweep_fusion", v)
+
+kh = REC["ksweep_heldout"]
+if kh:
+    # The held-out delta is the number the draft leads with, because the
+    # full-test +0.0724 is selected on test. Both are checked; only the
+    # held-out one is presented as the improvement.
+    chk("k=800 held-out delta", "ksweep_heldout",
+        kh.get("held_out_delta_vs_k200"), "+{:.4f}")
+    chk("k=800 held-out sigma", "ksweep_heldout",
+        kh.get("held_out_sigma"), "{:.2f}")
+
+# ---- the operational profile, including the tight-FPR limitation -----------
+ob = REC["operational_best"]
+if ob:
+    cfgs = ob["configs"]
+    best = "CNN + KG k=800 (s_kg)"
+    chk("best config macro", "operational_best",
+        cfgs.get(best, {}).get("macro_pr_auc", {}).get("mean"))
+    chk("best config vs CNN", "operational_best",
+        cfgs.get(best, {}).get("paired_vs_cnn", {}).get("mean_delta"), "+{:.4f}")
+    for cfg, short in ((best, "CNN+KG"), ("CNN alone", "CNN")):
+        for fam, fshort in (("ALL unknown flows", "unknown"), ("Bot", "Bot")):
+            for fpr in ("0.001", "0.010", "0.050", "0.100"):
+                v = (cfgs.get(cfg, {}).get("recall_at_fpr", {})
+                     .get(fam, {}).get(fpr, {}).get("mean"))
+                if v is None:
+                    continue
+                # 0.0 % and 0.1 % both render as short strings that appear all
+                # over the draft, so they are recorded rather than searched --
+                # a check that matches by accident is worse than no check.
+                chk("recall %s %s @%s FPR" % (short, fshort, fpr),
+                    "operational_best", 100.0 * v, "{:.1f} %",
+                    quoted=(100.0 * v) >= 1.0)
+
+# ---- cross-dataset: lift is the only comparable unit -----------------------
+cd = REC["crossdata_lift"]
+if cd:
+    for ds in ("d2017", "d2018"):
+        yr = ds[1:]
+        for arm in ("cnn", "autoencoder"):
+            b = cd[ds].get(arm, {}).get("per_family", {}).get("Bot", {})
+            chk("%s Bot lift, %s" % (arm, yr), "crossdata_lift",
+                b.get("lift_mean"), "{:.2f}x")
+    v = cd.get("verdict") or {}
+    chk("AE-CNN Bot lift 2017", "crossdata_lift",
+        v.get("ae_minus_cnn_2017"), "+{:.2f}x")
+    chk("AE-CNN Bot lift 2018", "crossdata_lift",
+        v.get("ae_minus_cnn_2018"), "+{:.2f}x")
+    chk("Bot dissociation shrink factor", "crossdata_lift",
+        v.get("magnitude_shrink_factor"), "{:.1f}")
+
+r18 = REC["replication_2018"]
+if r18:
+    fam = r18["per_family_mean"]["cnn"]
+    # Two decimals below 10x, one above -- matching how the draft states each,
+    # because 0.9561 rounds to "1.0x" at one decimal and would read as chance.
+    for f, short in (("Brute Force -Web", "BF-Web"), ("Brute Force -XSS", "BF-XSS"),
+                     ("Infilteration", "Infilteration")):
+        v = fam.get(f, {}).get("lift")
+        chk("2018 CNN %s lift" % short, "replication_2018", v,
+            "{:.1f}x" if v and v >= 10 else "{:.2f}x")
 
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")

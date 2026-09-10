@@ -237,6 +237,16 @@ are **independently observed phenomena that the mechanism explains**; we did not
 that isolates the mechanism as their cause. We regard the unification as the contribution, and we
 label it as an explanatory claim rather than a fifth measurement.
 
+🔑 **The mechanism replicates on an independent capture, with the confound removed.** A standing
+objection to §4 is that Bot is simply *rare* in CIC-IDS2017 (n = 1,956), so its failure might be a
+sample-size artefact rather than a representational one. **CSE-CIC-IDS2018 supplies the control: Bot
+there is abundant — and the CNN scores it at 0.83× chance, BELOW a random ranker**, against 1.31× on
+2017. Infilteration behaves the same way (0.96×). Meanwhile the same model reaches **20.1×** on
+Brute Force -Web and **47.3×** on Brute Force -XSS in that capture. Abundance does not buy
+reachability, and scarcity was never the explanation: **reachability tracks overlap with the learned
+basis**, which is what §4 claims. ⚠️ The 2018 arm is matched to 2017's training size (883,796 flows)
+so nothing here is confounded with four times the data.
+
 **No standard out-of-distribution score rescues it.** We ran nine scorers — MSP, max-logit, energy at
 four temperatures, entropy, ODIN at two settings, and margin — against a falsification threshold of
 0.08 macro-Bot **fixed in advance**. The best reaches **0.0783**. ⚠️ We say plainly that this *passed
@@ -291,13 +301,54 @@ we came to state the impossibility too broadly.
 
 ## §6 What partially works, stated without overclaiming
 
-**The knowledge-graph channel: +0.0528 macro** [+0.0466, +0.0592], p < 0.0001, **3/3 seeds**, lifting
-Bot from 0.0446 to 0.2518. This is the only component of our architecture that earns its place.
-⚠️ **Its direction is established and its magnitude is not**: against the paired difference's own
-standard deviation the effect is 1.7σ, spanning **0.027–0.088**. We report the direction as
-established and the magnitude as a range.
+**The knowledge-graph channel is the only component of our architecture that earns its place**, and
+its size depends on one hyper-parameter we had never swept. At the cluster count used throughout our
+earlier experiments (k = 200) it is **+0.0528 macro** [+0.0466, +0.0592], p < 0.0001, **3/3 seeds**,
+lifting Bot from 0.0446 to 0.2518. Sweeping k shows the fused macro is **monotone** in it, in both
+knowledge-graph variants and at every step, 3/3 seeds:
 
-**The operational statement is better than the PR-AUC one.** Reaching half of the zero-day flows
+| k | 100 | 200 | 400 | 800 |
+|---|---:|---:|---:|---:|
+| fused macro (`s_kg`) | 0.6493 | 0.6792 | 0.6960 | **0.7123** |
+| fused macro (`causal`) | 0.6622 | 0.6930 | 0.6968 | **0.7032** |
+
+At **k = 800 the fusion reaches macro 0.7123 against the CNN's 0.6399, +0.0724 on 3/3 seeds.**
+
+⚠️ **That +0.0724 is selected on test and we do not report it as the improvement.** We re-selected
+k on a stratified half of the test set with an rng fixed independently of any model seed, and report
+on the half never used for selection: **+0.0305 at 2.86σ, 3/3 seeds.** That is the honest number.
+The same protocol is what caught a companion result — a weighted-fusion variant worth +0.007 on the
+selection half is **−0.0008 and direction-inconsistent** on the reporting half, and without the split
+it would have shipped as a gain.
+
+⚠️ **Direction established, magnitude not.** Against the paired difference's own standard deviation
+the k = 200 effect is 1.7σ, spanning **0.027–0.088**. We report direction as established and
+magnitude as a range throughout.
+
+⚠️ **We do not claim `s_kg` is the better variant.** The two variants' ranking **flips with k** —
+`causal` leads at k = 200, `s_kg` at k = 800 — neither cross-variant gap is tested paired, and both
+sit inside the 0.0285 that an absolute number in our pipeline carries. The **monotonicity in k** is
+the established finding; the variant choice is not.
+
+**A single operating point hides the shape of the result, so we sweep the false-alarm rate.**
+Recall of flows from families the model has never seen, three seeds, threshold set on benign flows
+alone:
+
+| recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
+|---|---:|---:|---:|---:|
+| CNN alone | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| CNN + KG (k = 800) | **45.8 %** | **57.6 %** | 72.1 % | 91.6 % |
+|  of which **Bot** | **0.0 %** | 23.2 % | 46.6 % | 85.2 % |
+|   (CNN alone, Bot) | 0.0 % | 0.1 % | 9.5 % | 19.9 % |
+
+🔴 **At the tightest budget the knowledge graph COSTS 1.5 points, and Bot is 0.0 % for both
+models.** The gain is real but it begins around a 1 % false-alarm rate; **no configuration we built
+reaches Bot at a tight alert budget.** We report this because quoting only the 1 % column — which is
+the column that flatters us — would conceal it, and because it is the same error as reporting a
+size-weighted blend in place of a macro. ⚠️ The 10 % column is reported for shape only: on 55,237
+benign test flows it is roughly **5,500 false alerts**, and is not a deployable operating point.
+
+**The review-depth statement is better than the PR-AUC one.** Reaching half of the zero-day flows
 requires reviewing **52 %** of all traffic with the CNN, and **29–32 %** with the knowledge graph or
 the fusion. That 20-point reduction in review depth is the clearest operational statement of what the
 knowledge graph buys, and it is more meaningful than any PR-AUC delta. ⚠️ **It inherits the
@@ -338,10 +389,28 @@ And that the knowledge graph's specified "unexplained cluster" mechanism detects
 scores lift ≤ 1.00×, at or below chance, across three representations and three thresholds. The
 specified mechanism is dead; the scope is corroboration and explainability.
 
-### The double dissociation — a supporting result, not the lead
+### The double dissociation — a supporting result, and what replication does to it
 
 The CNN and the autoencoder dissociate on every family, non-overlapping across seeds: XSS **+0.90
 (40 SD)**, Web Brute Force **+0.82 (37 SD)**, Bot **+0.0868 (3.9 SD)**, p < 0.0005.
+
+🔑 **We replicated it on CSE-CIC-IDS2018, and the two halves come apart.** Only **lift**
+(PR-AUC ÷ prevalence) is comparable across captures — raw PR-AUC is bounded below by prevalence and
+the two datasets differ by orders of magnitude on exactly the families in question. We report lift
+and nothing else, having made the raw-PR-AUC comparison ourselves first and withdrawn it.
+
+| Bot, lift over chance | CIC-IDS2017 | CSE-CIC-IDS2018 |
+|---|---:|---:|
+| CNN | 1.31× | **0.83×** |
+| autoencoder | 3.84× | 1.09× |
+| **autoencoder − CNN** | **+2.53×** | **+0.26×** |
+
+**The direction replicates on an independent capture; the magnitude does not.** The autoencoder's
+Bot advantage shrinks by a factor of **9.7**, and at 1.09× it sits close enough to chance that 2018
+lends no support to the reading *"an anomaly method reaches Bot."* ⚠️ We cannot even test whether
+1.09× beats chance: our 2018 record persists per-family lift as a mean with no per-seed spread, so a
+margin of 0.09× is not distinguishable from noise. **We therefore claim the direction and drop the
+magnitude**, and we treat the 2017 magnitude as a property of that capture.
 
 ⚠️ **It is a dissociation between two models, not two method families.** RandomForest — a supervised
 method — **ties the autoencoder on Bot** (0.1311 versus 0.1314, p = 0.88) while beating it by 0.50 on
@@ -423,16 +492,18 @@ which beats the mean and *not* the maximum — because the maximum was never a t
 
 ## §8 Limitations
 
-1. **Single dataset — and we correct our own framing of why.** ~~Cross-dataset validation on
-   CIC-IDS2018 is *blocked* — the data is not available to us.~~ 🔴 **That was wrong, and checking it
-   during the bibliographic pass is what caught it.** CSE-CIC-IDS2018 is published on the AWS
-   Registry of Open Data and downloads without an AWS account
-   (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`), under a licence that explicitly
-   permits redistribution with citation; the processed flow CSVs are a few GB, the raw logs ~450 GB.
-   **So the honest limitation is that we did not do it, not that we could not.** This remains the
-   weakest point in the paper, and it is a scope limitation rather than an access one — a reviewer
-   can verify the dataset's availability in under a minute, and an access excuse would not have
-   survived that check.
+1. **~~Single dataset.~~ ✅ RESOLVED — and the retraction chain is worth keeping visible.** We first
+   wrote that cross-dataset validation on CIC-IDS2018 was ~~*blocked* because the data was
+   unavailable~~. That was **wrong** — CSE-CIC-IDS2018 is on the AWS Registry of Open Data and
+   downloads without an account (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`), under
+   a licence permitting redistribution with citation. We then wrote that the honest limitation was
+   ~~that we did not do it~~. **We have now done it**: four method arms × three seeds, training size
+   matched to 2017's 883,796 flows, reported in §4 and §6. The mechanism replicates with the
+   rarity confound removed, and the double dissociation replicates in direction but not magnitude.
+   ⚠️ **What remains limited:** two captures from the *same producer* under related methodology is
+   not evidence of generality across network environments, and **7 of the 10 published 2018 flow CSVs
+   are Excel-truncated at 2²⁰ rows, chronologically** — a defect in the distributed artefact that we
+   detected and worked around, and that anyone reusing those files should know about.
 2. **Three adequately powered zero-day families, not six.** And Web Brute Force and XSS correlate at
    **r = +0.992** (same capture window, same tool), so the macro average is effectively ⅓ Bot and ⅔
    *one* web signal. Regrouping shifts values by 0.11–0.15 but **preserves every ordering** we report.
