@@ -16,7 +16,7 @@ selection half and is **−0.0008** on the reporting half.
 | 2 | **KG cluster count k** | ✅ done | ✅ **k=800: 0.7123, +0.0724 over CNN**, held-out 2.86σ |
 | 3 | Weighted / multi-resolution fusion | ✅ done | 🔴 **−0.0008, direction inconsistent.** w=0.5 was already optimal |
 | 4a | ~~LOCO, single hold-out~~ | 🔴 **RETRACTED — the code was a no-op** | renamed a class; 9 classes before and after |
-| 4b | **LOCO, merged reject class** | 🟡 **PILOT DONE (n=2/arm), seed 44 running** | 🔴 falsifier NOT triggered · ✅ but the ARM CONTRAST is a positive finding |
+| 4b | **LOCO, merged reject class** | ✅ **DONE, n=3/arm** | 🔴 falsifier NOT triggered · ✅ **double dissociation between the two merges**, 3/3 every family |
 | 5 | **Cross-dataset augmented training** | ⬜ **NEXT** | user's idea, aims straight at the mechanism |
 
 ✅ **Phase 6 is folded into the paper (2026-09-10).** §4 gains the abundance control (2018's Bot is
@@ -129,12 +129,22 @@ moves.
 **Pre-registered prediction confirmed.** Neither arm's headline beats the CNN's 0.6399 on any seed
 (hetero **0.6351**, homog **0.6334**), so §4's scope stands as claimed.
 
-**Mean percentile rank under `p(UNKNOWN)`, as a distance from chance (0.500), n=2 per arm:**
+**Mean percentile rank under `p(UNKNOWN)`, as a distance from chance (0.500), n=3 per arm:**
 
 | arm | merged into `UNKNOWN` | **Bot** | Web BF | Web XSS |
 |---|---|---:|---:|---:|
-| **HETERO** | `DDoS` + `FTP-Patator` + `PortScan` | **+0.043 ⚠️ sign flips** | +0.189 | +0.217 |
-| **HOMOG** | three DoS variants | **−0.199** (2/2 consistent) | +0.257 | +0.270 |
+| **HETERO** | `DDoS` + `FTP-Patator` + `PortScan` | **+0.068 ⚠️ sign flips** | +0.200 | +0.219 |
+| **HOMOG** | three DoS variants | **−0.206** (3/3 consistent) | +0.259 | +0.271 |
+| **paired by seed, HETERO − HOMOG** | | **+0.274, 2.57σ, 3/3** | **−0.059, 3.58σ, 3/3** | **−0.052, 12.35σ, 3/3** |
+
+✅ **A DOUBLE DISSOCIATION BETWEEN THE TWO MERGES** — direction-consistent on every seed for every
+family. The web direction is *forced* by §4: those families are absorbed into `DoS slowloris`, so
+merging the DoS classes into `UNKNOWN` drags them along.
+
+🔴 **Falsifier, evaluated PAIRED against the seed-matched CNN** (not against the n=3 mean 0.6399 —
+`locoR_hetero_s44` scores 0.6406, *above* that mean, while its own seed-matched CNN scores 0.6396):
+hetero **−0.0030** (1/3 better), homog **−0.0258** (1/3). **NOT triggered.** LOCO is a wash on the
+headline.
 
 ✅ **The positive result: merge composition controls the reject region's reach.** A *homogeneous*
 merge yields a unit that **actively anti-ranks Bot** (−0.199, direction-consistent) — it has become a

@@ -269,6 +269,7 @@ architecture as much as anyone else's.
 | **The symbolic pillar itself** | **−0.0004 (n.s.)** alone, and it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043. |
 | **Calibration** | Isotonic regression reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) — a **287×** gap. **The better the calibration, the wider the gap.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage. |
+| **Training an explicit reject class** (open-set / leave-classes-out) | **A wash.** Merging three known families into one `UNKNOWN` (9 → 7 classes) moves the headline by **−0.0030** paired against the seed-matched CNN, 1/3 seeds better. The reject unit does not reach Bot: **+0.068 above chance with the sign flipping across seeds.** ✅ But *which* families it reaches is controlled by what is merged into it — see below. |
 | **A fitted fuser over the channel that actually helps** — ⚠️ **scope: this row is about the knowledge-graph channel only; a fitted combiner over other channels *does* work, see §6** | **Structurally impossible for this channel.** The knowledge-graph score is defined by streaming the *test* set into windows, so it has **no validation-side score at all** — the channel with the largest measured gain cannot enter a combiner fitted on held-out data under any protocol. |
 
 Three of these deserve their consequence stated rather than left implicit.
@@ -291,6 +292,44 @@ for reporting; threshold with Platt.
 Abstention keys on confidence. §4 established that the model is **confidently wrong** on Bot. A
 confidence-based rule cannot catch confident-and-wrong, and it does not: zero-day precision is
 unchanged to four decimal places across every non-degenerate coverage.
+
+**The reject class is the one negative here with a positive mechanism inside it, and it is our
+sharpest test of §4.** Every other method in this paper detects novelty *without ever training for
+it*. An explicit reject class is the obvious objection — so we built it, pre-registered the
+prediction that it would fail, and ran two arms differing only in **what** was merged into `UNKNOWN`:
+**HETERO** (`DDoS` + `FTP-Patator` + `PortScan` — a flood, a brute-force and a scan) against
+**HOMOG** (three variants of DoS). Mean percentile rank of each family under `p(UNKNOWN)`, three
+seeds per arm, stated as a distance from chance:
+
+| arm | **Bot** | Web Brute Force | Web XSS |
+|---|---:|---:|---:|
+| HETERO | **+0.068** ⚠️ sign flips across seeds | +0.200 | +0.219 |
+| HOMOG | **−0.206** (3/3 consistent) | +0.259 | +0.271 |
+| **paired by seed, HETERO − HOMOG** | **+0.274, 2.57σ, 3/3** | **−0.059, 3.58σ, 3/3** | **−0.052, 12.35σ, 3/3** |
+
+**This is a double dissociation between the two merges**, direction-consistent on every seed for
+every family. A homogeneous DoS merge produces a reject unit that **actively anti-ranks Bot**
+(−0.206) while reaching the web families best; a heterogeneous merge reverses both. And the
+direction is **forced by §4**: the web families are absorbed into `DoS slowloris`, so merging the DoS
+classes into `UNKNOWN` drags them along with it. **A reject class is not a generic "none of the
+above" — its reach is determined by the feature basis of whatever is merged into it**, which is the
+same mechanism this paper claims for the closed-set case, now observed in the open-set one.
+
+🔴 **And the ceiling of that mechanism is chance.** The *best* case for Bot, from the most
+heterogeneous merge we can construct out of the known classes, is **+0.068 with the sign flipping
+between seeds** — the same instability signature as the CNN's own Bot ranking (cross-seed
+ρ = −0.090). **Bot's rank is noise regardless of which model produces it.** Restructuring the label
+space steers *which* novel families a reject region reaches; it does not make an unreachable one
+reachable.
+
+⚠️ **A prior version of this experiment was a no-op and we report that too.** Holding out a *single*
+family and relabelling it `UNKNOWN` leaves nine classes and the same partition of the training set;
+a softmax objective is invariant to class **names**, so that run was the baseline with its output
+units permuted, and `p(UNKNOWN)` was simply `p(DDoS)` — it ranked the held-out family at the 94.4th
+percentile and Bot at the 29th, *below* benign. **A reject class requires reducing the class count,
+not renaming a class.** §7 records how the defect survived a full training run: the sweep's headline
+metric folded the reject mass back into the attack mass, so a broken experiment returned a plausible
+near-baseline number instead of an anomaly.
 
 **The scope of the fitted-fuser claim, because we got it wrong once.** The wall applies to channels
 whose value is **zero-day-specific**. It does *not* apply to a channel that also carries value on the
