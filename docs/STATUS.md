@@ -4,6 +4,67 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🎯 IMPROVEMENT ITINERARY (opened 2026-09-10) — 1 of 4 positive so far
+
+**Every arm is selected on held-out data and reported on a split never used for selection.** That
+protocol has already paid for itself once: the weighted-fusion arm looked like +0.007 on the
+selection half and is **−0.0008** on the reporting half.
+
+| # | experiment | status | result |
+|---|---|---|---|
+| 1 | Ensemble + KG | ✅ done | 🔴 **−0.1516, 3.70σ, 0/3** — much worse |
+| 2 | **KG cluster count k** | ✅ done | ✅ **k=800: 0.7123, +0.0724 over CNN**, held-out 2.86σ |
+| 3 | Weighted / multi-resolution fusion | ✅ done | 🔴 **−0.0008, direction inconsistent.** w=0.5 was already optimal |
+| 4 | **LOCO / open-set reject class** | ▶ **RUNNING** | 12 runs, 4 hold-outs × 3 seeds |
+| 5 | **Cross-dataset augmented training** | ⬜ **NEXT** | user's idea, aims straight at the mechanism |
+
+### ✅ CURRENT BEST: CNN + KG at k=800 — macro **0.7123**
+
+**+0.0724 over the CNN alone (0.6399)**, 2.5× the 0.0285 an absolute number carries, monotone across
+all four k values, 3/3 seeds at every step, and it survives held-out selection.
+
+**Operationally — the number to quote:** at a **1 % false-alarm rate** it flags **57.8 %** of flows
+from families the model has never seen, against the CNN's 48.3 %. On the hardest family, **Bot goes
+from 0.1 % → 23.2 %** (and 19.9 % → 85.2 % at a 10 % FPR).
+⚠️ Bot's high-FPR detection rides substantially on CIC-IDS2017's **scripted attack window**; 10 % FPR
+is not a deployable operating point.
+
+### ▶ #4 LOCO — the last structural idea, prediction pre-registered
+
+Hold out one KNOWN attack family and relabel its training flows `UNKNOWN`, so the model learns an
+**explicit reject class** instead of a closed 9-way partition. `p(UNKNOWN)` becomes a *trained*
+novelty detector — everything swept so far (4 deep architectures, 7 classical, 4 benign-only, 9 OOD
+scorers) tried to detect novelty **without ever training for it**.
+
+Hold-outs chosen **a priori for diversity, not after looking**: `DDoS` (volumetric flood) ·
+`DoS Hulk` (slow-rate) · `FTP-Patator` (credential brute-force) · `PortScan` (scan).
+
+🔴 **Pre-registered prediction: this FAILS.** §4 says a model learning *"UNKNOWN = this specific
+held-out signature"* transfers nothing to Bot, whose features have 0/8 overlap with the known-class
+task. **Falsifier:** if macro beats 0.6399 on 3/3 seeds for any hold-out, §4's scope is narrower than
+claimed and the section needs revising.
+
+### ⬜ #5 Cross-dataset augmented training — worth doing, and it has a trap
+
+Train on 2017 **plus 2018's known classes**, widening the learned basis. §4 says reachability tracks
+overlap with that basis, so a wider basis is a principled route rather than a "more data" hope.
+
+🔴 **THE TRAP THAT WOULD SINK IT: 2018 contains Bot, Infilteration and the web families — exactly
+what is zero-day in 2017.** Training on raw 2018 leaks all five and produces a beautiful, meaningless
+number. The clean design **excludes those families from both datasets** and trains only on the
+genuinely-known remainder.
+⚠️ Also needs the 67/68 feature reconciliation, and 2018's class names must stay distinct rather than
+being merged into 2017's (`DoS attacks-Hulk` is not a rerun of `DoS Hulk`).
+
+### ⚠️ What no experiment here can fix
+
+**Heartbleed (n=11) and Infilteration (n=36) are below the power bar** — excluded from the macro for
+that reason, and no weighting or architecture rescues 11 flows. **Web BF and XSS are already at
+89–92 %** and their scores are *absorption into `DoS slowloris`*, not novel-class detection. The only
+real headroom is **Bot at a deployable FPR**, and that is the family §4 proves closed-set learning
+cannot reach.
+
+
 ## 📋 THE PAPER IS OUTLINED (2026-08-10) — and the canonical thesis was retracted to do it
 
 **[docs/target/paper_outline.md](target/paper_outline.md)** — section-by-section, every claim mapped
