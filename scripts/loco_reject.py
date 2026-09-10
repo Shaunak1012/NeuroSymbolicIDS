@@ -298,6 +298,46 @@ def main():
         print("  FALSIFIER (beats the SEED-MATCHED CNN on every seed): %s"
               % (", ".join(beat) if beat else "NOT triggered"))
 
+        # ---- THE ARM CONTRAST, PAIRED BY SEED --------------------------------
+        # Comparing arm MEANS would repeat the mistake the falsifier fix just
+        # corrected. The two arms share seeds, so the difference is paired and
+        # the seed-level noise common to both cancels - the same reason a paired
+        # bootstrap was used elsewhere in this project.
+        if len(arms) == 2:
+            a1, a2 = sorted(arms)
+            print("")
+            print("ARM CONTRAST, PAIRED BY SEED: %s - %s" % (a1, a2))
+            out["arm_contrast"] = {"arms": [a1, a2], "per_family": {}}
+            fams2 = sorted(set(arms[a1]) & set(arms[a2]) - {"_macro", "_headline",
+                                                            "_seed"})
+            for f in fams2:
+                by = {}
+                for a in (a1, a2):
+                    by[a] = dict(zip(arms[a]["_seed"], arms[a][f]))
+                shared = sorted(set(by[a1]) & set(by[a2]))
+                if len(shared) < 2:
+                    continue
+                d = np.array([by[a1][s_] - by[a2][s_] for s_ in shared])
+                sd = d.std(ddof=1)
+                sig = float(abs(d.mean()) / sd) if sd > 0 else None
+                cons = bool((d > 0).all() or (d < 0).all())
+                out["arm_contrast"]["per_family"][f] = {
+                    "mean_delta": float(d.mean()), "paired_sd": float(sd),
+                    "sigma": sig, "direction_consistent": cons,
+                    "n_seeds": len(shared),
+                    "per_seed": {str(s_): round(by[a1][s_] - by[a2][s_], 3)
+                                 for s_ in shared}}
+                print("  %-26s %+.3f | %s | %d/%d same direction | %s"
+                      % (f, d.mean(),
+                         ("%.2f sigma" % sig) if sig is not None else "sd=0",
+                         int((d > 0).sum()) if d.mean() > 0
+                         else int((d < 0).sum()), len(d),
+                         "DIRECTION CONSISTENT" if cons
+                         else "direction inconsistent"))
+                print("      per seed: %s"
+                      % "  ".join("s%d %+.3f" % (s_, by[a1][s_] - by[a2][s_])
+                                  for s_ in shared))
+
     out["finding"] = (
         "CNN_LOCO_HOLDOUT renames one class rather than restructuring the label "
         "space: nine classes before and after, same partition of the training "

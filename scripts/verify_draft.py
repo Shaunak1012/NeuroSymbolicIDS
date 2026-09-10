@@ -62,7 +62,7 @@ REC = {n: load(n) for n in (
     "field_gap", "ablation", "operational", "ood_scores", "noise_postdet",
     "comparability", "kg_criteria", "bot_failure_analysis", "fitted_fusion",
     "latency_determinism_on", "ksweep_fusion", "ksweep_heldout",
-    "operational_best", "crossdata_lift", "replication_2018")}
+    "operational_best", "crossdata_lift", "replication_2018", "loco_reject")}
 
 with open(DRAFT, encoding="utf-8") as f:
     TEXT = f.read()
@@ -329,6 +329,32 @@ if r18:
         v = fam.get(f, {}).get("lift")
         chk("2018 CNN %s lift" % short, "replication_2018", v,
             "{:.1f}x" if v and v >= 10 else "{:.2f}x")
+
+# ---- the reject-class experiment (5) ---------------------------------------
+lr = REC["loco_reject"]
+if lr:
+    for arm, row in (lr.get("arm_summary") or {}).items():
+        for fam, v in row["per_family_vs_chance"].items():
+            chk("LOCO %s %s vs chance" % (arm, fam), "loco_reject",
+                v["mean_minus_chance"], "{:+.3f}")
+        pv = row.get("paired_vs_seed_matched_cnn") or {}
+        # the headline delta is quoted for the arm the draft leads with; the
+        # other arm's is recorded rather than searched, since the draft
+        # summarises both arms with one figure.
+        chk("LOCO %s headline paired delta" % arm, "loco_reject",
+            pv.get("mean_delta"), "{:+.4f}", quoted=(arm == "hetero"))
+    ac = lr.get("arm_contrast") or {}
+    for fam, v in (ac.get("per_family") or {}).items():
+        chk("LOCO contrast %s delta" % fam, "loco_reject",
+            v["mean_delta"], "{:+.3f}")
+        chk("LOCO contrast %s sigma" % fam, "loco_reject", v["sigma"], "{:.2f}")
+    # the retracted rename, whose numbers the draft also states
+    noop = next((r for t, r in lr["models"].items() if r.get("is_rename_noop")),
+                None)
+    if noop:
+        pr = noop.get("mean_percentile_rank") or {}
+        chk("LOCO rename held-out percentile", "loco_reject",
+            100.0 * pr.get("held_out_families", 0), "{:.1f}")
 
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")

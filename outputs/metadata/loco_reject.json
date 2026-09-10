@@ -212,6 +212,48 @@
         "zd_Web Attack XSS": 0.7745656140154122
       }
     },
+    "locoR_homog_s44": {
+      "held_out": [
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest"
+      ],
+      "n_classes": 7,
+      "classes": [
+        "BENIGN",
+        "DDoS",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "SSH-Patator",
+        "UNKNOWN"
+      ],
+      "is_rename_noop": false,
+      "1-p(BENIGN)": {
+        "macro_pr_auc": 0.5755211431307862,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)": {
+        "macro_pr_auc": 0.42755581040411655,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)|attack": {
+        "macro_pr_auc": 0.020969603479747332,
+        "largest_tie_fraction": 0.00785815206963317,
+        "usable": true
+      },
+      "mean_percentile_rank": {
+        "held_out_families": 0.8927326801662328,
+        "real_zero_day": 0.53144745249462,
+        "benign": 0.4575679969931733,
+        "n_held_out_test": 24593,
+        "zd_Bot": 0.2808715706362597,
+        "zd_Web Attack Brute Force": 0.7624653823216657,
+        "zd_Web Attack XSS": 0.772003245822439
+      }
+    },
     "loco_DDoS_s42": {
       "held_out": [
         "DDoS"
@@ -301,40 +343,44 @@
       }
     },
     "homog": {
-      "n_seeds": 2,
-      "p_unknown_macro_mean": 0.46042456017907085,
-      "headline_macro_mean": 0.6333835494089697,
+      "n_seeds": 3,
+      "p_unknown_macro_mean": 0.4494683102540861,
+      "headline_macro_mean": 0.6140960806495751,
       "per_family_vs_chance": {
         "Bot": {
-          "mean_minus_chance": -0.19941343030599296,
+          "mean_minus_chance": -0.2059850966585754,
           "per_seed": [
             0.28,
-            0.321
+            0.321,
+            0.281
           ],
           "sign_flip": false
         },
         "Web Attack Brute Force": {
-          "mean_minus_chance": 0.2571049123174689,
+          "mean_minus_chance": 0.25889173565220114,
           "per_seed": [
             0.742,
-            0.772
+            0.772,
+            0.762
           ],
           "sign_flip": false
         },
         "Web Attack XSS": {
-          "mean_minus_chance": 0.2698702988626511,
+          "mean_minus_chance": 0.2705812811825804,
           "per_seed": [
             0.765,
-            0.775
+            0.775,
+            0.772
           ],
           "sign_flip": false
         }
       },
       "paired_vs_seed_matched_cnn": {
-        "mean_delta": -0.006673418482572746,
+        "mean_delta": -0.025803330999243996,
         "per_seed": {
           "42": -0.0153,
-          "43": 0.002
+          "43": 0.002,
+          "44": -0.0641
         },
         "seeds_better": 1,
         "all_seeds_better": false
@@ -343,6 +389,50 @@
   },
   "falsifier_triggered": false,
   "falsifier_note": "Evaluated PAIRED against the seed-matched CNN. Comparing against the n=3 mean 0.6399 would be unpaired: locoR_hetero_s44 scores 0.6406, above that mean, while its own seed-matched CNN scores 0.6396.",
+  "arm_contrast": {
+    "arms": [
+      "hetero",
+      "homog"
+    ],
+    "per_family": {
+      "Bot": {
+        "mean_delta": 0.2741406624481759,
+        "paired_sd": 0.10667888996295029,
+        "sigma": 2.569774231278422,
+        "direction_consistent": true,
+        "n_seeds": 3,
+        "per_seed": {
+          "42": 0.334,
+          "43": 0.151,
+          "44": 0.338
+        }
+      },
+      "Web Attack Brute Force": {
+        "mean_delta": -0.05900716910020609,
+        "paired_sd": 0.016504507137251635,
+        "sigma": 3.575215461419231,
+        "direction_consistent": true,
+        "n_seeds": 3,
+        "per_seed": {
+          "42": -0.069,
+          "43": -0.068,
+          "44": -0.04
+        }
+      },
+      "Web Attack XSS": {
+        "mean_delta": -0.051808249899469826,
+        "paired_sd": 0.004193772679079821,
+        "sigma": 12.353614242829527,
+        "direction_consistent": true,
+        "n_seeds": 3,
+        "per_seed": {
+          "42": -0.049,
+          "43": -0.057,
+          "44": -0.05
+        }
+      }
+    }
+  },
   "finding": "CNN_LOCO_HOLDOUT renames one class rather than restructuring the label space: nine classes before and after, same partition of the training set. A softmax objective is invariant to class names, so LOCO training equals baseline training up to a permutation of output units, and p(UNKNOWN) is p(held-out family) - a family detector, not a novelty detector. The sweep was stopped after 1.5 of 12 runs.",
   "caveats": [
     "Ties are reported beside every macro; a scorer with more than half the flows in one block is not comparable to one without.",
