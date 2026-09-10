@@ -2,6 +2,90 @@
   "cnn_alone": 0.6399,
   "noise_band": 0.0285,
   "models": {
+    "locoR_hetero_s42": {
+      "held_out": [
+        "DDoS",
+        "FTP-Patator",
+        "PortScan"
+      ],
+      "n_classes": 7,
+      "classes": [
+        "BENIGN",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "SSH-Patator",
+        "UNKNOWN"
+      ],
+      "is_rename_noop": false,
+      "1-p(BENIGN)": {
+        "macro_pr_auc": 0.6399166339921214,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)": {
+        "macro_pr_auc": 0.27845838576233956,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)|attack": {
+        "macro_pr_auc": 0.15481026592445774,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "mean_percentile_rank": {
+        "held_out_families": 0.8713698283628838,
+        "real_zero_day": 0.6465921132637186,
+        "benign": 0.3252391058784734,
+        "n_held_out_test": 29476,
+        "zd_Bot": 0.6133679501956936,
+        "zd_Web Attack Brute Force": 0.6735257298983598,
+        "zd_Web Attack XSS": 0.7165933562677247
+      }
+    },
+    "locoR_hetero_s43": {
+      "held_out": [
+        "DDoS",
+        "FTP-Patator",
+        "PortScan"
+      ],
+      "n_classes": 7,
+      "classes": [
+        "BENIGN",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "SSH-Patator",
+        "UNKNOWN"
+      ],
+      "is_rename_noop": false,
+      "1-p(BENIGN)": {
+        "macro_pr_auc": 0.6302853595474803,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)": {
+        "macro_pr_auc": 0.21004837596102763,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)|attack": {
+        "macro_pr_auc": 0.11977610267987472,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "mean_percentile_rank": {
+        "held_out_families": 0.8713862258741681,
+        "real_zero_day": 0.5931564381632618,
+        "benign": 0.4010819813385788,
+        "n_held_out_test": 29476,
+        "zd_Bot": 0.472461325012402,
+        "zd_Web Attack Brute Force": 0.7036142729557472,
+        "zd_Web Attack XSS": 0.7180168480775103
+      }
+    },
     "loco_DDoS_s42": {
       "held_out": [
         "DDoS"

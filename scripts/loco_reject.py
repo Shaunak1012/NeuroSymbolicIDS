@@ -175,9 +175,20 @@ def main():
             print("    p(UNKNOWN) mean percentile rank: held-out %.3f | "
                   "real zero-day %.3f | benign %.3f"
                   % (pr["held_out_families"], pr["real_zero_day"], pr["benign"]))
-            print("      per adequately-powered zero-day family: %s"
-                  % "  ".join("%s %.3f" % (k[3:], v)
-                              for k, v in pr.items() if k.startswith("zd_")))
+            # CHANCE IS 0.500 AND IT IS THE ONLY REFERENCE THAT MEANS ANYTHING.
+            # Reading a family's rank against the BENIGN row instead invites a
+            # specific error, made once already: benign sits LOW exactly when
+            # the reject unit is working, so every other row floats up relative
+            # to it and a family at chance looks detected. Each family is
+            # therefore printed with its distance from 0.500, not from benign.
+            print("      per adequately-powered zero-day family "
+                  "(chance = 0.500):")
+            for k, v in pr.items():
+                if not k.startswith("zd_"):
+                    continue
+                print("        %-26s %.3f  (%+.3f vs chance)%s"
+                      % (k[3:], v, v - 0.5,
+                         "" if abs(v - 0.5) > 0.05 else "  <- AT CHANCE"))
         else:
             print("    held-out families have no test flows - percentile skipped")
         out["models"][tag] = row
