@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (68 Python scripts, plus 11 shell launchers).
+> Last verified against source: **2026-09-05** (69 Python scripts, plus 11 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,24 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+**`crossdata_lift.py`** — the 2017-vs-2018 comparison in **lift** (PR-AUC ÷ prevalence), the only
+unit comparable across captures with different family prevalences. Exists because `analyse_2018.py`'s
+2017 reference is a two-entry hard-coded stub with the autoencoder's Bot lift set to `None`, so the
+one comparison the paper needs could not be made.
+
+| Bot, lift over chance | 2017 | 2018 |
+|---|---:|---:|
+| CNN | 1.31× | **0.83×** (below chance) |
+| autoencoder | 3.84× | 1.09× |
+| **AE − CNN** | **+2.53×** | **+0.26×** |
+
+✅ **The double dissociation's DIRECTION replicates; its MAGNITUDE shrinks 9.7×.** At 1.09× the
+autoencoder is close enough to chance that 2018 lends no support to "an anomaly method reaches Bot" —
+and it **cannot be tested**, because `replication_2018.json` persists per-family lift as a mean with
+no per-seed spread. Claim the direction, drop the magnitude.
+🔑 Separately this is the **control for §4**: 2018's Bot is abundant and the CNN still scores it
+**below a random ranker**, so Bot's failure was never a rarity artefact.
 
 **`operational_best.py`** — persists the operational profile of the selected system, because the
 numbers the project leads with had been computed in-session and never written to disk. Sweeps FPR

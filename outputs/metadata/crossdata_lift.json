@@ -1,0 +1,188 @@
+{
+  "unit": "lift = PR-AUC / prevalence",
+  "seeds_2017": [
+    42,
+    43,
+    44
+  ],
+  "chance": 1.0,
+  "d2017": {
+    "cnn": {
+      "macro_lift_mean": 39.227532077798315,
+      "macro_lift_per_seed": [
+        39.415,
+        39.131,
+        39.137
+      ],
+      "macro_pr_auc_mean": 0.6398994116488191,
+      "per_family": {
+        "Bot": {
+          "lift_mean": 1.3085798656729215,
+          "lift_per_seed": [
+            1.728,
+            0.716,
+            1.482
+          ],
+          "pr_auc_mean": 0.044753417677971676,
+          "chance_pr_auc": 0.03419998950920567,
+          "n": 1956
+        },
+        "Web Attack Brute Force": {
+          "lift_mean": 34.73888594937401,
+          "lift_per_seed": [
+            34.62,
+            34.972,
+            34.625
+          ],
+          "pr_auc_mean": 0.9225909545627138,
+          "chance_pr_auc": 0.026557873960242492,
+          "n": 1507
+        },
+        "Web Attack XSS": {
+          "lift_mean": 81.63513041834801,
+          "lift_per_seed": [
+            81.896,
+            81.705,
+            81.305
+          ],
+          "pr_auc_mean": 0.9523538627057722,
+          "chance_pr_auc": 0.011665980783338402,
+          "n": 652
+        }
+      }
+    },
+    "autoencoder": {
+      "macro_lift_mean": 4.158050306051165,
+      "macro_lift_per_seed": [
+        4.408,
+        4.107,
+        3.958
+      ],
+      "macro_pr_auc_mean": 0.09695209503408403,
+      "per_family": {
+        "Bot": {
+          "lift_mean": 3.8421030510646887,
+          "lift_per_seed": [
+            3.558,
+            4.816,
+            3.153
+          ],
+          "pr_auc_mean": 0.13139988403969943,
+          "chance_pr_auc": 0.03419998950920567,
+          "n": 1956
+        },
+        "Web Attack Brute Force": {
+          "lift_mean": 3.9454417129019537,
+          "lift_per_seed": [
+            4.396,
+            3.494,
+            3.946
+          ],
+          "pr_auc_mean": 0.10478254372873334,
+          "chance_pr_auc": 0.026557873960242492,
+          "n": 1507
+        },
+        "Web Attack XSS": {
+          "lift_mean": 4.686606154186852,
+          "lift_per_seed": [
+            5.271,
+            4.012,
+            4.776
+          ],
+          "pr_auc_mean": 0.054673857333819305,
+          "chance_pr_auc": 0.011665980783338402,
+          "n": 652
+        }
+      }
+    }
+  },
+  "d2018": {
+    "cnn": {
+      "macro_lift_mean": 17.306957028122778,
+      "macro_lift_per_seed": [
+        15.425,
+        23.886,
+        12.61
+      ],
+      "macro_pr_auc_mean": 0.4558899364022344,
+      "per_family": {
+        "Bot": {
+          "lift_mean": 0.8301305065577109,
+          "pr_auc_mean": 0.6958280632349855
+        },
+        "Brute Force -Web": {
+          "lift_mean": 20.104967743622723,
+          "pr_auc_mean": 0.2199526453715104
+        },
+        "Brute Force -XSS": {
+          "lift_mean": 47.33657549827743,
+          "pr_auc_mean": 0.19628276419924662
+        },
+        "Infilteration": {
+          "lift_mean": 0.9561543640332383,
+          "pr_auc_mean": 0.7114962728031952
+        },
+        "SQL Injection": {
+          "lift_mean": 47.95698449727559,
+          "pr_auc_mean": 0.07541360418008093
+        }
+      }
+    },
+    "autoencoder": {
+      "macro_lift_mean": 5.968518457078829,
+      "macro_lift_per_seed": [
+        5.662,
+        4.711,
+        7.533
+      ],
+      "macro_pr_auc_mean": 0.4615378439368952,
+      "per_family": {
+        "Bot": {
+          "lift_mean": 1.0918067582738302,
+          "pr_auc_mean": 0.9151690921308552
+        },
+        "Brute Force -Web": {
+          "lift_mean": 5.989657416767593,
+          "pr_auc_mean": 0.0655281326728321
+        },
+        "Brute Force -XSS": {
+          "lift_mean": 15.717138676170622,
+          "pr_auc_mean": 0.06517166466285504
+        },
+        "Infilteration": {
+          "lift_mean": 1.0754709771032678,
+          "pr_auc_mean": 0.8002824862810388
+        },
+        "SQL Injection": {
+          "lift_mean": 4.9645840572234645,
+          "pr_auc_mean": 0.0078069374239212175
+        }
+      }
+    }
+  },
+  "bot": {
+    "cnn": {
+      "2017": 1.3085798656729215,
+      "2018": 0.8301305065577109
+    },
+    "autoencoder": {
+      "2017": 3.8421030510646887,
+      "2018": 1.0918067582738302
+    }
+  },
+  "verdict": {
+    "ae_minus_cnn_2017": 2.5335231853917675,
+    "ae_minus_cnn_2018": 0.2616762517161193,
+    "direction_replicates": true,
+    "magnitude_shrink_factor": 9.68189955632761,
+    "ae_lift_2018_over_chance": 0.09180675827383022,
+    "cnn_below_chance_2018": true,
+    "ae_beats_chance_2018_testable": false,
+    "why_not_testable": "replication_2018.json persists per-family lift as a mean only; with no per-seed spread a margin of 0.09x over chance cannot be distinguished from noise."
+  },
+  "caveats": [
+    "Lift divides out prevalence, which is the only reason these datasets can be compared at all; raw PR-AUC across them is meaningless and this project retracted one such comparison already.",
+    "2018's macro is over a DIFFERENT family set (Bot, Brute Force -Web, Brute Force -XSS, Infilteration, SQL Injection), so the macro rows are a comparison of the same METHOD on two captures, not of one number against itself.",
+    "A dissociation between two models that both sit at chance is not evidence that either reaches the family."
+  ]
+}
