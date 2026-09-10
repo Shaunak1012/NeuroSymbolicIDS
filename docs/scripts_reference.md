@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (63 Python scripts, plus 9 shell launchers).
+> Last verified against source: **2026-09-05** (66 Python scripts, plus 11 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1424,6 +1424,46 @@ well-powered version of a problem that was defined by being rare. Defaulting tha
 replication ends up answering a different question than the one it claims.
 
 **Writes** `data/processed/paper_2018/` + `outputs/metadata/preprocess_2018.json`.
+
+## The improvement itinerary — `best_config.py` · `kg_ksweep.sh` · `ksweep_fusion.py` · `fusion_weight.py` · `loco_sweep.sh`
+
+Five scripts from the 2026-09-10 push to raise the headline. **Every arm selects on held-out data and
+reports on a split never used for selection** — that protocol has already paid for itself once.
+
+**`best_config.py`** — is anything better than CNN+KG? 🔴 **No.** `ENSEMBLE + KG` = **0.5414** vs
+0.6930, worse by **0.1516 at 3.70σ, 0/3 seeds**. The 11-run ensemble is a *better standalone CNN*
+(0.6356 vs 0.6217) and a *much worse fusion partner*: the CNN's Bot ranking is noise (ρ = −0.090), so
+averaging 11 runs creates **consistent non-signal**, removing the accidental variance rank fusion was
+exploiting. It does **not** retry "combine everything" — `fusion_multi` already falsified that (ALL 9
+channels 0.6664, CNN+AE+KG 0.6509, both below CNN+KG).
+
+**`kg_ksweep.sh` + `ksweep_fusion.py`** — ✅ **the one positive.** Bot cluster purity was known to be
+higher at k=400 (80.6 %) than k=200 (77.6 %), but every fusion result used k=200. Fused macro is
+**monotone in k**: 0.6493 / 0.6792 / 0.6960 / **0.7123**, 3/3 seeds at every step. **k=800 gives
++0.0724 over the CNN alone.** Re-selected on a stratified half of test (rng 9001) and reported on the
+other half: **+0.0305, 2.86σ, 3/3** — it survives held-out selection.
+🔑 `kg.py` needed a `KG_TAG` override first: without it every k at a given seed wrote the same report
+and clobbered the others, and the sweep would have "finished" having measured only its last k.
+
+**`fusion_weight.py`** — 🔴 **negative, and it caught a would-be artefact.** Hypothesis: Bot (47 % of
+unknown flows) sits at 23.2 % recall at 1 % FPR but 85.2 % at 10 %, so the KG signal looked *diluted*
+by 50/50 fusion. Measured, **w=0.5 IS the optimum** for every k-set, with a sharp cliff past 0.6.
+Multi-resolution k adds nothing. Half A said `k400+800@w=0.5` was best at 0.7193; **half B says
+−0.0008, direction inconsistent.** Without the split this would have shipped as +0.007.
+
+**`loco_sweep.sh`** (+ `CNN_LOCO_HOLDOUT` in `cnn_paper.py`) — open-set training: relabel one known
+family's training flows `UNKNOWN` so the model learns an **explicit reject class**, making
+`p(UNKNOWN)` a *trained* novelty detector. Everything else swept detects novelty **without ever
+training for it**. Four hold-outs chosen a priori for diversity (`DDoS`, `DoS Hulk`, `FTP-Patator`,
+`PortScan`) × 3 seeds.
+🔴 **Prediction pre-registered before the run: this fails**, because a model learning "UNKNOWN = this
+specific signature" transfers nothing to Bot's 0/8 overlap. **Falsifier:** macro beating 0.6399 on
+3/3 seeds for any hold-out means §4's scope is narrower than claimed.
+
+⚠️ **What none of these can fix.** Heartbleed (n=11) and Infilteration (n=36) are below the power bar.
+Web BF and XSS are already 89–92 % and are *absorption into `DoS slowloris`*, not novel-class
+detection. The only real headroom is Bot at a deployable FPR — the family §4 proves closed-set
+learning cannot reach.
 
 ## `scripts/analyse_2018.py` — Phase 6
 
