@@ -1,0 +1,139 @@
+{
+  "reference_k": 200,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "variants": {
+    "s_kg": {
+      "100": {
+        "standalone_mean": 0.17744844876068286,
+        "fused_mean": 0.6493217184023551,
+        "fused_per_seed": [
+          0.6485,
+          0.6533,
+          0.6461
+        ],
+        "paired_vs_reference": {
+          "mean_delta": -0.029831626576846754,
+          "paired_sd": 0.0387199633771264,
+          "sigma": 0.7704456299788139,
+          "direction_consistent": false,
+          "seeds_better": 1,
+          "verdict": "not established - direction inconsistent"
+        }
+      },
+      "200": {
+        "standalone_mean": 0.19912139412621974,
+        "fused_mean": 0.6791533449792019,
+        "fused_per_seed": [
+          0.7214,
+          0.6512,
+          0.6648
+        ]
+      },
+      "400": {
+        "standalone_mean": 0.2206315156048593,
+        "fused_mean": 0.6959843186384386,
+        "fused_per_seed": [
+          0.7322,
+          0.6726,
+          0.6831
+        ],
+        "paired_vs_reference": {
+          "mean_delta": 0.016830973659236765,
+          "paired_sd": 0.005511390679741167,
+          "sigma": 3.053852400829477,
+          "direction_consistent": true,
+          "seeds_better": 3,
+          "verdict": "BETTER, direction consistent"
+        }
+      },
+      "800": {
+        "standalone_mean": 0.1999253340878553,
+        "fused_mean": 0.7122872851184693,
+        "fused_per_seed": [
+          0.7402,
+          0.6878,
+          0.7088
+        ],
+        "paired_vs_reference": {
+          "mean_delta": 0.033133940139267404,
+          "paired_sd": 0.012946404701073173,
+          "sigma": 2.559315957156879,
+          "direction_consistent": true,
+          "seeds_better": 3,
+          "verdict": "BETTER, direction consistent"
+        }
+      }
+    },
+    "causal": {
+      "100": {
+        "standalone_mean": 0.22837904455936656,
+        "fused_mean": 0.6622248652374637,
+        "fused_per_seed": [
+          0.6752,
+          0.6485,
+          0.663
+        ],
+        "paired_vs_reference": {
+          "mean_delta": -0.030769584396628875,
+          "paired_sd": 0.023279615936013298,
+          "sigma": 1.3217393483295694,
+          "direction_consistent": true,
+          "seeds_better": 0,
+          "verdict": "worse, direction consistent"
+        }
+      },
+      "200": {
+        "standalone_mean": 0.24881722493824723,
+        "fused_mean": 0.6929944496340926,
+        "fused_per_seed": [
+          0.7328,
+          0.6637,
+          0.6825
+        ]
+      },
+      "400": {
+        "standalone_mean": 0.2485436122390994,
+        "fused_mean": 0.6968003094410524,
+        "fused_per_seed": [
+          0.7364,
+          0.6697,
+          0.6843
+        ],
+        "paired_vs_reference": {
+          "mean_delta": 0.0038058598069598735,
+          "paired_sd": 0.002098440993558563,
+          "sigma": 1.8136606264567143,
+          "direction_consistent": true,
+          "seeds_better": 3,
+          "verdict": "BETTER, direction consistent"
+        }
+      },
+      "800": {
+        "standalone_mean": 0.24564163815102677,
+        "fused_mean": 0.70318557026272,
+        "fused_per_seed": [
+          0.7476,
+          0.6643,
+          0.6976
+        ],
+        "paired_vs_reference": {
+          "mean_delta": 0.010191120628627445,
+          "paired_sd": 0.00831442391031451,
+          "sigma": 1.225715784828434,
+          "direction_consistent": true,
+          "seeds_better": 3,
+          "verdict": "BETTER, direction consistent"
+        }
+      }
+    }
+  },
+  "caveats": [
+    "SELECTION ON TEST: four k values compared on the same split that reports the headline, so any winner's margin is optimistically biased and must not be quoted as a clean improvement.",
+    "Standalone rank does not predict fused rank - the 11-run CNN ensemble beats a single CNN standalone and is 0.1516 worse in fusion.",
+    "An absolute number carries 0.0285; only the paired delta decides."
+  ]
+}

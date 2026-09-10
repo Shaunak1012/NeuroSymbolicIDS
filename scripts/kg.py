@@ -64,7 +64,12 @@ K = int(os.environ.get("KG_K", 200))
 N_WINDOWS = int(os.environ.get("KG_WINDOWS", 20))
 TAU = float(os.environ.get("KG_TAU", 3.0))        # decay constant, in windows
 BURST_THR = float(os.environ.get("KG_BURST", 8.0))  # measured operating point
-TAG = "kg" if SEED == cfg["seed"] else f"kg_s{SEED}"
+# KG_TAG lets a sweep vary K without every run overwriting the same report.
+# Additive and inert when unset -- without it, kg_k100_s42 / kg_k400_s42 /
+# kg_k800_s42 would all write "kg" and silently clobber each other, and the
+# sweep would "finish" having measured only its last k.
+_DEFAULT_TAG = "kg" if SEED == cfg["seed"] else f"kg_s{SEED}"
+TAG = os.environ.get("KG_TAG", _DEFAULT_TAG)
 print(f"CONFIG: seed={SEED} k={K} windows={N_WINDOWS} tau={TAU} burst_thr={BURST_THR}")
 
 # ------------------------------------------------------------------ data ----

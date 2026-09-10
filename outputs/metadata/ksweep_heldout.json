@@ -1,0 +1,20 @@
+{
+  "selected_k": 800,
+  "rng": 9001,
+  "half_a_means": {
+    "100": 0.6516342656366415,
+    "200": 0.6804859909112492,
+    "400": 0.7026101763810498,
+    "800": 0.7165485765764372
+  },
+  "half_b_means": {
+    "100": 0.6476532236335136,
+    "200": 0.6785568100821343,
+    "400": 0.6905495026795688,
+    "800": 0.7090777426354714
+  },
+  "held_out_delta_vs_k200": 0.030520932553336988,
+  "held_out_sigma": 2.8567052056294835,
+  "held_out_seeds_better": 3,
+  "note": "k selected on half A, reported on half B; removes the test-set selection bias in ksweep_fusion.json"
+}

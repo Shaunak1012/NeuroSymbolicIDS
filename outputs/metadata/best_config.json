@@ -1,0 +1,45 @@
+{
+  "reference_cnn_kg": 0.6926,
+  "cnn_alone": 0.6399,
+  "ensemble_n_runs": 11,
+  "configs": {
+    "CNN + KG  (the reference)": {
+      "per_seed": [
+        0.7328,
+        0.6637,
+        0.6825
+      ],
+      "mean": 0.6929944496340926,
+      "sd": 0.03570957313028544,
+      "note": ""
+    },
+    "ENSEMBLE + KG": {
+      "per_seed": [
+        0.5491,
+        0.5583,
+        0.5169
+      ],
+      "mean": 0.5414475599926029,
+      "sd": 0.021763075039316213,
+      "note": "11-run CNN ensemble replaces the single CNN"
+    },
+    "fitted_arms": {
+      "skipped": true,
+      "reason": "fitted_fusion.py does not persist per-seed fitted test scores"
+    }
+  },
+  "paired_vs_cnn_kg": {
+    "ENSEMBLE + KG": {
+      "mean_delta": -0.15156111630075916,
+      "paired_sd": 0.040966620678226394,
+      "sigma": 3.699624567308119,
+      "direction_consistent": true,
+      "seeds_better": 0
+    }
+  },
+  "caveats": [
+    "'Combine everything' was already falsified: fusion_multi measured ALL 9 channels at 0.6664 and CNN+AE+KG at 0.6509, both below CNN+KG's 0.6926.",
+    "An absolute number carries 0.0285; only the paired delta over shared seeds decides a comparison.",
+    "The KG channel cannot enter a fitted combiner - no validation-side score exists by construction."
+  ]
+}

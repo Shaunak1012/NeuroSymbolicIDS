@@ -1,0 +1,459 @@
+{
+ "config": {
+  "seed": 44,
+  "k": 400,
+  "windows": 20,
+  "tau": 3.0,
+  "burst_threshold": 8.0,
+  "representation": "raw_features",
+  "scope": "corroboration + explanation, NOT primary detection"
+ },
+ "graph": {
+  "nodes": 415,
+  "edges": 2057,
+  "clusters": 400,
+  "behaviours": [
+   "BurstTraffic",
+   "HighVolume",
+   "LargePackets",
+   "HighEntropy",
+   "ScanProbe",
+   "BeaconLike"
+  ],
+  "attack_types": [
+   "BENIGN",
+   "DDoS",
+   "DoS GoldenEye",
+   "DoS Hulk",
+   "DoS Slowhttptest",
+   "DoS slowloris",
+   "FTP-Patator",
+   "PortScan",
+   "SSH-Patator"
+  ]
+ },
+ "emerging": {
+  "threshold": 8.0,
+  "n_clusters": 115,
+  "clusters": [
+   2,
+   4,
+   11,
+   15,
+   19,
+   20,
+   21,
+   24,
+   32,
+   33,
+   42,
+   45,
+   46,
+   49,
+   50,
+   52,
+   54,
+   57,
+   61,
+   62,
+   64,
+   72,
+   73,
+   78,
+   80,
+   87,
+   89,
+   91,
+   96,
+   102,
+   104,
+   108,
+   111,
+   113,
+   114,
+   120,
+   126,
+   130,
+   131,
+   133,
+   137,
+   138,
+   141,
+   144,
+   145,
+   147,
+   148,
+   150,
+   156,
+   163,
+   169,
+   171,
+   172,
+   176,
+   179,
+   182,
+   188,
+   190,
+   191,
+   196,
+   198,
+   200,
+   204,
+   208,
+   211,
+   215,
+   218,
+   222,
+   228,
+   230,
+   233,
+   240,
+   241,
+   242,
+   247,
+   249,
+   251,
+   253,
+   256,
+   259,
+   260,
+   269,
+   270,
+   271,
+   273,
+   274,
+   278,
+   280,
+   282,
+   287,
+   302,
+   307,
+   314,
+   320,
+   328,
+   329,
+   344,
+   347,
+   348,
+   350,
+   353,
+   354,
+   360,
+   361,
+   364,
+   366,
+   369,
+   370,
+   382,
+   384,
+   386,
+   389,
+   391,
+   395,
+   396
+  ],
+  "precision": 0.39210199004975127,
+  "recall": 0.904374850585704,
+  "lift": 5.56985423111552,
+  "base_rate": 0.07039717266913498
+ },
+ "s_kg_metrics": {
+  "macro_zd_pr_auc": 0.21050980934770824,
+  "macro_zd_lift": 9.547696032169467,
+  "zd_pr_auc": 0.3803289502598032,
+  "zd_roc_auc": 0.9252374456275001,
+  "zd_f1": 0.0,
+  "all_pr_auc": 0.8221692476621302,
+  "saturated": true,
+  "fam_bot_pr_auc": 0.24247029470709572,
+  "fam_heartbleed_pr_auc": 0.00159366815452359,
+  "fam_infiltration_pr_auc": 0.0008045594735499801,
+  "fam_web_attack_brute_force_pr_auc": 0.24542601058962582,
+  "fam_web_attack_sql_injection_pr_auc": 0.0019185682062788246,
+  "fam_web_attack_xss_pr_auc": 0.14363312274640314
+ },
+ "s_kg_causal_metrics": {
+  "macro_zd_pr_auc": 0.24420984082437877,
+  "macro_zd_lift": 10.794883013347885,
+  "zd_pr_auc": 0.42915942657711087,
+  "zd_roc_auc": 0.9462270832601278,
+  "zd_f1": 0.0,
+  "all_pr_auc": 0.9119862408642117,
+  "saturated": true,
+  "fam_bot_pr_auc": 0.2847219908997322,
+  "fam_heartbleed_pr_auc": 0.0032850302158613023,
+  "fam_infiltration_pr_auc": 0.0015451627774816178,
+  "fam_web_attack_brute_force_pr_auc": 0.298235262772725,
+  "fam_web_attack_sql_injection_pr_auc": 0.0027979158933634667,
+  "fam_web_attack_xss_pr_auc": 0.14967226880067905
+ },
+ "confound_control": {
+  "s_kg (causal)": {
+   "bot_global": 0.2847219908997322,
+   "bot_global_lift": 8.325206966016557,
+   "bot_within_window": 0.8966771466273034,
+   "bot_within_window_lift": 3.142623133990574
+  },
+  "s_kg (transductive)": {
+   "bot_global": 0.24247029470709572,
+   "bot_global_lift": 7.089776873815402,
+   "bot_within_window": 0.8920896698398733,
+   "bot_within_window_lift": 3.1265452059057015
+  },
+  "lateness ONLY": {
+   "bot_global": 0.15745292679850703,
+   "bot_global_lift": 4.603888160729556,
+   "bot_within_window": 0.28532760957839776,
+   "bot_within_window_lift": 1.0
+  }
+ },
+ "explanations": [
+  {
+   "cluster": 72,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "ScanProbe",
+     0.3373681931936615
+    ],
+    [
+     "BeaconLike",
+     0.3365688658724915
+    ],
+    [
+     "BurstTraffic",
+     0.32606294093384697
+    ]
+   ],
+   "known_associations": [
+    [
+     "BENIGN",
+     1.0
+    ]
+   ],
+   "path": "Cluster:72 -[exhibits]-> [ScanProbe 34%, BeaconLike 34%, BurstTraffic 33%] | -[associated_with]-> [BENIGN 100%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "BENIGN": 347
+   }
+  },
+  {
+   "cluster": 73,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "BeaconLike",
+     0.9333333333333333
+    ],
+    [
+     "HighVolume",
+     0.0666666666666667
+    ]
+   ],
+   "known_associations": [
+    [
+     "DoS slowloris",
+     0.9951923076923077
+    ],
+    [
+     "BENIGN",
+     0.004807692307692306
+    ]
+   ],
+   "path": "Cluster:73 -[exhibits]-> [BeaconLike 93%, HighVolume 7%] | -[associated_with]-> [DoS slowloris 100%, BENIGN 0%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "DoS slowloris": 101
+   }
+  },
+  {
+   "cluster": 89,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "BeaconLike",
+     0.49612623051775595
+    ],
+    [
+     "ScanProbe",
+     0.4487580614394148
+    ],
+    [
+     "BurstTraffic",
+     0.05511570804282917
+    ]
+   ],
+   "known_associations": [
+    [
+     "BENIGN",
+     1.0
+    ]
+   ],
+   "path": "Cluster:89 -[exhibits]-> [BeaconLike 50%, ScanProbe 45%, BurstTraffic 6%] | -[associated_with]-> [BENIGN 100%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "BENIGN": 116
+   }
+  },
+  {
+   "cluster": 148,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "HighVolume",
+     0.5982923243125005
+    ],
+    [
+     "HighEntropy",
+     0.3750663633752787
+    ],
+    [
+     "LargePackets",
+     0.026641312312220885
+    ]
+   ],
+   "known_associations": [
+    [
+     "DoS Slowhttptest",
+     0.8095238095238096
+    ],
+    [
+     "DoS slowloris",
+     0.18743667679837892
+    ],
+    [
+     "BENIGN",
+     0.0030395136778115506
+    ]
+   ],
+   "path": "Cluster:148 -[exhibits]-> [HighVolume 60%, HighEntropy 38%, LargePackets 3%] | -[associated_with]-> [DoS Slowhttptest 81%, DoS slowloris 19%, BENIGN 0%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "DoS Slowhttptest": 94,
+    "DoS slowloris": 29
+   }
+  },
+  {
+   "cluster": 163,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "BeaconLike",
+     0.5004627689917038
+    ],
+    [
+     "ScanProbe",
+     0.4624088673728369
+    ],
+    [
+     "BurstTraffic",
+     0.037127604746073246
+    ]
+   ],
+   "known_associations": [
+    [
+     "BENIGN",
+     1.0
+    ]
+   ],
+   "path": "Cluster:163 -[exhibits]-> [BeaconLike 50%, ScanProbe 46%, BurstTraffic 4%] | -[associated_with]-> [BENIGN 100%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "BENIGN": 227
+   }
+  },
+  {
+   "cluster": 176,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "BeaconLike",
+     0.4863503154749612
+    ],
+    [
+     "ScanProbe",
+     0.4506647616960167
+    ],
+    [
+     "BurstTraffic",
+     0.06298492282902213
+    ]
+   ],
+   "known_associations": [
+    [
+     "BENIGN",
+     1.0
+    ]
+   ],
+   "path": "Cluster:176 -[exhibits]-> [BeaconLike 49%, ScanProbe 45%, BurstTraffic 6%] | -[associated_with]-> [BENIGN 100%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "BENIGN": 264
+   }
+  },
+  {
+   "cluster": 196,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "BeaconLike",
+     0.4878995133541696
+    ],
+    [
+     "ScanProbe",
+     0.48152757504828825
+    ],
+    [
+     "BurstTraffic",
+     0.030572911597542152
+    ]
+   ],
+   "known_associations": [
+    [
+     "BENIGN",
+     1.0
+    ]
+   ],
+   "path": "Cluster:196 -[exhibits]-> [BeaconLike 49%, ScanProbe 48%, BurstTraffic 3%] | -[associated_with]-> [BENIGN 100%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "BENIGN": 425
+   }
+  },
+  {
+   "cluster": 218,
+   "burstiness": 20.0,
+   "emerging": true,
+   "dominant_behaviours": [
+    [
+     "BeaconLike",
+     0.4985610542188518
+    ],
+    [
+     "ScanProbe",
+     0.4556467398035747
+    ],
+    [
+     "BurstTraffic",
+     0.04579220597757358
+    ]
+   ],
+   "known_associations": [
+    [
+     "BENIGN",
+     1.0
+    ]
+   ],
+   "path": "Cluster:218 -[exhibits]-> [BeaconLike 50%, ScanProbe 46%, BurstTraffic 5%] | -[associated_with]-> [BENIGN 100%] | EMERGING \u2014 activity concentrated in time (burstiness 20.0x uniform)",
+   "actual_composition": {
+    "BENIGN": 106
+   }
+  }
+ ],
+ "caveats": [
+  "Growth works substantially because CIC-IDS2017's attacks are scripted into fixed windows; a real network with continuous low-rate C2 would not produce it.",
+  "'Temporal burstiness of a raw-feature cluster' does not require a knowledge graph. The KG earns its place through explanation/corroboration, not this number.",
+  "s_kg is deliberately NOT fed to a fitted combiner: validation contains no zero-day by construction, so a fitted fuser cannot learn to weight it.",
+  "LATENESS CONFOUND: a trivial 'later in the week' baseline scores Bot 0.1575 globally, beating the previous best channel (autoencoder, 0.1314). The global KG number is therefore inflated by CIC-IDS2017's attack schedule. Report the WITHIN-WINDOW figure alongside it -- that is the schedule-free measure."
+ ]
+}
