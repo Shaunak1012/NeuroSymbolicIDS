@@ -332,11 +332,36 @@ if r18:
 
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")
-unbacked("zero-day family counts 1,956 / 1,507 / 652", "derived from y_test_mc.npy at runtime")
+# These were listed as hand-checks on the grounds that they are "derived at
+# runtime" -- but deriving them here costs one array load, and a hand-check
+# nobody performs is indistinguishable from no check at all.
+try:
+    import numpy as _np
+    import config as _cfg
+    _P = os.path.join(paths.PROCESSED, _cfg.get()["paths"]["paper_subdir"])
+    _y = _np.load(os.path.join(_P, "y_test_mc.npy"), allow_pickle=True)
+    chk("test split size", "y_test_mc.npy", len(_y), "{:,d}")
+    for _f in ("Bot", "Web Attack Brute Force", "Web Attack XSS",
+               "Heartbleed", "Infiltration", "Web Attack Sql Injection"):
+        _n = int((_y == _f).sum())
+        # the three underpowered families are named in the draft with their n,
+        # the powered three with theirs; both render as a bare integer.
+        chk("zero-day n: %s" % _f, "y_test_mc.npy", _n, "{:,d}")
+except Exception as _e:                                   # noqa: BLE001
+    unbacked("zero-day family counts", "could not load y_test_mc.npy: %s" % _e)
 unbacked("base paper 48.34 % / 47.85 % / 47.24 %", "paper_metrics.json + basepaper.pdf - verify by hand")
 unbacked("Tier A/B per-method figures", "baselines_classic.json / deep_zoo.json - not itemised here yet")
 unbacked("double dissociation SD multiples (40 / 37 / 3.9)", "derived in STATUS from AE + CNN runs")
-unbacked("Web BF / XSS correlation r = +0.992", "robustness.json - not itemised here yet")
+# CORRECTED 2026-09-10: this note used to say "robustness.json - not itemised
+# here yet", and robustness.json does NOT contain it (its keys are
+# c3_regrouped_macro and fusion_wall_test). Nor is it derivable from
+# runs.jsonl or field_gap.json, which record MACRO per method and no
+# per-family breakdown. It is genuinely unpersisted, and saying which files
+# do not hold it is more useful than naming one that does not.
+unbacked("Web BF / XSS correlation r = +0.992",
+         "NOT persisted anywhere - absent from robustness.json, field_gap.json "
+         "and runs.jsonl (none carry per-family PR-AUC per method). Needs a "
+         "method x family matrix to back; recompute before publication.")
 
 # ------------------------------------------------------------------ report --
 print("=" * 96)
