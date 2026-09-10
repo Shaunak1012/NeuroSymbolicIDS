@@ -86,6 +86,48 @@
         "zd_Web Attack XSS": 0.7180168480775103
       }
     },
+    "locoR_homog_s42": {
+      "held_out": [
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest"
+      ],
+      "n_classes": 7,
+      "classes": [
+        "BENIGN",
+        "DDoS",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "SSH-Patator",
+        "UNKNOWN"
+      ],
+      "is_rename_noop": false,
+      "1-p(BENIGN)": {
+        "macro_pr_auc": 0.6293228708541774,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)": {
+        "macro_pr_auc": 0.45190685367871647,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)|attack": {
+        "macro_pr_auc": 0.014555399375764036,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "mean_percentile_rank": {
+        "held_out_families": 0.8927388398574733,
+        "real_zero_day": 0.5246467717711253,
+        "benign": 0.4971837265863641,
+        "n_held_out_test": 24593,
+        "zd_Bot": 0.2796929499344026,
+        "zd_Web Attack Brute Force": 0.7423159151135514,
+        "zd_Web Attack XSS": 0.7651749837098901
+      }
+    },
     "loco_DDoS_s42": {
       "held_out": [
         "DDoS"
@@ -129,6 +171,68 @@
       }
     }
   },
+  "arm_summary": {
+    "hetero": {
+      "n_seeds": 2,
+      "p_unknown_macro_mean": 0.24425338086168358,
+      "headline_macro_mean": 0.6351009967698009,
+      "per_family_vs_chance": {
+        "Bot": {
+          "mean_minus_chance": 0.04291463760404779,
+          "per_seed": [
+            0.613,
+            0.472
+          ],
+          "sign_flip": true
+        },
+        "Web Attack Brute Force": {
+          "mean_minus_chance": 0.1885700014270535,
+          "per_seed": [
+            0.674,
+            0.704
+          ],
+          "sign_flip": false
+        },
+        "Web Attack XSS": {
+          "mean_minus_chance": 0.21730510217261756,
+          "per_seed": [
+            0.717,
+            0.718
+          ],
+          "sign_flip": false
+        }
+      }
+    },
+    "homog": {
+      "n_seeds": 1,
+      "p_unknown_macro_mean": 0.45190685367871647,
+      "headline_macro_mean": 0.6293228708541774,
+      "per_family_vs_chance": {
+        "Bot": {
+          "mean_minus_chance": -0.22030705006559742,
+          "per_seed": [
+            0.28
+          ],
+          "sign_flip": false
+        },
+        "Web Attack Brute Force": {
+          "mean_minus_chance": 0.24231591511355144,
+          "per_seed": [
+            0.742
+          ],
+          "sign_flip": false
+        },
+        "Web Attack XSS": {
+          "mean_minus_chance": 0.2651749837098901,
+          "per_seed": [
+            0.765
+          ],
+          "sign_flip": false
+        }
+      }
+    }
+  },
+  "falsifier_triggered": false,
   "finding": "CNN_LOCO_HOLDOUT renames one class rather than restructuring the label space: nine classes before and after, same partition of the training set. A softmax objective is invariant to class names, so LOCO training equals baseline training up to a permutation of output units, and p(UNKNOWN) is p(held-out family) - a family detector, not a novelty detector. The sweep was stopped after 1.5 of 12 runs.",
   "caveats": [
     "Ties are reported beside every macro; a scorer with more than half the flows in one block is not comparable to one without.",

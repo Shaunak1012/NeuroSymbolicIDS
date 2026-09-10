@@ -194,6 +194,66 @@ def main():
         out["models"][tag] = row
         del prob
 
+    # ---- ARM SUMMARY: the HETERO-vs-HOMOG contrast is the actual test -------
+    # Either arm alone only says "a reject class does not reach Bot". The
+    # CONTRAST says whether the unit learned a REGION or a SIGNATURE UNION: if
+    # merging heterogeneous families broadens what the unit reaches, breadth is
+    # a property of the merge and not an accident.
+    arms = {}
+    for tag, row in out["models"].items():
+        if row.get("is_rename_noop") or not tag.startswith("locoR_"):
+            continue
+        arm = tag.split("_")[1]
+        pr = row.get("mean_percentile_rank", {})
+        for k, v in pr.items():
+            if k.startswith("zd_"):
+                arms.setdefault(arm, {}).setdefault(k[3:], []).append(v)
+        arms.setdefault(arm, {}).setdefault("_macro", []).append(
+            row["p(UNKNOWN)"]["macro_pr_auc"])
+        arms[arm].setdefault("_headline", []).append(
+            row["1-p(BENIGN)"]["macro_pr_auc"])
+    if arms:
+        print("\n" + "=" * 96)
+        print("ARM SUMMARY - mean percentile rank vs chance (0.500), n seeds per arm")
+        print("=" * 96)
+        fams = sorted({f for a in arms.values() for f in a if not f.startswith("_")})
+        print("%-10s %5s  %s" % ("arm", "n", "  ".join("%-24s" % f for f in fams)))
+        for arm in sorted(arms):
+            n = len(arms[arm].get("_macro", []))
+            cells = []
+            for f in fams:
+                v = arms[arm].get(f, [])
+                if not v:
+                    cells.append("%-24s" % "-")
+                    continue
+                m = float(np.mean(v)) - 0.5
+                # a sign flip across seeds is the finding, not a rounding detail
+                flip = len(v) > 1 and not (all(x > 0.5 for x in v)
+                                           or all(x < 0.5 for x in v))
+                cells.append("%-24s" % ("%+.3f%s" % (m, " SIGN FLIP" if flip else "")))
+            print("%-10s %5d  %s" % (arm, n, "  ".join(cells)))
+        for arm in sorted(arms):
+            print("  %-8s p(UNKNOWN) macro %.4f | headline 1-p(BENIGN) %.4f "
+                  "(CNN alone %.4f)"
+                  % (arm, float(np.mean(arms[arm]["_macro"])),
+                     float(np.mean(arms[arm]["_headline"])), CNN_BASE))
+        out["arm_summary"] = {
+            a: {"n_seeds": len(v.get("_macro", [])),
+                "p_unknown_macro_mean": float(np.mean(v["_macro"])),
+                "headline_macro_mean": float(np.mean(v["_headline"])),
+                "per_family_vs_chance": {
+                    f: {"mean_minus_chance": float(np.mean(x)) - 0.5,
+                        "per_seed": [round(y, 3) for y in x],
+                        "sign_flip": bool(len(x) > 1 and not (
+                            all(y > 0.5 for y in x) or all(y < 0.5 for y in x)))}
+                    for f, x in v.items() if not f.startswith("_")}}
+            for a, v in arms.items()}
+        beat = [a for a, v in arms.items()
+                if all(h > CNN_BASE for h in v["_headline"])]
+        out["falsifier_triggered"] = bool(beat)
+        print("\nFALSIFIER (headline > %.4f on EVERY seed in an arm): %s"
+              % (CNN_BASE, ", ".join(beat) if beat else "NOT triggered"))
+
     out["finding"] = (
         "CNN_LOCO_HOLDOUT renames one class rather than restructuring the label "
         "space: nine classes before and after, same partition of the training "
