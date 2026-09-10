@@ -1,0 +1,297 @@
+{
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "n_test": 558233,
+  "zero_day_classes": [
+    "Bot",
+    "Brute Force -Web",
+    "Brute Force -XSS",
+    "Infilteration",
+    "SQL Injection"
+  ],
+  "min_family_n": 100,
+  "macro_lift": {
+    "cnn": {
+      "per_seed": [
+        15.425,
+        23.886,
+        12.61
+      ],
+      "mean": 17.306957028122778
+    },
+    "ltn_control": {
+      "per_seed": [
+        6.358,
+        7.824,
+        1.718
+      ],
+      "mean": 5.299858720072248
+    },
+    "ltn_ax6": {
+      "per_seed": [
+        1.405,
+        2.183,
+        1.122
+      ],
+      "mean": 1.5699032136288864
+    },
+    "autoencoder": {
+      "per_seed": [
+        5.662,
+        4.711,
+        7.533
+      ],
+      "mean": 5.968518457078829
+    }
+  },
+  "macro": {
+    "cnn": {
+      "per_seed": [
+        0.4567,
+        0.4904,
+        0.4206
+      ],
+      "mean": 0.4558899364022344,
+      "sd": 0.03487967514203574,
+      "min": 0.4206062352936279,
+      "max": 0.49035103382055734
+    },
+    "ltn_control": {
+      "per_seed": [
+        0.4343,
+        0.4356,
+        0.4035
+      ],
+      "mean": 0.4244760249618491,
+      "sd": 0.018189614469955026,
+      "min": 0.4034859772811422,
+      "max": 0.43562335113765416
+    },
+    "ltn_ax6": {
+      "per_seed": [
+        0.3812,
+        0.3986,
+        0.3982
+      ],
+      "mean": 0.39267140690481156,
+      "sd": 0.009974042531758908,
+      "min": 0.38115674629011476,
+      "max": 0.39863114181091863
+    },
+    "autoencoder": {
+      "per_seed": [
+        0.4615,
+        0.4523,
+        0.4708
+      ],
+      "mean": 0.4615378439368952,
+      "sd": 0.00922847148691367,
+      "min": 0.45233161072187383,
+      "max": 0.470788394081075
+    }
+  },
+  "per_family_mean": {
+    "cnn": {
+      "Bot": {
+        "pr_auc": 0.6958280632349855,
+        "lift": 0.8301305065577109
+      },
+      "Brute Force -Web": {
+        "pr_auc": 0.2199526453715104,
+        "lift": 20.104967743622723
+      },
+      "Brute Force -XSS": {
+        "pr_auc": 0.19628276419924662,
+        "lift": 47.33657549827743
+      },
+      "Infilteration": {
+        "pr_auc": 0.7114962728031952,
+        "lift": 0.9561543640332383
+      },
+      "SQL Injection": {
+        "pr_auc": 0.07541360418008093,
+        "lift": 47.95698449727559
+      }
+    },
+    "ltn_control": {
+      "Bot": {
+        "pr_auc": 0.8382133168382842,
+        "lift": 0.9999976748212854
+      },
+      "Brute Force -Web": {
+        "pr_auc": 0.05861007837327826,
+        "lift": 5.35730649274831
+      },
+      "Brute Force -XSS": {
+        "pr_auc": 0.057399338528180945,
+        "lift": 13.84272395426583
+      },
+      "Infilteration": {
+        "pr_auc": 0.7436813661076531,
+        "lift": 0.9994067584535626
+      },
+      "SQL Injection": {
+        "pr_auc": 0.009018866927110762,
+        "lift": 5.735273709682791
+      }
+    },
+    "ltn_ax6": {
+      "Bot": {
+        "pr_auc": 0.7677800833134102,
+        "lift": 0.9159700551925617
+      },
+      "Brute Force -Web": {
+        "pr_auc": 0.03266786584454832,
+        "lift": 2.986035416615677
+      },
+      "Brute Force -XSS": {
+        "pr_auc": 0.0055979691928701196,
+        "lift": 1.3500354573483468
+      },
+      "Infilteration": {
+        "pr_auc": 0.7646397092684175,
+        "lift": 1.0275719253589612
+      },
+      "SQL Injection": {
+        "pr_auc": 0.0013023195669510448,
+        "lift": 0.8281704602478913
+      }
+    },
+    "autoencoder": {
+      "Bot": {
+        "pr_auc": 0.9151690921308552,
+        "lift": 1.0918067582738302
+      },
+      "Brute Force -Web": {
+        "pr_auc": 0.0655281326728321,
+        "lift": 5.989657416767593
+      },
+      "Brute Force -XSS": {
+        "pr_auc": 0.06517166466285504,
+        "lift": 15.717138676170622
+      },
+      "Infilteration": {
+        "pr_auc": 0.8002824862810388,
+        "lift": 1.0754709771032678
+      },
+      "SQL Injection": {
+        "pr_auc": 0.0078069374239212175,
+        "lift": 4.9645840572234645
+      }
+    }
+  },
+  "family_prevalence": {
+    "Bot": 0.8382152658385784,
+    "Brute Force -Web": 0.01094021379075722,
+    "Brute Force -XSS": 0.004146534939063965,
+    "Infilteration": 0.7441228106745971,
+    "SQL Injection": 0.0015725259828287394
+  },
+  "paired": {
+    "cnn_minus_ltn_control": {
+      "per_seed": [
+        0.0224,
+        0.0547,
+        0.0171
+      ],
+      "mean": 0.03141391144038532,
+      "paired_sd": 0.020361765434938995,
+      "sigma": 1.5427891820461608,
+      "seeds_positive": 3,
+      "seeds_negative": 0,
+      "direction_consistent": true,
+      "verdict": "direction established, magnitude NOT"
+    },
+    "cnn_minus_ltn_ax6": {
+      "per_seed": [
+        0.0756,
+        0.0917,
+        0.0224
+      ],
+      "mean": 0.06321852949742289,
+      "paired_sd": 0.03627898286816972,
+      "sigma": 1.742566204988323,
+      "seeds_positive": 3,
+      "seeds_negative": 0,
+      "direction_consistent": true,
+      "verdict": "direction established, magnitude NOT"
+    },
+    "cnn_minus_autoencoder": {
+      "per_seed": [
+        -0.0048,
+        0.038,
+        -0.0502
+      ],
+      "mean": -0.005647907534660823,
+      "paired_sd": 0.044107181108344024,
+      "sigma": 0.12804961443324644,
+      "seeds_positive": 1,
+      "seeds_negative": 2,
+      "direction_consistent": false,
+      "verdict": "NOT ESTABLISHED \u2014 direction inconsistent"
+    },
+    "ltn_control_minus_ltn_ax6": {
+      "per_seed": [
+        0.0532,
+        0.037,
+        0.0053
+      ],
+      "mean": 0.03180461805703757,
+      "paired_sd": 0.02436887857927054,
+      "sigma": 1.3051326081164958,
+      "seeds_positive": 3,
+      "seeds_negative": 0,
+      "direction_consistent": true,
+      "verdict": "direction established, magnitude NOT"
+    },
+    "ltn_control_minus_autoencoder": {
+      "per_seed": [
+        -0.0272,
+        -0.0167,
+        -0.0673
+      ],
+      "mean": -0.037061818975046144,
+      "paired_sd": 0.026706878006227352,
+      "sigma": 1.3877256250769667,
+      "seeds_positive": 0,
+      "seeds_negative": 3,
+      "direction_consistent": true,
+      "verdict": "direction established, magnitude NOT"
+    },
+    "ltn_ax6_minus_autoencoder": {
+      "per_seed": [
+        -0.0803,
+        -0.0537,
+        -0.0726
+      ],
+      "mean": -0.06886643703208371,
+      "paired_sd": 0.013697317498042977,
+      "sigma": 5.027731673878707,
+      "seeds_positive": 0,
+      "seeds_negative": 3,
+      "direction_consistent": true,
+      "verdict": "direction AND magnitude established"
+    }
+  },
+  "reference_2017_n3": {
+    "cnn": {
+      "macro_pr_auc": 0.6399,
+      "bot_lift": 1.31
+    },
+    "autoencoder": {
+      "macro_pr_auc": 0.097,
+      "bot_lift": null
+    }
+  },
+  "caveats": [
+    "Published 2018 CSVs are truncated at Excel's 2^20 row limit, chronologically; all class counts are lower bounds.",
+    "Brute Force -Web (611) and -XSS (230) clear MIN_FAMILY_N but their counts come from Friday-23-02, cut at 09:04 \u2014 admissible and artefactually small.",
+    "2018 runs use 67 features vs 2017's 68 (Fwd Header Length.1 was a 2017 duplicate with no 2018 counterpart).",
+    "Training size matched to 2017 (883,796) so differences are not confounded with 4x the data.",
+    "No KG arm: timeline.py is 2017-only, so no chronological stream exists for 2018 and burstiness cannot be computed.",
+    "CROSS-DATASET COMPARISON MUST USE LIFT. 2018 family prevalences span 0.0016-0.84 against 2017's ~0.03; comparing raw macro PR-AUC across the two repeats the size-weighted-mixture defect already retracted for the blended metric. Within-2018 paired deltas are unaffected."
+  ]
+}

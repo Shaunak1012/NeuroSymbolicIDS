@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (62 Python scripts, plus 9 shell launchers).
+> Last verified against source: **2026-09-05** (63 Python scripts, plus 9 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1424,6 +1424,27 @@ well-powered version of a problem that was defined by being rare. Defaulting tha
 replication ends up answering a different question than the one it claims.
 
 **Writes** `data/processed/paper_2018/` + `outputs/metadata/preprocess_2018.json`.
+
+## `scripts/analyse_2018.py` — Phase 6
+
+**Purpose**: turn the 12 trained 2018 models into **paired verdicts**, judged by §7's criterion —
+direction-consistency across **all** seeds, then the paired effect size — rather than by comparing
+means, which is how C2 got closed at p=0.001 and then retracted.
+
+🔴 **It reports macro LIFT alongside macro PR-AUC, and that is the point.** PR-AUC's baseline is the
+family's prevalence in the family-vs-benign set. 2018's zero-day prevalences span **0.0016–0.84**
+against 2017's ~0.03. Bot is the extreme: 286,191 flows against 55,238 benign is **84 % prevalence**,
+so "everything is an attack" scores ~0.84 and Bot's **0.6958 is BELOW chance (0.83× lift)**.
+
+⚠️ **Comparing raw macro PR-AUC across the two datasets is the size-weighted-mixture defect already
+retracted once for the blended metric.** Use lift. Within-2018 paired deltas are unaffected.
+
+**It refuses to promote a direction into a magnitude**: a 3/3 result at 1.3σ is labelled *"direction
+established, magnitude NOT"*, the same verdict shape 2017's CNN+KG carries. It also **will not pool a
+noise floor across arms** — 2018's per-arm SDs span 3.8×, so every delta is judged against its own
+paired SD.
+
+**Writes** `outputs/metadata/replication_2018.json`.
 
 ## `scripts/replicate_2018.sh` — Phase 6
 

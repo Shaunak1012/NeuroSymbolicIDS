@@ -2,6 +2,80 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-10 (PHASE 6 RAN — the mechanism replicates, and a metric trap nearly got reported)
+
+### ✅ 12/12 trainings, 0 failures. `analyse_2018.py` → `replication_2018.json`
+
+CNN / LTN control / LTN+Ax6 / autoencoder × seeds 42-44 on CSE-CIC-IDS2018, training size
+matched to 2017's 883,796 so nothing is confounded with 4× the data.
+
+### 🔴 THE MECHANISM REPLICATES — Bot is abundant and STILL at chance
+
+Option A was chosen to test one thing: §4 says reachability depends on **feature-basis overlap, not
+rarity**, so an *abundant* novel family should still be unreachable. It is.
+
+| family | n | prevalence | CNN PR-AUC | **CNN lift** |
+|---|---:|---:|---:|---:|
+| **Bot** | 286,191 | 0.8382 | 0.6958 | **0.83×** |
+| **Infilteration** | 160,639 | 0.7441 | 0.7115 | **0.96×** |
+| Brute Force -Web | 611 | 0.0109 | 0.2200 | **20.10×** |
+| Brute Force -XSS | 230 | 0.0041 | 0.1963 | **47.34×** |
+| SQL Injection | 87 | 0.0016 | 0.0754 | **47.96×** |
+
+2017 Bot: 1,966 flows, lift **1.31×**. 2018 Bot: 286,191 flows, lift **0.83×**. **Abundance in TEST
+does not make a novel class reachable**, because the model never trained on it — exactly the
+pre-registered prediction.
+
+🔑 **And the inversion is the finding:** the CNN detects the *rare* zero-day families at **20–48×
+chance** and the *abundant* ones at **chance**. Whatever governs reachability here, it is not sample
+count.
+
+### 🔴 A METRIC TRAP THAT WAS ALMOST REPORTED AS A BREAKTHROUGH
+
+Bot's raw PR-AUC on 2018 is **0.6958** against 2017's 0.0446. Read naively that is "Bot became
+detectable" — and it was written down that way before being checked.
+
+**It is an artefact of prevalence.** PR-AUC's baseline is the positive class's share of the
+family-vs-benign set. 2018 has 286,191 Bot flows against 55,238 benign, so **84 % prevalence**: a
+model calling everything an attack scores ~0.84. **0.6958 is BELOW chance.**
+
+⚠️ **So cross-dataset macro PR-AUC comparison is invalid here** — 2017's family prevalences sit near
+0.03, 2018's span **0.0016–0.84**, a ~500× range. Averaging PR-AUCs across those and comparing the
+average to another dataset is **the same size-weighted-mixture defect this project already retracted
+once** for the blended "benign vs all unknowns" metric, wearing new clothes. ✅ **Use lift.**
+✅ **Within-2018 paired deltas are unaffected** — same test set, same prevalences.
+
+🔴 **RETRACTED, same session:** "2018 CNN 0.4559 vs 2017's 0.6399, ~0.18 lower, likely to survive."
+Not a valid comparison. `analyse_2018.py` now reports macro lift alongside macro PR-AUC and encodes
+the caveat so it cannot be quoted without it.
+
+### The symbolic pillar hurts again — and now we can see HOW
+
+| paired (within 2018) | mean | σ | seeds | verdict |
+|---|---:|---:|---:|---|
+| CNN − LTN control | +0.0314 | 1.54 | 3/3 | direction est., magnitude NOT |
+| CNN − LTN +Ax6 | +0.0632 | 1.74 | 3/3 | direction est., magnitude NOT |
+| LTN control − LTN +Ax6 | +0.0318 | 1.31 | 3/3 | direction est., magnitude NOT |
+| **LTN +Ax6 − autoencoder** | **−0.0689** | **5.03** | 3/3 | ✅ **direction AND magnitude** |
+| CNN − autoencoder | −0.0056 | 0.13 | **2/3** | 🔴 **NOT ESTABLISHED** |
+
+**Monotone and 3/3 at every rung: CNN > LTN control > LTN +Ax6.** Each layer of symbolic machinery
+costs macro. 2017's Ax6 was −0.0004 (n.s.); on 2018 it is negative on every seed.
+
+🔑 **The mechanism of the harm is visible per-family.** Ax6 destroys exactly the signal the CNN has:
+XSS **47.34× → 1.35×**, SQL Injection **47.96× → 0.83×**, Web BF **20.10× → 2.99×**. The axioms do
+not fail to help; they **actively suppress detection on the families that were working**.
+
+### 🔴 The double dissociation does NOT replicate
+
+CNN − autoencoder is **2/3, 0.13σ — direction inconsistent**. On 2017 the CNN beat the AE 0.6399 to
+0.0970 (6.6×, 3/3). On 2018 they are indistinguishable on macro.
+
+⚠️ **Caught by seeding, not by luck.** Seed 42 alone showed the AE *ahead* (+0.0048) and that was
+flagged as "the most interesting thing in the batch, n=1, do not believe it". Seed 43 flipped it
+(−0.0381), seed 44 flipped back (+0.0502). **Sixth single-seed trap in this project, second caught
+before publication.**
+
 ## 2026-09-09c (Phase 6 data is IN — and the published 2018 CSVs are truncated)
 
 ### ✅ 6.41 GB fetched, 67/68 features mapped, full audit run
