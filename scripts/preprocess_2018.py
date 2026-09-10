@@ -272,10 +272,20 @@ def main():
             print("  %-6s %8d rows" % (nm, len(idx)))
         np.save(os.path.join(OUT, "zero_day_classes.npy"), np.array(sorted(zd)))
         np.save(os.path.join(OUT, "known_classes.npy"), np.array(sorted(set(y[tr]))))
-        # 2017's smallest RETAINED zero-day family is Web XSS at 652; its
-        # smallest EXCLUDED one is Infiltration at 36. Report which 2018
-        # families clear that precedent rather than inventing a new bar.
-        BAR_2017 = 652
+        # Use metrics.py's ENFORCED bar, not a bar inferred from 2017's outcome.
+        #
+        # An earlier version of this block used 652 -- 2017's smallest RETAINED
+        # family -- reasoning from the result rather than the rule. That is a
+        # second, stricter threshold living in the project alongside the real one,
+        # which is exactly the drift this repo keeps getting bitten by: it
+        # reported 2 powered families where metrics.py reports 4.
+        #
+        # ⚠️ The substantive caveat is separate from the power rule and still
+        # holds: Brute Force -Web (611) and -XSS (230) CLEAR MIN_FAMILY_N but
+        # their counts come from Friday-23-02, truncated at 09:04. They are
+        # statistically admissible and artefactually small. Say both.
+        import metrics as _metrics
+        BAR_2017 = _metrics.MIN_FAMILY_N
         powered = {k: counts[k] for k in sorted(zd) if counts.get(k, 0) >= BAR_2017}
         under = {k: counts.get(k, 0) for k in sorted(zd) if counts.get(k, 0) < BAR_2017}
         print("\n  adequately powered zero-day (>= %d, 2017's smallest retained): %s"
@@ -285,7 +295,7 @@ def main():
                      "n_train": len(tr), "n_val": len(va), "n_test": len(te),
                      "match_2017_train": bool(MATCH_2017),
                      "n_train_2017_reference": N_TRAIN_2017,
-                     "power_bar_2017_smallest_retained": BAR_2017,
+                     "power_bar_min_family_n": BAR_2017,
                      "zero_day_powered": powered, "zero_day_underpowered": under})
 
     p = os.path.join(paths.METADATA, "preprocess_2018.json")

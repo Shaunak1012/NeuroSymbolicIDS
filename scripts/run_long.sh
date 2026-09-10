@@ -53,8 +53,22 @@ case "$SCRIPT" in
   *)    RUNNER=("$PY" -u "scripts/$SCRIPT") ;;
 esac
 
-PYTHONIOENCODING=utf-8 "${RUNNER[@]}" "$@" >"$LOG" 2>&1 &
+# nohup + disown so the job SURVIVES THE PARENT SESSION.
+#
+# WHY (2026-09-10): this line was a plain `&`, which makes the job a child of the
+# calling shell. When the Claude Code session that launched it exited overnight,
+# the 12-run Phase-6 batch died at run 6 of 12 -- roughly three hours of CPU lost.
+#
+# Non-negotiable #2 says "long job => run_long.sh", and it WAS followed. The rule
+# was satisfied and the job still died, because the tool the rule points at could
+# not survive a session teardown. That is the exact "plausible-but-wrong
+# substitute" failure CLAUDE.md warns about, found in the rule's own machinery.
+#
+# nohup detaches from the terminal (ignores SIGHUP); disown removes the job from
+# the shell's table so teardown does not signal it.
+PYTHONIOENCODING=utf-8 nohup "${RUNNER[@]}" "$@" >"$LOG" 2>&1 &
 PID=$!
+disown "$PID" 2>/dev/null || true
 echo "launched $SCRIPT (pid $PID) -> $LOG"
 echo "monitor with:  scripts/run_long.sh --watch $SCRIPT"
 
