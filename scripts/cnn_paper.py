@@ -17,6 +17,7 @@ Outputs (TAG defaults to "cnn_paper" at the config seed, "cnn_paper_s<seed>" oth
   outputs/metadata/<TAG>_history.pkl
 """
 import os
+import sys
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import pickle
 import numpy as np
@@ -93,6 +94,27 @@ scaler = StandardScaler().fit(X_tr)
 X_tr, X_val, X_te = scaler.transform(X_tr), scaler.transform(X_val), scaler.transform(X_te)
 
 # ---- labels: encode 9 known classes; zero-day (test only) -> -1 ----
+# OPEN-SET TRAINING (LOCO). CNN_LOCO_HOLDOUT names a KNOWN attack class whose
+# training flows are relabelled "UNKNOWN" instead of dropped, so the model learns
+# an explicit reject class rather than a closed 9-way partition. p(UNKNOWN) is
+# then a trained novelty detector, and the question is whether it transfers to
+# the REAL zero-day families it never saw.
+#
+# Additive and inert when unset -- without the env var this line is exactly what
+# it was. Same pattern as FEATURE_TRANSFORM and PAPER_SUBDIR.
+#
+# 4's mechanism predicts this FAILS: if the model learns "UNKNOWN = this specific
+# held-out signature" rather than a generic reject region, nothing transfers to a
+# family with 0/8 feature overlap. That is the prediction, written before the run.
+LOCO = os.environ.get("CNN_LOCO_HOLDOUT", "")
+if LOCO:
+    n_held = int((y_tr == LOCO).sum())
+    if n_held == 0:
+        sys.exit("CNN_LOCO_HOLDOUT=%r matches no training flow" % LOCO)
+    y_tr = np.where(y_tr == LOCO, "UNKNOWN", y_tr)
+    y_val = np.where(y_val == LOCO, "UNKNOWN", y_val)
+    print(f"[LOCO] held out {LOCO!r}: {n_held:,} train flows relabelled UNKNOWN")
+
 le = LabelEncoder().fit(y_tr)          # train has only the 9 known classes
 n_classes = len(le.classes_)
 y_tr_e, y_val_e = le.transform(y_tr), le.transform(y_val)
