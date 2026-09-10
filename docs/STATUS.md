@@ -19,6 +19,12 @@ selection half and is **−0.0008** on the reporting half.
 | 4b | **LOCO, merged reject class** | ▶ **RUNNING** | redesigned: 3 families → one `UNKNOWN`, 9 → 7 classes |
 | 5 | **Cross-dataset augmented training** | ⬜ **NEXT** | user's idea, aims straight at the mechanism |
 
+✅ **Phase 6 is folded into the paper (2026-09-10).** §4 gains the abundance control (2018's Bot is
+**abundant** and the CNN scores it **0.83× — below a random ranker**); §6 gains the cross-dataset
+table (**the double dissociation's direction replicates, its magnitude shrinks 9.7×**); §8's
+"single dataset" limitation becomes a **resolved** item. Draft verification is now **100 verified,
+0 mismatched** (was 62).
+
 ### ✅ CURRENT BEST: CNN + KG at k=800 — macro **0.7123**
 
 **+0.0724 over the CNN alone (0.6399)**, 2.5× the 0.0285 an absolute number carries, monotone across

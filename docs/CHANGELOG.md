@@ -2,6 +2,51 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-10 (THE DRAFT CATCHES UP — cross-dataset, k sweep, FPR sweep)
+
+### ✅ The double dissociation replicates in DIRECTION, not in magnitude
+
+New `crossdata_lift.py`. Only **lift** (PR-AUC ÷ prevalence) is comparable across captures, and
+`analyse_2018.py` could not make the comparison — its 2017 reference is a hard-coded two-entry stub
+with the autoencoder's Bot lift set to `None`.
+
+| Bot, lift over chance | 2017 | 2018 |
+|---|---:|---:|
+| CNN | 1.31× | **0.83×** — below a random ranker |
+| autoencoder | 3.84× | 1.09× |
+| **AE − CNN** | **+2.53×** | **+0.26×** |
+
+Direction replicates; **magnitude shrinks 9.7×**. At 1.09× the autoencoder is close enough to chance
+that 2018 lends no support to "an anomaly method reaches Bot" — and it **cannot be tested**, because
+2018's per-family lift is persisted as a mean with no per-seed spread. §6 now claims the direction
+and drops the magnitude.
+
+🔑 **And this is §4's control.** 2018's Bot is **abundant** and the CNN still scores it below
+chance, so Bot's failure was never a rarity artefact. Training size is matched to 2017's 883,796
+flows, so nothing is confounded with 4× the data.
+
+### 🔴 The fusion is WORSE at the tightest operating point
+
+New `operational_best.py` persists what had only ever been computed in-session. Sweeping FPR instead
+of quoting one point:
+
+| recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
+|---|---:|---:|---:|---:|
+| CNN alone | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| CNN + KG k=800 | **45.8 %** | **57.6 %** | 72.1 % | 91.6 % |
+|  of which Bot | **0.0 %** | 23.2 % | 46.6 % | 85.2 % |
+
+**At 0.1 % FPR the KG costs 1.5 points; Bot is 0.0 % for both.** The gain begins around 1 % FPR and
+no configuration reaches Bot at a tight alert budget. ✅ Also corrected **57.8 % → 57.6 %**.
+
+### ✅ Draft: §§4, 6, 8 updated · verification 62 → **100 verified, 0 mismatched**
+
+§6 gains the k sweep (monotone in k, both variants, 3/3 seeds; **0.7123 at k=800**, reported with the
+held-out **+0.0305 at 2.86σ** because +0.0724 is selected on test). §8's "single dataset" limitation
+becomes **resolved**, retraction chain intact (*blocked* → *we did not do it* → **done**).
+`verify_draft.py` now normalises the multiplication sign, which had been making every lift figure
+read as a mismatch.
+
 ## 2026-09-10 (LOCO RETRACTED AS A NO-OP — and redesigned)
 
 ### 🔴 `CNN_LOCO_HOLDOUT` renamed a class instead of building a reject class
