@@ -8,6 +8,21 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🔴 2026-09-10 — [OPEN] §8's `r = +0.992` is quoted in the draft and persisted nowhere
+
+The draft's §8 states that Web Brute Force and XSS correlate at **r = +0.992**, which carries real
+weight — it is the argument that the macro average is effectively ⅓ Bot and ⅔ *one* web signal.
+**No file holds it.** `robustness.json` (which `verify_draft.py` used to name) contains only
+`c3_regrouped_macro` and `fusion_wall_test`; `field_gap.json` and `runs.jsonl` record **macro per
+method** with no per-family breakdown. Backing it needs a method × family PR-AUC matrix that does
+not currently exist.
+
+**Same defect class as the operational recall numbers fixed earlier today** (computed in-session,
+never written down) — that one is closed by `operational_best.py`; this one is not.
+⚠️ **Recompute and persist before publication, or drop the claim.** Until then `verify_draft.py`
+names it as unbacked and says which files do *not* hold it, which is more useful than the previous
+note that sent the reader to a file that never had it.
+
 ## 🟡 2026-09-10 — [OPEN] Two non-negotiables lapsed in one long tool-heavy session
 
 Recorded because the point of the block at the top of CLAUDE.md is that these lapse **during long
