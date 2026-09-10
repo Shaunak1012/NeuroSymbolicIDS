@@ -2,6 +2,50 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-10 (LOCO RETRACTED AS A NO-OP — and redesigned)
+
+### 🔴 `CNN_LOCO_HOLDOUT` renamed a class instead of building a reject class
+
+The single-hold-out LOCO arm (#4 on the improvement itinerary) **could not test its own
+hypothesis**. Relabelling one family `UNKNOWN` leaves **nine classes and the same partition of the
+training set**, and a softmax objective is invariant to class *names* — so training was identical to
+the baseline up to a permutation of output units, and `p(UNKNOWN)` was just `p(DDoS)`.
+
+**Measured, not asserted** — new `scripts/loco_reject.py` re-scores the saved models (`cnn_paper.py`
+persists only `p_attack`, so the full softmax had to be recovered):
+
+| scorer | macro | ties |
+|---|---:|---:|
+| `1 - p(BENIGN)` (the sweep's headline) | 0.6240 | 1.4 % |
+| **`p(UNKNOWN)`** — the hypothesis | **0.1684** | 0.8 % |
+| `p(UNKNOWN)` given attack | 0.0144 | 0.8 % |
+
+Mean percentile rank under `p(UNKNOWN)`: held-out `DDoS` **0.944** · Web BF 0.814 · XSS 0.854 ·
+**Bot 0.290** · benign **0.475**. A DDoS detector — with the web families high by the *absorption*
+already on record, and **Bot below benign**. This **supports §4's mechanism**: the reject unit is
+reachable exactly to the extent a family overlaps the held-out signature.
+
+- 🔴 **`loco_DDoS_s42 = 0.6240` is a permuted re-seed of the baseline** (0.72 SD from 0.6399), not a
+  LOCO result. Do not cite it in either direction. **The falsifier was never tested.**
+- ⏹️ Sweep stopped after **1.5 of 12** runs, ~4.5 h of compute saved.
+- 🧭 **Why it survived a full run:** the headline `1 - p(BENIGN)` folds the reject mass back into
+  the attack mass, so a scorer that cannot express the hypothesis returned a plausible near-baseline
+  number. **A no-op does not fail loudly — it agrees with the baseline.**
+
+### ✅ Redesigned as a **merged** reject class (#4b), pilot running
+
+`CNN_LOCO_HOLDOUT` now accepts a comma-separated list and **merges** those families into one shared
+`UNKNOWN`, cutting **9 → 7** classes — a real structural change. Two arms whose *contrast* is the
+test: **HETERO** (`DDoS`+`FTP-Patator`+`PortScan`) vs **HOMOG** (three DoS variants). If a reject
+region generalises, HETERO must transfer better; if they behave alike, the unit learned a signature
+union, not a region. A single name is still accepted (the retracted model must stay loadable) but now
+**warns that the arm proves nothing**.
+
+- Pre-registered: **still predicted to fail**; falsifier is macro > 0.6399 on every seed in either
+  arm, read off **`p(UNKNOWN)`**, never the headline.
+- Files: `scripts/loco_reject.py` (new) · `scripts/loco_sweep.sh` (rewritten, retraction in header) ·
+  `scripts/cnn_paper.py` (LOCO block).
+
 ## 2026-09-10 (PHASE 6 RAN — the mechanism replicates, and a metric trap nearly got reported)
 
 ### ✅ 12/12 trainings, 0 failures. `analyse_2018.py` → `replication_2018.json`

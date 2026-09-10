@@ -8,6 +8,23 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🔴 2026-09-10 — [FIXED] An experiment's knob did not do what the experiment claimed
+
+**`CNN_LOCO_HOLDOUT` renamed a class rather than building a reject class.** Nine classes before and
+after; a softmax objective ignores class names, so the run was a permuted re-seed of the baseline and
+`p(UNKNOWN)` was `p(held-out family)`. Caught **after a full training run** (~22 min) and 0.5 of a
+second, by asking what the saved model's label encoder actually contained.
+
+**Fixed** — hold-outs are now *merged* into one `UNKNOWN` (9 → 7 classes); a single-name hold-out
+still runs but warns. `scripts/loco_reject.py` evaluates `p(UNKNOWN)` directly.
+
+**⚠️ The generalisable defect, which is NOT fixed by the above:** the sweep's reported metric
+(`1 - p(BENIGN)`) **could not express the hypothesis**, so the no-op returned a plausible
+near-baseline number instead of an anomaly. **Before running a sweep, check that its headline scorer
+can actually go wrong in the way the hypothesis predicts** — an inexpressive metric makes a broken
+experiment look like a negative result. Same family as the `1 - p(BENIGN)` blend that `metrics.py`
+already forbids as a headline.
+
 ## Legend
 
 | Tag | Meaning |

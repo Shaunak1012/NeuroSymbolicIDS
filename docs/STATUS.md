@@ -4,7 +4,7 @@
 
 ## ▶ RESUME HERE (next session)
 
-## 🎯 IMPROVEMENT ITINERARY (opened 2026-09-10) — 1 of 4 positive so far
+## 🎯 IMPROVEMENT ITINERARY (opened 2026-09-10) — 1 positive, 2 negative, 1 retracted as a no-op
 
 **Every arm is selected on held-out data and reported on a split never used for selection.** That
 protocol has already paid for itself once: the weighted-fusion arm looked like +0.007 on the
@@ -15,7 +15,8 @@ selection half and is **−0.0008** on the reporting half.
 | 1 | Ensemble + KG | ✅ done | 🔴 **−0.1516, 3.70σ, 0/3** — much worse |
 | 2 | **KG cluster count k** | ✅ done | ✅ **k=800: 0.7123, +0.0724 over CNN**, held-out 2.86σ |
 | 3 | Weighted / multi-resolution fusion | ✅ done | 🔴 **−0.0008, direction inconsistent.** w=0.5 was already optimal |
-| 4 | **LOCO / open-set reject class** | ▶ **RUNNING** | 12 runs, 4 hold-outs × 3 seeds |
+| 4a | ~~LOCO, single hold-out~~ | 🔴 **RETRACTED — the code was a no-op** | renamed a class; 9 classes before and after |
+| 4b | **LOCO, merged reject class** | ▶ **RUNNING** | redesigned: 3 families → one `UNKNOWN`, 9 → 7 classes |
 | 5 | **Cross-dataset augmented training** | ⬜ **NEXT** | user's idea, aims straight at the mechanism |
 
 ### ✅ CURRENT BEST: CNN + KG at k=800 — macro **0.7123**
@@ -29,20 +30,77 @@ from 0.1 % → 23.2 %** (and 19.9 % → 85.2 % at a 10 % FPR).
 ⚠️ Bot's high-FPR detection rides substantially on CIC-IDS2017's **scripted attack window**; 10 % FPR
 is not a deployable operating point.
 
-### ▶ #4 LOCO — the last structural idea, prediction pre-registered
+### 🔴 #4a LOCO single hold-out — **RETRACTED 2026-09-10, the implementation was a no-op**
 
-Hold out one KNOWN attack family and relabel its training flows `UNKNOWN`, so the model learns an
-**explicit reject class** instead of a closed 9-way partition. `p(UNKNOWN)` becomes a *trained*
-novelty detector — everything swept so far (4 deep architectures, 7 classical, 4 benign-only, 9 OOD
-scorers) tried to detect novelty **without ever training for it**.
+~~Hold out one KNOWN attack family and relabel its training flows `UNKNOWN`, so the model learns an
+**explicit reject class** instead of a closed 9-way partition.~~ **The code did not do this.**
+`CNN_LOCO_HOLDOUT` **renamed** one class:
 
-Hold-outs chosen **a priori for diversity, not after looking**: `DDoS` (volumetric flood) ·
-`DoS Hulk` (slow-rate) · `FTP-Patator` (credential brute-force) · `PortScan` (scan).
+| | label space | classes |
+|---|---|---|
+| baseline | `[BENIGN, DDoS, DoS GoldenEye, …, SSH-Patator]` | **9** |
+| LOCO `DDoS` | `[BENIGN, DoS GoldenEye, …, SSH-Patator, UNKNOWN]` | **9** |
 
-🔴 **Pre-registered prediction: this FAILS.** §4 says a model learning *"UNKNOWN = this specific
-held-out signature"* transfers nothing to Bot, whose features have 0/8 overlap with the known-class
-task. **Falsifier:** if macro beats 0.6399 on 3/3 seeds for any hold-out, §4's scope is narrower than
-claimed and the section needs revising.
+Same nine groups, same partition of the training set, same per-class focal alpha. **A softmax
+objective is invariant to class NAMES**, so LOCO training was identical to baseline training up to a
+*permutation of output units* — and `p(UNKNOWN)` was simply `p(DDoS)`.
+
+`loco_reject.py` measured it on the one model the sweep produced, rather than resting on the argument:
+
+| scorer | macro | ties |
+|---|---:|---:|
+| `1 - p(BENIGN)` (the sweep's headline) | 0.6240 | 1.4 % |
+| **`p(UNKNOWN)`** — the actual hypothesis | **0.1684** | 0.8 % |
+| `p(UNKNOWN)` given attack | 0.0144 | 0.8 % |
+
+**Mean percentile rank under `p(UNKNOWN)`** is where it becomes unambiguous — and note the
+**per-family** line, because the "real zero-day 0.569" average is exactly the size-weighted mixture
+`metrics.py` exists to forbid:
+
+> held-out `DDoS` **0.944** · Web BF 0.814 · Web XSS 0.854 · **Bot 0.290** · benign **0.475**
+
+The unit is a **DDoS detector**. The web families score high by the *same absorption* already
+documented (they are absorbed into a known attack — here `DDoS` rather than `DoS slowloris`), and
+**Bot lands at 0.290, BELOW benign** — not merely unreachable but anti-correlated. This is
+**support for §4's mechanism, not evidence against it**: the reject unit is reachable exactly to the
+extent a family overlaps the held-out signature.
+
+⚠️ **`loco_DDoS_s42 = 0.6240` is a permuted re-seed of the baseline, not a LOCO result.** It is
+0.72 SD from the baseline's 0.6399 and must not be cited in either direction. **The sweep was stopped
+after 1.5 of 12 runs** — ~4.5 h of compute saved. **The falsifier was never tested.**
+
+🧭 **Why it survived design AND a full run:** the sweep's headline was `1 - p(BENIGN)`, which folds
+the reject mass back into the attack mass, so it returned a plausible near-baseline number instead of
+anything anomalous. **A scorer that cannot express the hypothesis will not fail loudly** — it will
+agree with the baseline, which is what "no-op" looks like from the outside.
+
+### ▶ #4b LOCO redesigned — a **merged** reject class, prediction pre-registered
+
+To create a reject class you must **reduce the class count**: merge several known families into one
+shared `UNKNOWN`. **9 → 7** is a real structural change — one output unit must now cover
+heterogeneous signatures, which is what "none of the above" means.
+
+Two arms, and **the contrast is the point** rather than either arm alone:
+
+| arm | merged into `UNKNOWN` | character |
+|---|---|---|
+| **HETERO** | `DDoS` + `FTP-Patator` + `PortScan` | flood + brute-force + scan |
+| **HOMOG** | `DoS GoldenEye` + `Hulk` + `Slowhttptest` | three variants of one thing |
+
+If a reject region genuinely **generalises**, HETERO must transfer better than HOMOG. If both behave
+alike, the unit is learning a *signature union* and not a region — the same failure as #4a, one level
+up.
+
+🔴 **Pre-registered prediction: this still FAILS.** Bot's discriminative features have 0/8 overlap
+with the known-class task, and merging known families reorganises the decision boundary **without
+adding the features Bot needs**. Expect Bot at or below chance under `p(UNKNOWN)` in both arms.
+**Falsifier:** macro beating 0.6399 on every seed in either arm means §4's scope is narrower than
+claimed. **Evaluate on `p(UNKNOWN)` via `loco_reject.py` — NOT on the `1 - p(BENIGN)` headline**,
+which is what hid #4a for a whole run.
+
+⚠️ **A drop in the `1 - p(BENIGN)` headline is EXPECTED and is not the result** — three known
+classes leave the supervised task. Pilot is 2 seeds × 2 arms; seed 44 is added only if something
+moves.
 
 ### ⬜ #5 Cross-dataset augmented training — worth doing, and it has a trap
 

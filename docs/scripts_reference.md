@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (66 Python scripts, plus 11 shell launchers).
+> Last verified against source: **2026-09-05** (67 Python scripts, plus 11 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1451,14 +1451,24 @@ by 50/50 fusion. Measured, **w=0.5 IS the optimum** for every k-set, with a shar
 Multi-resolution k adds nothing. Half A said `k400+800@w=0.5` was best at 0.7193; **half B says
 −0.0008, direction inconsistent.** Without the split this would have shipped as +0.007.
 
-**`loco_sweep.sh`** (+ `CNN_LOCO_HOLDOUT` in `cnn_paper.py`) — open-set training: relabel one known
-family's training flows `UNKNOWN` so the model learns an **explicit reject class**, making
-`p(UNKNOWN)` a *trained* novelty detector. Everything else swept detects novelty **without ever
-training for it**. Four hold-outs chosen a priori for diversity (`DDoS`, `DoS Hulk`, `FTP-Patator`,
-`PortScan`) × 3 seeds.
-🔴 **Prediction pre-registered before the run: this fails**, because a model learning "UNKNOWN = this
-specific signature" transfers nothing to Bot's 0/8 overlap. **Falsifier:** macro beating 0.6399 on
-3/3 seeds for any hold-out means §4's scope is narrower than claimed.
+**`loco_sweep.sh`** (+ `CNN_LOCO_HOLDOUT` in `cnn_paper.py`) — open-set training.
+🔴 **The first version was a NO-OP and is retracted.** Relabelling ONE family `UNKNOWN` leaves nine
+classes and the same partition of the training set, and a softmax objective is invariant to class
+*names*, so training equalled the baseline up to a permutation of output units and `p(UNKNOWN)` was
+just `p(DDoS)`. **Rewritten** to *merge* several families into one shared `UNKNOWN` (**9 → 7**
+classes), which is the actual structural change. Two arms whose contrast is the test: **HETERO**
+(`DDoS`+`FTP-Patator`+`PortScan`) vs **HOMOG** (three DoS variants) — if a reject region
+generalises, HETERO must transfer better.
+🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
+features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
+off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+**`loco_reject.py`** — re-scores the saved LOCO models to evaluate `p(UNKNOWN)` itself, which
+`cnn_paper.py` does not persist (only `p_attack`). This is what caught the no-op: on
+`loco_DDoS_s42`, `p(UNKNOWN)` scores macro **0.1684** against the headline's 0.6240, and its mean
+percentile rank is held-out `DDoS` **0.944** · Web BF 0.814 · XSS 0.854 · **Bot 0.290** · benign
+**0.475** — a DDoS detector, with Bot *below* benign. Reports the largest tie fraction beside every
+macro, because a saturating softmax unit can make PR-AUC incomparable.
 
 ⚠️ **What none of these can fix.** Heartbleed (n=11) and Infilteration (n=36) are below the power bar.
 Web BF and XSS are already 89–92 % and are *absorption into `DoS slowloris`*, not novel-class
