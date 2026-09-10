@@ -212,6 +212,8 @@ def main():
             row["p(UNKNOWN)"]["macro_pr_auc"])
         arms[arm].setdefault("_headline", []).append(
             row["1-p(BENIGN)"]["macro_pr_auc"])
+        # the seed is the join key for the PAIRED comparison below
+        arms[arm].setdefault("_seed", []).append(int(tag.rsplit("_s", 1)[-1]))
     if arms:
         print("\n" + "=" * 96)
         print("ARM SUMMARY - mean percentile rank vs chance (0.500), n seeds per arm")
@@ -248,11 +250,53 @@ def main():
                             all(y > 0.5 for y in x) or all(y < 0.5 for y in x)))}
                     for f, x in v.items() if not f.startswith("_")}}
             for a, v in arms.items()}
-        beat = [a for a, v in arms.items()
-                if all(h > CNN_BASE for h in v["_headline"])]
+        # PAIRED, not against the scalar 0.6399. That figure is the CNN's n=3
+        # MEAN, and comparing a seed-42 model against a three-seed average is
+        # the unpaired comparison this project keeps retracting:
+        # locoR_hetero_s44 scores 0.6406, ABOVE that mean, while its own
+        # seed-matched CNN scores 0.6396. Only the per-seed difference is
+        # interpretable.
+        cnn_by_seed = {}
+        for sd in sorted({x for v in arms.values() for x in v["_seed"]}):
+            f = ("y_prob_cnn_paper_test.npy" if sd == 42
+                 else "y_prob_cnn_paper_s%d_test.npy" % sd)
+            fp = os.path.join(paths.PREDICTIONS, f)
+            if os.path.exists(fp):
+                cnn_by_seed[sd] = metrics.evaluate(
+                    yte, np.load(fp), zd, fpr=0.01)["macro"]["pr_auc"]
+        print("")
+        print("PAIRED vs the SEED-MATCHED CNN (not against the n=3 mean %.4f)"
+              % CNN_BASE)
+        beat = []
+        for arm in sorted(arms):
+            pairs = [(sd, h, cnn_by_seed[sd])
+                     for sd, h in zip(arms[arm]["_seed"], arms[arm]["_headline"])
+                     if sd in cnn_by_seed]
+            if not pairs:
+                continue
+            d = np.array([h - c for _, h, c in pairs])
+            all_better = bool((d > 0).all())
+            if all_better:
+                beat.append(arm)
+            print("  %-8s %+.4f mean | %d/%d seeds better | %s"
+                  % (arm, d.mean(), int((d > 0).sum()), len(d),
+                     "FALSIFIER TRIGGERED" if all_better else "not triggered"))
+            print("           per seed: %s"
+                  % "  ".join("s%d %+.4f" % (sd, h - c) for sd, h, c in pairs))
+            out["arm_summary"][arm]["paired_vs_seed_matched_cnn"] = {
+                "mean_delta": float(d.mean()),
+                "per_seed": {str(sd): round(h - c, 4) for sd, h, c in pairs},
+                "seeds_better": int((d > 0).sum()),
+                "all_seeds_better": all_better}
         out["falsifier_triggered"] = bool(beat)
-        print("\nFALSIFIER (headline > %.4f on EVERY seed in an arm): %s"
-              % (CNN_BASE, ", ".join(beat) if beat else "NOT triggered"))
+        out["falsifier_note"] = (
+            "Evaluated PAIRED against the seed-matched CNN. Comparing against "
+            "the n=3 mean 0.6399 would be unpaired: locoR_hetero_s44 scores "
+            "0.6406, above that mean, while its own seed-matched CNN scores "
+            "0.6396.")
+        print("")
+        print("  FALSIFIER (beats the SEED-MATCHED CNN on every seed): %s"
+              % (", ".join(beat) if beat else "NOT triggered"))
 
     out["finding"] = (
         "CNN_LOCO_HOLDOUT renames one class rather than restructuring the label "
