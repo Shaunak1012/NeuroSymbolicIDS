@@ -24,11 +24,27 @@ selection half and is **−0.0008** on the reporting half.
 **+0.0724 over the CNN alone (0.6399)**, 2.5× the 0.0285 an absolute number carries, monotone across
 all four k values, 3/3 seeds at every step, and it survives held-out selection.
 
-**Operationally — the number to quote:** at a **1 % false-alarm rate** it flags **57.8 %** of flows
+**Operationally — the number to quote:** at a **1 % false-alarm rate** it flags **57.6 %** of flows
 from families the model has never seen, against the CNN's 48.3 %. On the hardest family, **Bot goes
 from 0.1 % → 23.2 %** (and 19.9 % → 85.2 % at a 10 % FPR).
+🔴 **Corrected 2026-09-10: this was written as 57.8 %.** It is **57.6 %** — the value now persisted
+in `operational_best.json`, which exists because these headline numbers had been computed in-session
+and never written to disk (CLAUDE.md: a number in a doc with no logged run behind it is a defect).
+
+🔴 **AND THE FUSION IS WORSE AT THE TIGHTEST OPERATING POINT — found 2026-09-10 on persisting the
+full sweep, not visible from the single 1 % number:**
+
+| recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
+|---|---:|---:|---:|---:|
+| CNN alone | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| CNN + KG k=800 | **45.8 %** | **57.6 %** | **72.1 %** | **91.6 %** |
+|  of which **Bot** | **0.0 %** | 23.2 % | 46.6 % | 85.2 % |
+
+At **0.1 % FPR the KG costs 1.5 points** and **Bot is 0.0 % in both** — the gain is real but it
+starts at ~1 % FPR, and no configuration reaches Bot at a tight budget. Quoting only the 1 % column
+would hide this; say it first.
 ⚠️ Bot's high-FPR detection rides substantially on CIC-IDS2017's **scripted attack window**; 10 % FPR
-is not a deployable operating point.
+is ~5,500 false alerts on this test set and is not a deployable operating point.
 
 ### 🔴 #4a LOCO single hold-out — **RETRACTED 2026-09-10, the implementation was a no-op**
 

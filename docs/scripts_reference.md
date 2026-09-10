@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (67 Python scripts, plus 11 shell launchers).
+> Last verified against source: **2026-09-05** (68 Python scripts, plus 11 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,21 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+**`operational_best.py`** — persists the operational profile of the selected system, because the
+numbers the project leads with had been computed in-session and never written to disk. Sweeps FPR
+rather than quoting one point, and that is what exposed the limitation:
+
+| recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
+|---|---:|---:|---:|---:|
+| CNN alone | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| CNN + KG k=800 (`s_kg`) | **45.8 %** | **57.6 %** | 72.1 % | 91.6 % |
+|  of which **Bot** | **0.0 %** | 23.2 % | 46.6 % | 85.2 % |
+
+🔴 **At 0.1 % FPR the KG COSTS 1.5 points and Bot is 0.0 % in both.** The gain is real but begins
+around 1 % FPR; no configuration reaches Bot at a tight alert budget. Profiles both KG variants
+because the variant ranking **flips with k** (`causal` leads at k=200, `s_kg` at k=800) and neither
+cross-variant gap is tested paired.
 
 **`loco_reject.py`** — re-scores the saved LOCO models to evaluate `p(UNKNOWN)` itself, which
 `cnn_paper.py` does not persist (only `p_attack`). This is what caught the no-op: on
