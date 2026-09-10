@@ -106,14 +106,36 @@ X_tr, X_val, X_te = scaler.transform(X_tr), scaler.transform(X_val), scaler.tran
 # 4's mechanism predicts this FAILS: if the model learns "UNKNOWN = this specific
 # held-out signature" rather than a generic reject region, nothing transfers to a
 # family with 0/8 feature overlap. That is the prediction, written before the run.
+#
+# RETRACTED 2026-09-10 -- A SINGLE HOLD-OUT IS A NO-OP, and this code was the bug.
+# Renaming ONE class leaves nine classes and the same partition of the training
+# set, and a softmax objective is invariant to class NAMES: training is then
+# identical to the baseline up to a permutation of output units, so p(UNKNOWN) is
+# just p(held-out family). `loco_reject.py` measured it -- p(UNKNOWN) puts the
+# held-out family at the 94.4th percentile and the REAL zero-day families at
+# 0.569, against benign 0.475. A family detector, not a novelty detector.
+#
+# The fix is structural, not cosmetic: MERGE two or more families into ONE shared
+# UNKNOWN class, which genuinely reduces the class count and forces a reject
+# region spanning heterogeneous signatures. Comma-separate them. A single name is
+# still accepted, because refusing it would break the saved loco_DDoS_s42 model
+# this retraction rests on, but it now warns that the arm proves nothing.
 LOCO = os.environ.get("CNN_LOCO_HOLDOUT", "")
 if LOCO:
-    n_held = int((y_tr == LOCO).sum())
-    if n_held == 0:
-        sys.exit("CNN_LOCO_HOLDOUT=%r matches no training flow" % LOCO)
-    y_tr = np.where(y_tr == LOCO, "UNKNOWN", y_tr)
-    y_val = np.where(y_val == LOCO, "UNKNOWN", y_val)
-    print(f"[LOCO] held out {LOCO!r}: {n_held:,} train flows relabelled UNKNOWN")
+    held = [h.strip() for h in LOCO.split(",") if h.strip()]
+    counts = {h: int((y_tr == h).sum()) for h in held}
+    missing = [h for h, n in counts.items() if n == 0]
+    if missing:
+        sys.exit("CNN_LOCO_HOLDOUT names %r, which match no training flow" % missing)
+    y_tr = np.where(np.isin(y_tr, held), "UNKNOWN", y_tr)
+    y_val = np.where(np.isin(y_val, held), "UNKNOWN", y_val)
+    print(f"[LOCO] held out {held}: "
+          f"{sum(counts.values()):,} train flows merged into UNKNOWN "
+          f"({', '.join('%s=%d' % kv for kv in counts.items())})")
+    if len(held) == 1:
+        print("[LOCO] WARNING: one hold-out is a RENAME, not a reject class -- "
+              "same 9 classes, same partition, so this run is a permuted re-seed "
+              "of the baseline and cannot test the hypothesis. See loco_reject.py.")
 
 le = LabelEncoder().fit(y_tr)          # train has only the 9 known classes
 n_classes = len(le.classes_)

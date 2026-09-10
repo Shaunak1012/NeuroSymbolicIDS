@@ -1,0 +1,53 @@
+{
+  "cnn_alone": 0.6399,
+  "noise_band": 0.0285,
+  "models": {
+    "loco_DDoS_s42": {
+      "held_out": [
+        "DDoS"
+      ],
+      "n_classes": 9,
+      "classes": [
+        "BENIGN",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "SSH-Patator",
+        "UNKNOWN"
+      ],
+      "is_rename_noop": true,
+      "1-p(BENIGN)": {
+        "macro_pr_auc": 0.6239861352473762,
+        "largest_tie_fraction": 0.013980707844197526,
+        "usable": true
+      },
+      "p(UNKNOWN)": {
+        "macro_pr_auc": 0.16841323179400117,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "p(UNKNOWN)|attack": {
+        "macro_pr_auc": 0.01436298722352322,
+        "largest_tie_fraction": 0.0078319873013658,
+        "usable": true
+      },
+      "mean_percentile_rank": {
+        "held_out_families": 0.9441774287505755,
+        "real_zero_day": 0.5690772389922377,
+        "benign": 0.4745096606832517,
+        "n_held_out_test": 12802,
+        "zd_Bot": 0.2900512597595745,
+        "zd_Web Attack Brute Force": 0.8138227799419834,
+        "zd_Web Attack XSS": 0.8539376692081985
+      }
+    }
+  },
+  "finding": "CNN_LOCO_HOLDOUT renames one class rather than restructuring the label space: nine classes before and after, same partition of the training set. A softmax objective is invariant to class names, so LOCO training equals baseline training up to a permutation of output units, and p(UNKNOWN) is p(held-out family) - a family detector, not a novelty detector. The sweep was stopped after 1.5 of 12 runs.",
+  "caveats": [
+    "Ties are reported beside every macro; a scorer with more than half the flows in one block is not comparable to one without.",
+    "Only models that were actually trained are scored - this makes no claim about hold-outs that never ran."
+  ]
+}
