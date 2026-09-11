@@ -269,6 +269,7 @@ architecture as much as anyone else's.
 | **The symbolic pillar itself** | **−0.0004 (n.s.)** alone, and it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043. |
 | **Calibration** | Isotonic regression reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) — a **287×** gap. **The better the calibration, the wider the gap.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage. |
+| **Training on a second dataset** (CSE-CIC-IDS2018's known pool, doubling the training set) | 🔴 **Actively harmful: −0.1461 macro against a seed-matched control, 0/3 seeds better, direction consistent.** And the harm is *imported false positives*, not lost detection — see below. |
 | **Training an explicit reject class** (open-set / leave-classes-out) | **A wash.** Merging three known families into one `UNKNOWN` (9 → 7 classes) moves the headline by **−0.0030** paired against the seed-matched CNN, 1/3 seeds better. The reject unit does not reach Bot: **+0.068 above chance with the sign flipping across seeds.** ✅ But *which* families it reaches is controlled by what is merged into it — see below. |
 | **A fitted fuser over the channel that actually helps** — ⚠️ **scope: this row is about the knowledge-graph channel only; a fitted combiner over other channels *does* work, see §6** | **Structurally impossible for this channel.** The knowledge-graph score is defined by streaming the *test* set into windows, so it has **no validation-side score at all** — the channel with the largest measured gain cannot enter a combiner fitted on held-out data under any protocol. |
 
@@ -292,6 +293,51 @@ for reporting; threshold with Platt.
 Abstention keys on confidence. §4 established that the model is **confidently wrong** on Bot. A
 confidence-based rule cannot catch confident-and-wrong, and it does not: zero-day precision is
 unchanged to four decimal places across every non-degenerate coverage.
+
+**Adding a second dataset makes it worse, and the reason is the most practically useful thing in
+this section.** "Train on more data from another capture" is standard advice for generalisation. We
+did it carefully: 2018's known pool added to train and validation, **test left as untouched 2017**,
+BENIGN merged across captures so that *"came from 2018"* could not become a shortcut for *"is an
+attack"*, 2018's attack names kept distinct, and no leak — 2018's own split already withholds Bot,
+the web families, Infilteration and SQL Injection, which is exactly 2017's zero-day set.
+
+| comparison | macro Δ | σ | seeds better | |
+|---|---:|---:|---:|---|
+| **augmented vs seed-matched control** | **−0.1461** | 1.80 | **0/3** | direction consistent |
+| control vs the 68-feature baseline | −0.0091 | 0.78 | 1/3 | **inconsistent — inert, as required** |
+
+The control matters: the augmented model takes **67** inputs because 2017's 68th feature is a
+duplicate column (byte-identical across all 883,796 training rows), and input width changes the
+flatten dimension. A 2017-only 67-feature arm was built **before** any augmented result existed, and
+it comes out inert — so the −0.1461 is the augmentation, not the architecture.
+
+🔑 **The harm is imported false positives, not lost detection.** Our first explanation was wrong
+and we report it: we predicted *dilution*, that nine new capture-specific attack classes would split
+the absorbing mass the web families depend on. They stay **89–92 % concentrated**; the absorbing
+class merely moves (`DoS slowloris` → `DoS Slowhttptest`, another 2017 class). What actually changes
+is the **benign** side — the number of benign flows outscoring the Web Brute Force median goes from
+**2 to 242**, and **81 % of that false-positive tail is assigned to `SSH-Patator`**, the 2017 family
+that 2018's `SSH-Bruteforce` (36,054 flows) reinforces. **Adding a related attack family from another
+capture sharpens that decision region until it confidently mis-fires on the original capture's benign
+traffic.** Only 13.8 % of the tail goes to a 2018 class, so this is not imported 2018 signatures
+either; and refitting the scaler is ruled out (median scale ratio 0.979, and the two badly distorted
+features are absent from Bot's discriminative set on every seed).
+
+🔑 **And PR-AUC and the operating curve disagree, which is this paper's own thesis turned on us:**
+
+| recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
+|---|---:|---:|---:|---:|
+| baseline | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| augmented | **16.2 %** | **49.1 %** | 50.1 % | 50.9 % |
+
+At a 1 % false-alarm rate the augmented model is **slightly better**. At 0.1 % it retains barely a
+third of the baseline's recall. A reader shown only the macro would conclude the model was ruined; a
+reader shown only the 1 % column would conclude nothing happened. **Both are reported because
+neither alone is true.**
+
+🧭 **Twice in this work an intervention breaks specifically at the 0.1 % operating point** — the
+knowledge-graph fusion also costs 1.5 points there while gaining 9 at 1 %. The tightest alert budget
+is where these methods fail, and it is the budget a real deployment runs at.
 
 **The reject class is the one negative here with a positive mechanism inside it, and it is our
 sharpest test of §4.** Every other method in this paper detects novelty *without ever training for

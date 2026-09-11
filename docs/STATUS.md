@@ -17,7 +17,7 @@ selection half and is **−0.0008** on the reporting half.
 | 3 | Weighted / multi-resolution fusion | ✅ done | 🔴 **−0.0008, direction inconsistent.** w=0.5 was already optimal |
 | 4a | ~~LOCO, single hold-out~~ | 🔴 **RETRACTED — the code was a no-op** | renamed a class; 9 classes before and after |
 | 4b | **LOCO, merged reject class** | ✅ **DONE, n=3/arm** | 🔴 falsifier NOT triggered · ✅ **double dissociation between the two merges**, 3/3 every family |
-| 5 | **Cross-dataset augmented training** | 🟡 **WIDE done n=3, control running** | 🔴 **−0.155 macro, 3/3 seeds** — it does substantial HARM |
+| 5 | **Cross-dataset augmented training** | ✅ **DONE, n=3 + control** | 🔴 **−0.1461 vs the seed-matched control, 0/3 seeds better** — actively HARMFUL |
 
 ✅ **Phase 6 is folded into the paper (2026-09-10).** §4 gains the abundance control (2018's Bot is
 **abundant** and the CNN scores it **0.83× — below a random ranker**); §6 gains the cross-dataset
@@ -177,10 +177,17 @@ Train on 2017 + 2018's known pool (1,767,592 rows, 18 classes), test on **untouc
 **−0.155 macro, direction-consistent 3/3.** Per seed 0.3864 / 0.5268 / 0.5412 — note the spread of
 **0.155 against the baseline's 0.009**: the augmented arm is wildly seed-unstable.
 
-⚠️ **CONTROL STILL RUNNING.** `CTRL67` (2017 only, 67 features) isolates this from the input-width
-change. Seed 42 gives **0.6250 vs BASE68's 0.6446** — −0.0196, inside the 0.0285 band — so dropping
-the duplicate column looks close to inert, and the seed-42 experimental delta is **WIDE 0.3864 vs
-CTRL67 0.6250 = −0.2386**. n=1 on the control; do not quote until n=3.
+✅ **CONTROL COMPLETE (n=3) AND IT VALIDATES THE COMPARISON.**
+
+| comparison | macro Δ | σ | seeds better | verdict |
+|---|---:|---:|---:|---|
+| **WIDE vs CTRL67** — the experiment | **−0.1461** | 1.80 | **0/3** | direction consistent |
+| CTRL67 vs BASE68 — control validity | −0.0091 | 0.78 | 1/3 | **inconsistent → INERT, as required** |
+
+Per family (WIDE vs CTRL67): **Bot −0.0090 at 2.82σ (0/3)** — the most statistically solid of the
+three · Web BF −0.1474 (1.44σ, 0/3) · **Web XSS −0.2818 (2.02σ, 0/3)**, the largest absolute harm.
+The control being inert on macro means the −0.1461 is the augmentation and not the 67-vs-68 input
+width. ⚠️ At 1.80σ the **direction is established and the magnitude is not** — range 0.087–0.239.
 
 🔑 **THE MECHANISM — and my first explanation was FALSIFIED.** I predicted *dilution*: that adding
 nine capture-specific attack classes would split the absorbing mass the web families depend on.

@@ -62,7 +62,8 @@ REC = {n: load(n) for n in (
     "field_gap", "ablation", "operational", "ood_scores", "noise_postdet",
     "comparability", "kg_criteria", "bot_failure_analysis", "fitted_fusion",
     "latency_determinism_on", "ksweep_fusion", "ksweep_heldout",
-    "operational_best", "crossdata_lift", "replication_2018", "loco_reject")}
+    "operational_best", "crossdata_lift", "replication_2018", "loco_reject",
+    "aug_analyse", "aug_assignment")}
 
 with open(DRAFT, encoding="utf-8") as f:
     TEXT = f.read()
@@ -355,6 +356,44 @@ if lr:
         pr = noop.get("mean_percentile_rank") or {}
         chk("LOCO rename held-out percentile", "loco_reject",
             100.0 * pr.get("held_out_families", 0), "{:.1f}")
+
+# ---- experiment 5: cross-dataset augmented training ------------------------
+aa = REC["aug_analyse"]
+if aa:
+    for key, quoted in (("WIDE_vs_CTRL67", True), ("CTRL67_vs_BASE68", True),
+                        ("WIDE_vs_BASE68", False)):
+        c = (aa.get("comparisons") or {}).get(key) or {}
+        m = c.get("macro") or {}
+        if not m:
+            continue
+        chk("exp5 %s macro delta" % key, "aug_analyse",
+            m.get("mean_delta"), "{:+.4f}", quoted=quoted)
+        chk("exp5 %s sigma" % key, "aug_analyse", m.get("sigma"), "{:.2f}",
+            quoted=quoted)
+    for arm, row in (aa.get("operational") or {}).items():
+        for fpr in ("0.001", "0.010", "0.050", "0.100"):
+            v = (row.get(fpr) or {}).get("mean")
+            if v is None:
+                continue
+            # CTRL67's curve is recorded but the draft quotes only the two arms
+            # the argument turns on, so it is marked not-quoted rather than
+            # flagged as a mismatch.
+            chk("exp5 %s rec@%s" % (arm, fpr), "aug_analyse", 100.0 * v,
+                "{:.1f} %", quoted=(arm != "CTRL67"))
+    # Only BASE68's absolute macro is quoted. WIDE's 0.4848 and CTRL67's 0.6308
+    # are deliberately NOT in the draft: printing 0.4848 beside 0.6399 invites
+    # exactly the unpaired comparison the control was built to prevent, and the
+    # paired -0.1461 is the interpretable form. Recorded, not flagged.
+    for arm in ("BASE68", "CTRL67", "WIDE"):
+        v = (aa.get("arms") or {}).get(arm, {}).get("macro_mean")
+        chk("exp5 %s macro" % arm, "aug_analyse", v, "{:.4f}",
+            quoted=(arm == "BASE68"))
+
+ag = REC["aug_assignment"]
+if ag:
+    for fam, v in (ag.get("web_concentration") or {}).items():
+        chk("exp5 %s baseline concentration" % fam, "aug_assignment",
+            100.0 * v["baseline_top_share"], "{:.1f}", quoted=False)
 
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")
