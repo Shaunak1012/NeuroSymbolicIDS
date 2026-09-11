@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (69 Python scripts, plus 11 shell launchers).
+> Last verified against source: **2026-09-05** (72 Python scripts, plus 13 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,44 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+## EXPERIMENT 5 — `build_augmented.py` · `aug_sweep.sh` · `aug_ctrl_sweep.sh` · `aug_analyse.py` · `aug_assignment.py`
+
+Does a **wider learned basis** reach 2017's zero-day families? §4 says reachability tracks overlap
+with the basis the model learned, so training on more known families is the one intervention aimed at
+the mechanism rather than its symptoms.
+
+**`build_augmented.py`** builds `data/processed/paper_aug/` (2017 + 2018's known pool, **1,767,592
+rows, 18 classes**) and the feature-count control `paper_67`. It verifies rather than assumes:
+2017's 68th feature `Fwd Header Length.1` is **byte-identical** to `Fwd Header Length` across all
+883,796 training rows; 2018's 67 columns are exactly the remaining 67 **in order**; and **no leak** —
+2018's own split already holds out Bot, the web families, Infilteration and SQL Injection, which is
+exactly 2017's zero-day set. BENIGN is **merged** across captures (if 2018 contributed only attacks,
+"came from 2018" would perfectly predict "is an attack" and the model could learn capture artefacts
+instead of attack structure); attack names stay **distinct**. Test is untouched 2017.
+
+🔴 **RESULT (n=3): augmentation does substantial HARM — macro 0.6399 → 0.4848, 3/3 seeds.**
+Per seed 0.3864 / 0.5268 / 0.5412, a spread of 0.155 against the baseline's 0.009.
+
+**`aug_analyse.py`** reports the three paired comparisons (WIDE vs CTRL67 is the experiment; CTRL67 vs
+BASE68 tests the control's own validity; WIDE vs BASE68 is flagged as confounded by input width) and
+**PR-AUC alongside the operating curve, because they disagree**:
+
+| arm | macro | rec@0.1 % | rec@1 % | rec@5 % | rec@10 % |
+|---|---:|---:|---:|---:|---:|
+| BASE68 | 0.6399 | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| WIDE | 0.4848 | **16.2 %** | **49.1 %** | 50.1 % | 50.9 % |
+
+At 1 % FPR augmentation is slightly **better**; at 0.1 % it falls to a third. The harm is in the top
+of the ranking, not in detection at a deployable threshold.
+
+**`aug_assignment.py`** diagnoses why, and **falsified the first explanation**. Dilution was predicted
+— that nine new attack classes would split the web families' absorbing mass. They stay **89–92 %
+concentrated**; the absorbing class merely moves (`DoS slowloris` → `DoS Slowhttptest`). The effect is
+on the **benign** side: benign flows outscoring the Web-BF median go from **2 to 242**, and **81 % of
+the false-positive tail lands on `SSH-Patator`** — the family 2018's `SSH-Bruteforce` reinforces.
+Augmenting with a related attack family from another capture sharpens that decision region until it
+confidently mis-fires on the original capture's benign traffic.
 
 **`crossdata_lift.py`** — the 2017-vs-2018 comparison in **lift** (PR-AUC ÷ prevalence), the only
 unit comparable across captures with different family prevalences. Exists because `analyse_2018.py`'s

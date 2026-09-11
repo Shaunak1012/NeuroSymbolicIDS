@@ -102,8 +102,8 @@ def main():
     print("=" * 96)
 
     # ---- 1. locate the duplicate column and prove it is a duplicate ---------
-    with open(os.path.join(paths.METADATA, "preprocess_2018.json"),
-              encoding="utf-8") as f:
+    meta18 = os.path.join(paths.METADATA, "preprocess_2018.json")
+    with open(meta18, encoding="utf-8") as f:
         names18 = json.load(f)["feature_names"]
     names17 = list(np.load(os.path.join(P17, "feature_names.npy"),
                            allow_pickle=True)) \

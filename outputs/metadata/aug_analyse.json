@@ -26,12 +26,16 @@
     },
     "WIDE": {
       "seeds": [
-        42
+        42,
+        43,
+        44
       ],
       "macro_per_seed": [
-        0.3864
+        0.3864,
+        0.5268,
+        0.5412
       ],
-      "macro_mean": 0.3863576661030061
+      "macro_mean": 0.4847686183914857
     }
   },
   "comparisons": {
@@ -44,10 +48,59 @@
       "status": "insufficient"
     },
     "WIDE_vs_BASE68": {
+      "why": "confounded by input width; reported for completeness",
       "shared_seeds": [
-        42
+        42,
+        43,
+        44
       ],
-      "status": "insufficient"
+      "macro": {
+        "mean_delta": -0.15513079325733342,
+        "paired_sd": 0.08947994949059856,
+        "sigma": 1.7336933485152741,
+        "direction_consistent": true,
+        "seeds_better": 0,
+        "per_seed": [
+          -0.2583,
+          -0.1087,
+          -0.0984
+        ]
+      },
+      "per_family": {
+        "Bot": {
+          "mean_delta": -0.02242998158928174,
+          "paired_sd": 0.01936801306853221,
+          "sigma": 1.1580940961736752,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.0391,
+            -0.0012,
+            -0.027
+          ]
+        },
+        "Web Attack Brute Force": {
+          "mean_delta": -0.15494341676639378,
+          "paired_sd": 0.10242746242069702,
+          "sigma": 1.5127136131714332,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.2717,
+            -0.1131,
+            -0.0801
+          ]
+        },
+        "Web Attack XSS": {
+          "mean_delta": -0.2880189814163247,
+          "paired_sd": 0.15291987212719402,
+          "sigma": 1.8834633943243126,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.4641,
+            -0.2118,
+            -0.1882
+          ]
+        }
+      }
     }
   },
   "operational": {
@@ -87,27 +140,35 @@
     },
     "WIDE": {
       "0.001": {
-        "mean": 0.002151565861821659,
+        "mean": 0.1618455653836959,
         "per_seed": [
-          0.0022
+          0.0022,
+          0.1375,
+          0.3459
         ]
       },
       "0.010": {
-        "mean": 0.4905570164953383,
+        "mean": 0.49103514224240974,
         "per_seed": [
-          0.4906
+          0.4906,
+          0.4877,
+          0.4949
         ]
       },
       "0.050": {
-        "mean": 0.5008367200573751,
+        "mean": 0.5005976571838394,
         "per_seed": [
-          0.5008
+          0.5008,
+          0.5008,
+          0.5001
         ]
       },
       "0.100": {
-        "mean": 0.502749223045661,
+        "mean": 0.5090445453821022,
         "per_seed": [
-          0.5027
+          0.5027,
+          0.5214,
+          0.503
         ]
       }
     }
