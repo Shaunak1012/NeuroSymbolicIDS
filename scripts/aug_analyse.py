@@ -158,6 +158,43 @@ def main():
                       "per_seed": [round(v, 4) for v in d.tolist()]},
             "per_family": fams}
 
+    # ---- PR-AUC vs OPERATIONAL RECALL, because they disagree ----------------
+    # On seed 42 the macro fell 0.6399 -> 0.3864 while recall at a 1 % false-alarm
+    # rate barely moved. PR-AUC is dominated by the extreme top of the ranking,
+    # and augmentation put benign flows there: 2 benign flows outscored the Web
+    # Brute Force median in the baseline against 242 in the augmented model. A
+    # fixed-FPR operating point is insensitive to that; PR-AUC is not. Reporting
+    # only one of the two would misstate the size of the harm in one direction or
+    # the other, which is this paper's own thesis about metrics.
+    ben = yte == "BENIGN"
+    anyzd = np.isin(yte, sorted(zd))
+    print("\n" + "=" * 100)
+    print("PR-AUC vs OPERATIONAL RECALL - the two disagree, so both are reported")
+    print("=" * 100)
+    print("%-8s %10s | %s" % ("arm", "macro",
+                              "  ".join("rec@%.1f%%" % (100 * f)
+                                        for f in (0.001, 0.01, 0.05, 0.10))))
+    out["operational"] = {}
+    for arm in ARMS:
+        if not present[arm]:
+            continue
+        sc = {s_: load(ARMS[arm](s_)) for s_ in present[arm]}
+        row, cells = {}, []
+        for fpr in (0.001, 0.01, 0.05, 0.10):
+            v = []
+            for s_ in present[arm]:
+                thr = np.quantile(sc[s_][ben], 1.0 - fpr)
+                v.append(float((sc[s_][anyzd] >= thr).mean()))
+            row["%.3f" % fpr] = {"mean": float(np.mean(v)),
+                                 "per_seed": [round(x, 4) for x in v]}
+            cells.append("%8.1f%%" % (100 * np.mean(v)))
+        out["operational"][arm] = row
+        print("%-8s %10.4f | %s"
+              % (arm, out["arms"][arm]["macro_mean"], "  ".join(cells)))
+    print("")
+    print("A large macro drop with a flat recall curve means the harm is in the")
+    print("TOP of the ranking, not in detection at a deployable threshold.")
+
     # ---- the pre-registered falsifier --------------------------------------
     key = "WIDE_vs_CTRL67"
     c = out["comparisons"].get(key, {})

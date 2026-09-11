@@ -1,0 +1,123 @@
+{
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "noise_band": 0.0285,
+  "arms": {
+    "BASE68": {
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "macro_per_seed": [
+        0.6446,
+        0.6355,
+        0.6396
+      ],
+      "macro_mean": 0.6398994116488191
+    },
+    "CTRL67": {
+      "seeds": [],
+      "macro_per_seed": [],
+      "macro_mean": null
+    },
+    "WIDE": {
+      "seeds": [
+        42
+      ],
+      "macro_per_seed": [
+        0.3864
+      ],
+      "macro_mean": 0.3863576661030061
+    }
+  },
+  "comparisons": {
+    "WIDE_vs_CTRL67": {
+      "shared_seeds": [],
+      "status": "insufficient"
+    },
+    "CTRL67_vs_BASE68": {
+      "shared_seeds": [],
+      "status": "insufficient"
+    },
+    "WIDE_vs_BASE68": {
+      "shared_seeds": [
+        42
+      ],
+      "status": "insufficient"
+    }
+  },
+  "operational": {
+    "BASE68": {
+      "0.001": {
+        "mean": 0.4729460514782054,
+        "per_seed": [
+          0.4736,
+          0.4736,
+          0.4717
+        ]
+      },
+      "0.010": {
+        "mean": 0.48298669216670653,
+        "per_seed": [
+          0.4839,
+          0.4824,
+          0.4827
+        ]
+      },
+      "0.050": {
+        "mean": 0.5424336600525939,
+        "per_seed": [
+          0.5123,
+          0.5013,
+          0.6137
+        ]
+      },
+      "0.100": {
+        "mean": 0.6038728185512791,
+        "per_seed": [
+          0.6273,
+          0.5451,
+          0.6393
+        ]
+      }
+    },
+    "WIDE": {
+      "0.001": {
+        "mean": 0.002151565861821659,
+        "per_seed": [
+          0.0022
+        ]
+      },
+      "0.010": {
+        "mean": 0.4905570164953383,
+        "per_seed": [
+          0.4906
+        ]
+      },
+      "0.050": {
+        "mean": 0.5008367200573751,
+        "per_seed": [
+          0.5008
+        ]
+      },
+      "0.100": {
+        "mean": 0.502749223045661,
+        "per_seed": [
+          0.5027
+        ]
+      }
+    }
+  },
+  "falsifier_triggered": false,
+  "falsifier_note": "Beats the SEED-MATCHED 67-feature control on every seed. Evaluated against CTRL67 rather than the historical 0.6399, which differs in input width as well as in training data.",
+  "caveats": [
+    "WIDE trains on 1,767,592 rows against 883,796, so a positive result confounds 'wider basis' with 'more data'. The NARROW control (equal added volume from one family group) is specified in build_augmented.py and built only if WIDE moves the headline.",
+    "2018's known pool is DDoS/DoS/FTP-BruteForce/SSH-Bruteforce - the same categories 2017 already trains on - so the basis widens in directions it already covered.",
+    "Test is untouched 2017 and the zero-day definition is 2017's, so these numbers are comparable to every other number in the project.",
+    "An absolute number carries 0.0285; only the paired deltas decide."
+  ]
+}

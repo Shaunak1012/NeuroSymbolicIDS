@@ -1,0 +1,179 @@
+{
+  "falsifier_concentration": 0.8,
+  "models": {
+    "cnn_paper": {
+      "label": "BASELINE 2017, 68 features",
+      "n_classes": 9,
+      "families": {
+        "Bot": {
+          "n": 1956,
+          "top": [
+            {
+              "class": "BENIGN",
+              "n": 1956,
+              "share": 1.0
+            }
+          ],
+          "largest_share": 1.0,
+          "concentrated": true
+        },
+        "Web Attack Brute Force": {
+          "n": 1507,
+          "top": [
+            {
+              "class": "DoS slowloris",
+              "n": 1354,
+              "share": 0.8984737889847378
+            },
+            {
+              "class": "BENIGN",
+              "n": 152,
+              "share": 0.10086264100862641
+            },
+            {
+              "class": "DoS GoldenEye",
+              "n": 1,
+              "share": 0.0006635700066357001
+            }
+          ],
+          "largest_share": 0.8984737889847378,
+          "concentrated": true
+        },
+        "Web Attack XSS": {
+          "n": 652,
+          "top": [
+            {
+              "class": "DoS slowloris",
+              "n": 606,
+              "share": 0.9294478527607362
+            },
+            {
+              "class": "BENIGN",
+              "n": 20,
+              "share": 0.03067484662576687
+            },
+            {
+              "class": "DoS Hulk",
+              "n": 17,
+              "share": 0.02607361963190184
+            },
+            {
+              "class": "DoS GoldenEye",
+              "n": 6,
+              "share": 0.009202453987730062
+            },
+            {
+              "class": "DoS Slowhttptest",
+              "n": 2,
+              "share": 0.003067484662576687
+            }
+          ],
+          "largest_share": 0.9294478527607362,
+          "concentrated": true
+        }
+      }
+    },
+    "cnn_aug_s42": {
+      "label": "AUGMENTED 2017+2018, 67 features",
+      "n_classes": 18,
+      "families": {
+        "Bot": {
+          "n": 1956,
+          "top": [
+            {
+              "class": "BENIGN",
+              "n": 1956,
+              "share": 1.0
+            }
+          ],
+          "largest_share": 1.0,
+          "concentrated": true
+        },
+        "Web Attack Brute Force": {
+          "n": 1507,
+          "top": [
+            {
+              "class": "DoS Slowhttptest",
+              "n": 1336,
+              "share": 0.8865295288652952
+            },
+            {
+              "class": "BENIGN",
+              "n": 115,
+              "share": 0.07631055076310551
+            },
+            {
+              "class": "DoS attacks-GoldenEye [2018]",
+              "n": 39,
+              "share": 0.025879230258792303
+            },
+            {
+              "class": "DoS attacks-Slowloris [2018]",
+              "n": 8,
+              "share": 0.0053085600530856005
+            },
+            {
+              "class": "DoS slowloris",
+              "n": 7,
+              "share": 0.0046449900464499
+            }
+          ],
+          "largest_share": 0.8865295288652952,
+          "concentrated": true
+        },
+        "Web Attack XSS": {
+          "n": 652,
+          "top": [
+            {
+              "class": "DoS Slowhttptest",
+              "n": 597,
+              "share": 0.9156441717791411
+            },
+            {
+              "class": "BENIGN",
+              "n": 41,
+              "share": 0.06288343558282208
+            },
+            {
+              "class": "DoS GoldenEye",
+              "n": 6,
+              "share": 0.009202453987730062
+            },
+            {
+              "class": "DoS attacks-GoldenEye [2018]",
+              "n": 3,
+              "share": 0.004601226993865031
+            },
+            {
+              "class": "DoS attacks-Slowloris [2018]",
+              "n": 2,
+              "share": 0.003067484662576687
+            }
+          ],
+          "largest_share": 0.9156441717791411,
+          "concentrated": true
+        }
+      }
+    }
+  },
+  "web_concentration": {
+    "Web Attack Brute Force": {
+      "baseline_top_share": 0.8984737889847378,
+      "augmented_top_share_mean": 0.8865295288652952,
+      "drop": 0.011944260119442607,
+      "baseline_top_class": "DoS slowloris"
+    },
+    "Web Attack XSS": {
+      "baseline_top_share": 0.9294478527607362,
+      "augmented_top_share_mean": 0.9156441717791411,
+      "drop": 0.013803680981595012,
+      "baseline_top_class": "DoS slowloris"
+    }
+  },
+  "dilution_falsified": true,
+  "caveats": [
+    "Bot is a separate question: 100 % of Bot flows are already classified BENIGN by the baseline, so there is no absorbing attack class to dilute. Its fall from 1.31x to 0.6x is reported, not explained here.",
+    "Scaler distortion is largely ruled out: only RST Flag Count and ECE Flag Count are badly distorted by refitting on the union, and neither is in Bot's discriminative set on any measured seed.",
+    "Assignment share is argmax over the softmax; a flow counted in one class may have had a near-tie with another."
+  ]
+}
