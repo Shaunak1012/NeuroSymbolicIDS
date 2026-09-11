@@ -1,0 +1,48 @@
+{
+  "features": {
+    "n": 67,
+    "dropped_from_2017": "Fwd Header Length.1",
+    "dropped_index": 51
+  },
+  "zero_day_classes": [
+    "Bot",
+    "Heartbleed",
+    "Infiltration",
+    "Web Attack Brute Force",
+    "Web Attack Sql Injection",
+    "Web Attack XSS"
+  ],
+  "splits": {
+    "train": {
+      "n_2017": 883796,
+      "n_2018": 883796,
+      "n_total": 1767592,
+      "n_classes": 18,
+      "benign_fraction": 0.5
+    },
+    "val": {
+      "n_2017": 110475,
+      "n_2018": 110474,
+      "n_total": 220949,
+      "n_classes": 18,
+      "benign_fraction": 0.5000022629656617
+    },
+    "test": {
+      "n_total": 114658,
+      "source": "2017 only",
+      "note": "no 2018 flow enters test; the zero-day definition stays 2017's"
+    }
+  },
+  "control": {
+    "subdir": "paper_67",
+    "source": "2017 only, 67 features",
+    "why": "isolates the augmentation from the 67-vs-68 input-width change; the dropped column is a verified duplicate but the architecture is not identical"
+  },
+  "caveats": [
+    "This arm confounds 'wider basis' with 'twice the data'. The NARROW control (equal added volume from a single family group) is specified in the docstring and is built only if WIDE moves the headline.",
+    "2018's known pool is DDoS/DoS/FTP-BruteForce/SSH-Bruteforce - the same categories 2017 already trains on - so the basis widens in directions it already covered.",
+    "2018 class counts are lower bounds: 7 of 10 published CSVs are Excel-truncated at 2^20 rows, chronologically.",
+    "The falsifier is evaluated PAIRED against the seed-matched baseline, not against the n=3 mean 0.6399.",
+    "The paired baseline is the 67-FEATURE 2017-only control (paper_67), not the historical 68-feature cnn_paper: the augmented model has a different input width and therefore a different flatten dimension."
+  ]
+}
