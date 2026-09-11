@@ -17,7 +17,7 @@ selection half and is **−0.0008** on the reporting half.
 | 3 | Weighted / multi-resolution fusion | ✅ done | 🔴 **−0.0008, direction inconsistent.** w=0.5 was already optimal |
 | 4a | ~~LOCO, single hold-out~~ | 🔴 **RETRACTED — the code was a no-op** | renamed a class; 9 classes before and after |
 | 4b | **LOCO, merged reject class** | ✅ **DONE, n=3/arm** | 🔴 falsifier NOT triggered · ✅ **double dissociation between the two merges**, 3/3 every family |
-| 5 | **Cross-dataset augmented training** | ⬜ **NEXT** | user's idea, aims straight at the mechanism |
+| 5 | **Cross-dataset augmented training** | 🟡 **WIDE done n=3, control running** | 🔴 **−0.155 macro, 3/3 seeds** — it does substantial HARM |
 
 ✅ **Phase 6 is folded into the paper (2026-09-10).** §4 gains the abundance control (2018's Bot is
 **abundant** and the CNN scores it **0.83× — below a random ranker**); §6 gains the cross-dataset
@@ -165,7 +165,62 @@ lands, "HOMOG is direction-consistent" means 2/2, not established.
 including the retracted rename). They are the absorption families; this is that mechanism reappearing
 in an experiment not designed to look for it, not independent corroboration of anything.
 
-### ⬜ #5 Cross-dataset augmented training — worth doing, and it has a trap
+### 🔴 #5 RESULT (WIDE arm, n=3) — augmentation does substantial HARM
+
+Train on 2017 + 2018's known pool (1,767,592 rows, 18 classes), test on **untouched 2017**.
+
+| arm | macro | rec@0.1 % | rec@1 % | rec@5 % | rec@10 % |
+|---|---:|---:|---:|---:|---:|
+| BASE68 (2017, 68 feat) | **0.6399** | **47.3 %** | 48.3 % | 54.2 % | 60.4 % |
+| WIDE (2017+2018, 67 feat) | **0.4848** | **16.2 %** | **49.1 %** | 50.1 % | 50.9 % |
+
+**−0.155 macro, direction-consistent 3/3.** Per seed 0.3864 / 0.5268 / 0.5412 — note the spread of
+**0.155 against the baseline's 0.009**: the augmented arm is wildly seed-unstable.
+
+⚠️ **CONTROL STILL RUNNING.** `CTRL67` (2017 only, 67 features) isolates this from the input-width
+change. Seed 42 gives **0.6250 vs BASE68's 0.6446** — −0.0196, inside the 0.0285 band — so dropping
+the duplicate column looks close to inert, and the seed-42 experimental delta is **WIDE 0.3864 vs
+CTRL67 0.6250 = −0.2386**. n=1 on the control; do not quote until n=3.
+
+🔑 **THE MECHANISM — and my first explanation was FALSIFIED.** I predicted *dilution*: that adding
+nine capture-specific attack classes would split the absorbing mass the web families depend on.
+Measured, they are **still 89–92 % concentrated**; the absorbing class merely moved
+(`DoS slowloris` → `DoS Slowhttptest`, another **2017** class). The real effect is on the **benign**
+side, and the gap closed from both ends:
+
+| | baseline | augmented |
+|---|---:|---:|
+| Web-BF median score | 0.9940 | 0.8768 |
+| **benign flows scoring above it** | **2** | **242** |
+| BENIGN 99.9th percentile | 0.9038 | 0.9973 |
+
+The baseline's benign tail spreads over six classes; the augmented one puts **81 % on `SSH-Patator`**
+— the family 2018's `SSH-Bruteforce` (36,054 flows) reinforces. **Augmenting with a related attack
+family from another capture sharpens that decision region until it confidently mis-fires on the
+original capture's benign traffic.** Only 13.8 % of the false-positive tail goes to a 2018 class, so
+it is not imported 2018 signatures. Scaler distortion is ruled out: median scale ratio 0.979, and the
+only two badly distorted features (`RST Flag Count`, `ECE Flag Count`) are absent from Bot's
+discriminative set on every measured seed.
+
+🔑 **PR-AUC AND THE OPERATING CURVE DISAGREE, AND THAT IS THE POINT.** At **1 % FPR the augmented
+model is slightly BETTER** (49.1 % vs 48.3 %); at **0.1 % FPR it falls 47.3 % → 16.2 %**. The macro
+overstates the harm at 1 % and understates it at 0.1 %. ⚠️ **Correction:** the 0.1 % figure was first
+quoted as **0.2 %** from seed 42 alone; at n=3 it is **16.2 %**.
+
+🧭 **Second time today an intervention breaks specifically at 0.1 % FPR** — CNN+KG at k=800 also
+costs 1.5 points there. The tight alert budget is where these methods fail, and it is the only budget
+a real SOC runs at.
+
+⚠️ **Bot is the consistent part:** lift **0.6× / 0.7×** (below a random ranker) against the baseline's
+1.31×. The pre-registered prediction — that 2018's DDoS/DoS/brute-force pool widens the basis only
+where it was already covered — held, and the harm went further than predicted. The macro's swing
+comes entirely from the **web** families (0.6478↓0.8157 and 0.4913↓0.7414 across seeds).
+
+⚠️ **NARROW arm not run.** It was pre-registered to run *only if WIDE moved the headline upward*, as
+the control for the data-volume confound. WIDE moved it sharply **down**, so the confound cannot
+explain the result away and the arm is not needed.
+
+### ⬜ #5 original plan — kept for the record
 
 Train on 2017 **plus 2018's known classes**, widening the learned basis. §4 says reachability tracks
 overlap with that basis, so a wider basis is a principled route rather than a "more data" hope.
