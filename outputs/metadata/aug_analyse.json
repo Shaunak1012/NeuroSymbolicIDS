@@ -20,9 +20,17 @@
       "macro_mean": 0.6398994116488191
     },
     "CTRL67": {
-      "seeds": [],
-      "macro_per_seed": [],
-      "macro_mean": null
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "macro_per_seed": [
+        0.625,
+        0.6389,
+        0.6286
+      ],
+      "macro_mean": 0.630834205100245
     },
     "WIDE": {
       "seeds": [
@@ -40,12 +48,114 @@
   },
   "comparisons": {
     "WIDE_vs_CTRL67": {
-      "shared_seeds": [],
-      "status": "insufficient"
+      "why": "THE EXPERIMENT - augmentation, input width held fixed",
+      "shared_seeds": [
+        42,
+        43,
+        44
+      ],
+      "macro": {
+        "mean_delta": -0.1460655867087593,
+        "paired_sd": 0.08112474671561418,
+        "sigma": 1.8005059198618845,
+        "direction_consistent": true,
+        "seeds_better": 0,
+        "per_seed": [
+          -0.2386,
+          -0.1121,
+          -0.0874
+        ]
+      },
+      "per_family": {
+        "Bot": {
+          "mean_delta": -0.008990753866585148,
+          "paired_sd": 0.0031875654191276656,
+          "sigma": 2.820570775625251,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.0103,
+            -0.0113,
+            -0.0054
+          ]
+        },
+        "Web Attack Brute Force": {
+          "mean_delta": -0.14738824485393362,
+          "paired_sd": 0.10246319610815,
+          "sigma": 1.4384505895986808,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.2636,
+            -0.1083,
+            -0.0702
+          ]
+        },
+        "Web Attack XSS": {
+          "mean_delta": -0.2818177614057589,
+          "paired_sd": 0.1395138958512526,
+          "sigma": 2.0199977908023468,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.442,
+            -0.2168,
+            -0.1867
+          ]
+        }
+      }
     },
     "CTRL67_vs_BASE68": {
-      "shared_seeds": [],
-      "status": "insufficient"
+      "why": "the control's own validity - should be ~0",
+      "shared_seeds": [
+        42,
+        43,
+        44
+      ],
+      "macro": {
+        "mean_delta": -0.009065206548574123,
+        "paired_sd": 0.011655818748743921,
+        "sigma": 0.7777408643687966,
+        "direction_consistent": false,
+        "seeds_better": 1,
+        "per_seed": [
+          -0.0196,
+          0.0034,
+          -0.011
+        ]
+      },
+      "per_family": {
+        "Bot": {
+          "mean_delta": -0.013439227722696593,
+          "paired_sd": 0.02069836118031043,
+          "sigma": 0.6492894585046096,
+          "direction_consistent": false,
+          "per_seed": [
+            -0.0288,
+            0.0101,
+            -0.0216
+          ]
+        },
+        "Web Attack Brute Force": {
+          "mean_delta": -0.007555171912460172,
+          "paired_sd": 0.002576210453539948,
+          "sigma": 2.932668758516478,
+          "direction_consistent": true,
+          "per_seed": [
+            -0.008,
+            -0.0048,
+            -0.0099
+          ]
+        },
+        "Web Attack XSS": {
+          "mean_delta": -0.0062012200105657405,
+          "paired_sd": 0.014137202869421535,
+          "sigma": 0.4386454709494794,
+          "direction_consistent": false,
+          "per_seed": [
+            -0.0221,
+            0.005,
+            -0.0015
+          ]
+        }
+      }
     },
     "WIDE_vs_BASE68": {
       "why": "confounded by input width; reported for completeness",
@@ -135,6 +245,40 @@
           0.6273,
           0.5451,
           0.6393
+        ]
+      }
+    },
+    "CTRL67": {
+      "0.001": {
+        "mean": 0.4729460514782054,
+        "per_seed": [
+          0.4733,
+          0.471,
+          0.4745
+        ]
+      },
+      "0.010": {
+        "mean": 0.483464817913778,
+        "per_seed": [
+          0.4824,
+          0.4855,
+          0.4824
+        ]
+      },
+      "0.050": {
+        "mean": 0.4921507689855766,
+        "per_seed": [
+          0.4858,
+          0.5068,
+          0.4839
+        ]
+      },
+      "0.100": {
+        "mean": 0.5061757908996732,
+        "per_seed": [
+          0.5042,
+          0.5197,
+          0.4946
         ]
       }
     },
