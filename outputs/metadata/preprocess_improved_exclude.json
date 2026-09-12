@@ -1,0 +1,64 @@
+{
+  "arm": "exclude",
+  "source": "Engelen et al. WTMC 2021 corrected CIC-IDS2017",
+  "n_features": 67,
+  "unmapped_features": [
+    "Fwd Header Length.1"
+  ],
+  "constant_columns_dropped": [],
+  "attempted_flows": 9144,
+  "inf_nan_rows_dropped": 752,
+  "per_file": [
+    {
+      "file": "Friday-WorkingHours.csv",
+      "rows": 547915
+    },
+    {
+      "file": "Monday-WorkingHours.csv",
+      "rows": 371749
+    },
+    {
+      "file": "Thursday-WorkingHours.csv",
+      "rows": 362368
+    },
+    {
+      "file": "Tuesday-WorkingHours.csv",
+      "rows": 322003
+    },
+    {
+      "file": "Wednesday-WorkingHours.csv",
+      "rows": 496779
+    }
+  ],
+  "split": {
+    "train": 692604,
+    "val": 86576,
+    "test": 87547
+  },
+  "test_family_counts": {
+    "DoS Hulk": 15847,
+    "BENIGN": 43288,
+    "DDoS": 9512,
+    "PortScan": 15903,
+    "DoS Slowhttptest": 174,
+    "SSH-Patator": 298,
+    "DoS slowloris": 400,
+    "DoS GoldenEye": 757,
+    "FTP-Patator": 397,
+    "Bot": 738,
+    "Web Attack Brute Force": 151,
+    "Infiltration": 32,
+    "Web Attack XSS": 27,
+    "Web Attack Sql Injection": 12,
+    "Heartbleed": 11
+  },
+  "powered_families": [
+    "Bot",
+    "Web Attack Brute Force"
+  ],
+  "caveats": [
+    "67 features, not 68 - the fixed tool emits Fwd Header Length once. Compare against the paper_67 control, not the 68-feature baseline.",
+    "Under STRICT the macro is over a DIFFERENT family set, so its value is not comparable to 0.6399; only per-family numbers transfer.",
+    "Flow construction and several feature calculations changed, so this is not a relabelling of our flows - the flows themselves differ and no 1:1 correspondence exists."
+  ]
+}

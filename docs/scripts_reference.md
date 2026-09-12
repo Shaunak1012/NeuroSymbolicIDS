@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (72 Python scripts, plus 13 shell launchers).
+> Last verified against source: **2026-09-05** (73 Python scripts, plus 14 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,36 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+## ROBUSTNESS — `preprocess_improved.py` · `improved_sweep.sh`
+
+Rebuilds the paper split on **Engelen et al.'s corrected CIC-IDS2017** (WTMC 2021): fixed
+CICFlowMeter (mutual-FIN termination, RST handling, no post-close direction flip, recomputed
+Idle/Bulk/Down-Up-ratio/flow-length features) plus relabelling. **Over 20 % of traces are
+reconstructed or relabelled.**
+
+🔴 **The finding that matters before any model runs.** The corrected labels add an
+`X - Attempted` class for attack flows that transmitted **no payload**:
+
+| family | original | effective | attempted |
+|---|---:|---:|---:|
+| Bot | 1,966 | **738** | 1,470 |
+| Web Attack Brute Force | 1,507 | **151** | 1,214 |
+| Web Attack XSS | 652 | **27** | 652 |
+
+~9 in 10 web-attack flows and 2 in 3 Bot flows are bare connection attempts, and **Web XSS falls
+below `MIN_FAMILY_N=100`** — under the strict reading only **two** powered families remain.
+🔬 This also offers a deeper account of our own absorption finding: if ~90 % of web-attack flows
+transmitted nothing, they *are* bare connection attempts, which is what `DoS slowloris` looks like.
+
+Two pre-registered arms: **MERGE** (attempted folded back — maximally comparable, isolates the
+flow/feature fixes) and **STRICT** (attempted dropped — the cleaner question; its macro is over a
+different family set and is **not** comparable to 0.6399). Relabelling attempted flows BENIGN is
+rejected with a reason. 67 features, so the comparison arm is `paper_67`, not the 68-feature
+baseline. The split carries meta CSVs with Src/Dst IP for the exogenous-axiom experiment.
+
+🛑 **Training is currently blocked** — see KNOWN_ISSUES: Windows Smart App Control blocks
+TensorFlow. Both splits are built and waiting.
 
 ## EXPERIMENT 5 — `build_augmented.py` · `aug_sweep.sh` · `aug_ctrl_sweep.sh` · `aug_analyse.py` · `aug_assignment.py`
 

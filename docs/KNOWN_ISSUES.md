@@ -8,6 +8,31 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🛑 2026-09-12 — [OPEN, BLOCKS ALL TRAINING] Windows Smart App Control blocks TensorFlow
+
+**Every training run now fails at `import tensorflow`.** Windows Smart App Control flipped from
+evaluation to **enforcement** (`VerifiedAndReputablePolicyState: 1`) and blocks TensorFlow's unsigned
+native modules:
+
+> Code Integrity determined that a process (`python.exe`) attempted to load
+> `...tensorflow\python\data\experimental\service\_pywrap_server_lib.pyd` that did not meet the
+> Enterprise signing level requirements — Policy ID `{0283ac0f-fff1-49ae-ada1-8a933130cad6}`
+
+First block **2026-09-12 16:59:56**, minutes after `cnn_67_s44` completed normally at ~16:00. **Not
+caused by any code change** — it is an OS policy transition. All six `improved_sweep.sh` runs failed
+identically and immediately.
+
+**What still works:** numpy / pandas / sklearn / scipy, every saved `.npy` prediction, both corrected
+splits, and all analysis that does not load a model.
+**What is blocked:** all training · anything loading a `.keras` model (125 on disk) · OpenMax
+(needs per-class logits, and `rescore_logits.py` persists only the scalar log-odds) · XAI work
+needing gradients.
+
+⚠️ **Resolution is the user's call, not an automated fix.** Either disable Smart App Control
+(Windows Security → App & browser control — **one-way by design**, Microsoft does not allow
+re-enabling without a Windows reinstall) or move training to WSL2, which SAC does not govern.
+**Do not attempt to modify the security policy from a session.**
+
 ## 🔴 2026-09-10 — [OPEN] §8's `r = +0.992` is quoted in the draft and persisted nowhere
 
 The draft's §8 states that Web Brute Force and XSS correlate at **r = +0.992**, which carries real
