@@ -63,7 +63,8 @@ REC = {n: load(n) for n in (
     "comparability", "kg_criteria", "bot_failure_analysis", "fitted_fusion",
     "latency_determinism_on", "ksweep_fusion", "ksweep_heldout",
     "operational_best", "crossdata_lift", "replication_2018", "loco_reject",
-    "aug_analyse", "aug_assignment")}
+    "aug_analyse", "aug_assignment", "metric_divergence",
+    "preprocess_improved_merge", "preprocess_improved_exclude")}
 
 with open(DRAFT, encoding="utf-8") as f:
     TEXT = f.read()
@@ -395,6 +396,42 @@ if ag:
         chk("exp5 %s baseline concentration" % fam, "aug_assignment",
             100.0 * v["baseline_top_share"], "{:.1f}", quoted=False)
 
+# ---- metric divergence + the web-family correlation -------------------------
+md = REC["metric_divergence"]
+if md:
+    q1 = md.get("q1_rank_agreement") or {}
+    for k in ("0.001", "0.010", "0.050", "0.100"):
+        v = (q1.get(k) or {}).get("spearman_rho")
+        chk("rank agreement rho @%s FPR" % k, "metric_divergence", v, "{:+.3f}")
+    chk("n methods in divergence sweep", "metric_divergence",
+        md.get("n_methods"), "{:d}")
+    tq = md.get("q1_top_quintile") or {}
+    if tq:
+        chk("top-quintile overlap", "metric_divergence",
+            len(tq.get("overlap", [])), "{:d}")
+    q2 = md.get("q2_web_correlation") or {}
+    chk("Web BF vs XSS pearson r", "metric_divergence",
+        q2.get("pearson_r"), "{:+.4f}")
+    chk("Web BF vs XSS spearman rho", "metric_divergence",
+        q2.get("spearman_rho"), "{:+.4f}")
+    chk("Bot vs Web BF r", "metric_divergence",
+        q2.get("bot_vs_webbf_r"), "{:+.3f}")
+    chk("Bot vs XSS r", "metric_divergence",
+        q2.get("bot_vs_webxss_r"), "{:+.3f}")
+
+# ---- the corrected-dataset family counts ------------------------------------
+for arm, key in (("merge", "preprocess_improved_merge"),
+                 ("exclude", "preprocess_improved_exclude")):
+    pi = REC[key]
+    if not pi:
+        continue
+    fc = pi.get("test_family_counts") or {}
+    # STRICT is the arm whose counts the draft quotes as "effective"; MERGE's
+    # totals are recorded rather than searched.
+    for fam in ("Bot", "Web Attack Brute Force", "Web Attack XSS"):
+        chk("corrected %s n: %s" % (arm, fam), key, fc.get(fam), "{:,d}",
+            quoted=(arm == "exclude"))
+
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")
 # These were listed as hand-checks on the grounds that they are "derived at
@@ -417,16 +454,10 @@ except Exception as _e:                                   # noqa: BLE001
 unbacked("base paper 48.34 % / 47.85 % / 47.24 %", "paper_metrics.json + basepaper.pdf - verify by hand")
 unbacked("Tier A/B per-method figures", "baselines_classic.json / deep_zoo.json - not itemised here yet")
 unbacked("double dissociation SD multiples (40 / 37 / 3.9)", "derived in STATUS from AE + CNN runs")
-# CORRECTED 2026-09-10: this note used to say "robustness.json - not itemised
-# here yet", and robustness.json does NOT contain it (its keys are
-# c3_regrouped_macro and fusion_wall_test). Nor is it derivable from
-# runs.jsonl or field_gap.json, which record MACRO per method and no
-# per-family breakdown. It is genuinely unpersisted, and saying which files
-# do not hold it is more useful than naming one that does not.
-unbacked("Web BF / XSS correlation r = +0.992",
-         "NOT persisted anywhere - absent from robustness.json, field_gap.json "
-         "and runs.jsonl (none carry per-family PR-AUC per method). Needs a "
-         "method x family matrix to back; recompute before publication.")
+# CLOSED 2026-09-12. This was unbacked for two days -- the note used to point
+# at robustness.json, which does not contain it. metric_divergence.py now
+# builds the method x family matrix it needed and the figure is checked below
+# against that record, not asserted.
 
 # ------------------------------------------------------------------ report --
 print("=" * 96)

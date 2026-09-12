@@ -335,9 +335,22 @@ third of the baseline's recall. A reader shown only the macro would conclude the
 reader shown only the 1 % column would conclude nothing happened. **Both are reported because
 neither alone is true.**
 
-🧭 **Twice in this work an intervention breaks specifically at the 0.1 % operating point** — the
-knowledge-graph fusion also costs 1.5 points there while gaining 9 at 1 %. The tightest alert budget
-is where these methods fail, and it is the budget a real deployment runs at.
+🧭 ~~**Twice in this work an intervention breaks specifically at the 0.1 % operating point**, so
+the tightest alert budget is where these methods fail.~~ 🔴 **We proposed that as a pattern and then
+tested it, and it does not hold.** Across **57 methods** with saved per-flow scores, macro zero-day
+PR-AUC and recall at a fixed false-alarm rate agree *better* at a tight budget than a loose one:
+
+| Spearman ρ (macro vs recall) | @0.1 % FPR | @1 % | @5 % | @10 % |
+|---|---:|---:|---:|---:|
+| | **+0.849** | +0.817 | +0.812 | **+0.425** |
+
+The two cases above are real and remain reported as individual results, but they are **not instances
+of a general rule** — two hand-picked observations were exactly the n=2 anecdote this paper warns
+against elsewhere, and we record the falsification rather than the hunch. ⚠️ What the sweep *does*
+show is a divergence at the **loose** end (ρ = +0.425 at 10 % FPR), the opposite of what we expected,
+and a partial reordering at the top: of the 11 best methods by macro, only **6** are also in the top
+11 by recall at 0.1 % FPR, with post-hoc OOD scorers (entropy, max-logit, MSP, ODIN) ranking higher
+on the operational metric than their macro implies.
 
 **The reject class is the one negative here with a positive mechanism inside it, and it is our
 sharpest test of §4.** Every other method in this paper detects novelty *without ever training for
@@ -539,6 +552,47 @@ the practice on the strength of what it cost us.
 Determinism flags are enabled and verified byte-identical across sessions five days apart; pre- and
 post-flag runs are different populations and are never pooled.
 
+### Auditing ourselves against a published taxonomy
+
+Arp et al. (USENIX Security 2022) catalogue ten recurring pitfalls in security machine learning and
+find **sampling bias in 90 % of surveyed papers, data snooping in 73 %, and every paper affected by
+at least three.** Rather than assert that our discipline is adequate, we audit against their list and
+report where we fail.
+
+| | pitfall | our status |
+|---|---|---|
+| P1 | Sampling bias | ⚠️ **Partial.** Two captures, but from the same producer under related methodology. Named in §8. |
+| P2 | Label inaccuracy | 🔴 **Found late and material.** See below. |
+| P3 | Data snooping | ✅ Selection on a held-out half with an rng fixed independently of any model seed. It caught a +0.007 result that is **−0.0008** on the reporting half. ⚠️ Residual: the cluster count was *first* swept on test, and we say so where we report it. |
+| P4 | Spurious correlations | ✅ This is §4 and the absorption analysis: the web families' 0.92–0.95 is **absorption into a known attack class**, not detection, and an earlier explanation of our own was falsified and withdrawn. |
+| P5 | Biased parameter selection | ✅ Noise floor measured before any delta is interpreted; every comparison paired on seed. |
+| P6 | Inappropriate baseline | ✅ Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. |
+| P7 | Inappropriate performance measures | 🔑 **This is the paper's subject**, not a box we tick — §3. |
+| P8 | Base rate fallacy | ✅ PR-AUC over ROC, prevalence and lift reported, families below 100 flows excluded from the macro, and cross-dataset comparison done **only** in lift because prevalence differs by orders of magnitude. |
+| P9 | Lab-only evaluation | ❌ **Not addressed.** Throughput is measured (7.95 µs/flow) but nothing is deployed. |
+| P10 | Inappropriate threat model | ❌ **Not addressed.** No adversarial evaluation; named as future work. |
+
+🔴 **P2 deserves its own paragraph, because it caught us.** Engelen et al. (WTMC 2021) re-ran
+CIC-IDS2017 through a corrected CICFlowMeter and relabelled it, reconstructing or relabelling **more
+than 20 % of traces** and introducing an `X - Attempted` class for attack flows that **transmitted no
+payload**. Under those labels our three adequately powered zero-day families become:
+
+| family | as published | effective | attempted |
+|---|---:|---:|---:|
+| Bot | 1,966 | **738** | 1,470 |
+| Web Attack Brute Force | 1,507 | **151** | 1,214 |
+| Web Attack XSS | 652 | **27** | 652 |
+
+Two-thirds of Bot and roughly nine-tenths of the web families are **bare connection attempts**, and
+Web XSS falls below our own power bar of 100 flows. This is a live threat to §4: if most of what we
+called Bot transmitted nothing, part of its unreachability could be a labelling artefact rather than
+a property of the model. It also offers a **deeper account of our own absorption finding** — if nine
+in ten web-attack flows transmitted nothing, they *are* bare connection attempts, which is what a
+slow-connection attack looks like. We rebuild the split on the corrected data under two
+pre-registered readings (attempted folded in; attempted excluded) and report both.
+**We did not find this ourselves; we found it by checking our dataset against the literature**, which
+is the argument for doing so.
+
 Five lessons, each of which cost us something:
 
 🔴 **A flow-level significance test cannot rescue a delta below the pipeline's own reproducibility.**
@@ -589,9 +643,14 @@ which beats the mean and *not* the maximum — because the maximum was never a t
    not evidence of generality across network environments, and **7 of the 10 published 2018 flow CSVs
    are Excel-truncated at 2²⁰ rows, chronologically** — a defect in the distributed artefact that we
    detected and worked around, and that anyone reusing those files should know about.
-2. **Three adequately powered zero-day families, not six.** And Web Brute Force and XSS correlate at
-   **r = +0.992** (same capture window, same tool), so the macro average is effectively ⅓ Bot and ⅔
-   *one* web signal. Regrouping shifts values by 0.11–0.15 but **preserves every ordering** we report.
+2. **Three adequately powered zero-day families, not six.** And Web Brute Force and XSS correlate
+   at **r = +0.9906** across 57 methods (Spearman ρ = +0.9822, p < 1e-40) — same capture window, same
+   tool — so the macro average is effectively ⅓ Bot and ⅔ *one* web signal. The contrast makes the
+   point sharper: **Bot correlates with neither** (r = −0.216 against Web BF, −0.265 against XSS),
+   so the macro is one strong signal, one weak one, and they move in opposite directions. Regrouping
+   shifts values by 0.11–0.15 but **preserves every ordering** we report.
+   ⚠️ *This figure was quoted as r = +0.992 in an earlier draft with no record behind it; it is now
+   recomputed from the per-method matrix and persisted.*
 3. **Flow features, not payload bytes** — a deviation from the base paper's modality, and our 18–29 pp
    advantage on known-class views is a **modality** advantage rather than an algorithmic one. But we
    answer the "why not payload?" question rather than conceding it: the oracle probe separates every
