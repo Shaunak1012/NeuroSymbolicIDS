@@ -83,7 +83,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import paths                                          # noqa: E402
 import config                                         # noqa: E402
 
-SRC = os.path.join(paths.ROOT, "data", "improved_2017")
+SRC = paths.IMPROVED_2017
 ARM = os.environ.get("ATTEMPTED", "merge").lower()
 if ARM not in ("merge", "exclude"):
     sys.exit("ATTEMPTED must be 'merge' or 'exclude', got %r" % ARM)
