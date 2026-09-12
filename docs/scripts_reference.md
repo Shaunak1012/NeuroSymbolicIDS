@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (73 Python scripts, plus 14 shell launchers).
+> Last verified against source: **2026-09-05** (74 Python scripts, plus 14 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,35 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+## `metric_divergence.py` — one matrix, two questions
+
+Builds a **method × family × operating-point** matrix over every run with saved per-flow scores
+(157 runs → **57 methods** after collapsing seeds; tie-degenerate runs and non-method prefixes
+excluded as in `field_gap.py`).
+
+🔴 **Q1 falsified a hypothesis of ours.** We had observed twice that an intervention broke at a
+tight false-alarm rate while looking fine at 1 %, and proposed it as a pattern. Tested over 57
+methods, macro zero-day PR-AUC agrees with fixed-FPR recall **better** at a tight budget than a loose
+one:
+
+| Spearman ρ | @0.1 % FPR | @1 % | @5 % | @10 % |
+|---|---:|---:|---:|---:|
+| | **+0.849** | +0.817 | +0.812 | **+0.425** |
+
+The divergence is at the **loose** end, the opposite of what was expected. There is a real partial
+reordering at the top — only **6 of the top 11** by macro are also top 11 by recall@0.1 % FPR, with
+post-hoc OOD scorers ranking higher operationally than their macro implies — but the n=2 anecdote
+did not generalise, and the draft now records the falsification.
+
+✅ **Q2 backs a claim that was quoted for two days with no record.** §8 asserted Web Brute Force and
+XSS correlate at r = +0.992. Recomputed over 57 methods: **Pearson r = +0.9906, Spearman ρ = +0.9822
+(p < 1e-40)**. The contrast sharpens it — **Bot correlates with neither** (r = −0.216 vs Web BF,
+−0.265 vs XSS) — so the macro really is one strong signal, one weak one, moving in opposite
+directions.
+
+⚠️ Observational: these methods were not assigned at random and the set is dominated by variants of a
+few families.
 
 ## ROBUSTNESS — `preprocess_improved.py` · `improved_sweep.sh`
 
