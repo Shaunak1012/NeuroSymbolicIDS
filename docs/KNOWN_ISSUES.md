@@ -8,7 +8,7 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
-## 🛑 2026-09-12 — [OPEN, BLOCKS ALL TRAINING] Windows Smart App Control blocks TensorFlow
+## 🟡 2026-09-12 — [INTERMITTENT, was BLOCKING] Windows Smart App Control blocked TensorFlow
 
 **Every training run now fails at `import tensorflow`.** Windows Smart App Control flipped from
 evaluation to **enforcement** (`VerifiedAndReputablePolicyState: 1`) and blocks TensorFlow's unsigned
@@ -27,6 +27,17 @@ splits, and all analysis that does not load a model.
 **What is blocked:** all training · anything loading a `.keras` model (125 on disk) · OpenMax
 (needs per-class logits, and `rescore_logits.py` persists only the scalar log-odds) · XAI work
 needing gradients.
+
+✅ **UPDATE 2026-09-13: TensorFlow loads again and training has resumed.** `import tensorflow`
+succeeds, `cnn_paper.keras` loads (99,913 params), and there are **0 CodeIntegrity block events in
+the preceding 6 hours**.
+
+🔴 **But Smart App Control is STILL in enforcement** (`VerifiedAndReputablePolicyState: 1`), so
+the policy did not change — most likely Microsoft's cloud reputation service has since trusted these
+binaries. **Treat the unblock as provisional:** it could recur on a TensorFlow upgrade, a venv
+rebuild, or any change that introduces unseen unsigned binaries. Long jobs go through
+`run_long.sh` and the sweeps are resumable and fail-soft, which is what limited the damage — all six
+runs failed in under a minute rather than hanging.
 
 ⚠️ **Resolution is the user's call, not an automated fix.** Either disable Smart App Control
 (Windows Security → App & browser control — **one-way by design**, Microsoft does not allow
