@@ -266,6 +266,14 @@ We establish this on Bot, where the overlap is empty:
 - The eight features that separate Bot from benign have **0 of 8 overlap** with the eight the
   known-class task selects. (Eight is the comparison-set size; for Web Brute Force the overlap is 1
   of 8.)
+  🔴 **The gradient this sets up — zero overlap unreachable, one-of-eight reachable — is where the
+  corrected labels cost us, and we state the damage here rather than in a footnote.** Web Brute
+  Force's *reachability* was evidenced by PR-AUC 0.92–0.95. On labels that exclude attack flows
+  which transmitted no payload, that becomes **0.0072** (2.1× chance). The **ordering survives** —
+  Web Brute Force is above chance on every seed and Bot is not — but the **magnitude does not**, and
+  with it goes most of the quantitative force of the reachable half. What this section establishes
+  well is the **unreachable** direction; the reachable direction is now a consistent sign over two
+  families and little more. §7 gives the full accounting.
 - Consequently the model's Bot ranking is **noise**: cross-seed Spearman **ρ = −0.090**, against
   0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
   does not (ρ = 0.827)**. The property therefore belongs to *closed-set discriminative learning*, not
