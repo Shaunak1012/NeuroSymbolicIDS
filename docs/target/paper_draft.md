@@ -1,4 +1,4 @@
-# DRAFT — What the CIC-IDS2017 Literature Cannot Measure, and Why the Thing It Cannot Measure Is Hard
+# DRAFT — Unreachable by Construction: Zero-Day Blindness in Closed-Set Intrusion Detection, and the Two Measurement Failures That Hid It
 
 > **Status: FIRST PROSE DRAFT (2026-09-05).** Drafted *from* [paper_outline.md](paper_outline.md),
 > not independently of it — every number here traces to that file's second column and every caveat
@@ -12,28 +12,55 @@
 > ✅ **All eleven sections are drafted, all thirteen references verified, and one adversarial review
 > pass applied (2026-09-09).** Figures are built (`paper_figures.py`, `field_gap.py`) and referenced
 > by number.
+>
+> 🔄 **SPINE REFRAMED 2026-09-14, and the reason is a result.** This draft previously led with the
+> metric gap (§3) and titled itself *"What the CIC-IDS2017 Literature Cannot Measure…"*. Retraining on
+> Engelen et al.'s corrected labels then showed that **two of our three powered zero-day families were
+> measuring a labelling convention** — Web Brute Force falls from PR-AUC 0.8861 to **0.0072** once
+> flows that transmitted no payload are excluded. Every headline this project measured moved when the
+> measurement was fixed, **except the mechanism in §4**, which survived that test and four others.
+> The lead is therefore the mechanism; the two measurement failures are demoted to *why the field has
+> not noticed*. The old framing is kept in the abstract history below rather than deleted.
 
 ---
 
 ## Abstract
 
-Published intrusion-detection results on CIC-IDS2017 cluster above 99 % on the metric the field
-reports, and are routinely used to claim capability against novel attacks. We show that this metric
-**cannot resolve that capability**: across 31 methods evaluated identically, **37 of 169 method pairs
-(22 %) are statistically indistinguishable on the published metric while differing by a factor of two
-or more in macro zero-day PR-AUC**, the worst pair sitting 0.0052 apart on the former and **16.6×**
-apart on the latter. The metric is not noisy and not uninformative — its run-to-run standard
-deviation is 0.0021 and it correlates with zero-day performance at ρ = +0.582 — it is simply too
-coarse, in the regime the field reports in, to separate methods on the axis the claims are about.
+A closed-set discriminative model learns only the features that separate the classes it was trained
+on, so a novel class is reachable exactly to the extent its signature overlaps that basis. We show
+this is not a metaphor but a measurable property with a testable consequence, and that for one attack
+family the overlap is **empty**. For CIC-IDS2017's Bot family, **0 of 8** discriminative features are
+shared with the known-class task, **100 %** of Bot flows are classified BENIGN at mean
+p(BENIGN) = 0.9984, and the resulting ranking is **noise** — cross-seed Spearman **ρ = −0.090**,
+against 0.68–0.83 for every other family. The information is present: an oracle with Bot labels
+reaches PR-AUC **0.9988** from the same flow features. This is a limit of closed-set supervision, not
+of the feature modality.
 
-Underneath that measurement failure we identify a mechanism. A closed-set discriminative model learns
-only the features that separate the classes it was trained on, so a novel class is reachable exactly
-to the extent its signature overlaps that basis. For the Bot family this overlap is empty: **0 of 8**
-discriminative features are shared with the known-class task, **100 %** of Bot flows are classified
-BENIGN at mean p(BENIGN) = 0.9984, and the resulting ranking is **noise** (cross-seed Spearman
-ρ = −0.090, against 0.68–0.83 for every other family). The information is present — an oracle with
-Bot labels reaches PR-AUC 0.9988 from the same 68 flow features — so this is a limit of closed-set
-supervision, not of the feature modality.
+**The claim's credential is that it survived five attempts to break it.** Bot remains unreachable on
+an independent capture with the rarity confound removed (CSE-CIC-IDS2018, where Bot is *abundant* and
+the model scores it at **0.83×** chance — below a random ranker); under corrected labels that discard
+attack flows which transmitted no payload (effective-Bot lift **0.57 / 0.64 / 8.99**, two of three
+seeds below chance); against an explicitly trained reject class, whose reach we show is *steerable*
+by what is merged into it but whose ceiling for Bot is chance; against cross-dataset augmentation,
+which made it worse; and against four deep architectures, seven classical baselines, four benign-only
+methods and a nine-scorer out-of-distribution battery.
+
+**Two measurement failures explain why this has not been noticed, and we demonstrate both on our own
+system.** First, the metric the field reports cannot resolve the capability it is used to claim:
+across 31 methods evaluated identically, **37 of 169 method pairs (22 %) are statistically
+indistinguishable on the published metric while differing by a factor of two or more in macro
+zero-day PR-AUC**, the worst pair 0.0052 apart on the former and **16.6×** apart on the latter. The
+metric is neither noisy nor uninformative (run-to-run SD 0.0021; ρ = +0.582 against zero-day
+performance) — it is too coarse in the regime the field reports in. Second, and worse, **the better
+metric we advocate was itself measuring a labelling convention.** On corrected labels, Web Brute
+Force falls from PR-AUC **0.8861 to 0.0072** and XSS drops below any reasonable power bar, because
+roughly nine in ten flows in those families transmitted no payload at all. A better metric on a
+mislabelled benchmark is still the wrong measurement.
+
+⚠️ **This costs us the positive half of our own mechanism.** The evidence that some families *are*
+reachable rested on those web scores. On genuinely-transmitted attacks the **ordering** the mechanism
+predicts survives — Web Brute Force is above chance on every seed, Bot is not — but the magnitudes do
+not. We report a well-tested account of **unreachability** and a much weaker one of reachability.
 
 We then show what does not remove it: four deep architectures, seven classical baselines, four
 benign-only anomaly methods, a nine-scorer out-of-distribution battery, calibration, abstention, and
@@ -47,7 +74,36 @@ results.
 
 ---
 
-## §1 Introduction — a resolution failure
+## §1 Introduction — one family that cannot be reached, and two reasons nobody noticed
+
+A supervised intrusion detector is trained to separate the attack families it has seen. The features
+it learns are the ones that perform that separation and no others. It follows that a family it has
+*never* seen is visible to such a model only insofar as its signature happens to lie along those same
+features — and that a family whose signature lies elsewhere is not merely hard to detect but
+**unreachable by construction**, no matter how the model is tuned, ensembled, calibrated or fused.
+
+This paper makes that argument concrete on CIC-IDS2017 and then spends most of its length trying to
+break it. The Bot family shares **0 of 8** discriminative features with the known-class task; **100 %**
+of its flows are classified BENIGN at mean p(BENIGN) = 0.9984; and the ranking the model produces
+over them is **noise**, at cross-seed ρ = **−0.090** against 0.68–0.83 for every other family. An
+oracle given Bot labels reaches PR-AUC **0.9988** from the same features, so the information is
+there and the limit is closed-set supervision.
+
+**What makes this worth reporting is not the observation but its durability.** We removed the obvious
+confound — that Bot is simply rare — by testing on a capture where Bot is *abundant*, and the model
+scores it **below a random ranker**. We removed a labelling confound we did not know we had, by
+retraining on a corrected release of the dataset in which attack flows that transmitted no payload
+are marked as such; Bot's effective-flow lift is **0.57 / 0.64 / 8.99** across seeds, two of three
+below chance. We trained an explicit reject class, and found its reach is steerable by what one
+merges into it but its ceiling for Bot is chance. We widened the learned basis with a second dataset,
+and made things worse. None of it moved.
+
+🔑 **The second half of the paper asks why a field reporting >99 % has not run into this**, and finds
+two measurement failures — one in the metric, one in the labels. We demonstrate both on our own
+system rather than on anyone else's, and the second one invalidates two of our own three headline
+families.
+
+### The metric failure
 
 The CIC-IDS2017 literature reports accuracy, F1 and AUC above 99 % with enough regularity that the
 numbers have stopped discriminating. That would be unremarkable if those numbers were used only to
