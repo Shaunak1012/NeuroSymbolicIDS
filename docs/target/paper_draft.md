@@ -454,6 +454,59 @@ not renaming a class.** §7 records how the defect survived a full training run:
 metric folded the reject mass back into the attack mass, so a broken experiment returned a plausible
 near-baseline number instead of an anomaly.
 
+### Why our symbolic pillar could not have worked, and why that is about the benchmark
+
+The neuro-symbolic intrusion-detection work that reports a genuine gain injects knowledge the neural
+model **structurally cannot hold**. Grov et al. constrain that *flows not communicating with web
+servers cannot be web attacks* — which requires an asset inventory — and nearly double XSS precision
+(0.088 → 0.213). KnowGraph reasons over relational structure across entities and auxiliary models
+trained on different objectives. Kalutharage et al. map to an external attack taxonomy.
+
+Ours did the opposite, and we did not see it until we looked at theirs. **All seven of our behaviour
+predicates are deterministic functions of the same flow features the network already reads** —
+`HighEntropy` is packet-length standard deviation, `BeaconLike` is a function of destination port.
+They re-encode what is already in the input, so they can supply an inductive bias but never
+additional evidence. That is section 4's own mechanism turned on the symbolic side: **symbolic
+knowledge helps to the extent it lies outside the learned basis.**
+
+🔴 **We then tried to build knowledge that does lie outside it, and the benchmark would not let
+us.** Source and destination IP are *not* among the features, and no single flow's vector can express
+a property of a host across many flows, so we derived host-role predicates from the metadata — which
+ports a destination normally serves, whether a flow's port is unusual for that host, a source's
+fan-out, and pair persistence — with profiles built from **training flows only** so the construction
+stays inductive. We deliberately did **not** use attacker identity: CIC-IDS2017 documents the
+attacker subnet and conditioning on it would be label leakage dressed as domain knowledge.
+
+Then we tested the premise, by asking whether a gradient-boosted model could predict each predicate
+**from the 68 flow features**:
+
+| predicate | all features | without `Destination Port` |
+|---|---:|---:|
+| Unusual port for host | AUC 0.990 | 0.988 |
+| Host serves a web port | AUC 0.994 | 0.992 |
+| Source fan-out | R² 0.949 | 0.898 |
+| Pair persistence | R² 0.914 | 0.886 |
+
+**None of it is exogenous.** The ablation matters: dropping the one port feature barely moves the
+numbers, so this is not the flow's own port giving the answer away — the remaining 67 features
+genuinely determine host role and cross-flow structure. In a testbed where each host plays one
+scripted role, a flow's characteristics nearly identify its host, and therefore that host's aggregate
+properties.
+
+🔑 **The generalisable point: you cannot manufacture exogenous knowledge by aggregating the same
+data.** Grov et al.'s axiom works because an asset inventory is an artefact from *outside* the
+capture. Ours was inferred *from* the capture, and anything inferable from the capture is largely
+inferable from its features. **CIC-IDS2017 ships no external knowledge artefact** — no inventory, no
+topology, no threat intelligence — so on this benchmark the neuro-symbolic approach as the literature
+practises it **cannot be evaluated at all.** Every symbolic predicate anyone builds from CIC-IDS2017
+alone is a re-encoding of its features.
+
+⚠️ **Stated as thresholds, not proof.** "Exogenous" here means AUC < 0.75 or R² < 0.5, which are
+conventions; a predicate at R² = 0.90 still leaves residual variance that could in principle carry
+signal. And a stronger predictor might recover more, which would only strengthen the conclusion. We
+did **not** proceed to the injection arms, because measuring a predicate the model can already
+compute would report feature engineering as a symbolic result.
+
 **The scope of the fitted-fuser claim, because we got it wrong once.** The wall applies to channels
 whose value is **zero-day-specific**. It does *not* apply to a channel that also carries value on the
 known classes the combiner is fitted on. §6 reports a fitted combiner that works, and §7 reports how
