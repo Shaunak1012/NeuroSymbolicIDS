@@ -2,6 +2,44 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-14 (THE CORRECTED LABELS LAND — and they implicate our own headline)
+
+Six runs on Engelen et al.'s corrected CIC-IDS2017, two pre-registered arms × three seeds.
+**Lift is the only cross-arm unit** — different flow collections, different prevalences, no 1:1
+correspondence, so nothing is paired against 0.6399. Chance lift = 1.0.
+
+### 🔴 The web families were being detected through flows that transmitted NOTHING
+
+| family | attempted FOLDED IN | attempted EXCLUDED | n (excluded) |
+|---|---:|---:|---:|
+| Web Attack Brute Force | **29.4×** | **2.1×** | 151 |
+| Web Attack XSS | 61.5× | *unmeasurable* | 27 |
+| Bot | 7.1× | unstable, see below | 738 |
+
+Web BF PR-AUC falls **0.8861 → 0.0072**. We already knew the web families' 0.92–0.95 was *absorption
+into a known attack class*; now we know it was substantially **detection of bare connection
+attempts**, which are trivially unlike normal traffic.
+
+### ✅ §4's falsifier did NOT fire — and the way it failed is the finding
+
+Criterion: effective-Bot lift clearly above chance **consistently across seeds**. Effective Bot lifts
+**0.57 / 0.64 / 8.99** — **2 of 3 below a random ranker**, 16× spread. The mean of 3.4× describes no
+run that happened. That is exactly §4's documented Bot signature (cross-seed ρ = −0.090): the
+ranking is noise. **Bot's unreachability is a property of the model, not of the empty flows.**
+
+⚠️ **My first automated verdict was wrong and is corrected in place.** It reported "sits at 3.4×
+chance, SURVIVES" — self-contradictory, and a mean over `[0.6, 0.6, 9.0]`. The falsifier says
+*consistently*, and a mean cannot express consistency. `improved_analyse.py` now requires
+above-chance on **every** seed and reports the spread.
+
+### 🧭 What this does to the paper
+
+§3 argues the field's published metric cannot measure zero-day detection. This shows the metric **we
+advocate** was, on two of three families, measuring a labelling convention — whether the dataset
+counts an unsuccessful connection attempt as an attack. **A better metric on a mislabelled benchmark
+is still the wrong measurement.** Written into §7; draft verification 151 → 163 verified, 0
+mismatched.
+
 ## 2026-09-10 (LOCO #4b — falsifier held; the arm contrast is the result)
 
 Four pilot runs, two arms × two seeds, merged reject class (9 → 7 classes).

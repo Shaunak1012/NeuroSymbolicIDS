@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (74 Python scripts, plus 14 shell launchers).
+> Last verified against source: **2026-09-05** (75 Python scripts, plus 14 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,26 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+## `improved_analyse.py` — the corrected-label verdict
+
+Scores the six corrected-data models (2 arms × 3 seeds). **Lift is the only cross-arm unit**: the
+test sets are different flow collections with different prevalences and no 1:1 correspondence, so
+nothing is paired against 0.6399. Chance lift = 1.0.
+
+| family | attempted FOLDED IN | attempted EXCLUDED | n |
+|---|---:|---:|---:|
+| Web Attack Brute Force | **29.4×** | **2.1×** | 151 |
+| Web Attack XSS | 61.5× | *unmeasurable* | 27 |
+| Bot | 7.1× | **0.57 / 0.64 / 8.99** | 738 |
+
+🔴 **The web families were detected through flows that transmitted nothing** — Web BF PR-AUC
+**0.8861 → 0.0072**.
+✅ **§4's falsifier did not fire**: it required above-chance *consistently across seeds*, and 2 of 3
+runs are **below a random ranker** with a 16× spread — §4's own Bot signature (ρ = −0.090).
+⚠️ **The mean of 3.4× describes no run that happened.** An earlier version of this script reported it
+as "sits at 3.4× chance, SURVIVES" — self-contradictory, and a mean cannot express the consistency
+the falsifier asks for. It now requires above-chance on **every** seed and reports the spread.
 
 ## `metric_divergence.py` — one matrix, two questions
 

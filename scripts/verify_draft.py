@@ -64,7 +64,8 @@ REC = {n: load(n) for n in (
     "latency_determinism_on", "ksweep_fusion", "ksweep_heldout",
     "operational_best", "crossdata_lift", "replication_2018", "loco_reject",
     "aug_analyse", "aug_assignment", "metric_divergence",
-    "preprocess_improved_merge", "preprocess_improved_exclude")}
+    "preprocess_improved_merge", "preprocess_improved_exclude",
+    "improved_analyse")}
 
 with open(DRAFT, encoding="utf-8") as f:
     TEXT = f.read()
@@ -431,6 +432,25 @@ for arm, key in (("merge", "preprocess_improved_merge"),
     for fam in ("Bot", "Web Attack Brute Force", "Web Attack XSS"):
         chk("corrected %s n: %s" % (arm, fam), key, fc.get(fam), "{:,d}",
             quoted=(arm == "exclude"))
+
+# ---- the corrected-data verdict ---------------------------------------------
+ia = REC["improved_analyse"]
+if ia:
+    for arm, fams in ((a, (v.get("per_family") or {}))
+                      for a, v in (ia.get("arms") or {}).items()):
+        for fam, v in fams.items():
+            # lift is the only cross-arm unit; the draft quotes it to 1 dp
+            chk("corrected %s %s lift" % (arm, fam), "improved_analyse",
+                v.get("lift_mean"), "{:.1f}x")
+            chk("corrected %s %s PR-AUC" % (arm, fam), "improved_analyse",
+                v.get("pr_auc_mean"), "{:.4f}", quoted=False)
+    sv = ia.get("section4_verdict") or {}
+    for i, v in enumerate(sv.get("lift_per_seed") or []):
+        chk("effective Bot lift seed %d" % i, "improved_analyse", v, "{:.2f}")
+    chk("effective Bot seeds below chance", "improved_analyse",
+        sv.get("seeds_below_chance"), "{:d}", quoted=False)
+    chk("effective Bot spread ratio", "improved_analyse",
+        sv.get("spread_ratio_max_over_min"), "{:.0f}x")
 
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")
