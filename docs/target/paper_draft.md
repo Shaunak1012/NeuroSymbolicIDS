@@ -868,6 +868,37 @@ metric that gain is reported on (§3b). **And our own symbolic pillar fares no b
 alone and significantly harmful in combination (§5), which is a negative result about our
 architecture, not only about theirs.
 
+🔑 **The neuro-symbolic systems that *do* report gains share a property, and naming it explains both
+their success and our failure.** Grov et al. [14] add a single axiom to an LTN over CIC-IDS2017 —
+*flows not communicating with web servers cannot be web attacks* — and roughly double web-attack
+precision (XSS 0.088 → 0.213) with recall unchanged. KnowGraph [15] performs logical reasoning over
+relational structure across entities, with auxiliary models trained on *different* objectives, and at
+a 0.5 % false-positive rate lifts true positives from **0.0 % to 35.5 %** where the pure-neural
+baseline detects nothing at all. Kalutharage et al. [16] map alerts to an external attack taxonomy.
+
+In every case **the injected knowledge is information the neural model structurally cannot hold**: an
+asset inventory, a relational graph, a curated taxonomy. None of it is computable from the feature
+vector the network consumes.
+
+**Ours is the mirror image, and we did not see it until we read theirs.** All seven of our behaviour
+predicates are deterministic functions of the same flow features the network already reads. They can
+supply an inductive bias; they cannot supply evidence. That is §4's mechanism turned on the symbolic
+side: **symbolic knowledge helps to the extent it lies outside the learned basis.**
+
+🔴 **We then tried to satisfy that precondition on this benchmark and could not** (§5). Host-role
+predicates built from metadata — which the feature vector does not contain — are nonetheless
+predicted from the 68 features at AUC 0.990–0.994 and R² 0.89–0.95, and an ablation shows this is not
+the flow's own port giving it away. **You cannot manufacture exogenous knowledge by aggregating the
+same data.** Grov et al.'s axiom works because an asset inventory is an artefact from *outside* the
+capture; CIC-IDS2017 ships no such artefact, and so **cannot support the experiment their result
+comes from.** We offer this as the most transferable thing we have to say to this literature: before
+reporting a neuro-symbolic gain, establish that the knowledge injected is not already in the input —
+and note that a benchmark may make that impossible.
+
+⚠️ **This is not a criticism of [14]–[16].** Their knowledge genuinely is exogenous; the point is that
+the property is load-bearing and usually left implicit, so a reader cannot tell a knowledge result
+from a feature-engineering result without it.
+
 **Open-set recognition and out-of-distribution scoring.** Treating unseen attack families as an
 open-set problem has a long history in this domain [10], and the general OOD literature supplies
 post-hoc scorers that need no retraining: maximum softmax probability [11], temperature-scaled and
@@ -878,9 +909,15 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
 
 ### References
 
-> ✅ **Citation-verification status: all thirteen references were confirmed against a primary or
+> ✅ **Citation-verification status: references [1]–[13] were confirmed against a primary or
 > authoritative source (publisher page, arXiv record, DOI, or — for [8] — the PDF held in this
 > repository).** The bibliographic pass was completed 2026-09-09.
+>
+> 🟡 **[14]–[17] were added 2026-09-14 from a literature scan and are NOT yet at that standard.**
+> [14], [15] and [17] were read at the publisher or arXiv record and their quoted figures taken from
+> the text; **[16] is cited via the survey [17] and its primary source has not been consulted** — it
+> is marked inline and must be checked or dropped before submission. Applying the same rule to
+> citations as to numbers means saying which ones are not yet verified, not implying they all are.
 >
 > 🔴 **It caught a real error, which is why the pass was not skipped.** Reference [10] was drafted as
 > *"E. M. Rudd et al."* from memory; the first author is **Steve Cruz**, and Rudd is third. An
@@ -917,6 +954,19 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
     Neural Networks.* ICLR 2018.
 13. W. Liu, X. Wang, J. D. Owens, Y. Li. *Energy-Based Out-of-Distribution Detection.* Advances in
     Neural Information Processing Systems (NeurIPS), vol. 33, 2020.
+14. M. W. Eckhoff, J. Halvorsen, B. J. Hansen, M. Eian, V. Mavroeidis, R. A. Chetwyn, G. Skjøtskift,
+    G. Grov. *Experimenting with Neurosymbolic Artificial Intelligence for Defending Against Cyber
+    Attacks.* Neurosymbolic Artificial Intelligence, 2025. doi:10.1177/29498732251377352
+    — extends *On the use of neurosymbolic AI for defending against cyber attacks*, arXiv:2408.04996,
+    2024, which reports the LTN web-server axiom and the XSS precision figures cited above.
+15. Z. Zhou et al. *KnowGraph: Knowledge-Enabled Anomaly Detection via Logical Reasoning on Graph
+    Data.* ACM SIGSAC Conference on Computer and Communications Security (CCS), 2024.
+    doi:10.1145/3658644.3690354
+16. C. I. Kalutharage et al. *Neuro-symbolic intrusion detection with explainable alignment to an
+    external attack taxonomy.* (Cited via the survey in [17]; consult the primary source before
+    final submission.)
+17. *Neuro-Symbolic AI for Cybersecurity: State of the Art, Challenges, and Opportunities.*
+    arXiv:2509.06921, 2025.
 
 ---
 
