@@ -4,6 +4,37 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🔴 INTEGRATION #1 RESULT (2026-09-14) — the benchmark cannot support a NeSy experiment
+
+**Premise tested and FAILED, which is itself the finding.** The hypothesis was that symbolic
+knowledge helps to the extent it lies **outside** the learned feature basis — §4's mechanism applied
+to the symbolic side. The NeSy IDS papers that report gains inject knowledge the model cannot hold
+(Grov et al.: an asset inventory; KnowGraph: relational structure; Kalutharage: ATT&CK). All seven of
+our `behavior.py` predicates are functions of features the CNN already reads.
+
+Host-role predicates were built from metadata (Src/Dst IP are **not** features), profiles from
+**train only**, attacker identity deliberately excluded as leakage. Then the premise was tested:
+
+| predicate | all features | without `Destination Port` |
+|---|---:|---:|
+| Unusual port for host | AUC 0.990 | 0.988 |
+| Host serves a web port | AUC 0.994 | 0.992 |
+| Source fan-out | R² 0.949 | 0.898 |
+| Pair persistence | R² 0.914 | 0.886 |
+
+**0 of 5 exogenous.** The ablation rules out the port shortcut — the other 67 features determine host
+role on their own. In a testbed where each host plays one scripted role, a flow's characteristics
+nearly identify its host.
+
+🔑 **You cannot manufacture exogenous knowledge by aggregating the same data.** CIC-IDS2017 ships no
+inventory, topology or threat feed, so **the neuro-symbolic approach as the literature practises it
+cannot be evaluated on this benchmark.** Injection arms **not run**, per the pre-registered decision:
+measuring a predicate the model can already compute would report feature engineering as a symbolic
+result.
+
+⚠️ Thresholds (AUC < 0.75, R² < 0.5) are conventions, and residual variance could in principle carry
+signal. A stronger predictor would only strengthen the conclusion.
+
 ## 🔴 CORRECTED-LABEL VERDICT (2026-09-14) — READ BEFORE CITING ANY ZERO-DAY NUMBER
 
 Engelen et al.'s corrected CIC-IDS2017 marks attack flows that transmitted **no payload** as

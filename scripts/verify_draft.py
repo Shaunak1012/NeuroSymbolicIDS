@@ -65,7 +65,7 @@ REC = {n: load(n) for n in (
     "operational_best", "crossdata_lift", "replication_2018", "loco_reject",
     "aug_analyse", "aug_assignment", "metric_divergence",
     "preprocess_improved_merge", "preprocess_improved_exclude",
-    "improved_analyse")}
+    "improved_analyse", "exogenous_predicate")}
 
 with open(DRAFT, encoding="utf-8") as f:
     TEXT = f.read()
@@ -451,6 +451,20 @@ if ia:
         sv.get("seeds_below_chance"), "{:d}", quoted=False)
     chk("effective Bot spread ratio", "improved_analyse",
         sv.get("spread_ratio_max_over_min"), "{:.0f}x")
+
+# ---- the exogeneity test ----------------------------------------------------
+ep = REC["exogenous_predicate"]
+if ep:
+    for name, v in (ep.get("exogeneity") or {}).items():
+        if v.get("status") == "degenerate":
+            continue
+        fmt = "{:.3f}"
+        chk("exogeneity %s all-features" % name, "exogenous_predicate",
+            v.get("all_features"), fmt)
+        chk("exogeneity %s no-dest-port" % name, "exogenous_predicate",
+            v.get("no_dest_port"), fmt)
+    chk("n exogenous predicates", "exogenous_predicate",
+        ep.get("n_exogenous"), "{:d}", quoted=False)
 
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")

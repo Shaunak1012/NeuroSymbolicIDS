@@ -1,0 +1,61 @@
+{
+  "predicates": [
+    "UnusualPortForHost",
+    "ServesWebPort",
+    "FanOutLog",
+    "PairPersistenceLog",
+    "UnknownHost"
+  ],
+  "web_ports": [
+    80,
+    443,
+    8080,
+    8443
+  ],
+  "min_flows_for_profile": 5,
+  "profiles_built_from": "train only (inductive)",
+  "n_hosts_profiled": 14260,
+  "test_unknown_host_fraction": 0.004317186772823334,
+  "exogeneity": {
+    "UnusualPortForHost": {
+      "kind": "binary",
+      "all_features": 0.9895342362472577,
+      "no_dest_port": 0.9884251437034727,
+      "exogenous": false,
+      "port_shortcut": false
+    },
+    "ServesWebPort": {
+      "kind": "binary",
+      "all_features": 0.993927530059534,
+      "no_dest_port": 0.9922505369190943,
+      "exogenous": false,
+      "port_shortcut": false
+    },
+    "FanOutLog": {
+      "kind": "continuous",
+      "all_features": 0.9486498934338677,
+      "no_dest_port": 0.8981365255631876,
+      "exogenous": false,
+      "port_shortcut": false
+    },
+    "PairPersistenceLog": {
+      "kind": "continuous",
+      "all_features": 0.914394855179784,
+      "no_dest_port": 0.8856182237349919,
+      "exogenous": false,
+      "port_shortcut": false
+    },
+    "UnknownHost": {
+      "kind": "binary",
+      "status": "degenerate"
+    }
+  },
+  "n_exogenous": 0,
+  "premise_holds": false,
+  "caveats": [
+    "Profiles come from TRAIN only and are applied to test, so this is inductive - aggregating over the whole capture would be transductive, the defect already disclosed for rank fusion.",
+    "Attacker identity is deliberately NOT used. CIC-IDS2017 documents the attacker subnet and conditioning on it would be label leakage dressed as domain knowledge (Arp et al. P4).",
+    "The unknown-host fraction bounds what host-role knowledge can do at deployment: those flows get no profile signal at all.",
+    "Exogeneity is tested with gradient boosting on the 68 features; a stronger predictor might recover more, so these thresholds are evidence, not proof."
+  ]
+}

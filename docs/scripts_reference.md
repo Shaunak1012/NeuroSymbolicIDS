@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (75 Python scripts, plus 14 shell launchers).
+> Last verified against source: **2026-09-05** (76 Python scripts, plus 14 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1462,6 +1462,34 @@ generalises, HETERO must transfer better.
 🔴 **Still predicted to fail:** merging known families reorganises the boundary without adding the
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
+
+## `exogenous_predicate.py` — the benchmark cannot support a neuro-symbolic experiment
+
+Tests the principle a literature scan suggested: **symbolic knowledge helps to the extent it lies
+OUTSIDE the learned feature basis.** The NeSy IDS work that reports real gains injects knowledge the
+model structurally cannot hold (Grov et al.: an asset inventory; KnowGraph: relational structure;
+Kalutharage: ATT&CK). All seven of our `behavior.py` predicates are functions of features the CNN
+already reads.
+
+So this builds host-role knowledge from metadata — Src/Dst IP are **not** among the features — with
+profiles from **training flows only** (inductive; whole-capture aggregation would be transductive),
+and attacker identity deliberately excluded as label leakage (Arp P4). Then it **tests the premise**:
+
+| predicate | all features | without `Destination Port` |
+|---|---:|---:|
+| Unusual port for host | AUC 0.990 | 0.988 |
+| Host serves a web port | AUC 0.994 | 0.992 |
+| Source fan-out | R² 0.949 | 0.898 |
+| Pair persistence | R² 0.914 | 0.886 |
+
+🔴 **0 of 5 are exogenous, and the ablation shows it is not the port shortcut** — the other 67
+features determine host role by themselves. In a testbed where each host plays one scripted role, a
+flow's characteristics nearly identify its host.
+
+🔑 **You cannot manufacture exogenous knowledge by aggregating the same data.** CIC-IDS2017 ships no
+inventory, topology or threat feed, so **the neuro-symbolic approach as the literature practises it
+cannot be evaluated on this benchmark at all.** The injection arms were **not** run — measuring a
+predicate the model can already compute would report feature engineering as a symbolic result.
 
 ## `improved_analyse.py` — the corrected-label verdict
 
