@@ -1,0 +1,153 @@
+{
+  "chance_lift": 1.0,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "arms": {
+    "merge": {
+      "n_test": 92049,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "macro_pr_auc_mean": 0.7219813920688782,
+      "macro_pr_auc_per_seed": [
+        0.7412,
+        0.7284,
+        0.6964
+      ],
+      "macro_lift_mean": 32.6705720727241,
+      "powered_families": [
+        "Bot",
+        "Web Attack Brute Force",
+        "Web Attack XSS"
+      ],
+      "per_family": {
+        "Bot": {
+          "n": 2208,
+          "chance_pr_auc": 0.04792602721885785,
+          "pr_auc_mean": 0.34214782500849733,
+          "lift_mean": 7.1390817237167035,
+          "lift_per_seed": [
+            8.54,
+            7.36,
+            5.52
+          ],
+          "above_chance_all_seeds": true,
+          "below_chance_all_seeds": false
+        },
+        "Web Attack Brute Force": {
+          "n": 1365,
+          "chance_pr_auc": 0.030180419209339348,
+          "pr_auc_mean": 0.8860935183155513,
+          "lift_mean": 29.35988105961594,
+          "lift_per_seed": [
+            29.14,
+            29.58,
+            29.36
+          ],
+          "above_chance_all_seeds": true,
+          "below_chance_all_seeds": false
+        },
+        "Web Attack XSS": {
+          "n": 679,
+          "chance_pr_auc": 0.01524403933366261,
+          "pr_auc_mean": 0.9377028328825857,
+          "lift_mean": 61.51275343483966,
+          "lift_per_seed": [
+            61.34,
+            61.64,
+            61.56
+          ],
+          "above_chance_all_seeds": true,
+          "below_chance_all_seeds": false
+        }
+      }
+    },
+    "exclude": {
+      "n_test": 87547,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "macro_pr_auc_mean": 0.032101728703455686,
+      "macro_pr_auc_per_seed": [
+        0.0086,
+        0.0079,
+        0.0797
+      ],
+      "macro_lift_mean": 2.7357059030443396,
+      "powered_families": [
+        "Bot",
+        "Web Attack Brute Force"
+      ],
+      "per_family": {
+        "Bot": {
+          "n": 738,
+          "chance_pr_auc": 0.016762821968836595,
+          "pr_auc_mean": 0.05700538767177929,
+          "lift_mean": 3.400703519834357,
+          "lift_per_seed": [
+            0.57,
+            0.64,
+            8.99
+          ],
+          "above_chance_all_seeds": false,
+          "below_chance_all_seeds": false
+        },
+        "Web Attack Brute Force": {
+          "n": 151,
+          "chance_pr_auc": 0.003476138953474988,
+          "pr_auc_mean": 0.007198069735132086,
+          "lift_mean": 2.0707082862543227,
+          "lift_per_seed": [
+            2.21,
+            1.45,
+            2.55
+          ],
+          "above_chance_all_seeds": true,
+          "below_chance_all_seeds": false
+        }
+      }
+    }
+  },
+  "section4_falsifier_triggered": false,
+  "section4_verdict": {
+    "effective_bot_n": 738,
+    "lift_per_seed": [
+      0.57,
+      0.64,
+      8.99
+    ],
+    "lift_mean_NOT_the_criterion": 3.400703519834357,
+    "above_chance_on_every_seed": false,
+    "seeds_below_chance": 2,
+    "spread_ratio_max_over_min": 15.771929824561406,
+    "unstable": true,
+    "reading": "SURVIVES, and by the instability route rather than by a low mean. Effective Bot lifts [0.57, 0.64, 8.99] across seeds - 2 of 3 BELOW a random ranker, a 16x spread between the best and worst run. That is the same signature section 4 documents for Bot (cross-seed rank rho = -0.090): the ranking is noise, so no single number summarises it and the mean of 3.4x describes no run that happened."
+  },
+  "attempted_contribution": {
+    "Bot": {
+      "merge_lift": 7.1390817237167035,
+      "strict_lift": 3.400703519834357,
+      "merge_n": 2208,
+      "strict_n": 738
+    },
+    "Web Attack Brute Force": {
+      "merge_lift": 29.35988105961594,
+      "strict_lift": 2.0707082862543227,
+      "merge_n": 1365,
+      "strict_n": 151
+    }
+  },
+  "caveats": [
+    "NOTHING here is paired against our published numbers: the three test sets are different collections of flows with different prevalences and no 1:1 correspondence. Only LIFT is comparable, and no delta against 0.6399 is meaningful.",
+    "Chance lift is 1.0; below 1.0 is worse than random ranking.",
+    "STRICT has two powered families (Bot 738, Web BF 151) against the original three, so its macro aggregates a different set.",
+    "67 features, not 68 - the corrected tool emits Fwd Header Length once."
+  ]
+}

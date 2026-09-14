@@ -588,10 +588,39 @@ Web XSS falls below our own power bar of 100 flows. This is a live threat to §4
 called Bot transmitted nothing, part of its unreachability could be a labelling artefact rather than
 a property of the model. It also offers a **deeper account of our own absorption finding** — if nine
 in ten web-attack flows transmitted nothing, they *are* bare connection attempts, which is what a
-slow-connection attack looks like. We rebuild the split on the corrected data under two
-pre-registered readings (attempted folded in; attempted excluded) and report both.
-**We did not find this ourselves; we found it by checking our dataset against the literature**, which
-is the argument for doing so.
+slow-connection attack looks like. We rebuilt the split on the corrected data under two
+pre-registered readings and retrained three seeds on each. **We did not find this ourselves; we found
+it by checking our dataset against the literature**, which is the argument for doing so.
+
+🔴 **THE RESULT, AND IT IMPLICATES OUR OWN HEADLINE.** Lift (PR-AUC ÷ prevalence) is the only
+unit comparable across these arms — the test sets are different collections of flows with different
+prevalences and there is no 1:1 correspondence, so nothing here is paired against 0.6399 and no delta
+against it would be meaningful. Chance lift is 1.0.
+
+| family | attempted FOLDED IN | attempted EXCLUDED | n (excluded) |
+|---|---:|---:|---:|
+| Web Attack Brute Force | **29.4×** | **2.1×** | 151 |
+| Web Attack XSS | 61.5× | *unmeasurable* | 27 |
+| Bot | 7.1× | see below | 738 |
+
+**Web Brute Force falls from 29.4× chance to 2.1× once flows that transmitted nothing are removed**
+(PR-AUC 0.8861 → 0.0072), and XSS drops below the power bar entirely. The web families' 0.92–0.95 —
+which we already knew was *absorption into a known attack class* rather than detection — was
+substantially **detection of bare connection attempts**. A flow in which the attacker transmitted no
+payload is trivially unlike normal traffic, and that is what was being scored.
+
+✅ **§4's pre-registered falsifier did not fire, and the way it failed to fire is the point.** The
+criterion was effective-Bot lift *clearly above chance, consistently across seeds*. Effective Bot
+lifts **0.57 / 0.64 / 8.99** — **two of three runs below a random ranker**, a 16× spread between best
+and worst. The mean of 3.4× describes no run that happened. That instability is precisely the
+signature §4 documents for Bot (cross-seed rank ρ = −0.090): **the ranking is noise**, so Bot's
+unreachability is a property of the model rather than an artefact of empty flows.
+
+🧭 **What this does to the paper is uncomfortable and we state it plainly.** §3 argues the field's
+published metric cannot measure zero-day detection. This shows that the metric *we* advocate was, on
+two of three families, measuring a labelling convention — whether the dataset counts an unsuccessful
+connection attempt as an attack. **A better metric on a mislabelled benchmark is still the wrong
+measurement**, and we would not have known without checking the dataset against its own corrigenda.
 
 Five lessons, each of which cost us something:
 

@@ -4,6 +4,32 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🔴 CORRECTED-LABEL VERDICT (2026-09-14) — READ BEFORE CITING ANY ZERO-DAY NUMBER
+
+Engelen et al.'s corrected CIC-IDS2017 marks attack flows that transmitted **no payload** as
+`X - Attempted`. Six runs, two pre-registered arms × three seeds. **Lift is the only cross-arm unit**
+(different flow collections and prevalences, no 1:1 correspondence — nothing is paired against
+0.6399). Chance lift = 1.0.
+
+| family | attempted FOLDED IN | attempted EXCLUDED | n |
+|---|---:|---:|---:|
+| Web Attack Brute Force | **29.4×** | **2.1×** | 151 |
+| Web Attack XSS | 61.5× | *unmeasurable* | 27 |
+| Bot | 7.1× | **0.57 / 0.64 / 8.99** | 738 |
+
+🔴 **The web families were detected through flows that transmitted nothing.** Web BF PR-AUC
+**0.8861 → 0.0072**. The absorption caution was right and understated: those flows are bare
+connection attempts, trivially unlike normal traffic.
+
+✅ **§4 SURVIVES.** The falsifier required effective-Bot lift above chance *consistently across
+seeds*; **2 of 3 runs are below a random ranker** with a 16× spread. That is §4's own Bot signature
+(ρ = −0.090) — the ranking is noise, so unreachability is a model property, not a labelling artefact.
+⚠️ The mean of 3.4× **describes no run that happened** and must not be quoted.
+
+🧭 **This implicates our own metric.** §3 says the field's metric cannot measure zero-day; on two of
+three families **ours was measuring a labelling convention**. A better metric on a mislabelled
+benchmark is still the wrong measurement.
+
 ## 🎯 IMPROVEMENT ITINERARY (opened 2026-09-10) — 1 positive, 2 negative, 1 retracted as a no-op
 
 **Every arm is selected on held-out data and reported on a split never used for selection.** That
