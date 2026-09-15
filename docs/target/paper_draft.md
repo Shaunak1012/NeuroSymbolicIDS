@@ -879,8 +879,10 @@ recurring pitfalls across 30 top-tier security papers and give recommendations f
 qualitative — machine learning struggles with novelty. §4 supplies a **mechanism** for one instance
 of it (empty overlap between the novel class's discriminative features and the trained basis) and
 shows the failure is not merely inaccuracy but **instability**: the model's ranking of that class is
-noise, cross-seed ρ = −0.090. §1 supplies the **quantitative** counterpart — 33 % of method pairs are
-indistinguishable on the published metric while differing ≥2× on the capability at issue. Against
+noise, cross-seed ρ = −0.090. §1 supplies the **quantitative** counterpart — ~~33 %~~ **22 %** of comparable method pairs (37 of
+169) are indistinguishable on the published metric while differing ≥2× on the capability at issue.
+*(Corrected 2026-09-15: "33 %" was a stale figure from an earlier method count and matched neither
+the tie-degenerate-excluded headline, 22 %, nor the all-methods figure, 30 %.)* Against
 Arp et al., §7 attempts what their recommendations imply and few papers actually do: measure the
 pipeline's own reproducibility floor, express every delta as a multiple of it, and **report the
 claims of ours that the floor retracted**.
@@ -1067,9 +1069,9 @@ by hand, and a checker that silently skips what it cannot verify is worse than n
 ## §11 Conclusion
 
 The metric the CIC-IDS2017 literature publishes is precise, weakly informative about zero-day
-capability, and **too coarse in its own reporting regime to separate methods on that axis** — a third
-of method pairs are indistinguishable on it while differing twofold or more on the capability the
-numbers are used to claim. Underneath that, a closed-set discriminative model cannot reach a novel
+capability, and **too coarse in its own reporting regime to separate methods on that axis** — ~~a third~~ more than a fifth
+of comparable method pairs (37 of 169, 22 %) are indistinguishable on it while differing twofold or
+more on the capability the numbers are used to claim. Underneath that, a closed-set discriminative model cannot reach a novel
 class whose signature does not overlap the basis it was trained on, and when the overlap is empty the
 model is not merely inaccurate but **unstable**: its ranking of that class is noise. We showed this
 with a mechanism, traced four independent symptoms to it, and demonstrated that neither more

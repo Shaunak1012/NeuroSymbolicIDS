@@ -507,6 +507,27 @@ unbacked("double dissociation SD multiples (40 / 37 / 3.9)", "derived in STATUS 
 # ------------------------------------------------------------------ report --
 print("=" * 96)
 print("DRAFT VERIFICATION - docs/target/paper_draft.md against outputs/metadata/*.json")
+# ---- STALE CLAIMS: values that must NOT appear -------------------------------
+# Every check above asks whether the record's value is PRESENT. None asks whether
+# a superseded value is ABSENT, and that blind spot bit on 2026-09-15: section 9
+# and the conclusion both said "33 %" / "a third" of method pairs for two weeks
+# after the tie-degenerate exclusion made the headline 22 % (37 of 169). The
+# correct figure was present elsewhere, so every presence check passed.
+# Struck-through text is removed first, so an in-place retraction does not trip it.
+STALE = [
+    (r"\b33\s?%\s+of\s+(comparable\s+)?method\s+pairs",
+     "method-pair fraction is 22 % (37/169) excluding tie-degenerate scorers, "
+     "30 % over all methods; 33 % matches neither"),
+    (r"\ba\s+third\s+of\s+(comparable\s+)?method\s+pairs",
+     "same stale fraction, in words"),
+]
+import re as _re
+_LIVE = _re.sub(r"(?s)~~.*?~~", "", NORM)
+STALE_HITS = []
+for pat, why in STALE:
+    for mo in _re.finditer(pat, _LIVE, flags=_re.I):
+        STALE_HITS.append((mo.group(0).replace("\n", " "), why))
+
 print("=" * 96)
 for label, want in OK:
     print(f"  OK        {label:44s} {want}")
@@ -516,12 +537,15 @@ for label, why in UNBACKED:
     print(f"  UNBACKED  {label:44s} {why}")
 for label, want, src in BAD:
     print(f"  MISMATCH  {label:44s} record says {want!r} ({src}.json) - NOT in draft")
+for hit, why in STALE_HITS:
+    print(f"  STALE     {hit!r:44s} {why}")
 
 print("-" * 96)
 print(f"{len(OK)} verified · {len(NOT_QUOTED)} not quoted · "
-      f"{len(UNBACKED)} unbacked (check by hand) · {len(BAD)} MISMATCHED")
+      f"{len(UNBACKED)} unbacked (check by hand) · {len(BAD)} MISMATCHED · "
+      f"{len(STALE_HITS)} STALE")
 if BAD:
     print("\nA mismatch means the draft disagrees with the record. Fix the DRAFT unless the")
     print("record is stale, in which case re-run the script that produces it.")
 print("=" * 96)
-sys.exit(1 if BAD else 0)
+sys.exit(1 if (BAD or STALE_HITS) else 0)
