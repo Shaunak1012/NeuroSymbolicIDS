@@ -1463,6 +1463,28 @@ generalises, HETERO must transfer better.
 features Bot needs (0/8 overlap). **Falsifier:** macro > 0.6399 on every seed in either arm — read
 off `p(UNKNOWN)` via `loco_reject.py`, **never** the `1 - p(BENIGN)` headline.
 
+## `verify_draft.py` over a derived paper — `VERIFY_FILES`
+
+`verify_draft.py` checks every quantitative claim in the draft against `outputs/metadata/*.json`.
+It now takes `VERIFY_FILES` (comma-separated, repo-relative) so it can check a **derived** version of
+the paper; unset, it checks `paper_draft.md` exactly as before.
+
+It exists for the NeSy split. The submission is a 10-page `nesy_body.md` plus a `nesy_supplementary.md`
+whose appendices are copied verbatim from the master draft, and the invariant that matters is that
+**every verified number survives the split somewhere** — so both files are checked as one text:
+
+```bash
+VERIFY_FILES="docs/target/nesy_body.md,docs/target/nesy_supplementary.md" python scripts/verify_draft.py
+```
+
+✅ **It earned its place on the first run.** The first supplementary omitted the master draft's
+metric-failure subsection and §2, and the check reported **8 verified numbers missing** — the
+run-to-run SD, the indistinguishability band, the pair counts, the duplicate rate. Rebuilt with both,
+the split verifies at **172 / 0 mismatched, identical to the master**.
+⚠️ Checking the union confirms nothing was *lost*; it cannot confirm a number in the body is right if
+the correct value also appears in the supplementary. For that, every decimal in the body is separately
+required to appear verbatim in the master draft.
+
 ## `exogenous_predicate.py` — the benchmark cannot support a neuro-symbolic experiment
 
 Tests the principle a literature scan suggested: **symbolic knowledge helps to the extent it lies

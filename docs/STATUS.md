@@ -25,7 +25,13 @@ abstract are retained in the draft for a possible security-venue version.
 - **Double-blind; anonymised.** No author, repository or institution may be identifiable. A grep
   for the obvious identifiers found none, but a full anonymisation pass is required before submission.
 
-**Remaining before submission:** cut to 10 pages with a supplementary appendix · convert to the PMLR
+**Remaining before submission:** ~~cut to 10 pages with a supplementary appendix~~ ✅ **done 2026-09-15** —
+`nesy_body.md` (**3,323 words**, 6 tables, well inside 10 pages) + `nesy_supplementary.md` (8 appendices,
+**copied verbatim** from the master draft). **Body + supplementary verify at 172 / 0 mismatched —
+identical to the master**, so the split lost and altered nothing; every decimal in the body also
+appears verbatim in the master. `paper_draft.md` stays the full research record · **remap §-numbered
+cross-references inside the appendices and strip emoji/internal commentary** · add 1–2 figures
+(room exists) · convert to the PMLR
 template · verify references [14]–[17] and check or drop [16] · close the 4 unbacked numbers ·
 anonymisation pass · NeSy 2027 CFP check once announced.
 
