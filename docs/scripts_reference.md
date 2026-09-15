@@ -864,7 +864,9 @@ python scripts/md_to_pmlr.py          # generate + lint; exit 1 on any lint prob
 - **The lint is structural, not a compile.** It checks brace and environment balance, cite keys
   against the `.bib`, `\ref` labels, figure files, unmapped non-ASCII and leftover markdown. It also
   checks that **every decimal and thousands-grouped number in the converted markdown reaches the
-  `.tex` unchanged** (428 today). Each check was shown to fire by planting its error in a scratch
+  `.tex` unchanged** (419 today). A section sign left in the prose is also caught: the unicode pass
+  would silently turn it into `\S{}`, which is what the check looks for. Straight double quotes are
+  typeset as LaTeX opening/closing quotes. Each check was shown to fire by planting its error in a scratch
   copy.
 - 🔴 **It cannot measure the page count.** No TeX distribution is installed locally. `jmlr.cls`,
   which `nesy2026.cls` loads, ships with TeX Live and Overleaf.

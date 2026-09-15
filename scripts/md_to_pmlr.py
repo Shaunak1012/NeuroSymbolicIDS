@@ -136,7 +136,7 @@ def inline(text, in_supp=False):
         r"\citep{%s}" % CITE[int(m.group(1))]), text)
 
     # cross-references
-    text = re.sub(r"supplementary \u00a7([A-H])\b",
+    text = re.sub(r"[Ss]upplementary \u00a7([A-H])\b",
                   lambda m: hold(r"Appendix~\ref{apd:%s}" % m.group(1)), text)
     text = re.sub(r"\u00a7(\d+) of the main paper",
                   lambda m: hold(r"Section~\ref{sec:%s}" % m.group(1)), text)
@@ -158,6 +158,8 @@ def inline(text, in_supp=False):
     text = re.sub(r"(?<![\\\w])\*(?!\s)(.+?)(?<!\s)\*(?!\w)", r"\\emph{\1}", text)
 
     text = _unicode(text)
+    # straight double quotes typeset as two closing quotes in pdflatex
+    text = re.sub(r'"([^"\x00]+)"', r"``\1''", text)
     text = re.sub("\x00(\\d+)\x00", lambda m: store[int(m.group(1))], text)
     # a placeholder may itself contain placeholders (e.g. nothing today, but be safe)
     text = re.sub("\x00(\\d+)\x00", lambda m: store[int(m.group(1))], text)
@@ -535,7 +537,9 @@ def lint():
         problems.append("unmapped non-ASCII: %s" % " ".join(
             "U+%04X" % ord(c) for c in non_ascii))
     for pat, what in ((r"\*\*", "markdown bold"), (r"(?<!\\)\[\d+\]", "raw [n] citation"),
-                      (r"\u00a7", "raw section sign"), (r"^\|", "raw table row"),
+                      # the unicode pass maps a leftover section sign to \S{}, so look for
+                      # that: every section sign in the prose should have become a \ref
+                      (r"\u00a7|\\S\{\}", "unconverted section sign"), (r"^\|", "raw table row"),
                       (r"\x00", "unresolved placeholder")):
         hits = re.findall(pat, body, flags=re.M)
         if hits:
