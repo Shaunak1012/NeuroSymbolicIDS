@@ -35,8 +35,18 @@ cross-references inside the appendices and strip emoji/internal commentary** ✅
 (room exists)~~ ✅ **done 2026-09-15** — Figure 1 (the thesis) and Figure 2 (the mechanism), palette validated, body now 3,531 words · ~~convert to the PMLR
 template~~ 🟡 **source done 2026-09-15, NOT compiled** — `docs/target/nesy_latex/` is generated from the markdown by
 `md_to_pmlr.py` (`\documentclass[anon]{nesy2026}`, 17-entry `refs.bib`, supplementary after the bibliography as
-`\appendix`). Its lint passes: structure, cite keys, labels, figures, and **all 428 numbers identical to the
-verified markdown**. 🔴 **The 10-page limit is UNVERIFIED — no TeX distribution is installed.** Compile on
+`\appendix`). Its lint passes: structure, cite keys, labels, figures, and **all ~~428~~ 419 numbers identical to the
+verified markdown** *(419 after the 2026-09-15 prose revision removed a table the supplementary duplicated from the body)*.
+· 🟡 **Prose revision done 2026-09-15, committed locally, NOT pushed.** Body and supplementary rewritten in plain
+academic prose, with all numbers kept (172 verified / 0 mismatched) and style habits counted before and after. Em dashes: body 29 → 1,
+supplementary 113 → 0. Mid-sentence bold: body 89 → 22, supplementary 292 → 53 (paragraph headings only). Emoji
+and the words "honest" and "load-bearing" removed. Stale supplementary content removed: the old security-paper contributions list, a
+dangling "Fig. 1" reference, lowercase "this appendix" remap artefacts, a duplicate Appendix D heading and the
+r = +0.992 note. **Originality:** no shared run of ≥5 words with the abstracts of 15 of the 17 cited works. The
+one 8-word overlap found (Engelen et al.'s list of error stages) was reworded. [3] and [4] could not be checked
+(publisher sign-in). 🔴 **Open decision for the author, now sharper:** the repository is public. Pushing this
+branch would put the exact submission text on GitHub, where a similarity checker would match it at 100 % and a reviewer could find it
+by searching a sentence. Make the repository private before pushing, or keep the submission files out of it 🔴 **The 10-page limit is UNVERIFIED — no TeX distribution is installed.** Compile on
 Overleaf (no install) or with a local TeX install (author's permission needed) before this item closes ·
 ~~the build-note blocks in both files must be deleted at conversion~~ ✅ stripped by the generator · ~~verify references [14]–[17] and check or drop [16]~~ ✅ **done 2026-09-15** — three errors caught, one a fabricated title; see the draft's citation banner · ~~anonymisation pass~~ ✅ **done 2026-09-15** — reviewer-visible text in body and supplementary has no identifying strings and no code identifiers (script names were removed because the repository is **public** and a name like `field_gap.py` is a search-engine pointer to it); figure PNG/PDF metadata carries only Matplotlib's software tag. Four stale running counts removed along the way. 🟡 **Open decision for the author:** NeSy **explicitly permits preprints** and says nothing against public code, so keeping the repository public is within the rules — but `paper_draft.md` is in it verbatim, so a reviewer who searched a supplementary sentence could find it. Making the repo private during review is optional extra caution, not a requirement, and is the author's call · close the 4 unbacked numbers ·
 ~~anonymisation pass~~ *(duplicate of the item above, done)* · NeSy 2027 CFP check once announced.

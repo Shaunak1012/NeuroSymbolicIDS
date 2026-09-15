@@ -2,6 +2,32 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-15 (Submission prose revised; originality checked against cited abstracts)
+
+- **`nesy_body.md` and `nesy_supplementary.md` rewritten in plain academic prose.** Claims, caveats and
+  numbers are unchanged. Every recorded value still verifies (172 / 0 mismatched / 0 stale, master and
+  submission), and a before/after number diff shows only deliberate removals.
+- **Style counted, not eyeballed** (per 1,000 words, body / supplementary): em dashes 9.3 → 0.3 /
+  12.4 → 0.0; bold spans 28.6 → 6.0 / 32.0 → 6.2 (what remains is paragraph run-in headings); emoji and
+  the words "honest" and "load-bearing" removed. Mean sentence length 22.1 → 19.6 words in the body.
+- **Defects removed from the supplementary:** the old security-paper *Contributions* list citing a
+  non-existent "Fig. 1"; lowercase "this appendix" sentence starts left by the reference remap; a second
+  `## Appendix D` heading that would have become an unnumbered `\section*`; the internal r = +0.992
+  note; Arp et al. and Engelen et al. cited by venue instead of by reference number; long passages
+  repeated verbatim from the body (§3/§6 table and argument), now shortened to pointers plus the details
+  the body lacks.
+- **Originality check:** word-sequence overlap against the abstracts of the cited works (OpenAlex,
+  arXiv, publisher page). No shared run of five or more words across 15 of 17 abstracts. The one 8-word
+  run found (Engelen et al.'s list of error stages) was reworded. [3] and [4] could not be checked,
+  since their abstracts are behind publisher sign-in. This is not a full-text plagiarism scan.
+- `verify_draft.py`: the worst-pair name check accepts the prose phrase "a CNN-LSTM and a linear SVM",
+  keyed by run identifier so that a different pair still fails.
+- `md_to_pmlr.py`: "Supplementary §X" with a capital S was not converted to a reference. The lint's
+  section-sign check could never fire, because the unicode pass had already mapped § to `\S{}`. Both
+  are fixed, and the check was shown to fire by planting the error.
+- 🔴 **Committed locally, not pushed.** The repository is public, and pushing would publish the exact
+  submission text (see STATUS open decision).
+
 ## 2026-09-15 (PMLR LaTeX source generated — structurally linted, not compiled)
 
 - **`scripts/md_to_pmlr.py`** generates `docs/target/nesy_latex/` from `nesy_body.md` +
