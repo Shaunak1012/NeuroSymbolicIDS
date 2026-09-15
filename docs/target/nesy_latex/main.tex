@@ -2,8 +2,15 @@
 % Do not edit by hand: change the markdown (which verify_draft.py checks) and regenerate.
 \documentclass[anon]{nesy2026} % anonymised submission for OpenReview
 
+% double-blind hygiene: the PDF info dict otherwise carries the build time with the
+% author's UTC offset, and a banner naming the TeX distribution
+\pdfinfoomitdate=1
+\pdftrailerid{}
+\pdfsuppressptexinfo=-1
+
 \usepackage{booktabs}
-\usepackage{tabularx}
+\usepackage{array}  % >{...} column specs; tabularx used to load it implicitly
+\setlength{\emergencystretch}{1.5em}  % lets lines with long numeric tokens break
 
 \title[Knowledge the Network Already Has]{Knowledge the Network Already Has: An Exogeneity Precondition for Neuro-Symbolic Intrusion Detection}
 % Author block is suppressed by the anon option; fill in only for the camera-ready.
@@ -58,7 +65,7 @@ Two measurement problems limit the magnitudes we can report (Section~\ref{sec:7}
 Comparing our system with published ones that report gains suggests why:
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.220\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.455\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.325\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{system} & \textbf{knowledge injected} & \textbf{computable from the flow features?} \\
 \midrule
@@ -67,7 +74,7 @@ KnowGraph \citep{zhou2024} & logic over relations between entities & no, needs a
 \citet{kalutharage2025} & mapping of techniques to an attack taxonomy & no, needs an external taxonomy \\
 ours & behaviour predicates (Ax3--Ax6) & yes, each is a function of the input \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 All seven of our behaviour predicates are deterministic functions of features the network already consumes. \texttt{HighEntropy}, for example, is the standard deviation of packet length rather than Shannon entropy, and \texttt{BeaconLike} depends on the destination port. A predicate that the network can compute for itself carries no new information. The most it can do is reshape the hypothesis space, which is a form of regularisation. In short, the knowledge we injected was endogenous.
@@ -101,7 +108,7 @@ Taken together, knowledge that lies inside the basis (our axioms) adds no eviden
 A single demonstration of a mechanism is not strong evidence, so we tried to break it in five ways. For each attempt we wrote down, before running it, what result would count against the mechanism.
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.392\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.217\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.392\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{attempt} & \textbf{what it rules out} & \textbf{result for Bot} \\
 \midrule
@@ -111,7 +118,7 @@ Reject class: three known families merged into \texttt{UNKNOWN} & the model was 
 Cross-dataset augmentation with the 2018 known classes & the basis was too narrow & $-$0.1461 macro against a seed-matched control; better on 0/3 seeds \\
 Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers & the choice of method & no method reaches Bot; the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 The corrected-label experiment is the hardest test, and the way it fails deserves a comment. Our criterion was a lift above chance on every seed. The mean lift is 3.4$\times$, which on its own would look like detection, but no individual run is close to that value. The large spread between seeds is the same instability described in Section~\ref{sec:4}.
@@ -129,7 +136,7 @@ If the precondition in Section~\ref{sec:3} is correct, the obvious next step is 
 \textbf{Testing the premise.} A predicate is exogenous only if the network could not already compute it. To check this, we trained gradient-boosted models to predict each predicate from the flow features:
 
 \begin{center}\small
-\begin{tabular}{lrr}
+\begin{tabular}{@{}lrr@{}}
 \toprule
 \textbf{predicate} & \textbf{all features} & \textbf{without \texttt{Destination Port}} \\
 \midrule
@@ -152,7 +159,7 @@ Two measurement problems limit how much weight any of our numbers can bear. We r
 \textbf{Label semantics.} \citet{engelen2021} reprocessed CIC-IDS2017 with a corrected flow meter and added an \texttt{X -- Attempted} label for attack flows that carried no payload. About two-thirds of Bot flows and about nine-tenths of the web-attack flows fall into this category. After retraining on the corrected release we obtain:
 
 \begin{center}\small
-\begin{tabular}{lrrr}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{family} & \textbf{attempted folded in} & \textbf{attempted excluded} & \textbf{n (excluded)} \\
 \midrule
@@ -185,6 +192,9 @@ When flows that transmitted nothing are removed, the PR-AUC for Web Brute Force 
 \textbf{Conclusion.} Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside the model's learned feature basis. The same condition makes an attack family with no overlap unreachable, and that unreachability held under every test we designed to break it. The neuro-symbolic systems that report gains use knowledge that is truly exogenous. Ours did not, and on CIC-IDS2017 we could not construct any, because knowledge aggregated from a capture can be recovered from that capture's features. We suggest that anyone reporting a neuro-symbolic gain should first check that the injected knowledge is not already present in the input, and should be aware that some benchmarks make this impossible.
 
 \emph{Code, per-run records and trained models will be released upon acceptance.}
+
+% page-limit probe: main.aux records the page the counted body ends on
+\label{body:end}
 
 \bibliography{refs}
 
@@ -270,7 +280,7 @@ A closed-set discriminative model learns the features that separate the classes 
 This part of the study took the most effort, and much of it concerns our own architecture.
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.500\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.500\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{attempted fix} & \textbf{result} \\
 \midrule
@@ -284,7 +294,7 @@ Training on a second dataset (known classes of CSE-CIC-IDS2018, doubling the tra
 An explicit reject class (merging known classes into \texttt{UNKNOWN}) & No net effect. Merging three known families into one \texttt{UNKNOWN} class (9 $\rightarrow$ 7 classes) changes the main score by $-$0.0030 against the seed-matched CNN, better on 1/3 seeds. The reject class does not reach Bot (+0.068 above chance, with the sign changing across seeds), but which families it does reach depends on what is merged into it (see below). \\
 A fitted fuser that includes the knowledge-graph channel & Not possible for this channel. The knowledge-graph score is computed by streaming the test set into windows, so no validation-set score exists, and the channel cannot enter a combiner fitted on held-out data. This applies to the knowledge-graph channel only; a fitted combiner over other channels does work (see ``What partially works''). \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 Several of these results need more explanation.
@@ -298,14 +308,14 @@ Several of these results need more explanation.
 \textbf{A second dataset.} Adding data from another capture is common advice for improving generalisation, so we tested it carefully. The known classes of the 2018 capture were added to the training and validation sets, and the test set remained the untouched 2017 test set. BENIGN was merged across the two captures so that ``comes from 2018'' could not act as a shortcut for ``is an attack'', and the 2018 attack names were kept as separate classes. There is no leak, because the 2018 split already withholds Bot, the web families, Infilteration and SQL Injection, which is exactly the 2017 zero-day set.
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xrrr>{\raggedright\arraybackslash}X}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.302\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.111\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.095\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.151\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.341\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{comparison} & \textbf{macro $\Delta$} & \textbf{$\sigma$} & \textbf{seeds better} &  \\
 \midrule
 augmented vs seed-matched control & $-$0.1461 & 1.80 & 0/3 & consistent direction \\
 control vs the 68-feature baseline & $-$0.0091 & 0.78 & 1/3 & inconsistent, so no effect, as required \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 The control is needed because the augmented model has 67 inputs. The 68th feature of the 2017 data is a duplicate column (identical across all 883,796 training rows), and the input width changes the size of the flattened layer. We built a 2017-only model with 67 features before any augmented result existed, and it has no effect. The $-$0.1461 is therefore due to the augmentation and not to the architecture.
@@ -315,14 +325,14 @@ The drop comes from new false positives rather than lost detections. Our first e
 PR-AUC and the operating curve also disagree here:
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xrrrr}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.388\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{recall of unknown flows @ FPR} & \textbf{0.1 \%} & \textbf{1 \%} & \textbf{5 \%} & \textbf{10 \%} \\
 \midrule
 baseline & 47.3 \% & 48.3 \% & 54.2 \% & 60.4 \% \\
 augmented & 16.2 \% & 49.1 \% & 50.1 \% & 50.9 \% \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 At a 1 \% false-alarm rate the augmented model is slightly better. At 0.1 \% it keeps only about a third of the baseline's recall. A reader given only the macro score would think the model had been ruined, and a reader given only the 1 \% column would think nothing had changed. We report both because neither is accurate alone.
@@ -330,7 +340,7 @@ At a 1 \% false-alarm rate the augmented model is slightly better. At 0.1 \% it 
 We saw twice that an intervention failed specifically at the 0.1 \% operating point, and wondered whether the tightest alert budget is where these methods generally break down. When we tested this across 57 methods with saved per-flow scores, it did not hold. Macro zero-day PR-AUC and recall at a fixed false-alarm rate agree more closely at a tight budget than at a loose one:
 
 \begin{center}\small
-\begin{tabular}{lrrrr}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
 \textbf{Spearman $\rho$ (macro vs recall)} & \textbf{@0.1 \% FPR} & \textbf{@1 \%} & \textbf{@5 \%} & \textbf{@10 \%} \\
 \midrule
@@ -344,7 +354,7 @@ The two earlier cases are real and are still reported individually, but they are
 \textbf{The reject class.} Every other method in this study detects novelty without being trained to do so. An explicit reject class is the obvious answer to that objection, so we built one. We recorded in advance our prediction that it would fail, and ran two versions that differ only in which classes are merged into \texttt{UNKNOWN}. HETERO merges \texttt{DDoS}, \texttt{FTP-Patator} and \texttt{PortScan} (a flood, a brute-force attack and a scan); HOMOG merges three DoS variants. The table gives the mean percentile rank of each family under \texttt{p(UNKNOWN)}, over three seeds per version, as a distance from chance:
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}Xrr}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.272\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.320\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.200\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.208\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{version} & \textbf{Bot} & \textbf{Web Brute Force} & \textbf{Web XSS} \\
 \midrule
@@ -352,7 +362,7 @@ HETERO & +0.068, sign changes across seeds & +0.200 & +0.219 \\
 HOMOG & $-$0.206 (3/3 consistent) & +0.259 & +0.271 \\
 paired by seed, HETERO $-$ HOMOG & +0.274, 2.57$\sigma$, 3/3 & $-$0.059, 3.58$\sigma$, 3/3 & $-$0.052, 12.35$\sigma$, 3/3 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 The two versions form a double dissociation that holds on every seed for every family. The homogeneous DoS merge gives a reject class that ranks Bot below chance ($-$0.206) while reaching the web families best, and the heterogeneous merge reverses both. Appendix~\ref{apd:C} predicts this direction. The CNN assigns the web families to \texttt{DoS slowloris}, so merging the DoS classes into \texttt{UNKNOWN} carries the web families along. A reject class is therefore not a neutral ``none of the above'' category. What it reaches depends on the features of the classes merged into it, which is the closed-set mechanism appearing in the open-set setting.
@@ -374,7 +384,7 @@ On our side, the exogeneity test in Section~\ref{sec:6} did not go on to injecti
 \textbf{The knowledge-graph channel.} This is the only part of our architecture that improves results, and the size of the improvement depends on a hyper-parameter we had not initially swept. At the cluster count used in our earlier experiments (k = 200) it adds +0.0528 macro [+0.0466, +0.0592] (p $<$ 0.0001, 3/3 seeds) and raises Bot from 0.0446 to 0.2518. Sweeping k shows that the fused macro score increases with k in both knowledge-graph variants and at every step, on 3/3 seeds:
 
 \begin{center}\small
-\begin{tabular}{lrrrr}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
 \textbf{k} & \textbf{100} & \textbf{200} & \textbf{400} & \textbf{800} \\
 \midrule
@@ -395,7 +405,7 @@ We do not claim that \texttt{s\_kg} is the better variant. The ranking of the tw
 \textbf{Operating points.} A single operating point hides the shape of the result, so we vary the false-alarm rate. The table shows recall on flows from families the model has never seen, over three seeds, with the threshold set on benign flows only:
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xrrrr}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.388\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.153\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{recall of unknown flows @ FPR} & \textbf{0.1 \%} & \textbf{1 \%} & \textbf{5 \%} & \textbf{10 \%} \\
 \midrule
@@ -404,7 +414,7 @@ CNN + KG (k = 800) & 45.8 \% & 57.6 \% & 72.1 \% & 91.6 \% \\
 CNN + KG, Bot only & 0.0 \% & 23.2 \% & 46.6 \% & 85.2 \% \\
 CNN alone, Bot only & 0.0 \% & 0.1 \% & 9.5 \% & 19.9 \% \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 At the tightest budget the knowledge graph costs 1.5 points, and Bot recall is 0.0 \% for both models. The gain starts at around a 1 \% false-alarm rate, and no configuration we built detects Bot at a tight alert budget. Reporting only the 1 \% column would hide this. The 10 \% column shows the shape of the curve only. On 55,237 benign test flows it would mean roughly 5,500 false alerts, which is not a usable operating point.
@@ -426,7 +436,7 @@ The CNN and the autoencoder dissociate on every family, with no overlap across s
 When we repeated this on CSE-CIC-IDS2018, the two halves of the result behaved differently. Only lift (PR-AUC $\div$ prevalence) can be compared across captures, because PR-AUC is bounded below by prevalence and the two datasets differ by orders of magnitude in prevalence on the families concerned. We first made the comparison in raw PR-AUC and withdrew it, and we report lift only.
 
 \begin{center}\small
-\begin{tabular}{lrr}
+\begin{tabular}{@{}lrr@{}}
 \toprule
 \textbf{Bot, lift over chance} & \textbf{CIC-IDS2017} & \textbf{CSE-CIC-IDS2018} \\
 \midrule
@@ -454,7 +464,7 @@ The full detection path takes 7.95 $\mu$s per flow (125,762 flows/s) on one CPU 
 We measured the reproducibility of our own pipeline before interpreting any difference between methods.
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xrl}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.593\linewidth-2\tabcolsep\relax}>{\raggedleft\arraybackslash}p{\dimexpr 0.143\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.264\linewidth-2\tabcolsep\relax}@{}}
 \toprule
 \textbf{source of variance} & \textbf{SD} & \textbf{evidence} \\
 \midrule
@@ -464,7 +474,7 @@ Data-split variance (5-fold, model and test fixed) & 0.0228 & 5-fold \\
 Uncertainty on an absolute number & 0.0285 & $\surd$(0.0228$^{2}$ + 0.0171$^{2}$) \\
 Threshold for a comparison on a shared split & 0.0256 & 2$\cdot$SE$\cdot$$\surd$2 at n = 6 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 Seed variance and nondeterminism cannot be distinguished statistically (F(5,5) = 1.69, p = 0.58). Determinism flags are enabled, and runs were checked to be byte-identical across sessions five days apart. Runs from before and after the flags were introduced are treated as different populations and are never pooled.
@@ -474,7 +484,7 @@ Seed variance and nondeterminism cannot be distinguished statistically (F(5,5) =
 \citet{arp2022} describe ten common pitfalls in machine learning for security. In the papers they surveyed, sampling bias occurred in 90 \% and data snooping in 73 \%, and every paper had at least three of the pitfalls. We checked this work against their list.
 
 \begin{center}\small
-\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\dimexpr 0.074\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.314\linewidth-2\tabcolsep\relax}>{\raggedright\arraybackslash}p{\dimexpr 0.612\linewidth-2\tabcolsep\relax}@{}}
 \toprule
  & \textbf{pitfall} & \textbf{status in this work} \\
 \midrule
@@ -489,13 +499,13 @@ P8 & Base rate fallacy & PR-AUC rather than ROC, prevalence and lift reported, f
 P9 & Lab-only evaluation & Not addressed. Throughput is measured (7.95 $\mu$s/flow), but nothing has been deployed. \\
 P10 & Inappropriate threat model & Not addressed. There is no adversarial evaluation; we list it as future work. \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{center}
 
 \textbf{Label inaccuracy (P2).} \citet{engelen2021} reprocessed CIC-IDS2017 with a corrected version of CICFlowMeter and relabelled it. More than 20 \% of traces were reconstructed or relabelled, and a new \texttt{X - Attempted} class was introduced for attack flows that carried no payload. Under these labels our three main zero-day families become:
 
 \begin{center}\small
-\begin{tabular}{lrrr}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{family} & \textbf{as published} & \textbf{effective} & \textbf{attempted} \\
 \midrule
@@ -511,7 +521,7 @@ About two-thirds of Bot flows and about nine-tenths of the web-attack flows are 
 \textbf{Results on the corrected labels.} Lift (PR-AUC $\div$ prevalence) is the only measure that can be compared across these settings. The test sets contain different flows with different prevalences and there is no one-to-one correspondence, so nothing here is paired against 0.6399. Chance lift is 1.0.
 
 \begin{center}\small
-\begin{tabular}{lrrr}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
 \textbf{family} & \textbf{attempted folded in} & \textbf{attempted excluded} & \textbf{n (excluded)} \\
 \midrule

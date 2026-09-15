@@ -24,14 +24,15 @@ docs/target/nesy_latex/
 NeSy's full-paper limit is 10 pages EXCLUDING references and supplementary
 material, so the appendix after the bibliography does not count.
 
-⚠️ THIS SCRIPT CANNOT COMPILE, AND DOES NOT PRETEND TO. No TeX distribution is
-installed. `--lint` runs a structural check instead -- brace and environment
-balance, every citation key in the .bib, every \\ref label defined, every figure
-file present, no unmapped non-ASCII and no leftover markdown -- which catches
-most errors that would stop pdflatex. It cannot measure the page count; only a
-real compile can, and that is the check that matters for the 10-page limit.
+Two levels of check. The structural lint always runs: brace and environment balance,
+every citation key in the .bib, every \\ref label defined, every figure file present,
+no unmapped non-ASCII, no leftover markdown, and every number identical to the
+markdown. It cannot see what only TeX sees -- the page count, a class that refuses a
+package -- so `--compile` runs pdflatex/bibtex in _build/ and checks the page the
+body ends on (a \\label{body:end} read back from main.aux) against the 10-page limit.
 
 Run:  python scripts/md_to_pmlr.py            (generate + lint)
+      python scripts/md_to_pmlr.py --compile  (+ compile, page-limit check, main.pdf)
 """
 import io
 import os
@@ -177,23 +178,22 @@ def table_to_latex(rows, in_supp):
     cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows]
     header, sep, body = cells[0], cells[1], cells[2:]
     ncol = len(header)
-    specs, has_x = [], False
-    for j in range(ncol):
-        s = sep[j] if j < len(sep) else ""
-        longest = max(len(r[j]) if j < len(r) else 0 for r in [header] + body)
-        if longest > 28:
-            specs.append(r">{\raggedright\arraybackslash}X")
-            has_x = True
-        elif s.endswith(":") and not s.startswith(":"):
-            specs.append("r")
-        elif s.startswith(":") and s.endswith(":"):
-            specs.append("c")
-        else:
-            specs.append("l")
-    env = "tabularx" if has_x else "tabular"
-    width = "{\\linewidth}" if has_x else ""
+    longest = [max(len(r[j]) if j < len(r) else 0 for r in [header] + body) for j in range(ncol)]
+    right = [(sep[j] if j < len(sep) else "").endswith(":") for j in range(ncol)]
+    if max(longest) > 28:
+        # A table with long text gets fixed-width wrapping columns sized by content. Not tabularx:
+        # the jmlr class refuses to load it ("This will break footnote links").
+        # +3 characters per column covers the inter-column padding a short numeric column needs
+        # digits and math minus signs set wider than a text character, so numeric columns get more
+        weights = [min(max(w, 5), 70) + (7 if rt else 4) for w, rt in zip(longest, right)]
+        specs = ["%s\\arraybackslash}p{\\dimexpr %.3f\\linewidth-2\\tabcolsep\\relax}"
+                 % (">{\\raggedleft" if rt else ">{\\raggedright", w / float(sum(weights)))
+                 for w, rt in zip(weights, right)]
+    else:
+        specs = ["r" if rt else "l" for rt in right]
+    env = "tabular"
     out = ["\\begin{center}\\small",
-           "\\begin{%s}%s{%s}" % (env, width, "".join(specs)), "\\toprule"]
+           "\\begin{%s}{@{}%s@{}}" % (env, "".join(specs)), "\\toprule"]
     out.append(" & ".join("\\textbf{%s}" % inline(h, in_supp) if h else "" for h in header)
                + " \\\\")
     out.append("\\midrule")
@@ -466,8 +466,15 @@ def generate():
         "% Do not edit by hand: change the markdown (which verify_draft.py checks) and regenerate.",
         "\\documentclass[anon]{nesy2026} % anonymised submission for OpenReview",
         "",
+        "% double-blind hygiene: the PDF info dict otherwise carries the build time with the",
+        "% author's UTC offset, and a banner naming the TeX distribution",
+        "\\pdfinfoomitdate=1",
+        "\\pdftrailerid{}",
+        "\\pdfsuppressptexinfo=-1",
+        "",
         "\\usepackage{booktabs}",
-        "\\usepackage{tabularx}",
+        "\\usepackage{array}  % >{...} column specs; tabularx used to load it implicitly",
+        "\\setlength{\\emergencystretch}{1.5em}  % lets lines with long numeric tokens break",
         "",
         "\\title[%s]{%s}" % (inline(SHORT_TITLE), inline(title)),
         "% Author block is suppressed by the anon option; fill in only for the camera-ready.",
@@ -481,6 +488,9 @@ def generate():
         "\\end{abstract}",
         "",
         blocks_to_latex(main),
+        "",
+        "% page-limit probe: main.aux records the page the counted body ends on",
+        "\\label{body:end}",
         "",
         "\\bibliography{refs}",
         "",
@@ -547,7 +557,9 @@ def lint():
     # every number verify_draft.py checked in the markdown must reach the .tex unchanged
     num = re.compile(r"\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+")
     src_nums = sorted(num.findall(_converted_source()))
-    tex_nums = sorted(num.findall(body))
+    # generated column widths are layout, not claims
+    text_part = body.split("\\begin{document}", 1)[-1]     # preamble lengths are not claims
+    tex_nums = sorted(num.findall(re.sub(r"\\dimexpr [\d.]+\\linewidth", "", text_part)))
     if src_nums != tex_nums:
         from collections import Counter
         lost = Counter(src_nums) - Counter(tex_nums)
@@ -568,10 +580,72 @@ def lint():
         for p in problems:
             print("  - " + p)
         return 1
-    print("LINT PASSED - structurally sound. NOT compiled: the page count is unverified.")
+    print("LINT PASSED - structurally sound." + ("" if "--compile" in sys.argv else
+          " NOT compiled: the page count is unverified (run with --compile)."))
+    return 0
+
+
+# ---------------------------------------------------------------------------
+PAGE_LIMIT = 10          # NeSy full paper, excluding references and supplementary
+
+
+def _tex_bin(name):
+    import shutil
+    found = shutil.which(name)
+    if found:
+        return found
+    miktex = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Programs", "MiKTeX", "miktex",
+                          "bin", "x64", name + ".exe")
+    return miktex if os.path.exists(miktex) else None
+
+
+def compile_pdf():
+    """pdflatex -> bibtex -> pdflatex x2 in _build/, then read the page the body ends on.
+
+    The generated main.tex puts \\label{body:end} after the last body paragraph, so main.aux
+    records the last counted page directly; no PDF parsing is needed for the limit check.
+    """
+    import subprocess
+    pdflatex, bibtex = _tex_bin("pdflatex"), _tex_bin("bibtex")
+    if not (pdflatex and bibtex):
+        print("COMPILE SKIPPED - no pdflatex/bibtex found (MiKTeX, TeX Live or Overleaf needed)")
+        return 1
+    build = os.path.join(OUT, "_build")
+    if os.path.isdir(build):
+        shutil_rm = __import__("shutil").rmtree
+        shutil_rm(build)
+    __import__("shutil").copytree(OUT, build, ignore=__import__("shutil").ignore_patterns("_build", "*.pdf"))
+    latex = [pdflatex, "-enable-installer", "-interaction=nonstopmode", "-halt-on-error", "main.tex"]
+    if "miktex" not in pdflatex.lower():
+        latex.remove("-enable-installer")                 # MiKTeX-only: fetch missing packages
+    for cmd in (latex, [bibtex, "main"], latex, latex, latex):
+        r = subprocess.run(cmd, cwd=build, capture_output=True)
+        if r.returncode != 0:
+            print("COMPILE FAILED at %s (see %s)" % (os.path.basename(cmd[0]),
+                                                     os.path.join(build, "main.log")))
+            return 1
+    log = io.open(os.path.join(build, "main.log"), encoding="latin-1").read()
+    aux = io.open(os.path.join(build, "main.aux"), encoding="latin-1").read()
+    end = re.search(r"\\newlabel\{body:end\}\{\{[^}]*\}\{(\d+)\}", aux)
+    total = re.search(r"Output written on main\.pdf \((\d+) pages", log)
+    undefined = len(re.findall(r"(?:Citation|Reference) `[^']+' on page \d+ undefined", log))
+    overfull = re.findall(r"Overfull \\hbox \(([\d.]+)pt too wide\) in paragraph", log)
+    __import__("shutil").copyfile(os.path.join(build, "main.pdf"), os.path.join(OUT, "main.pdf"))
+    body_pages = int(end.group(1)) if end else None
+    print("compiled: %s pages in total; body ends on page %s (limit %d, references and appendices"
+          " excluded)" % (total.group(1) if total else "?", body_pages, PAGE_LIMIT))
+    print("          undefined citations/references: %d; overfull lines in our text: %d%s"
+          % (undefined, len(overfull), (" (max %.1fpt)" % max(map(float, overfull))) if overfull else ""))
+    if body_pages is None or body_pages > PAGE_LIMIT or undefined:
+        print("COMPILE CHECK FAILED")
+        return 1
+    print("COMPILE CHECK PASSED - main.pdf written to %s" % OUT)
     return 0
 
 
 if __name__ == "__main__":
     generate()
-    sys.exit(lint())
+    rc = lint()
+    if rc == 0 and "--compile" in sys.argv:
+        rc = compile_pdf()
+    sys.exit(rc)
