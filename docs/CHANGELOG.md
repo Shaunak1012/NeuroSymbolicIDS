@@ -2,6 +2,22 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-15 (PMLR LaTeX source generated — structurally linted, not compiled)
+
+- **`scripts/md_to_pmlr.py`** generates `docs/target/nesy_latex/` from `nesy_body.md` +
+  `nesy_supplementary.md`: `main.tex` (anonymised `nesy2026` class), `refs.bib`, the class file and
+  both figures. The LaTeX is **generated, not hand-converted**, so the markdown that `verify_draft.py`
+  checks stays the single source. A paper change is a regenerate, not a second edit.
+- **Lint:** braces/environments, cite keys, `\ref` labels, figure files, non-ASCII, leftover markdown,
+  and **all 428 decimal/grouped numbers identical to the markdown**. Six planted errors, all caught.
+- 🔴 **Not compiled — no TeX distribution installed — so the 10-page limit is unverified.**
+- ⚠️ **Two errors caught before commit.** (1) The first `.bib` expanded authors' first names from
+  memory. That is the error class behind [10], [15] and [16], so it was reverted to the verified
+  initials. (2) The lint crashed on a cp1252 console while printing the non-ASCII character it had
+  just detected.
+- 🔴 **Retracted in place: "6 tables" in the body (STATUS).** It is **4**. The count was asserted
+  at the split and repeated without being checked.
+
 ## 2026-09-15 (VENUE: NeSy — the paper is re-led around the exogeneity precondition)
 
 🎯 **Venue decided by the author: NeSy.** Recommended alternative was RAID 2027 with AISec 2027 as
