@@ -132,7 +132,7 @@ Logistic regression is **98 % as good as the CNN on the published metric and 17�
 Two members of this tier are **score-degenerate**: `decision_tree` and `knn` place 50.1 % and
 49.8 % of all flows in a single tie block, so their PR-AUC is not comparable to a continuous scorer's.
 **This is the same property that removes eleven methods from the headline figures above** — it is a general
-exclusion criterion in this paper, not a Tier-A footnote, and `field_gap.py` reports both populations
+exclusion criterion in this paper, not a Tier-A footnote, and the analysis reports both populations
 so the effect of applying it is visible rather than assumed.
 The best *valid* Tier-A result is the MLP at a three-seed mean of **0.4965** — not the n = 1 figure of
 0.5360 that a single run reported. **k-NN is not citable at all**: its macro spans 0.0440–0.4270
@@ -841,10 +841,10 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
 
 ### Reproducibility
 
-**What is released.** All 58 analysis and pipeline scripts, the protocol configuration
-(`config.yaml`), pinned dependencies, the 9 figures, the 70 metadata files that every number in this
-paper is drawn from, and the **append-only research record** — 190 logged runs with their seeds,
-parameters and results. The code is MIT-licensed.
+**What is released.** Every analysis and pipeline script, the protocol configuration, pinned
+dependencies, the figures, the metadata files that every number in this paper is drawn from, and
+the **append-only research record** — every logged run with its seed, parameters and results. The
+code is MIT-licensed.
 
 **What is not, and why.** The **CIC-IDS2017 dataset is not redistributed**; it carries its own usage
 terms and is obtained from its publisher. **Trained model weights are not released either** — they
@@ -868,10 +868,11 @@ Pre- and post-flag runs are different populations and we never pool them. A read
 pipeline today should reproduce the post-flag figures and should **not** expect to reproduce the
 pre-flag ones exactly; where a number in this paper is pre-flag, Appendix E's floor is the honest error bar.
 
-**One entry point.** `run_all.py` declares the 19 pipeline stages in order together with the
+**One entry point.** A single pipeline driver declares the 19 stages in order together with the
 artifacts each writes. Its **default mode verifies rather than executes** — it reports which stage
-outputs are present on disk — and `--run` executes the sequence, with `--from <stage>` to resume.
-Making a full CPU retrain the default behaviour of something called `run_all` would be a foot-gun.
+outputs are present on disk — and an explicit flag executes the sequence, with another to resume
+from any stage. Making a full CPU retrain the default behaviour of a pipeline driver would be a
+foot-gun.
 
 **An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
 never been *executed* end to end in one pass.** Every stage has run individually, most of them dozens
@@ -882,18 +883,18 @@ reproduction path.
 **Two mechanical checks ship with the artifact**, both of which exist because the corresponding
 mistake was actually made here:
 
-- `lint_conventions.py` enforces the conventions that have lapsed in this project, **naming the
+- A convention linter enforces the conventions that have lapsed in this project, **naming the
  incident behind each one** — an encoding bug fixed three times as separate incidents, a timestamp
  parser that silently reordered every test row, a script count that disagreed with disk.
-- `verify_draft.py` checks **every quantitative claim in this paper against the metadata files that
+- A claim verifier checks **every quantitative claim in this paper against the metadata files that
  produced it**: it pulls each value from its source JSON, formats it as the paper should state it,
- and asserts the string is present. Current state: **52 verified, 0 mismatched.** It exists because
+ and asserts the string is present; it also fails on known-superseded values. At the time of
+ writing every checked claim verifies, with none mismatched. It exists because
  the first draft misquoted a throughput figure and that was caught by accident rather than by any
  check. It verifies **transcription, not interpretation** — it cannot tell you a caveat is
  missing or a claim overreaches its evidence.
 
-**Six claims in this paper have no machine-readable record** and are flagged as such by that checker:
-the split sizes, the zero-day family counts, the base paper's published figures, the per-method
-figures in Tiers A and B, the double-dissociation standard-deviation multiples, and the Web Brute
-Force / XSS correlation. We list them rather than hiding them; that set is what a reader must check
+**Four claims in this paper have no machine-readable record** and are flagged as such by that checker:
+the split sizes, the base paper's published figures, the per-method figures in Tiers A and B, and the
+double-dissociation standard-deviation multiples. We list them rather than hiding them; that set is what a reader must check
 by hand, and a checker that silently skips what it cannot verify is worse than no checker.

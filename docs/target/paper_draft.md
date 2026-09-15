@@ -1021,10 +1021,13 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
 
 ## §10 Reproducibility
 
-**What is released.** All 58 analysis and pipeline scripts, the protocol configuration
-(`config.yaml`), pinned dependencies, the 9 figures, the 70 metadata files that every number in this
-paper is drawn from, and the **append-only research record** — 190 logged runs with their seeds,
-parameters and results. The code is MIT-licensed.
+**What is released.** Every analysis and pipeline script, the protocol configuration
+(`config.yaml`), pinned dependencies, the figures, the metadata files that every number in this
+paper is drawn from, and the **append-only research record** — every logged run with its seed,
+parameters and results. The code is MIT-licensed. *(Corrected 2026-09-15: this sentence gave "58
+scripts", "9 figures", "70 metadata files" and "190 logged runs". By that date the scripts numbered 76
+and the logged runs 239; the other two are omitted rather than restated, since how they were counted
+is not recorded. Counts written into prose go stale on the next commit, so none are given here.)*
 
 **What is not, and why.** The **CIC-IDS2017 dataset is not redistributed**; it carries its own usage
 terms and is obtained from its publisher. **Trained model weights are not released either** — they
@@ -1067,15 +1070,19 @@ mistake was actually made here:
   parser that silently reordered every test row, a script count that disagreed with disk.
 - `verify_draft.py` checks **every quantitative claim in this paper against the metadata files that
   produced it**: it pulls each value from its source JSON, formats it as the paper should state it,
-  and asserts the string is present. Current state: **52 verified, 0 mismatched.** It exists because
+  and asserts the string is present, and fails on known-superseded values. ~~Current state: **52
+verified, 0 mismatched.**~~ *(Removed 2026-09-15: this count had gone stale — the checker reported 172
+while the text said 52. A running count written into prose is out of date by the next edit, so the
+figure is reported on each run instead.)* It exists because
   the first draft misquoted a throughput figure and that was caught by accident rather than by any
   check. ⚠️ It verifies **transcription, not interpretation** — it cannot tell you a caveat is
   missing or a claim overreaches its evidence.
 
-**Six claims in this paper have no machine-readable record** and are flagged as such by that checker:
-the split sizes, the zero-day family counts, the base paper's published figures, the per-method
-figures in Tiers A and B, the double-dissociation standard-deviation multiples, and the Web Brute
-Force / XSS correlation. We list them rather than hiding them; that set is what a reader must check
+**~~Six~~ Four claims in this paper have no machine-readable record** and are flagged as such by that
+checker: the split sizes, the base paper's published figures, the per-method figures in Tiers A and
+B, and the double-dissociation standard-deviation multiples. *(Corrected 2026-09-15: two were backed
+after this was written — the zero-day family counts now verify against the test labels, and the Web
+Brute Force / XSS correlation against `metric_divergence.json`.)* We list them rather than hiding them; that set is what a reader must check
 by hand, and a checker that silently skips what it cannot verify is worse than no checker.
 
 ---

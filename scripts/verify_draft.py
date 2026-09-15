@@ -520,6 +520,13 @@ STALE = [
      "30 % over all methods; 33 % matches neither"),
     (r"\ba\s+third\s+of\s+(comparable\s+)?method\s+pairs",
      "same stale fraction, in words"),
+    # Running counts written into prose go stale on the next edit. Both of these
+    # survived for weeks in the reproducibility section while the checker itself
+    # was reporting different numbers.
+    (r"\b52\s+verified",
+     "stale verification count; the checker reports the live figure on each run"),
+    (r"\bSix\s+claims\s+in\s+this\s+paper\s+have\s+no\s+machine-readable",
+     "stale unbacked count; it is four, and two of the six named have since been backed"),
 ]
 import re as _re
 _LIVE = _re.sub(r"(?s)~~.*?~~", "", NORM)
