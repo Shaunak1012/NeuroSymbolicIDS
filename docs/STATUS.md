@@ -4,7 +4,28 @@
 
 ## ▶ RESUME HERE (next session)
 
-## 🎯 VENUE DECIDED (2026-09-15): NeSy
+## 🔴 VENUE DROPPED (2026-09-15, later the same day): plain research paper
+
+**Decided by the author:** *"don't add venue and whatnot"*, then "plain paper only, drop NeSy" and
+"leave it anonymous". The paper is now a venue-free research paper with no author line.
+- **Source:** [paper_body.md](target/paper_body.md) + [paper_supplementary.md](target/paper_supplementary.md)
+  (renamed from `nesy_*`), still verified together (172 / 0 mismatched).
+- **Build:** `python scripts/md_to_latex.py --compile` (renamed from `md_to_pmlr.py`) writes
+  `docs/target/paper_latex/main.pdf`. Plain `article` layout, **27 pages** including references and
+  appendices, 0 undefined references, 0 overfull lines.
+- **Removed:** the NeSy class file, the anonymised title block ("Author names withheld / Under Review"),
+  the proceedings header, the 10-page check and the "released upon acceptance" line. That line also
+  contradicted Appendix H, which says weights are not released; it now says so.
+- The framing (exogeneity precondition, *one principle, two consequences*) is unchanged. It is the
+  paper's argument, not a venue requirement.
+- 🟡 **Still open:** the repository is public, and pushing the branch puts the paper text on GitHub. If
+  the capstone report goes through a similarity checker such as Turnitin, the checker would match that
+  text. The author decides visibility.
+
+The NeSy-era planning below is **historical**. Its constraints (10 pages, double-blind, PMLR) no
+longer apply.
+
+## ~~🎯 VENUE DECIDED (2026-09-15): NeSy~~ — superseded above
 
 **Chosen by the author.** The recommended alternative was **RAID 2027 with AISec 2027 as fallback**,
 on the grounds that the security-methodology content now outweighs the neuro-symbolic content, and

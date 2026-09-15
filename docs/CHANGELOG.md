@@ -2,6 +2,24 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-15 (Venue dropped — the paper is now a plain, venue-free research paper)
+
+- **Author's decision:** no venue, no template, no author line. Replaces the NeSy decision made
+  earlier the same day, which STATUS and the master draft now show struck through.
+- **Renames:** `md_to_pmlr.py` → `md_to_latex.py`, `nesy_body.md` → `paper_body.md`,
+  `nesy_supplementary.md` → `paper_supplementary.md`, `nesy_latex/` → `paper_latex/`. The figure
+  files keep their `nesy_fig*` names; they are internal file names and never appear in the PDF.
+- **Build:** a plain `article` class (11 pt, 1-inch margins, Latin Modern, natbib/plainnat) replaces
+  `\documentclass[anon]{nesy2026}`. The class file, the `\label{body:end}` probe and the 10-page
+  check are removed, and `--compile` now fails only on TeX errors or undefined references.
+  **27 pages, 0 undefined references, 0 overfull lines.**
+- **Text:** the "Anonymous submission" lines are removed. "Code, per-run records and trained models
+  will be released upon acceptance" contradicted Appendix H (weights are not released) and now
+  matches it. A long `aws s3 sync` command that overflowed its line by 21.5 pt is shortened to the
+  bucket name.
+- The PDF text contains no venue strings; the only "NeSy" left is Grov et al.'s real citation
+  "(NeSy 2024)". Verification: 172 verified / 0 mismatched on both master and paper.
+
 ## 2026-09-15 (NeSy submission COMPILES — body ends on page 9 of 10)
 
 - **MiKTeX 25.12 installed** with the author's approval: winget, user scope, installer hash verified
