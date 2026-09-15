@@ -2,6 +2,26 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-15 (NeSy submission COMPILES — body ends on page 9 of 10)
+
+- **MiKTeX 25.12 installed** with the author's approval: winget, user scope, installer hash verified
+  (`basic-miktex-25.12-x64.exe`, 142 MB, miktex.org CTAN mirror). Smart App Control did not block it.
+- **`md_to_pmlr.py --compile`** runs pdflatex → bibtex → pdflatex ×3 in `nesy_latex/_build/`
+  (gitignored), copies `main.pdf` out (gitignored by `*.pdf`) and checks the limit. **29 pages in
+  total; the body ends on page 9**, read from a `\label{body:end}` in `main.aux`; 0 undefined
+  citations or references; 0 overfull lines in our text. The check was shown to fail with the limit
+  lowered to 8.
+- **What the first compile caught** (the structural lint could not): the jmlr class refuses
+  `tabularx`, so wide tables now use content-sized `p{}` columns; `array` had been loaded only
+  implicitly by `tabularx`; table and paragraph overflows (2–17 pt) were fixed with numeric-column
+  padding and `\emergencystretch`. The remaining 8.9 pt overflow is in the class's own first-page
+  header.
+- **Double-blind:** the PDF info dictionary carried the build timestamp with its UTC offset. It is now
+  suppressed. Title page confirmed as "Author names withheld / Under Review for NeSy 2026", and no
+  identifying strings appear in the PDF text.
+- ~~STATUS: "10-page limit UNVERIFIED"~~ struck through with the measurement. The layout has not been
+  reviewed page by page, since no renderer is available in the session.
+
 ## 2026-09-15 (Submission prose revised; originality checked against cited abstracts)
 
 - **`nesy_body.md` and `nesy_supplementary.md` rewritten in plain academic prose.** Claims, caveats and

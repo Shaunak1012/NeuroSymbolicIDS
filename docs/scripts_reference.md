@@ -849,7 +849,8 @@ labels across that boundary. Both were found only by looking at the output.
 number retyped into a `.tex` file by hand would be one that no check had ever seen.
 
 ```bash
-python scripts/md_to_pmlr.py          # generate + lint; exit 1 on any lint problem
+python scripts/md_to_pmlr.py            # generate + lint; exit 1 on any lint problem
+python scripts/md_to_pmlr.py --compile  # + pdflatex/bibtex in _build/, page-limit check, main.pdf
 ```
 
 - **Body, then `\bibliography`, then the supplementary as `\appendix`**, because NeSy counts 10 pages
@@ -868,8 +869,21 @@ python scripts/md_to_pmlr.py          # generate + lint; exit 1 on any lint prob
   would silently turn it into `\S{}`, which is what the check looks for. Straight double quotes are
   typeset as LaTeX opening/closing quotes. Each check was shown to fire by planting its error in a scratch
   copy.
-- 🔴 **It cannot measure the page count.** No TeX distribution is installed locally. `jmlr.cls`,
-  which `nesy2026.cls` loads, ships with TeX Live and Overleaf.
+- ~~🔴 **It cannot measure the page count.** No TeX distribution is installed locally.~~ **Superseded
+  2026-09-15:** MiKTeX is installed and `--compile` measures the page count. `main.tex` carries a
+  `\label{body:end}` after the last body paragraph, so the page the counted body ends on is read
+  from `main.aux` rather than estimated. The check fails if that page exceeds 10 or if any
+  citation or reference is undefined, and it was shown to fail by lowering the limit to 8. It
+  also reports overfull lines in our text. It finds `pdflatex` on PATH or in MiKTeX's per-user
+  location. `jmlr.cls`, which `nesy2026.cls` loads, ships with MiKTeX (fetched on first use), TeX
+  Live and Overleaf.
+- **Three things the first real compile caught that the structural lint could not:** (1) the jmlr
+  class refuses `tabularx` ("This will break footnote links"), so wide tables now use fixed `p{}`
+  columns sized by content, and numeric columns get extra width because digits and minus signs set
+  wider than text; (2) removing `tabularx` also removed the `array` package it loaded implicitly,
+  which `>{…}` column specs need; (3) the PDF info dictionary carried the build timestamp with the
+  author's UTC offset, a small double-blind leak, now suppressed with `\pdfinfoomitdate`,
+  `\pdftrailerid{}` and `\pdfsuppressptexinfo`.
 
 ⚠️ **The lint crashed on its own first real finding.** The non-ASCII report printed the offending
 character, and a cp1252 Windows console cannot encode `ρ`, so the check died reporting the error it
