@@ -4,6 +4,31 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🎯 VENUE DECIDED (2026-09-15): NeSy
+
+**Chosen by the author.** The recommended alternative was **RAID 2027 with AISec 2027 as fallback**,
+on the grounds that the security-methodology content now outweighs the neuro-symbolic content, and
+that RAID's April deadline would return reviewer feedback before AISec's July one. NeSy was chosen;
+the draft is re-led for it. All three 2026 deadlines had already passed when the decision was made.
+
+**The NeSy framing:** the lead is the **exogeneity precondition** — symbolic knowledge helps a neural
+detector to the extent it lies outside the learned feature basis. §4's mechanism is the same
+principle applied to novel classes (*one principle, two consequences*), and the CIC-IDS2017
+exogeneity test is a negative evaluability result. Title: *Knowledge the Network Already Has: An
+Exogeneity Precondition for Neuro-Symbolic Intrusion Detection.* The security-framed title and
+abstract are retained in the draft for a possible security-venue version.
+
+🔴 **Two hard constraints now govern the draft** (NeSy 2026 rules; 2027 not yet announced):
+- **10 pages excluding references and supplementary material, PMLR LaTeX template.** The draft is
+  **12,324 words, roughly twice that.** Supplementary material is uncounted, so detail moves there
+  rather than being cut.
+- **Double-blind; anonymised.** No author, repository or institution may be identifiable. A grep
+  for the obvious identifiers found none, but a full anonymisation pass is required before submission.
+
+**Remaining before submission:** cut to 10 pages with a supplementary appendix · convert to the PMLR
+template · verify references [14]–[17] and check or drop [16] · close the 4 unbacked numbers ·
+anonymisation pass · NeSy 2027 CFP check once announced.
+
 ## 🔴 INTEGRATION #1 RESULT (2026-09-14) — the benchmark cannot support a NeSy experiment
 
 **Premise tested and FAILED, which is itself the finding.** The hypothesis was that symbolic
@@ -334,10 +359,10 @@ redistribution with citation. Processed flow CSVs are a few GB; raw logs ~450 GB
 never access — it is that nobody has run it.** Found while verifying references, not by revisiting
 the claim. Every "blocked on data" line below is superseded by this note.
 
-**Still open before submission:** cross-dataset (**NOT blocked on access — see the 2026-09-09 correction; we simply have not run it**) · optionally a post-flag
-LTN-control sweep, the only route to reopening C2 · a **venue decision** (no template chosen, so the
-draft is Markdown by design) · 🔴 **a bibliographic pass on references [10]–[13]**, which are cited
-from knowledge and flagged in the draft as unverified. ~~related work~~ ✅ **§9 drafted 2026-09-05**
+**Still open before submission:** ~~cross-dataset (**NOT blocked on access — see the 2026-09-09 correction; we simply have not run it**)~~ ✅ **run 2026-09-10** · optionally a post-flag
+LTN-control sweep, the only route to reopening C2 · ~~a **venue decision** (no template chosen, so the
+draft is Markdown by design)~~ ✅ **DECIDED 2026-09-15: NeSy** — see the block below · 🔴 ~~**a bibliographic pass on references [10]–[13]**, which are cited
+from knowledge and flagged in the draft as unverified.~~ ✅ [1]–[13] verified 2026-09-09; 🟡 **[14]–[17] added 2026-09-14 are NOT yet verified, and [16] is cited via a survey.** ~~related work~~ ✅ **§9 drafted 2026-09-05**
 from an actual literature sweep, 9 of 13 references confirmed against a primary source ·
 ~~reproducibility-artifact section~~ ✅ **§10**, backed by `run_all.py` (19 stages, 0 missing).
 
