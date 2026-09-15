@@ -68,6 +68,16 @@ outside the model's learned feature basis** — and make three contributions aro
    knowledge is still recovered from its features. A benchmark with no external knowledge artefact
    cannot support the experiment published neuro-symbolic gains rest on.
 
+![Figure 1](../../outputs/figures/nesy_fig1_thesis.png)
+
+**Figure 1.** *One principle, two consequences.* Both panels draw the same learned feature basis —
+the features a closed-set objective selects. **(a)** Symbolic knowledge can help only from outside
+that basis: our Logic Tensor Network axioms are functions of the flow features and add no evidence,
+whereas the knowledge behind published gains [14–16] is not computable from the input. **(b)** An
+unseen attack family is reachable only insofar as it overlaps the basis: Web Brute Force shares 1 of
+8 discriminative features and is reached only weakly once label artefacts are removed (§7); Bot
+shares none and is unreachable. Inside and outside map to opposite outcomes in the two panels.
+
 ⚠️ **Two measurement failures bound the magnitudes (§7), and we demonstrate both on our own system.**
 The metric the field reports cannot resolve zero-day capability, and on corrected labels two of our
 three headline zero-day families were measuring whether the dataset counts an unsuccessful connection
@@ -147,14 +157,24 @@ We establish this on Bot, where the overlap is empty:
   confidence-based remedy before it is tried.
 - The eight features separating Bot from benign share **0 of 8** with the eight the known-class task
   selects.
-- The model's Bot ranking is therefore **noise**: cross-seed Spearman **ρ = −0.090**, against
-  0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
+- The model's Bot ranking is therefore **noise** (Figure 2): cross-seed Spearman **ρ = −0.090**,
+  against 0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
   does not (ρ = 0.827)**, so the property belongs to closed-set discriminative learning rather than to
   neural networks. ⚠️ Three seeds cannot distinguish −0.090 from −0.02; they are ample to show it is
   not 0.7, and only that is load-bearing.
 - **The information is present.** An oracle given Bot labels reaches PR-AUC **0.9988** from the same
   features. The oracle trains on zero-day labels and is an upper bound, not a method; it shows the
   barrier is supervision, not information or modality.
+
+![Figure 2](../../outputs/figures/nesy_fig2_mechanism.png)
+
+**Figure 2.** *Bot's ranking is noise for closed-set learners.* Agreement between each model's
+rankings of test flows across three training seeds (Spearman ρ), per unseen family. For Bot the two
+closed-set discriminative learners do not agree with themselves (1D CNN −0.090, random forest
++0.068); the benign-only autoencoder does (+0.827), so the instability belongs to closed-set
+discriminative learning rather than to neural networks. The zero line marks no agreement; no
+threshold is drawn, because none is measured. Three seeds cannot distinguish −0.090 from −0.02, but
+they suffice to show it is not 0.7.
 
 **The two consequences side by side.** Knowledge *inside* the basis — our axioms — adds no evidence.
 A novel class *outside* the basis — Bot — cannot be reached. Both follow from what a closed-set
