@@ -67,8 +67,19 @@ REC = {n: load(n) for n in (
     "preprocess_improved_merge", "preprocess_improved_exclude",
     "improved_analyse", "exogenous_predicate")}
 
-with open(DRAFT, encoding="utf-8") as f:
-    TEXT = f.read()
+# VERIFY_FILES lets the check run over a DERIVED version of the paper. The NeSy
+# submission splits the master draft into a 10-page body and a supplementary,
+# and the invariant that matters is that every verified number survives the
+# split somewhere - so the two files are checked together, as one text. Unset,
+# this is exactly the master-draft check it always was.
+_VF = os.environ.get("VERIFY_FILES", "")
+_FILES = ([os.path.join(paths.ROOT, x.strip()) for x in _VF.split(",") if x.strip()]
+          if _VF else [DRAFT])
+TEXT = ""
+for _fp in _FILES:
+    with open(_fp, encoding="utf-8") as f:
+        TEXT += f.read() + "\n"
+print("verifying: %s" % ", ".join(os.path.relpath(x, paths.ROOT) for x in _FILES))
 
 # The draft uses a Unicode minus in prose and ASCII hyphen in tables; normalise
 # both sides rather than requiring the author to remember which is which.
