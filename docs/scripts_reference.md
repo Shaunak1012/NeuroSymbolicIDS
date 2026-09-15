@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (76 Python scripts, plus 14 shell launchers).
+> Last verified against source: **2026-09-05** (77 Python scripts, plus 14 shell launchers).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -840,6 +840,38 @@ figures have a legend and direct labels, and the values are in the text. Print i
 The first version's sub-labels collided and its boundary line inherited the fill's 10 % opacity,
 leaving the one line that carries the argument nearly invisible. The second ran the inside item's
 labels across that boundary. Both were found only by looking at the output.
+
+## `scripts/md_to_pmlr.py`
+
+**Purpose**: Generate the NeSy PMLR LaTeX submission **from** `nesy_body.md` +
+`nesy_supplementary.md` into `docs/target/nesy_latex/` (`main.tex`, `refs.bib`, `nesy2026.cls`,
+`figures/`). The markdown stays the source of truth because it is what `verify_draft.py` checks. A
+number retyped into a `.tex` file by hand would be one that no check had ever seen.
+
+```bash
+python scripts/md_to_pmlr.py          # generate + lint; exit 1 on any lint problem
+```
+
+- **Body, then `\bibliography`, then the supplementary as `\appendix`**, because NeSy counts 10 pages
+  *excluding* references and supplementary material. Build-note blocks are stripped.
+- **Citations:** "Surname et al. [n]" becomes `\citet`, bare `[n]` / `[a]–[b]` become `\citep`.
+  `§N` becomes `Section~\ref{sec:N}`, and "supplementary §X" / "Appendix X" become
+  `Appendix~\ref{apd:X}`.
+- **`refs.bib` is transcribed from the verified reference list in `paper_draft.md`, with authors as
+  initials, exactly as verified.** The first draft of the `.bib` expanded first names from memory,
+  which is the error class behind three of the four reference errors caught so far ([10], [15],
+  [16]), so it was reverted before commit.
+- **The lint is structural, not a compile.** It checks brace and environment balance, cite keys
+  against the `.bib`, `\ref` labels, figure files, unmapped non-ASCII and leftover markdown. It also
+  checks that **every decimal and thousands-grouped number in the converted markdown reaches the
+  `.tex` unchanged** (428 today). Each check was shown to fire by planting its error in a scratch
+  copy.
+- 🔴 **It cannot measure the page count.** No TeX distribution is installed locally. `jmlr.cls`,
+  which `nesy2026.cls` loads, ships with TeX Live and Overleaf.
+
+⚠️ **The lint crashed on its own first real finding.** The non-ASCII report printed the offending
+character, and a cp1252 Windows console cannot encode `ρ`, so the check died reporting the error it
+had found. It now prints code points only. Same bug class as non-negotiable #6.
 
 ## `scripts/noise_postdet.py` + `scripts/noise_postdet.sh`
 

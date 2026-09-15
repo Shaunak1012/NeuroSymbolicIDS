@@ -1,6 +1,6 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-09**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-15**.
 
 ## ▶ RESUME HERE (next session)
 
@@ -26,14 +26,20 @@ abstract are retained in the draft for a possible security-venue version.
   for the obvious identifiers found none, but a full anonymisation pass is required before submission.
 
 **Remaining before submission:** ~~cut to 10 pages with a supplementary appendix~~ ✅ **done 2026-09-15** —
-`nesy_body.md` (**3,323 words**, 6 tables, well inside 10 pages) + `nesy_supplementary.md` (8 appendices,
+`nesy_body.md` (**3,323 words**, ~~6 tables~~ **4 tables** — *corrected 2026-09-15: the count was
+asserted at the split and never checked; a count of the markdown's table separators gives 4*, well inside 10 pages) + `nesy_supplementary.md` (8 appendices,
 **copied verbatim** from the master draft). **Body + supplementary verify at 172 / 0 mismatched —
 identical to the master**, so the split lost and altered nothing; every decimal in the body also
 appears verbatim in the master. `paper_draft.md` stays the full research record · **remap §-numbered
 cross-references inside the appendices and strip emoji/internal commentary** ✅ **done 2026-09-15** · ~~add 1–2 figures
-(room exists)~~ ✅ **done 2026-09-15** — Figure 1 (the thesis) and Figure 2 (the mechanism), palette validated, body now 3,531 words · convert to the PMLR
-template · ~~verify references [14]–[17] and check or drop [16]~~ ✅ **done 2026-09-15** — three errors caught, one a fabricated title; see the draft's citation banner · ~~anonymisation pass~~ ✅ **done 2026-09-15** — reviewer-visible text in body and supplementary has no identifying strings and no code identifiers (script names were removed because the repository is **public** and a name like `field_gap.py` is a search-engine pointer to it); figure PNG/PDF metadata carries only Matplotlib's software tag. Four stale running counts removed along the way. 🟡 **Open decision for the author:** NeSy **explicitly permits preprints** and says nothing against public code, so keeping the repository public is within the rules — but `paper_draft.md` is in it verbatim, so a reviewer who searched a supplementary sentence could find it. Making the repo private during review is optional extra caution, not a requirement, and is the author's call · the build-note blocks in both files must be deleted at conversion · close the 4 unbacked numbers ·
-anonymisation pass · NeSy 2027 CFP check once announced.
+(room exists)~~ ✅ **done 2026-09-15** — Figure 1 (the thesis) and Figure 2 (the mechanism), palette validated, body now 3,531 words · ~~convert to the PMLR
+template~~ 🟡 **source done 2026-09-15, NOT compiled** — `docs/target/nesy_latex/` is generated from the markdown by
+`md_to_pmlr.py` (`\documentclass[anon]{nesy2026}`, 17-entry `refs.bib`, supplementary after the bibliography as
+`\appendix`). Its lint passes: structure, cite keys, labels, figures, and **all 428 numbers identical to the
+verified markdown**. 🔴 **The 10-page limit is UNVERIFIED — no TeX distribution is installed.** Compile on
+Overleaf (no install) or with a local TeX install (author's permission needed) before this item closes ·
+~~the build-note blocks in both files must be deleted at conversion~~ ✅ stripped by the generator · ~~verify references [14]–[17] and check or drop [16]~~ ✅ **done 2026-09-15** — three errors caught, one a fabricated title; see the draft's citation banner · ~~anonymisation pass~~ ✅ **done 2026-09-15** — reviewer-visible text in body and supplementary has no identifying strings and no code identifiers (script names were removed because the repository is **public** and a name like `field_gap.py` is a search-engine pointer to it); figure PNG/PDF metadata carries only Matplotlib's software tag. Four stale running counts removed along the way. 🟡 **Open decision for the author:** NeSy **explicitly permits preprints** and says nothing against public code, so keeping the repository public is within the rules — but `paper_draft.md` is in it verbatim, so a reviewer who searched a supplementary sentence could find it. Making the repo private during review is optional extra caution, not a requirement, and is the author's call · close the 4 unbacked numbers ·
+~~anonymisation pass~~ *(duplicate of the item above, done)* · NeSy 2027 CFP check once announced.
 
 ## 🔴 INTEGRATION #1 RESULT (2026-09-14) — the benchmark cannot support a NeSy experiment
 
