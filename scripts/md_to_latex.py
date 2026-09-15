@@ -1,38 +1,38 @@
 """
-md_to_pmlr.py — generate the NeSy PMLR LaTeX submission FROM the markdown.
+md_to_latex.py — generate the paper's LaTeX source and PDF FROM the markdown.
 
 WHY GENERATE RATHER THAN HAND-CONVERT
 --------------------------------------
 The markdown is what `verify_draft.py` checks: every quantitative claim in
-`nesy_body.md` and `nesy_supplementary.md` is verified against the metadata that
-produced it, with zero mismatches and zero stale claims. Hand-converting ~14,000
+`paper_body.md` and `paper_supplementary.md` is verified against the metadata that
+produced it, with zero mismatches and zero stale claims. Hand-converting ~12,000
 words into LaTeX would break that chain -- a number retyped in a .tex file is a
 number no check has seen. Generating the LaTeX mechanically keeps it traceable,
-makes the conversion re-runnable when the paper changes during review, and puts
-LaTeX escaping (the part most likely to go wrong by hand) in one tested place.
+makes the conversion re-runnable whenever the paper changes, and puts LaTeX
+escaping (the part most likely to go wrong by hand) in one tested place.
 
 WHAT IT PRODUCES
 ----------------
-docs/target/nesy_latex/
-  main.tex          body, then bibliography, then the supplementary as \\appendix
+docs/target/paper_latex/
+  main.tex          plain `article` layout, no venue template and no author line:
+                    body, then bibliography, then the supplementary as \\appendix
   refs.bib          the 17 references, transcribed from the VERIFIED list in
                     paper_draft.md (Crossref / arXiv / publisher, 2026-09-09/15)
-  nesy2026.cls      the official NeSy 2026 class (anon option for OpenReview)
-  figures/*.png     the two submission figures, copied so the folder is
-                    self-contained for upload
-
-NeSy's full-paper limit is 10 pages EXCLUDING references and supplementary
-material, so the appendix after the bibliography does not count.
+  figures/*.png     the two figures, copied so the folder is self-contained
+  main.pdf          with --compile (gitignored)
 
 Two levels of check. The structural lint always runs: brace and environment balance,
 every citation key in the .bib, every \\ref label defined, every figure file present,
 no unmapped non-ASCII, no leftover markdown, and every number identical to the
-markdown. It cannot see what only TeX sees -- the page count, a class that refuses a
-package -- so `--compile` runs pdflatex/bibtex in _build/ and checks the page the
-body ends on (a \\label{body:end} read back from main.aux) against the 10-page limit.
+markdown. It cannot see what only TeX sees, so `--compile` runs pdflatex/bibtex in
+_build/ and fails on a TeX error or an undefined citation or reference.
 
-Run:  python scripts/md_to_pmlr.py            (generate + lint)
-      python scripts/md_to_pmlr.py --compile  (+ compile, page-limit check, main.pdf)
+History: this began as md_to_pmlr.py, targeting the NeSy 2026 PMLR template. The venue
+was dropped on 2026-09-15 at the author's request; the template, anonymised title block
+and 10-page check went with it.
+
+Run:  python scripts/md_to_latex.py            (generate + lint)
+      python scripts/md_to_latex.py --compile  (+ compile check, main.pdf)
 """
 import io
 import os
@@ -43,12 +43,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import paths                                          # noqa: E402
 
-SRC_BODY = os.path.join(paths.ROOT, "docs", "target", "nesy_body.md")
-SRC_SUPP = os.path.join(paths.ROOT, "docs", "target", "nesy_supplementary.md")
-OUT = os.path.join(paths.ROOT, "docs", "target", "nesy_latex")
-TEMPLATE_CLS = os.environ.get("NESY_CLS", "")
-
-SHORT_TITLE = "Knowledge the Network Already Has"
+SRC_BODY = os.path.join(paths.ROOT, "docs", "target", "paper_body.md")
+SRC_SUPP = os.path.join(paths.ROOT, "docs", "target", "paper_supplementary.md")
+OUT = os.path.join(paths.ROOT, "docs", "target", "paper_latex")
 
 # reference number -> bib key; numbering is shared by body and supplementary
 CITE = {1: "sharafaldin2018", 2: "engelen2021", 3: "lanvin2023",
@@ -181,10 +178,9 @@ def table_to_latex(rows, in_supp):
     longest = [max(len(r[j]) if j < len(r) else 0 for r in [header] + body) for j in range(ncol)]
     right = [(sep[j] if j < len(sep) else "").endswith(":") for j in range(ncol)]
     if max(longest) > 28:
-        # A table with long text gets fixed-width wrapping columns sized by content. Not tabularx:
-        # the jmlr class refuses to load it ("This will break footnote links").
-        # +3 characters per column covers the inter-column padding a short numeric column needs
-        # digits and math minus signs set wider than a text character, so numeric columns get more
+        # A table with long text gets fixed-width wrapping columns sized by content. Padding covers
+        # the inter-column space; numeric columns get more because digits and math minus signs set
+        # wider than a text character.
         weights = [min(max(w, 5), 70) + (7 if rt else 4) for w, rt in zip(longest, right)]
         specs = ["%s\\arraybackslash}p{\\dimexpr %.3f\\linewidth-2\\tabcolsep\\relax}"
                  % (">{\\raggedleft" if rt else ">{\\raggedright", w / float(sum(weights)))
@@ -226,10 +222,10 @@ def blocks_to_latex(md, in_supp=False):
                 cap.append(lines[j].strip())
                 j += 1
             caption = re.sub(r"^\*\*Figure \d+\.\*\*\s*", "", " ".join(cap))
-            out.append("\\begin{figure}[htbp]\n\\floatconts\n  {%s}\n"
-                       "  {\\caption{%s}}\n"
-                       "  {\\includegraphics[width=\\linewidth]{figures/%s}}\n"
-                       "\\end{figure}" % (FIGURES[stem], inline(caption, in_supp), stem))
+            out.append("\\begin{figure}[htbp]\n\\centering\n"
+                       "\\includegraphics[width=\\linewidth]{figures/%s}\n"
+                       "\\caption{%s}\\label{%s}\n"
+                       "\\end{figure}" % (stem, inline(caption, in_supp), FIGURES[stem]))
             i = j
             continue
 
@@ -462,23 +458,31 @@ def generate():
 
     os.makedirs(os.path.join(OUT, "figures"), exist_ok=True)
     tex = [
-        "% Generated by scripts/md_to_pmlr.py from nesy_body.md + nesy_supplementary.md.",
+        "% Generated by scripts/md_to_latex.py from paper_body.md + paper_supplementary.md.",
         "% Do not edit by hand: change the markdown (which verify_draft.py checks) and regenerate.",
-        "\\documentclass[anon]{nesy2026} % anonymised submission for OpenReview",
+        "\\documentclass[11pt]{article}",
         "",
-        "% double-blind hygiene: the PDF info dict otherwise carries the build time with the",
-        "% author's UTC offset, and a banner naming the TeX distribution",
+        "% the PDF info dict otherwise carries the build time with the author's UTC offset",
+        "% and a banner naming the TeX distribution; the paper has no author line, so neither",
         "\\pdfinfoomitdate=1",
         "\\pdftrailerid{}",
         "\\pdfsuppressptexinfo=-1",
         "",
+        "\\usepackage[margin=1in]{geometry}",
+        "\\usepackage[T1]{fontenc}",
+        "\\usepackage{lmodern}",
+        "\\usepackage{amsmath,amssymb}",
+        "\\usepackage{graphicx}",
         "\\usepackage{booktabs}",
-        "\\usepackage{array}  % >{...} column specs; tabularx used to load it implicitly",
+        "\\usepackage{array}  % >{...} column specs",
+        "\\usepackage[round]{natbib}",
+        "\\usepackage{url}",
+        "\\usepackage[hidelinks]{hyperref}",
         "\\setlength{\\emergencystretch}{1.5em}  % lets lines with long numeric tokens break",
         "",
-        "\\title[%s]{%s}" % (inline(SHORT_TITLE), inline(title)),
-        "% Author block is suppressed by the anon option; fill in only for the camera-ready.",
-        "\\clearauthor{\\Name{Author Name} \\Email{author@example.org}\\\\ \\addr Address}",
+        "\\title{%s}" % inline(title),
+        "\\author{}",
+        "\\date{}",
         "",
         "\\begin{document}",
         "\\maketitle",
@@ -489,11 +493,10 @@ def generate():
         "",
         blocks_to_latex(main),
         "",
-        "% page-limit probe: main.aux records the page the counted body ends on",
-        "\\label{body:end}",
-        "",
+        "\\bibliographystyle{plainnat}",
         "\\bibliography{refs}",
         "",
+        "\\clearpage",
         "\\appendix",
         "",
         blocks_to_latex(apps, in_supp=True),
@@ -506,8 +509,6 @@ def generate():
     for stem in FIGURES:
         shutil.copyfile(os.path.join(paths.FIGURES, stem + ".png"),
                         os.path.join(OUT, "figures", stem + ".png"))
-    if TEMPLATE_CLS and os.path.exists(TEMPLATE_CLS):
-        shutil.copyfile(TEMPLATE_CLS, os.path.join(OUT, "nesy2026.cls"))
     print("wrote %s" % OUT)
 
 
@@ -534,7 +535,6 @@ def lint():
             if k.strip() not in keys:
                 problems.append("citation key not in refs.bib: %s" % k)
     labels = set(re.findall(r"\\label\{([^}]+)\}", body))
-    labels |= set(re.findall(r"\\floatconts\s*\{([^}]+)\}", body))
     for r in re.findall(r"\\ref\{([^}]+)\}", body):
         if r not in labels:
             problems.append("\\ref to undefined label: %s" % r)
@@ -581,16 +581,12 @@ def lint():
             print("  - " + p)
         return 1
     print("LINT PASSED - structurally sound." + ("" if "--compile" in sys.argv else
-          " NOT compiled: the page count is unverified (run with --compile)."))
+          " Not compiled (run with --compile)."))
     return 0
 
 
 # ---------------------------------------------------------------------------
-PAGE_LIMIT = 10          # NeSy full paper, excluding references and supplementary
-
-
 def _tex_bin(name):
-    import shutil
     found = shutil.which(name)
     if found:
         return found
@@ -600,11 +596,7 @@ def _tex_bin(name):
 
 
 def compile_pdf():
-    """pdflatex -> bibtex -> pdflatex x2 in _build/, then read the page the body ends on.
-
-    The generated main.tex puts \\label{body:end} after the last body paragraph, so main.aux
-    records the last counted page directly; no PDF parsing is needed for the limit check.
-    """
+    """pdflatex -> bibtex -> pdflatex x3 in _build/; fail on a TeX error or undefined reference."""
     import subprocess
     pdflatex, bibtex = _tex_bin("pdflatex"), _tex_bin("bibtex")
     if not (pdflatex and bibtex):
@@ -612,9 +604,8 @@ def compile_pdf():
         return 1
     build = os.path.join(OUT, "_build")
     if os.path.isdir(build):
-        shutil_rm = __import__("shutil").rmtree
-        shutil_rm(build)
-    __import__("shutil").copytree(OUT, build, ignore=__import__("shutil").ignore_patterns("_build", "*.pdf"))
+        shutil.rmtree(build)
+    shutil.copytree(OUT, build, ignore=shutil.ignore_patterns("_build", "*.pdf"))
     latex = [pdflatex, "-enable-installer", "-interaction=nonstopmode", "-halt-on-error", "main.tex"]
     if "miktex" not in pdflatex.lower():
         latex.remove("-enable-installer")                 # MiKTeX-only: fetch missing packages
@@ -625,18 +616,14 @@ def compile_pdf():
                                                      os.path.join(build, "main.log")))
             return 1
     log = io.open(os.path.join(build, "main.log"), encoding="latin-1").read()
-    aux = io.open(os.path.join(build, "main.aux"), encoding="latin-1").read()
-    end = re.search(r"\\newlabel\{body:end\}\{\{[^}]*\}\{(\d+)\}", aux)
     total = re.search(r"Output written on main\.pdf \((\d+) pages", log)
     undefined = len(re.findall(r"(?:Citation|Reference) `[^']+' on page \d+ undefined", log))
     overfull = re.findall(r"Overfull \\hbox \(([\d.]+)pt too wide\) in paragraph", log)
-    __import__("shutil").copyfile(os.path.join(build, "main.pdf"), os.path.join(OUT, "main.pdf"))
-    body_pages = int(end.group(1)) if end else None
-    print("compiled: %s pages in total; body ends on page %s (limit %d, references and appendices"
-          " excluded)" % (total.group(1) if total else "?", body_pages, PAGE_LIMIT))
-    print("          undefined citations/references: %d; overfull lines in our text: %d%s"
+    shutil.copyfile(os.path.join(build, "main.pdf"), os.path.join(OUT, "main.pdf"))
+    print("compiled: %s pages" % (total.group(1) if total else "?"))
+    print("          undefined citations/references: %d; overfull lines: %d%s"
           % (undefined, len(overfull), (" (max %.1fpt)" % max(map(float, overfull))) if overfull else ""))
-    if body_pages is None or body_pages > PAGE_LIMIT or undefined:
+    if undefined or not total:
         print("COMPILE CHECK FAILED")
         return 1
     print("COMPILE CHECK PASSED - main.pdf written to %s" % OUT)

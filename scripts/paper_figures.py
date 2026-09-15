@@ -296,7 +296,7 @@ def fig5_variance():
 #  2. CAVEATS IN THE CAPTION, NOT ON THE IMAGE. fig2-5 burn their limits into
 #     the figure so they survive being lifted into a talk. A PMLR figure's
 #     caption lives in LaTeX beside it, and text inside the image would
-#     duplicate it at an unreadable size. The captions are in nesy_body.md.
+#     duplicate it at an unreadable size. The captions are in paper_body.md.
 #
 # Palette: the first three categorical slots, which the validator passes on
 # ALL pairs in light mode (worst CVD dE 9.2, normal-vision dE 24.0). Aqua is

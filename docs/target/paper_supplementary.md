@@ -1,11 +1,9 @@
-# Supplementary Material — Knowledge the Network Already Has
+# Appendices — Knowledge the Network Already Has
 
-*Anonymous submission. Supplementary material is not counted toward the page limit.*
-
-> **Build note — not part of the submission.** Revised from the corresponding sections of
+> **Build note — not part of the paper.** Revised from the corresponding sections of
 > [paper_draft.md](paper_draft.md). `verify_draft.py` checks this file together with
-> [nesy_body.md](nesy_body.md), so every recorded number must still appear in one of the two. The
-> build script strips this block on conversion to the PMLR template.
+> [paper_body.md](paper_body.md), so every recorded number must still appear in one of the two.
+> `md_to_latex.py` strips this block and the source table below when it generates the LaTeX.
 
 | appendix | master-draft source |
 |---|---|
@@ -631,8 +629,8 @@ but below the maximum, as expected given that the maximum was never a typical ru
 ## Appendix F — Limitations, extended
 
 1. **Cross-dataset validation.** We replicate on CSE-CIC-IDS2018, which is openly available from the AWS
-   Registry of Open Data without an account (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`)
-   under a licence that allows redistribution with citation. We ran four method settings with three seeds
+   Registry of Open Data without an account (bucket `s3://cse-cic-ids2018/`) under a licence that
+   allows redistribution with citation. We ran four method settings with three seeds
    each, matching the 2017 training size of 883,796 flows (Appendices C and D). The mechanism replicates
    once rarity is controlled for, and the double dissociation replicates in direction but not in size.
    The remaining limitation is that two captures from the same producer, using related methods, do not

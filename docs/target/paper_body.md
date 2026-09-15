@@ -1,12 +1,9 @@
 # Knowledge the Network Already Has: An Exogeneity Precondition for Neuro-Symbolic Intrusion Detection
 
-*Anonymous submission — NeSy full paper (≤ 10 pages excluding references and supplementary material)*
-
-> **Build note — not part of the submission.** Derived from [paper_draft.md](paper_draft.md), which
+> **Build note — not part of the paper.** Derived from [paper_draft.md](paper_draft.md), which
 > remains the full verified research record. Every quantity here is checked by `verify_draft.py`
-> against `outputs/metadata/*.json`, over this file and [nesy_supplementary.md](nesy_supplementary.md)
-> together, and every decimal in this file must appear verbatim in the master draft. The build
-> script strips this block on conversion to the PMLR template.
+> against `outputs/metadata/*.json`, over this file and [paper_supplementary.md](paper_supplementary.md)
+> together. `md_to_latex.py` strips this block when it generates the LaTeX.
 
 ---
 
@@ -359,7 +356,8 @@ construct any, because knowledge aggregated from a capture can be recovered from
 We suggest that anyone reporting a neuro-symbolic gain should first check that the injected knowledge is
 not already present in the input, and should be aware that some benchmarks make this impossible.
 
-*Code, per-run records and trained models will be released upon acceptance.*
+*Code, configuration and per-run records are released with this paper; the dataset and trained
+weights are not (Appendix H).*
 
 ---
 

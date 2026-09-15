@@ -60,5 +60,5 @@ outputs/*.pid
 outputs/*.log
 data/improved_2017/
 
-# LaTeX build directory for the NeSy submission (md_to_pmlr.py --compile)
-docs/target/nesy_latex/_build/
+# LaTeX build directory for the paper (md_to_latex.py --compile)
+docs/target/paper_latex/_build/
