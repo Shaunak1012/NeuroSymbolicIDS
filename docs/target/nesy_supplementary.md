@@ -5,25 +5,25 @@
 > **Build note — not part of the submission.** Every appendix below is copied **verbatim** from
 > [paper_draft.md](paper_draft.md), so no verified number can be lost or mistyped in the move;
 > `verify_draft.py` checks this file together with [nesy_body.md](nesy_body.md). Cross-references
-> inside the appendices (“§5”, “see §7”) still use the master draft's numbering and must
+> inside the appendices (“Appendix D”, “see Appendix E”) still use the master draft's numbering and must
 > be remapped, and emoji markers and internal commentary stripped, before PMLR conversion.
 
 | appendix | copied from master-draft section(s) |
 |---|---|
-| A — Protocol and metric, in full | §2 Protocol and metric |
-| B — The metric-resolution gap, in full | #The metric failure + §3 The gap, demonstrated four independent ways |
-| C — The mechanism, extended | §4 The mechanism |
-| D — What does not fix it, and what partially works | §5 What does not fix it |
-| E — Measurement discipline and the Arp et al. audit | §7 Measurement discipline |
-| F — Limitations, extended | §8 Limitations |
-| G — Related work, extended | §9 Related work |
-| H — Reproducibility | §10 Reproducibility |
+| A — Protocol and metric, in full | Appendix A Protocol and metric |
+| B — The metric-resolution gap, in full | #The metric failure + Appendix B The gap, demonstrated four independent ways |
+| C — The mechanism, extended | Appendix C The mechanism |
+| D — What does not fix it, and what partially works | Appendix D What does not fix it |
+| E — Measurement discipline and the Arp et al. audit | Appendix E Measurement discipline |
+| F — Limitations, extended | Appendix F Limitations |
+| G — Related work, extended | Appendix G Related work |
+| H — Reproducibility | Appendix H Reproducibility |
 
 ---
 
 ## Appendix A — Protocol and metric, in full
 
-### §2 Protocol and metric
+### Protocol and metric
 
 **Data and split.** CIC-IDS2017 flow features, **68 numeric features per flow**. Nine attack families
 plus benign are treated as *known* and split 80/10/10 stratified, with benign under-sampled to 1:1:
@@ -68,7 +68,7 @@ claim what they measure — separating benign traffic from attack families the m
 They are not. They are routinely offered as evidence of capability against *novel* attacks, which is
 the capability that matters operationally and the one the metric is least able to speak to.
 
-We make that gap quantitative. ⚠️ **The 40 methods are ours, and that matters for how the claim
+We make that gap quantitative. **The 40 methods are ours, and that matters for how the claim
 should be read.** They are not 40 published systems re-run; they are 40 models we trained under one
 protocol — classical baselines, deep architectures, benign-only anomaly detectors, neuro-symbolic
 variants and fusions — precisely so that every one is scored identically on both axes, which
@@ -79,21 +79,21 @@ the published metric). Scoring each on that metric and on **macro zero-day PR-AU
 families, we find:
 
 - **37 of 169 comparable method pairs (22 %) are indistinguishable on the published metric while
-  differing ≥2× on zero-day capability.** "Indistinguishable" means a difference below **0.0060**,
-  two standard deviations of a *difference* derived from a measured median run-to-run SD of
-  **0.0021**. We state the band rather than the count alone, because the count is meaningless
-  without it.
+ differing ≥2× on zero-day capability.** "Indistinguishable" means a difference below **0.0060**,
+ two standard deviations of a *difference* derived from a measured median run-to-run SD of
+ **0.0021**. We state the band rather than the count alone, because the count is meaningless
+ without it.
 - The extreme case, `deep_cnn_lstm` versus `linear_svm`, sits **0.0052 apart on the published metric
-  and 16.6× apart on zero-day**. We give the extreme only alongside the distribution above; on its
-  own it would be cherry-picking.
+ and 16.6× apart on zero-day**. We give the extreme only alongside the distribution above; on its
+ own it would be cherry-picking.
 - Restricting to the field's own reporting regime — the 22 methods scoring ≥0.98, which is where
-  published work lives — those methods sit **within 0.0144 of one another and span 18.5×** on
-  zero-day. The ≥0.98 cut is chosen *because it is the field's regime*, not because it separates the
-  data.
+ published work lives — those methods sit **within 0.0144 of one another and span 18.5×** on
+ zero-day. The ≥0.98 cut is chosen *because it is the field's regime*, not because it separates the
+ data.
 
-🔴 **These figures exclude 11 tie-degenerate scorers, and the exclusion is not optional.** Of the 42
+**These figures exclude 11 tie-degenerate scorers, and the exclusion is not optional.** Of the 42
 methods we evaluated, eleven — `decision_tree`, `knn_k5`, `naive_bayes`, four LTN variants and the
-four knowledge-graph channels — place roughly half of all flows in a **single tie block**. §3b
+four knowledge-graph channels — place roughly half of all flows in a **single tie block**. this appendix
 explains why that makes their PR-AUC incomparable to a continuous scorer's, and a "≥2× apart on
 macro" test is precisely a comparison of PR-AUCs. Including them gives **75 of 249 pairs (30 %)** and
 a headline extreme of 17.9×; both are inflated by the same artefact the paper elsewhere warns about,
@@ -112,15 +112,15 @@ figure, so the strong forms cannot be reintroduced by accident.
 
 **Contributions.**
 
-1. A resolution failure, demonstrated across 42 methods scored on a single axis (§3, Fig. 1).
+1. A resolution failure, demonstrated across 42 methods scored on a single axis (this appendix, Fig. 1).
 2. A mechanism for why zero-day detection is hard rather than merely unmeasured, with four
-   independent symptoms traced to one cause (§4).
+ independent symptoms traced to one cause (Appendix C).
 3. A negative result that is expensive to obtain: four categories of method, a standard OOD battery,
-   two post-hoc remedies and our own symbolic architecture all fail in the same way (§5).
-4. One partial success and its honest bound (§6), and a measurement-discipline section that retracts
-   two of our own claims (§7).
+ two post-hoc remedies and our own symbolic architecture all fail in the same way (Appendix D).
+4. One partial success and its honest bound (Appendix D), and a measurement-discipline section that retracts
+ two of our own claims (Appendix E).
 
-### §3 The gap, demonstrated four independent ways
+### The gap, demonstrated four independent ways
 
 **(a) One model, two protocols.** Holding the model fixed and changing only the evaluation protocol
 moves XGBoost from **0.9936 to 0.6372** and our CNN from **0.9928 to 0.6446** — a gap of **0.3564**
@@ -129,9 +129,9 @@ produced by nothing but the question asked.
 **(b) Seven classical baselines.** All seven land in **0.977–0.985** on the published metric, against
 the CNN's 0.9928 — the field's regime. On zero-day they span **0.0374 to 0.6049, a factor of 16**.
 Logistic regression is **98 % as good as the CNN on the published metric and 17× worse on zero-day.**
-⚠️ Two members of this tier are **score-degenerate**: `decision_tree` and `knn` place 50.1 % and
+Two members of this tier are **score-degenerate**: `decision_tree` and `knn` place 50.1 % and
 49.8 % of all flows in a single tie block, so their PR-AUC is not comparable to a continuous scorer's.
-**This is the same property that removes eleven methods from §1's headline** — it is a general
+**This is the same property that removes eleven methods from the headline figures above** — it is a general
 exclusion criterion in this paper, not a Tier-A footnote, and `field_gap.py` reports both populations
 so the effect of applying it is visible rather than assumed.
 The best *valid* Tier-A result is the MLP at a three-seed mean of **0.4965** — not the n = 1 figure of
@@ -141,7 +141,7 @@ across seeds, because the only thing the seed changes is which 50,000 rows it me
 **(c) Four deep architectures.** Published metric **0.9854–0.9932**. The relationship with zero-day
 capability is not merely weak here, it is **inverted**: the tier's *worst* zero-day model
 (Transformer, macro 0.1106) posts 0.9894, while `deep_gru` (macro 0.3029) posts the tier's **highest**
-published score, 0.9932. ⚠️ Three caveats travel with this tier. The recurrent models run over the
+published score, 0.9932. Three caveats travel with this tier. The recurrent models run over the
 **feature axis, not time** — the 68 statistics are unordered — which matches published practice and
 is therefore the right comparison, but is **not evidence about sequence modelling**. Budgets are
 unmatched (the LSTM hit its 30-epoch cap). The Transformer result is **one under-tuned
@@ -151,13 +151,13 @@ configuration**, not a claim about attention.
 reported figures by 18–29 pp on all four known-class views and **reproduce their 1D CNN's zero-day
 accuracy almost exactly — 47.85 % against 48.34 %.** What we cannot reproduce is their Hybrid-LTN's
 **+12 pp symbolic gain**: our closest reproduction of their model scores **47.24 %**, no better than
-our own CNN. ⚠️ This is a comparison in **form, not head-to-head** — different modality (flow features
+our own CNN. This is a comparison in **form, not head-to-head** — different modality (flow features
 versus payload bytes), zero-day membership differing by a swap (they hold out PortScan and train
 Infiltration; we do the reverse), and different class sizes. Holding the model fixed and changing only
 the family mix moves their headline from 48.32 % to 44.38 %, so **composition explains roughly 4 pp of
 the missing 12** — it is not explained away, but we say what is controlled.
 
-### §3b Two defects in that zero-day metric, verified arithmetically
+### Two defects in that zero-day metric, verified arithmetically
 
 **It has no false-positive term.** Their zero-day view contains only attack rows, so precision ≡ 1,
 accuracy *is* recall, and F1 = 2A/(1+A) exactly — we reproduce every published F1 from its matching
@@ -165,15 +165,15 @@ accuracy to within 0.02 pp. The headline "accuracy 48 → 60 %, F1 65 → 75 %" 
 reported twice**, and **a model that flags every flow scores 100 % on both**. We know this failure
 mode is reachable because a float32 saturation bug in our own pipeline did exactly that, and was
 caught only because our metric has a benign side. **It is also a size-weighted mixture**, the same
-defect described in §2.
+defect described in Appendix A.
 
 ---
 
 ## Appendix C — The mechanism, extended
 
-### §4 The mechanism — why a closed-set model cannot reach a novel class
+### The mechanism — why a closed-set model cannot reach a novel class
 
-The gap in §3 is not merely unmeasured; it is hard, and we can say why.
+The gap in Appendix B is not merely unmeasured; it is hard, and we can say why.
 
 **The synthesis.** A closed-set discriminative model learns only those features that separate the
 classes present in its training objective. A novel class is therefore reachable exactly to the extent
@@ -183,59 +183,59 @@ that class is not merely poor but **unstable**, because nothing in the objective
 We establish this on Bot, where the overlap is empty:
 
 - **100 % of Bot flows are classified BENIGN**, mean p(BENIGN) = **0.9984**, on all three seeds. Bot
-  is not ambiguous to the model; it is **confidently asserted benign**. This is what kills every
-  confidence-based remedy in §5 before it is tried.
+ is not ambiguous to the model; it is **confidently asserted benign**. This is what kills every
+ confidence-based remedy in Appendix D before it is tried.
 - The eight features that separate Bot from benign have **0 of 8 overlap** with the eight the
-  known-class task selects. (Eight is the comparison-set size; for Web Brute Force the overlap is 1
-  of 8.)
-  🔴 **The gradient this sets up — zero overlap unreachable, one-of-eight reachable — is where the
-  corrected labels cost us, and we state the damage here rather than in a footnote.** Web Brute
-  Force's *reachability* was evidenced by PR-AUC 0.92–0.95. On labels that exclude attack flows
-  which transmitted no payload, that becomes **0.0072** (2.1× chance). The **ordering survives** —
-  Web Brute Force is above chance on every seed and Bot is not — but the **magnitude does not**, and
-  with it goes most of the quantitative force of the reachable half. What this section establishes
-  well is the **unreachable** direction; the reachable direction is now a consistent sign over two
-  families and little more. §7 gives the full accounting.
+ known-class task selects. (Eight is the comparison-set size; for Web Brute Force the overlap is 1
+ of 8.)
+ **The gradient this sets up — zero overlap unreachable, one-of-eight reachable — is where the
+ corrected labels cost us, and we state the damage here rather than in a footnote.** Web Brute
+ Force's *reachability* was evidenced by PR-AUC 0.92–0.95. On labels that exclude attack flows
+ which transmitted no payload, that becomes **0.0072** (2.1× chance). The **ordering survives** —
+ Web Brute Force is above chance on every seed and Bot is not — but the **magnitude does not**, and
+ with it goes most of the quantitative force of the reachable half. What this section establishes
+ well is the **unreachable** direction; the reachable direction is now a consistent sign over two
+ families and little more. Appendix E gives the full accounting.
 - Consequently the model's Bot ranking is **noise**: cross-seed Spearman **ρ = −0.090**, against
-  0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
-  does not (ρ = 0.827)**. The property therefore belongs to *closed-set discriminative learning*, not
-  to neural networks.
-  ⚠️ **This is a stability statistic computed over three seeds, and §7 warns that n = 3 is far too
-  few to estimate a dispersion.** We rely on it here for one reason, which we state rather than
-  assume: the quantity is not marginal. Bot sits at ρ ≈ 0 while every other family sits at 0.68–0.83
-  — a categorical separation, not a difference of degree — and it reproduces across two unrelated
-  model families while the autoencoder, on the same three seeds, returns 0.827. **A three-seed
-  estimate cannot tell us that Bot's ρ is −0.090 rather than −0.02 or +0.05; it is entirely adequate
-  to tell us it is not 0.7.** Only the second claim is load-bearing.
+ 0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
+ does not (ρ = 0.827)**. The property therefore belongs to *closed-set discriminative learning*, not
+ to neural networks.
+ **This is a stability statistic computed over three seeds, and Appendix E warns that n = 3 is far too
+ few to estimate a dispersion.** We rely on it here for one reason, which we state rather than
+ assume: the quantity is not marginal. Bot sits at ρ ≈ 0 while every other family sits at 0.68–0.83
+ — a categorical separation, not a difference of degree — and it reproduces across two unrelated
+ model families while the autoencoder, on the same three seeds, returns 0.827. **A three-seed
+ estimate cannot tell us that Bot's ρ is −0.090 rather than −0.02 or +0.05; it is entirely adequate
+ to tell us it is not 0.7.** Only the second claim is load-bearing.
 - **The information is present.** An oracle given Bot labels reaches PR-AUC **0.9988** from the same
-  68 flow features (Web BF 0.9999, XSS 0.9984). ⚠️ The oracle trains on zero-day labels; it is an
-  **upper bound, not a method**, and it is excluded from every method comparison in this paper. Its
-  role is to establish that the barrier is supervision, not information — and, in passing, that it is
-  not modality either: there is no missing information for packet payloads to supply.
+ 68 flow features (Web BF 0.9999, XSS 0.9984). The oracle trains on zero-day labels; it is an
+ **upper bound, not a method**, and it is excluded from every method comparison in this paper. Its
+ role is to establish that the barrier is supervision, not information — and, in passing, that it is
+ not modality either: there is no missing information for packet payloads to supply.
 
 **One cause, four symptoms — and we separate what is measured from what is inferred.** The
 mechanism accounts for four otherwise unrelated observations: the clustering-purity lottery we hit
 building the knowledge graph, the spread in Mahalanobis Bot scores, RandomForest's Bot swing across
-seeds, and the CNN's own failure. ⚠️ **Two of those links are measured and two are argued.**
+seeds, and the CNN's own failure. **Two of those links are measured and two are argued.**
 RandomForest's instability is measured on the same axis as the CNN's (ρ = 0.068 against 0.827 for the
 autoencoder), and the CNN's is the direct observation. The purity lottery and the Mahalanobis spread
 are **independently observed phenomena that the mechanism explains**; we did not run a manipulation
 that isolates the mechanism as their cause. We regard the unification as the contribution, and we
 label it as an explanatory claim rather than a fifth measurement.
 
-🔑 **The mechanism replicates on an independent capture, with the confound removed.** A standing
-objection to §4 is that Bot is simply *rare* in CIC-IDS2017 (n = 1,956), so its failure might be a
+**The mechanism replicates on an independent capture, with the confound removed.** A standing
+objection to this appendix is that Bot is simply *rare* in CIC-IDS2017 (n = 1,956), so its failure might be a
 sample-size artefact rather than a representational one. **CSE-CIC-IDS2018 supplies the control: Bot
 there is abundant — and the CNN scores it at 0.83× chance, BELOW a random ranker**, against 1.31× on
 2017. Infilteration behaves the same way (0.96×). Meanwhile the same model reaches **20.1×** on
 Brute Force -Web and **47.3×** on Brute Force -XSS in that capture. Abundance does not buy
 reachability, and scarcity was never the explanation: **reachability tracks overlap with the learned
-basis**, which is what §4 claims. ⚠️ The 2018 arm is matched to 2017's training size (883,796 flows)
+basis**, which is what this appendix claims. The 2018 arm is matched to 2017's training size (883,796 flows)
 so nothing here is confounded with four times the data.
 
 **No standard out-of-distribution score rescues it.** We ran nine scorers — MSP, max-logit, energy at
 four temperatures, entropy, ODIN at two settings, and margin — against a falsification threshold of
-0.08 macro-Bot **fixed in advance**. The best reaches **0.0783**. ⚠️ We say plainly that this *passed
+0.08 macro-Bot **fixed in advance**. The best reaches **0.0783**. We say plainly that this *passed
 by two per cent* and do not round it to a clean pass; a threshold set slightly lower would have
 flipped the verdict. The one scorer that buys Bot anything (`energy_T1000`, 2.29× chance) does so by
 **destroying known-class discrimination**, collapsing macro to 0.0326.
@@ -244,7 +244,7 @@ flipped the verdict. The one scorer that buys Bot anything (`energy_T1000`, 2.29
 
 ## Appendix D — What does not fix it, and what partially works
 
-### §5 What does not fix it
+### What does not fix it
 
 This section is the expensive part of the paper to obtain, and it is deliberately about our own
 architecture as much as anyone else's.
@@ -252,14 +252,14 @@ architecture as much as anyone else's.
 | attempted fix | result |
 |---|---|
 | **More architecture** (LSTM, GRU, CNN-LSTM, Transformer) | Nothing escapes the top tier upward and nothing touches Bot (best 0.0626, against the knowledge graph's 0.3103). CNN-LSTM lands **0.0031** from the plain CNN, so the **convolutional front-end is doing the work**; pure recurrence halves the score. |
-| **More classical baselines** | 16× spread, none competitive (§3b caveats apply). |
+| **More classical baselines** | 16× spread, none competitive (Appendix B caveats apply). |
 | **Benign-only anomaly methods** (VAE, Deep SVDD, OC-SVM, LOF) | **LOF reaches macro 0.3360 ± 0.0135 and does *not* collapse on web attacks** — a correction to our own earlier framing, which attributed that collapse to the benign-only *family* when it is a property of **reconstruction-error scoring**. |
 | **The symbolic pillar itself** | **−0.0004 (n.s.)** alone, and it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043. |
 | **Calibration** | Isotonic regression reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) — a **287×** gap. **The better the calibration, the wider the gap.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage. |
-| **Training on a second dataset** (CSE-CIC-IDS2018's known pool, doubling the training set) | 🔴 **Actively harmful: −0.1461 macro against a seed-matched control, 0/3 seeds better, direction consistent.** And the harm is *imported false positives*, not lost detection — see below. |
-| **Training an explicit reject class** (open-set / leave-classes-out) | **A wash.** Merging three known families into one `UNKNOWN` (9 → 7 classes) moves the headline by **−0.0030** paired against the seed-matched CNN, 1/3 seeds better. The reject unit does not reach Bot: **+0.068 above chance with the sign flipping across seeds.** ✅ But *which* families it reaches is controlled by what is merged into it — see below. |
-| **A fitted fuser over the channel that actually helps** — ⚠️ **scope: this row is about the knowledge-graph channel only; a fitted combiner over other channels *does* work, see §6** | **Structurally impossible for this channel.** The knowledge-graph score is defined by streaming the *test* set into windows, so it has **no validation-side score at all** — the channel with the largest measured gain cannot enter a combiner fitted on held-out data under any protocol. |
+| **Training on a second dataset** (CSE-CIC-IDS2018's known pool, doubling the training set) | **Actively harmful: −0.1461 macro against a seed-matched control, 0/3 seeds better, direction consistent.** And the harm is *imported false positives*, not lost detection — see below. |
+| **Training an explicit reject class** (open-set / leave-classes-out) | **A wash.** Merging three known families into one `UNKNOWN` (9 → 7 classes) moves the headline by **−0.0030** paired against the seed-matched CNN, 1/3 seeds better. The reject unit does not reach Bot: **+0.068 above chance with the sign flipping across seeds.** But *which* families it reaches is controlled by what is merged into it — see below. |
+| **A fitted fuser over the channel that actually helps** — **scope: this row is about the knowledge-graph channel only; a fitted combiner over other channels *does* work, see this appendix** | **Structurally impossible for this channel.** The knowledge-graph score is defined by streaming the *test* set into windows, so it has **no validation-side score at all** — the channel with the largest measured gain cannot enter a combiner fitted on held-out data under any protocol. |
 
 Three of these deserve their consequence stated rather than left implicit.
 
@@ -272,13 +272,13 @@ harmful in combination.
 mapping from data in which the outcome was observed. For a class the model has never seen, that
 mapping does not hold — so the *better* the calibrator fits the known classes, the more confidently
 wrong it is on novel ones. The operational consequence is blunt: **p = 0.9 means 90 % for known
-attacks and nothing at all for novel ones.** ⚠️ A practical note: isotonic wins on ECE but is
+attacks and nothing at all for novel ones.** A practical note: isotonic wins on ECE but is
 **unusable as an operating point** — 74 distinct values over 114,658 flows, so the 1 %-FPR quantile
 lands inside a tie block and the achieved FPR was 0.70 against a 0.01 target. Calibrate with isotonic
 for reporting; threshold with Platt.
 
-**Abstention's failure was predicted in advance from §4 and is the mechanism's sharpest consequence.**
-Abstention keys on confidence. §4 established that the model is **confidently wrong** on Bot. A
+**Abstention's failure was predicted in advance from Appendix C and is the mechanism's sharpest consequence.**
+Abstention keys on confidence. Appendix C established that the model is **confidently wrong** on Bot. A
 confidence-based rule cannot catch confident-and-wrong, and it does not: zero-day precision is
 unchanged to four decimal places across every non-degenerate coverage.
 
@@ -299,7 +299,7 @@ duplicate column (byte-identical across all 883,796 training rows), and input wi
 flatten dimension. A 2017-only 67-feature arm was built **before** any augmented result existed, and
 it comes out inert — so the −0.1461 is the augmentation, not the architecture.
 
-🔑 **The harm is imported false positives, not lost detection.** Our first explanation was wrong
+**The harm is imported false positives, not lost detection.** Our first explanation was wrong
 and we report it: we predicted *dilution*, that nine new capture-specific attack classes would split
 the absorbing mass the web families depend on. They stay **89–92 % concentrated**; the absorbing
 class merely moves (`DoS slowloris` → `DoS Slowhttptest`, another 2017 class). What actually changes
@@ -311,7 +311,7 @@ traffic.** Only 13.8 % of the tail goes to a 2018 class, so this is not imported
 either; and refitting the scaler is ruled out (median scale ratio 0.979, and the two badly distorted
 features are absent from Bot's discriminative set on every seed).
 
-🔑 **And PR-AUC and the operating curve disagree, which is this paper's own thesis turned on us:**
+**And PR-AUC and the operating curve disagree, which is this paper's own thesis turned on us:**
 
 | recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
 |---|---:|---:|---:|---:|
@@ -323,9 +323,9 @@ third of the baseline's recall. A reader shown only the macro would conclude the
 reader shown only the 1 % column would conclude nothing happened. **Both are reported because
 neither alone is true.**
 
-🧭 ~~**Twice in this work an intervention breaks specifically at the 0.1 % operating point**, so
-the tightest alert budget is where these methods fail.~~ 🔴 **We proposed that as a pattern and then
-tested it, and it does not hold.** Across **57 methods** with saved per-flow scores, macro zero-day
+We observed twice that an intervention broke specifically at the 0.1 % operating point, and proposed
+that the tightest alert budget is where these methods fail. **We then tested that as a pattern, and it
+does not hold.** Across **57 methods** with saved per-flow scores, macro zero-day
 PR-AUC and recall at a fixed false-alarm rate agree *better* at a tight budget than a loose one:
 
 | Spearman ρ (macro vs recall) | @0.1 % FPR | @1 % | @5 % | @10 % |
@@ -334,14 +334,14 @@ PR-AUC and recall at a fixed false-alarm rate agree *better* at a tight budget t
 
 The two cases above are real and remain reported as individual results, but they are **not instances
 of a general rule** — two hand-picked observations were exactly the n=2 anecdote this paper warns
-against elsewhere, and we record the falsification rather than the hunch. ⚠️ What the sweep *does*
+against elsewhere, and we record the falsification rather than the hunch. What the sweep *does*
 show is a divergence at the **loose** end (ρ = +0.425 at 10 % FPR), the opposite of what we expected,
 and a partial reordering at the top: of the 11 best methods by macro, only **6** are also in the top
 11 by recall at 0.1 % FPR, with post-hoc OOD scorers (entropy, max-logit, MSP, ODIN) ranking higher
 on the operational metric than their macro implies.
 
 **The reject class is the one negative here with a positive mechanism inside it, and it is our
-sharpest test of §4.** Every other method in this paper detects novelty *without ever training for
+sharpest test of Appendix C.** Every other method in this paper detects novelty *without ever training for
 it*. An explicit reject class is the obvious objection — so we built it, pre-registered the
 prediction that it would fail, and ran two arms differing only in **what** was merged into `UNKNOWN`:
 **HETERO** (`DDoS` + `FTP-Patator` + `PortScan` — a flood, a brute-force and a scan) against
@@ -350,31 +350,31 @@ seeds per arm, stated as a distance from chance:
 
 | arm | **Bot** | Web Brute Force | Web XSS |
 |---|---:|---:|---:|
-| HETERO | **+0.068** ⚠️ sign flips across seeds | +0.200 | +0.219 |
+| HETERO | **+0.068** sign flips across seeds | +0.200 | +0.219 |
 | HOMOG | **−0.206** (3/3 consistent) | +0.259 | +0.271 |
 | **paired by seed, HETERO − HOMOG** | **+0.274, 2.57σ, 3/3** | **−0.059, 3.58σ, 3/3** | **−0.052, 12.35σ, 3/3** |
 
 **This is a double dissociation between the two merges**, direction-consistent on every seed for
 every family. A homogeneous DoS merge produces a reject unit that **actively anti-ranks Bot**
 (−0.206) while reaching the web families best; a heterogeneous merge reverses both. And the
-direction is **forced by §4**: the web families are absorbed into `DoS slowloris`, so merging the DoS
+direction is **forced by Appendix C**: the web families are absorbed into `DoS slowloris`, so merging the DoS
 classes into `UNKNOWN` drags them along with it. **A reject class is not a generic "none of the
 above" — its reach is determined by the feature basis of whatever is merged into it**, which is the
 same mechanism this paper claims for the closed-set case, now observed in the open-set one.
 
-🔴 **And the ceiling of that mechanism is chance.** The *best* case for Bot, from the most
+**And the ceiling of that mechanism is chance.** The *best* case for Bot, from the most
 heterogeneous merge we can construct out of the known classes, is **+0.068 with the sign flipping
 between seeds** — the same instability signature as the CNN's own Bot ranking (cross-seed
 ρ = −0.090). **Bot's rank is noise regardless of which model produces it.** Restructuring the label
 space steers *which* novel families a reject region reaches; it does not make an unreachable one
 reachable.
 
-⚠️ **A prior version of this experiment was a no-op and we report that too.** Holding out a *single*
+**A prior version of this experiment was a no-op and we report that too.** Holding out a *single*
 family and relabelling it `UNKNOWN` leaves nine classes and the same partition of the training set;
 a softmax objective is invariant to class **names**, so that run was the baseline with its output
 units permuted, and `p(UNKNOWN)` was simply `p(DDoS)` — it ranked the held-out family at the 94.4th
 percentile and Bot at the 29th, *below* benign. **A reject class requires reducing the class count,
-not renaming a class.** §7 records how the defect survived a full training run: the sweep's headline
+not renaming a class.** Appendix E records how the defect survived a full training run: the sweep's headline
 metric folded the reject mass back into the attack mass, so a broken experiment returned a plausible
 near-baseline number instead of an anomaly.
 
@@ -393,7 +393,7 @@ They re-encode what is already in the input, so they can supply an inductive bia
 additional evidence. That is section 4's own mechanism turned on the symbolic side: **symbolic
 knowledge helps to the extent it lies outside the learned basis.**
 
-🔴 **We then tried to build knowledge that does lie outside it, and the benchmark would not let
+**We then tried to build knowledge that does lie outside it, and the benchmark would not let
 us.** Source and destination IP are *not* among the features, and no single flow's vector can express
 a property of a host across many flows, so we derived host-role predicates from the metadata — which
 ports a destination normally serves, whether a flow's port is unusual for that host, a source's
@@ -417,7 +417,7 @@ genuinely determine host role and cross-flow structure. In a testbed where each 
 scripted role, a flow's characteristics nearly identify its host, and therefore that host's aggregate
 properties.
 
-🔑 **The generalisable point: you cannot manufacture exogenous knowledge by aggregating the same
+**The generalisable point: you cannot manufacture exogenous knowledge by aggregating the same
 data.** Grov et al.'s axiom works because an asset inventory is an artefact from *outside* the
 capture. Ours was inferred *from* the capture, and anything inferable from the capture is largely
 inferable from its features. **CIC-IDS2017 ships no external knowledge artefact** — no inventory, no
@@ -425,7 +425,7 @@ topology, no threat intelligence — so on this benchmark the neuro-symbolic app
 practises it **cannot be evaluated at all.** Every symbolic predicate anyone builds from CIC-IDS2017
 alone is a re-encoding of its features.
 
-⚠️ **Stated as thresholds, not proof.** "Exogenous" here means AUC < 0.75 or R² < 0.5, which are
+**Stated as thresholds, not proof.** "Exogenous" here means AUC < 0.75 or R² < 0.5, which are
 conventions; a predicate at R² = 0.90 still leaves residual variance that could in principle carry
 signal. And a stronger predictor might recover more, which would only strengthen the conclusion. We
 did **not** proceed to the injection arms, because measuring a predicate the model can already
@@ -433,12 +433,12 @@ compute would report feature engineering as a symbolic result.
 
 **The scope of the fitted-fuser claim, because we got it wrong once.** The wall applies to channels
 whose value is **zero-day-specific**. It does *not* apply to a channel that also carries value on the
-known classes the combiner is fitted on. §6 reports a fitted combiner that works, and §7 reports how
+known classes the combiner is fitted on. this appendix reports a fitted combiner that works, and Appendix E reports how
 we came to state the impossibility too broadly.
 
 ---
 
-## §6 What partially works, stated without overclaiming
+## Appendix D What partially works, stated without overclaiming
 
 **The knowledge-graph channel is the only component of our architecture that earns its place**, and
 its size depends on one hyper-parameter we had never swept. At the cluster count used throughout our
@@ -453,18 +453,18 @@ knowledge-graph variants and at every step, 3/3 seeds:
 
 At **k = 800 the fusion reaches macro 0.7123 against the CNN's 0.6399, +0.0724 on 3/3 seeds.**
 
-⚠️ **That +0.0724 is selected on test and we do not report it as the improvement.** We re-selected
+**That +0.0724 is selected on test and we do not report it as the improvement.** We re-selected
 k on a stratified half of the test set with an rng fixed independently of any model seed, and report
 on the half never used for selection: **+0.0305 at 2.86σ, 3/3 seeds.** That is the honest number.
 The same protocol is what caught a companion result — a weighted-fusion variant worth +0.007 on the
 selection half is **−0.0008 and direction-inconsistent** on the reporting half, and without the split
 it would have shipped as a gain.
 
-⚠️ **Direction established, magnitude not.** Against the paired difference's own standard deviation
+**Direction established, magnitude not.** Against the paired difference's own standard deviation
 the k = 200 effect is 1.7σ, spanning **0.027–0.088**. We report direction as established and
 magnitude as a range throughout.
 
-⚠️ **We do not claim `s_kg` is the better variant.** The two variants' ranking **flips with k** —
+**We do not claim `s_kg` is the better variant.** The two variants' ranking **flips with k** —
 `causal` leads at k = 200, `s_kg` at k = 800 — neither cross-variant gap is tested paired, and both
 sit inside the 0.0285 that an absolute number in our pipeline carries. The **monotonicity in k** is
 the established finding; the variant choice is not.
@@ -480,20 +480,20 @@ alone:
 |  of which **Bot** | **0.0 %** | 23.2 % | 46.6 % | 85.2 % |
 |   (CNN alone, Bot) | 0.0 % | 0.1 % | 9.5 % | 19.9 % |
 
-🔴 **At the tightest budget the knowledge graph COSTS 1.5 points, and Bot is 0.0 % for both
+**At the tightest budget the knowledge graph COSTS 1.5 points, and Bot is 0.0 % for both
 models.** The gain is real but it begins around a 1 % false-alarm rate; **no configuration we built
 reaches Bot at a tight alert budget.** We report this because quoting only the 1 % column — which is
 the column that flatters us — would conceal it, and because it is the same error as reporting a
-size-weighted blend in place of a macro. ⚠️ The 10 % column is reported for shape only: on 55,237
+size-weighted blend in place of a macro. The 10 % column is reported for shape only: on 55,237
 benign test flows it is roughly **5,500 false alerts**, and is not a deployable operating point.
 
 **The review-depth statement is better than the PR-AUC one.** Reaching half of the zero-day flows
 requires reviewing **52 %** of all traffic with the CNN, and **29–32 %** with the knowledge graph or
 the fusion. That 20-point reduction in review depth is the clearest operational statement of what the
-knowledge graph buys, and it is more meaningful than any PR-AUC delta. ⚠️ **It inherits the
+knowledge graph buys, and it is more meaningful than any PR-AUC delta. **It inherits the
 scripted-window caveat below**: the knowledge-graph channel's advantage rests on temporal
 concentration that this capture's attack schedule creates, so the depth reduction should be read as
-an upper bound on what a real network would give. 🔑 The accompanying finding is
+an upper bound on what a real network would give. The accompanying finding is
 worse news and more important: **at any deployable alert budget you see only known attacks** —
 precision is ~1.000 at every budget, with **zero zero-day flows in the top 1,000**. A 100 %-precise
 alert stream containing no novel attacks is exactly the failure a headline PR-AUC of 0.64 does not
@@ -504,25 +504,25 @@ show.
 (3/3 seeds, 2.5σ). It assigns the anomaly channel **17.9 % of absolute weight, positive on every
 seed**; it does not learn to ignore it. Fitted on validation, which contains **zero zero-day flows by
 construction** — asserted in code rather than assumed — and applied blind to test, achieving an FPR of
-0.0100 exactly on all three seeds. ⚠️ **+0.0103 is 0.80σ: direction established, magnitude not.** The
+0.0100 exactly on all three seeds. **+0.0103 is 0.80σ: direction established, magnitude not.** The
 honest sentence is *"a fitted combiner is possible and marginally positive"*, never *"fitted fusion
 works"*, and it does not replace the knowledge-graph result.
 
-⚠️ **Parameter-free fusion is not universally the safe choice, and we say so next to our own
+**Parameter-free fusion is not universally the safe choice, and we say so next to our own
 parameter-free result.** Equal-weight rank fusion of the CNN and autoencoder **loses to the CNN alone
 by −0.0501** (3/3 seeds, 4.34σ). Equal weights cannot express "this channel is worth a sixth of that
 one", so they help with a comparable partner and harm with a weak one. **Our +0.0528 is a result about
 the knowledge graph, not about equal weighting.**
 
 **The emerging-pattern rule works on growth rate**: lift **5.94×** [5.66, 6.11] over three seeds, at
-roughly 81 % recall. ⚠️ Two caveats must travel with it. First, growth works substantially *because
+roughly 81 % recall. Two caveats must travel with it. First, growth works substantially *because
 CIC-IDS2017's attacks are scripted into fixed windows* — a real network carrying continuous low-rate
 command-and-control would not produce this signal, and Bot's real-world signature is persistence
 rather than burstiness. Second, **temporal burstiness of a raw-feature cluster does not require a
 knowledge graph**; a reviewer will say this, so we say it first. The knowledge graph's justification
 rests on explanation and corroboration, not on this detection number.
 
-🔴 **Two claims we explicitly do not make.** That "the conjunction of criteria gives 81 % precision" —
+**Two claims we explicitly do not make.** That "the conjunction of criteria gives 81 % precision" —
 that was clustering-seed 42 alone, and three seeds give lift 1.73–11.57× and precision 0.122–0.814.
 And that the knowledge graph's specified "unexplained cluster" mechanism detects zero-day attacks — it
 scores lift ≤ 1.00×, at or below chance, across three representations and three thresholds. The
@@ -533,7 +533,7 @@ specified mechanism is dead; the scope is corroboration and explainability.
 The CNN and the autoencoder dissociate on every family, non-overlapping across seeds: XSS **+0.90
 (40 SD)**, Web Brute Force **+0.82 (37 SD)**, Bot **+0.0868 (3.9 SD)**, p < 0.0005.
 
-🔑 **We replicated it on CSE-CIC-IDS2018, and the two halves come apart.** Only **lift**
+**We replicated it on CSE-CIC-IDS2018, and the two halves come apart.** Only **lift**
 (PR-AUC ÷ prevalence) is comparable across captures — raw PR-AUC is bounded below by prevalence and
 the two datasets differ by orders of magnitude on exactly the families in question. We report lift
 and nothing else, having made the raw-PR-AUC comparison ourselves first and withdrawn it.
@@ -546,17 +546,17 @@ and nothing else, having made the raw-PR-AUC comparison ourselves first and with
 
 **The direction replicates on an independent capture; the magnitude does not.** The autoencoder's
 Bot advantage shrinks by a factor of **9.7**, and at 1.09× it sits close enough to chance that 2018
-lends no support to the reading *"an anomaly method reaches Bot."* ⚠️ We cannot even test whether
+lends no support to the reading *"an anomaly method reaches Bot."* We cannot even test whether
 1.09× beats chance: our 2018 record persists per-family lift as a mean with no per-seed spread, so a
 margin of 0.09× is not distinguishable from noise. **We therefore claim the direction and drop the
 magnitude**, and we treat the 2017 magnitude as a property of that capture.
 
-⚠️ **It is a dissociation between two models, not two method families.** RandomForest — a supervised
+**It is a dissociation between two models, not two method families.** RandomForest — a supervised
 method — **ties the autoencoder on Bot** (0.1311 versus 0.1314, p = 0.88) while beating it by 0.50 on
 macro. We do not write this up as a supervised-versus-unsupervised result; that stronger form is
 falsified by our own data.
 
-⚠️ **The web-attack half is not zero-day detection.** The CNN assigns **~90 % of Web Brute Force and
+**The web-attack half is not zero-day detection.** The CNN assigns **~90 % of Web Brute Force and
 XSS flows to `DoS slowloris`**, a known *attack* class, so their 0.92–0.95 PR-AUC is **absorption into
 a known attack**, not detection of a novel one. An earlier explanation of ours — that web attacks
 transfer because they resemble the FTP/SSH brute-force families — was tested and **falsified**, and we
@@ -565,12 +565,12 @@ do not repeat it.
 ### Cost is not the objection
 
 The full detection path runs at **7.95 µs per flow (125,762 flows/s)** on one CPU, scoring the entire
-test set in 0.91 s; the knowledge graph adds **0.58 µs per flow, +9.2 % over the CNN**. ⚠️ But
+test set in 0.91 s; the knowledge graph adds **0.58 µs per flow, +9.2 % over the CNN**. But
 **explanation costs 1,898× detection** — Integrated Gradients is 11.95 ms per flow, 84 flows/s.
 Explaining every test flow takes 23 minutes; explaining 100 alerts takes **1.19 s**. The rule this
 implies — **explain alerts, not flows** — composes with the alert-budget finding above rather than
 conflicting with it. We state it explicitly because an "explainable IDS" claim that implies per-flow
-explanation is wrong by four orders of magnitude. ⚠️ Throughput figures are meaningless without their
+explanation is wrong by four orders of magnitude. Throughput figures are meaningless without their
 batch size (batch 1 gives 256 flows/s, batch 8192 gives 158,919 — a 620× spread), and upstream
 flow-feature extraction is **not** measured here and may dominate a real deployment.
 
@@ -578,7 +578,7 @@ flow-feature extraction is **not** measured here and may dominate a real deploym
 
 ## Appendix E — Measurement discipline and the Arp et al. audit
 
-### §7 Measurement discipline — a section, not a footnote
+### Measurement discipline — a section, not a footnote
 
 We measured the reproducibility of our own pipeline before interpreting any delta, and we recommend
 the practice on the strength of what it cost us.
@@ -604,18 +604,18 @@ report where we fail.
 
 | | pitfall | our status |
 |---|---|---|
-| P1 | Sampling bias | ⚠️ **Partial.** Two captures, but from the same producer under related methodology. Named in §8. |
-| P2 | Label inaccuracy | 🔴 **Found late and material.** See below. |
-| P3 | Data snooping | ✅ Selection on a held-out half with an rng fixed independently of any model seed. It caught a +0.007 result that is **−0.0008** on the reporting half. ⚠️ Residual: the cluster count was *first* swept on test, and we say so where we report it. |
-| P4 | Spurious correlations | ✅ This is §4 and the absorption analysis: the web families' 0.92–0.95 is **absorption into a known attack class**, not detection, and an earlier explanation of our own was falsified and withdrawn. |
-| P5 | Biased parameter selection | ✅ Noise floor measured before any delta is interpreted; every comparison paired on seed. |
-| P6 | Inappropriate baseline | ✅ Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. |
-| P7 | Inappropriate performance measures | 🔑 **This is the paper's subject**, not a box we tick — §3. |
-| P8 | Base rate fallacy | ✅ PR-AUC over ROC, prevalence and lift reported, families below 100 flows excluded from the macro, and cross-dataset comparison done **only** in lift because prevalence differs by orders of magnitude. |
-| P9 | Lab-only evaluation | ❌ **Not addressed.** Throughput is measured (7.95 µs/flow) but nothing is deployed. |
-| P10 | Inappropriate threat model | ❌ **Not addressed.** No adversarial evaluation; named as future work. |
+| P1 | Sampling bias | **Partial.** Two captures, but from the same producer under related methodology. Named in Appendix F. |
+| P2 | Label inaccuracy | **Found late and material.** See below. |
+| P3 | Data snooping | Selection on a held-out half with an rng fixed independently of any model seed. It caught a +0.007 result that is **−0.0008** on the reporting half. Residual: the cluster count was *first* swept on test, and we say so where we report it. |
+| P4 | Spurious correlations | This is Appendix C and the absorption analysis: the web families' 0.92–0.95 is **absorption into a known attack class**, not detection, and an earlier explanation of our own was falsified and withdrawn. |
+| P5 | Biased parameter selection | Noise floor measured before any delta is interpreted; every comparison paired on seed. |
+| P6 | Inappropriate baseline | Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. |
+| P7 | Inappropriate performance measures | **This is the paper's subject**, not a box we tick — Appendix B. |
+| P8 | Base rate fallacy | PR-AUC over ROC, prevalence and lift reported, families below 100 flows excluded from the macro, and cross-dataset comparison done **only** in lift because prevalence differs by orders of magnitude. |
+| P9 | Lab-only evaluation | **Not addressed.** Throughput is measured (7.95 µs/flow) but nothing is deployed. |
+| P10 | Inappropriate threat model | **Not addressed.** No adversarial evaluation; named as future work. |
 
-🔴 **P2 deserves its own paragraph, because it caught us.** Engelen et al. (WTMC 2021) re-ran
+**P2 deserves its own paragraph, because it caught us.** Engelen et al. (WTMC 2021) re-ran
 CIC-IDS2017 through a corrected CICFlowMeter and relabelled it, reconstructing or relabelling **more
 than 20 % of traces** and introducing an `X - Attempted` class for attack flows that **transmitted no
 payload**. Under those labels our three adequately powered zero-day families become:
@@ -627,7 +627,7 @@ payload**. Under those labels our three adequately powered zero-day families bec
 | Web Attack XSS | 652 | **27** | 652 |
 
 Two-thirds of Bot and roughly nine-tenths of the web families are **bare connection attempts**, and
-Web XSS falls below our own power bar of 100 flows. This is a live threat to §4: if most of what we
+Web XSS falls below our own power bar of 100 flows. This is a live threat to Appendix C: if most of what we
 called Bot transmitted nothing, part of its unreachability could be a labelling artefact rather than
 a property of the model. It also offers a **deeper account of our own absorption finding** — if nine
 in ten web-attack flows transmitted nothing, they *are* bare connection attempts, which is what a
@@ -635,7 +635,7 @@ slow-connection attack looks like. We rebuilt the split on the corrected data un
 pre-registered readings and retrained three seeds on each. **We did not find this ourselves; we found
 it by checking our dataset against the literature**, which is the argument for doing so.
 
-🔴 **THE RESULT, AND IT IMPLICATES OUR OWN HEADLINE.** Lift (PR-AUC ÷ prevalence) is the only
+**THE RESULT, AND IT IMPLICATES OUR OWN HEADLINE.** Lift (PR-AUC ÷ prevalence) is the only
 unit comparable across these arms — the test sets are different collections of flows with different
 prevalences and there is no 1:1 correspondence, so nothing here is paired against 0.6399 and no delta
 against it would be meaningful. Chance lift is 1.0.
@@ -652,14 +652,14 @@ which we already knew was *absorption into a known attack class* rather than det
 substantially **detection of bare connection attempts**. A flow in which the attacker transmitted no
 payload is trivially unlike normal traffic, and that is what was being scored.
 
-✅ **§4's pre-registered falsifier did not fire, and the way it failed to fire is the point.** The
+**Appendix C's pre-registered falsifier did not fire, and the way it failed to fire is the point.** The
 criterion was effective-Bot lift *clearly above chance, consistently across seeds*. Effective Bot
 lifts **0.57 / 0.64 / 8.99** — **two of three runs below a random ranker**, a 16× spread between best
 and worst. The mean of 3.4× describes no run that happened. That instability is precisely the
-signature §4 documents for Bot (cross-seed rank ρ = −0.090): **the ranking is noise**, so Bot's
+signature Appendix C documents for Bot (cross-seed rank ρ = −0.090): **the ranking is noise**, so Bot's
 unreachability is a property of the model rather than an artefact of empty flows.
 
-🧭 **What this does to the paper is uncomfortable and we state it plainly.** §3 argues the field's
+**What this does to the paper is uncomfortable and we state it plainly.** Appendix B argues the field's
 published metric cannot measure zero-day detection. This shows that the metric *we* advocate was, on
 two of three families, measuring a labelling convention — whether the dataset counts an unsuccessful
 connection attempt as an attack. **A better metric on a mislabelled benchmark is still the wrong
@@ -667,35 +667,35 @@ measurement**, and we would not have known without checking the dataset against 
 
 Five lessons, each of which cost us something:
 
-🔴 **A flow-level significance test cannot rescue a delta below the pipeline's own reproducibility.**
+**A flow-level significance test cannot rescue a delta below the pipeline's own reproducibility.**
 We closed a comparison in our own favour with a paired bootstrap at p = 0.001, then measured the noise
 floor and found the gap (+0.0204) was **0.9 SD** — smaller than re-running one model twice. **The
 claim is retracted.** This is the single most transferable methodological result in the paper, and it
 retracts our own headline.
 
-🔴 **n = 3 is enough for a mean and nowhere near enough for a variance.** Two independent n = 3 SD
+**n = 3 is enough for a mean and nowhere near enough for a variance.** Two independent n = 3 SD
 estimates **agreed closely with each other and were both wrong by a factor of five**; a fourth seed
 moved one of them 5×. Agreement between under-powered estimates reads as corroboration and is not.
 **Sample-size adequacy depends on the statistic, not the count.**
 
-🔑 **A paired comparison must be judged against the paired difference's own SD, not the
+**A paired comparison must be judged against the paired difference's own SD, not the
 absolute-number floor.** The 0.0222 floor is run-to-run variance of a single channel; over shared
 seeds that common variance **cancels**. We caught this while building a figure whose first version
-applied the unpaired floor to paired deltas and rendered a 16.3σ, 3/3-seed effect as noise. ⚠️ That
+applied the unpaired floor to paired deltas and rendered a 16.3σ, 3/3-seed effect as noise. That
 error ran in the *safe* direction — it would have discarded a real result — but it is the same class
 of mistake as the ones that manufacture false positives. **The correct criterion is
 direction-consistency across all seeds plus the paired effect size**, and the two can disagree: our
 knowledge-graph result is certain in direction (3/3) and uncertain in magnitude (1.7σ).
 
-🔴 **A negative claim needs the same evidentiary standard as a positive one, and ours did not get
+**A negative claim needs the same evidentiary standard as a positive one, and ours did not get
 it.** We wrote that a fitted fuser was "structurally impossible here" on the strength of **one
 two-channel special case**. Running it on the real channel set falsified all three of its predictions
 and triggered a falsifier we had written down in advance. **Every safeguard in this project was
 pointed at over-claiming a positive result; this was an over-claimed *blocker*, and nothing was
-watching that direction.** The surviving claim (§5, last row) is narrower and still sufficient — but
+watching that direction.** The surviving claim (Appendix D, last row) is narrower and still sufficient — but
 it had to be measured to be found.
 
-⚠️ **A single best run is not a result.** Our best CNN figure, 0.6446, is the **maximum of eleven
+**A single best run is not a result.** Our best CNN figure, 0.6446, is the **maximum of eleven
 runs**; the mean is 0.6217. The honest reproducible baseline is the eleven-run ensemble at **0.6356**,
 which beats the mean and *not* the maximum — because the maximum was never a typical result.
 
@@ -703,53 +703,51 @@ which beats the mean and *not* the maximum — because the maximum was never a t
 
 ## Appendix F — Limitations, extended
 
-### §8 Limitations
+### Limitations
 
-1. **~~Single dataset.~~ ✅ RESOLVED — and the retraction chain is worth keeping visible.** We first
-   wrote that cross-dataset validation on CIC-IDS2018 was ~~*blocked* because the data was
-   unavailable~~. That was **wrong** — CSE-CIC-IDS2018 is on the AWS Registry of Open Data and
-   downloads without an account (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`), under
-   a licence permitting redistribution with citation. We then wrote that the honest limitation was
-   ~~that we did not do it~~. **We have now done it**: four method arms × three seeds, training size
-   matched to 2017's 883,796 flows, reported in §4 and §6. The mechanism replicates with the
-   rarity confound removed, and the double dissociation replicates in direction but not magnitude.
-   ⚠️ **What remains limited:** two captures from the *same producer* under related methodology is
-   not evidence of generality across network environments, and **7 of the 10 published 2018 flow CSVs
-   are Excel-truncated at 2²⁰ rows, chronologically** — a defect in the distributed artefact that we
-   detected and worked around, and that anyone reusing those files should know about.
+1. **Cross-dataset validation.** We replicate on CSE-CIC-IDS2018, which is openly available on the
+ AWS Registry of Open Data and downloads without an account
+ (`aws s3 sync s3://cse-cic-ids2018/ <dir> --no-sign-request`) under a licence permitting
+ redistribution with citation: four method arms × three seeds, training size matched to 2017's
+ 883,796 flows, reported in Appendix C and Appendix D. The mechanism replicates with the rarity
+ confound removed, and the double dissociation replicates in direction but not magnitude.
+ **What remains limited:** two captures from the *same producer* under related methodology is
+ not evidence of generality across network environments, and **7 of the 10 published 2018 flow CSVs
+ are Excel-truncated at 2²⁰ rows, chronologically** — a defect in the distributed artefact that we
+ detected and worked around, and that anyone reusing those files should know about.
 2. **Three adequately powered zero-day families, not six.** And Web Brute Force and XSS correlate
-   at **r = +0.9906** across 57 methods (Spearman ρ = +0.9822, p < 1e-40) — same capture window, same
-   tool — so the macro average is effectively ⅓ Bot and ⅔ *one* web signal. The contrast makes the
-   point sharper: **Bot correlates with neither** (r = −0.216 against Web BF, −0.265 against XSS),
-   so the macro is one strong signal, one weak one, and they move in opposite directions. Regrouping
-   shifts values by 0.11–0.15 but **preserves every ordering** we report.
-   ⚠️ *This figure was quoted as r = +0.992 in an earlier draft with no record behind it; it is now
-   recomputed from the per-method matrix and persisted.*
+ at **r = +0.9906** across 57 methods (Spearman ρ = +0.9822, p < 1e-40) — same capture window, same
+ tool — so the macro average is effectively ⅓ Bot and ⅔ *one* web signal. The contrast makes the
+ point sharper: **Bot correlates with neither** (r = −0.216 against Web BF, −0.265 against XSS),
+ so the macro is one strong signal, one weak one, and they move in opposite directions. Regrouping
+ shifts values by 0.11–0.15 but **preserves every ordering** we report.
+ *This figure was quoted as r = +0.992 in an earlier draft with no record behind it; it is now
+ recomputed from the per-method matrix and persisted.*
 3. **Flow features, not payload bytes** — a deviation from the base paper's modality, and our 18–29 pp
-   advantage on known-class views is a **modality** advantage rather than an algorithmic one. But we
-   answer the "why not payload?" question rather than conceding it: the oracle probe separates every
-   powered family from benign **in the flow-feature basis alone** (Bot 0.9988, Web BF 0.9999,
-   XSS 0.9984), so the Bot gap is a closed-set-supervision gap and not a modality gap — and §4's
-   mechanism would **relocate** to a payload basis rather than dissolve, since a closed-set model on
-   payload bytes would select the payload features that separate the same nine classes. The honest
-   cost of that choice: payload would replace the web families' *absorption* into `DoS slowloris` with
-   genuine detection, which is an honesty gain this paper does not get to claim.
-4. **Scripted attack windows** inflate any growth or temporal result (§6).
+ advantage on known-class views is a **modality** advantage rather than an algorithmic one. But we
+ answer the "why not payload?" question rather than conceding it: the oracle probe separates every
+ powered family from benign **in the flow-feature basis alone** (Bot 0.9988, Web BF 0.9999,
+ XSS 0.9984), so the Bot gap is a closed-set-supervision gap and not a modality gap — and Appendix C's
+ mechanism would **relocate** to a payload basis rather than dissolve, since a closed-set model on
+ payload bytes would select the payload features that separate the same nine classes. The honest
+ cost of that choice: payload would replace the web families' *absorption* into `DoS slowloris` with
+ genuine detection, which is an honesty gain this paper does not get to claim.
+4. **Scripted attack windows** inflate any growth or temporal result (Appendix D).
 5. **Behaviour predicates are approximations.** What we call `HighEntropy` is packet-length **standard
-   deviation**, not Shannon entropy of the payload, so any "entropy implies encryption" reading would
-   be overclaiming. One predicate is constant and another is binary rather than graded.
+ deviation**, not Shannon entropy of the payload, so any "entropy implies encryption" reading would
+ be overclaiming. One predicate is constant and another is binary rather than graded.
 6. **Our fusion result is transductive.** Rank fusion normalises each channel by its rank *within the
-   scored set*, so a flow's fused score depends on the rest of the test set. This is not label
-   leakage and not a scoring error — it is ordinary practice for a rank-based metric — but a streaming
-   deployment could not compute it without a frozen reference distribution, which is a different
-   estimator. **We have not measured that variant** and make no claim about its direction.
+ scored set*, so a flow's fused score depends on the rest of the test set. This is not label
+ leakage and not a scoring error — it is ordinary practice for a rank-based metric — but a streaming
+ deployment could not compute it without a frozen reference distribution, which is a different
+ estimator. **We have not measured that variant** and make no claim about its direction.
 7. **No adversarial evaluation.** Named as future work rather than implied.
 
 ---
 
 ## Appendix G — Related work, extended
 
-### §9 Related work
+### Related work
 
 **The dataset, and what is already known to be wrong with it.** CIC-IDS2017 was released by
 Sharafaldin et al. [1] and has become one of the most reported-on benchmarks in the field. Engelen
@@ -773,12 +771,12 @@ Test-of-Time award and remains the reference statement of the problem. Arp et al
 recurring pitfalls across 30 top-tier security papers and give recommendations for avoiding them.
 
 **We are downstream of both, and we try to supply what they ask for.** Sommer and Paxson's claim is
-qualitative — machine learning struggles with novelty. §4 supplies a **mechanism** for one instance
+qualitative — machine learning struggles with novelty. Appendix C supplies a **mechanism** for one instance
 of it (empty overlap between the novel class's discriminative features and the trained basis) and
 shows the failure is not merely inaccuracy but **instability**: the model's ranking of that class is
-noise, cross-seed ρ = −0.090. §1 supplies the **quantitative** counterpart — 33 % of method pairs are
+noise, cross-seed ρ = −0.090. Appendix B supplies the **quantitative** counterpart — 22 % of comparable method pairs (37 of 169) are
 indistinguishable on the published metric while differing ≥2× on the capability at issue. Against
-Arp et al., §7 attempts what their recommendations imply and few papers actually do: measure the
+Arp et al., Appendix E attempts what their recommendations imply and few papers actually do: measure the
 pipeline's own reproducibility floor, express every delta as a multiple of it, and **report the
 claims of ours that the floor retracted**.
 
@@ -788,17 +786,17 @@ hybrid cross-entropy plus satisfiability loss, reporting improved unknown-attack
 vanilla CNN on CIC-IDS2017. That paper is our starting point, and a recent survey by the same group
 [9] places it in a fast-growing literature.
 
-🔴 **We reproduce their CNN and cannot reproduce their symbolic gain.** On their own metric our
+**We reproduce their CNN and cannot reproduce their symbolic gain.** On their own metric our
 figures are 47.85 % against their 48.34 % for the 1D CNN — close agreement — while our nearest
-reproduction of their hybrid model scores 47.24 %, no better than our own CNN (§3d). We report this
+reproduction of their hybrid model scores 47.24 %, no better than our own CNN (Appendix B). We report this
 as a comparison **in form, not head-to-head**: the modality differs (flow features versus payload
 bytes), the zero-day membership differs by a swap, and the class sizes differ, with composition
 accounting for roughly 4 of the missing 12 points. We also identify two arithmetic defects in the
-metric that gain is reported on (§3b). **And our own symbolic pillar fares no better** — it is null
-alone and significantly harmful in combination (§5), which is a negative result about our
+metric that gain is reported on (Appendix B). **And our own symbolic pillar fares no better** — it is null
+alone and significantly harmful in combination (Appendix D), which is a negative result about our
 architecture, not only about theirs.
 
-🔑 **The neuro-symbolic systems that *do* report gains share a property, and naming it explains both
+**The neuro-symbolic systems that *do* report gains share a property, and naming it explains both
 their success and our failure.** Grov et al. [14] add a single axiom to an LTN over CIC-IDS2017 —
 *flows not communicating with web servers cannot be web attacks* — and roughly double web-attack
 precision (XSS 0.088 → 0.213) with recall unchanged. KnowGraph [15] performs logical reasoning over
@@ -812,10 +810,10 @@ vector the network consumes.
 
 **Ours is the mirror image, and we did not see it until we read theirs.** All seven of our behaviour
 predicates are deterministic functions of the same flow features the network already reads. They can
-supply an inductive bias; they cannot supply evidence. That is §4's mechanism turned on the symbolic
+supply an inductive bias; they cannot supply evidence. That is Appendix C's mechanism turned on the symbolic
 side: **symbolic knowledge helps to the extent it lies outside the learned basis.**
 
-🔴 **We then tried to satisfy that precondition on this benchmark and could not** (§5). Host-role
+**We then tried to satisfy that precondition on this benchmark and could not** (Appendix D). Host-role
 predicates built from metadata — which the feature vector does not contain — are nonetheless
 predicted from the 68 features at AUC 0.990–0.994 and R² 0.89–0.95, and an ablation shows this is not
 the flow's own port giving it away. **You cannot manufacture exogenous knowledge by aggregating the
@@ -825,14 +823,14 @@ comes from.** We offer this as the most transferable thing we have to say to thi
 reporting a neuro-symbolic gain, establish that the knowledge injected is not already in the input —
 and note that a benchmark may make that impossible.
 
-⚠️ **This is not a criticism of [14]–[16].** Their knowledge genuinely is exogenous; the point is that
+**This is not a criticism of [14]–[16].** Their knowledge genuinely is exogenous; the point is that
 the property is load-bearing and usually left implicit, so a reader cannot tell a knowledge result
 from a feature-engineering result without it.
 
 **Open-set recognition and out-of-distribution scoring.** Treating unseen attack families as an
 open-set problem has a long history in this domain [10], and the general OOD literature supplies
 post-hoc scorers that need no retraining: maximum softmax probability [11], temperature-scaled and
-input-perturbed variants [12], and energy-based scores [13]. §4 evaluates nine such scorers against a
+input-perturbed variants [12], and energy-based scores [13]. Appendix C evaluates nine such scorers against a
 falsification threshold fixed in advance. **None rescues the hard family**, and the one that moves it
 at all does so by destroying known-class discrimination. We report that as a bounded negative result
 about post-hoc scoring on this problem, not as a claim about OOD detection in general.
@@ -841,7 +839,7 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
 
 ## Appendix H — Reproducibility
 
-### §10 Reproducibility
+### Reproducibility
 
 **What is released.** All 58 analysis and pipeline scripts, the protocol configuration
 (`config.yaml`), pinned dependencies, the 9 figures, the 70 metadata files that every number in this
@@ -861,21 +859,21 @@ required.
 left to the core-count default, because op-level determinism alone does not fix reduction order.
 This was verified rather than assumed: two full 50-epoch runs of the same seed produce **byte-
 identical** output, and a third run five days later in a different session reproduced the same figure
-to twelve decimal places. §7 reports what that cost — 2–7 % throughput, and nothing measurable
+to twelve decimal places. Appendix E reports what that cost — 2–7 % throughput, and nothing measurable
 elsewhere.
 
-⚠️ **The determinism guarantee is forward-looking only.** Results computed **before** the flags
+**The determinism guarantee is forward-looking only.** Results computed **before** the flags
 landed came from a process with a run-to-run SD of 0.0222 and are **not** reproducible at fixed seed.
 Pre- and post-flag runs are different populations and we never pool them. A reader re-running the
 pipeline today should reproduce the post-flag figures and should **not** expect to reproduce the
-pre-flag ones exactly; where a number in this paper is pre-flag, §7's floor is the honest error bar.
+pre-flag ones exactly; where a number in this paper is pre-flag, Appendix E's floor is the honest error bar.
 
 **One entry point.** `run_all.py` declares the 19 pipeline stages in order together with the
 artifacts each writes. Its **default mode verifies rather than executes** — it reports which stage
 outputs are present on disk — and `--run` executes the sequence, with `--from <stage>` to resume.
 Making a full CPU retrain the default behaviour of something called `run_all` would be a foot-gun.
 
-⚠️ **An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
+**An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
 never been *executed* end to end in one pass.** Every stage has run individually, most of them dozens
 of times, but *"each stage works"* and *"the sequence works from a clean checkout"* are different
 claims and only the first is evidenced. `--run` is offered as a convenience, not as a validated
@@ -885,14 +883,14 @@ reproduction path.
 mistake was actually made here:
 
 - `lint_conventions.py` enforces the conventions that have lapsed in this project, **naming the
-  incident behind each one** — an encoding bug fixed three times as separate incidents, a timestamp
-  parser that silently reordered every test row, a script count that disagreed with disk.
+ incident behind each one** — an encoding bug fixed three times as separate incidents, a timestamp
+ parser that silently reordered every test row, a script count that disagreed with disk.
 - `verify_draft.py` checks **every quantitative claim in this paper against the metadata files that
-  produced it**: it pulls each value from its source JSON, formats it as the paper should state it,
-  and asserts the string is present. Current state: **52 verified, 0 mismatched.** It exists because
-  the first draft misquoted a throughput figure and that was caught by accident rather than by any
-  check. ⚠️ It verifies **transcription, not interpretation** — it cannot tell you a caveat is
-  missing or a claim overreaches its evidence.
+ produced it**: it pulls each value from its source JSON, formats it as the paper should state it,
+ and asserts the string is present. Current state: **52 verified, 0 mismatched.** It exists because
+ the first draft misquoted a throughput figure and that was caught by accident rather than by any
+ check. It verifies **transcription, not interpretation** — it cannot tell you a caveat is
+ missing or a claim overreaches its evidence.
 
 **Six claims in this paper have no machine-readable record** and are flagged as such by that checker:
 the split sizes, the zero-day family counts, the base paper's published figures, the per-method
