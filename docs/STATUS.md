@@ -32,7 +32,7 @@ identical to the master**, so the split lost and altered nothing; every decimal 
 appears verbatim in the master. `paper_draft.md` stays the full research record · **remap §-numbered
 cross-references inside the appendices and strip emoji/internal commentary** ✅ **done 2026-09-15** · ~~add 1–2 figures
 (room exists)~~ ✅ **done 2026-09-15** — Figure 1 (the thesis) and Figure 2 (the mechanism), palette validated, body now 3,531 words · convert to the PMLR
-template · verify references [14]–[17] and check or drop [16] · close the 4 unbacked numbers ·
+template · ~~verify references [14]–[17] and check or drop [16]~~ ✅ **done 2026-09-15** — three errors caught, one a fabricated title; see the draft's citation banner · close the 4 unbacked numbers ·
 anonymisation pass · NeSy 2027 CFP check once announced.
 
 ## 🔴 INTEGRATION #1 RESULT (2026-09-14) — the benchmark cannot support a NeSy experiment

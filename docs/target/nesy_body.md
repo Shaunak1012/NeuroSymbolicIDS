@@ -374,10 +374,13 @@ injected is not already in the input — and recognise that a benchmark may make
 12. S. Liang, Y. Li, R. Srikant. *Enhancing the Reliability of Out-of-Distribution Image Detection in
     Neural Networks.* ICLR 2018.
 13. W. Liu, X. Wang, J. D. Owens, Y. Li. *Energy-Based Out-of-Distribution Detection.* NeurIPS 2020.
-14. M. W. Eckhoff et al. *Experimenting with Neurosymbolic Artificial Intelligence for Defending
-    Against Cyber Attacks.* Neurosymbolic Artificial Intelligence, 2025.
-15. Z. Zhou et al. *KnowGraph: Knowledge-Enabled Anomaly Detection via Logical Reasoning on Graph
-    Data.* ACM CCS 2024.
-16. C. I. Kalutharage et al. — **⚠️ unverified; cited via [17]; check or drop before submission.**
-17. *Neuro-Symbolic AI for Cybersecurity: State of the Art, Challenges, and Opportunities.*
-    arXiv:2509.06921, 2025.
+14. G. Grov, J. Halvorsen, M. W. Eckhoff, B. J. Hansen, M. Eian, V. Mavroeidis. *On the Use of
+    Neurosymbolic AI for Defending Against Cyber Attacks.* Neural-Symbolic Learning and Reasoning
+    (NeSy 2024), LNCS, Springer, 2024, pp. 119–140.
+15. A. Zhou, X. Xu, R. Raghunathan, A. Lal, X. Guan, B. Yu, B. Li. *KnowGraph: Knowledge-Enabled
+    Anomaly Detection via Logical Reasoning on Graph Data.* ACM CCS 2024, pp. 168–182.
+16. C. S. Kalutharage, X. Liu, C. Chrysoulas. *Neurosymbolic Learning and Domain Knowledge-Driven
+    Explainable AI for Enhanced IoT Network Attack Detection and Response.* Computers & Security,
+    vol. 151, 2025, art. 104318.
+17. S. B. Hakim, M. Adil, A. Velasquez, S. Xu, H. H. Song. *Neuro-Symbolic AI for Cybersecurity:
+    State of the Art, Challenges, and Opportunities.* arXiv:2509.06921, 2025.

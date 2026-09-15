@@ -948,11 +948,26 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
 > authoritative source (publisher page, arXiv record, DOI, or — for [8] — the PDF held in this
 > repository).** The bibliographic pass was completed 2026-09-09.
 >
-> 🟡 **[14]–[17] were added 2026-09-14 from a literature scan and are NOT yet at that standard.**
-> [14], [15] and [17] were read at the publisher or arXiv record and their quoted figures taken from
-> the text; **[16] is cited via the survey [17] and its primary source has not been consulted** — it
-> is marked inline and must be checked or dropped before submission. Applying the same rule to
-> citations as to numbers means saying which ones are not yet verified, not implying they all are.
+> ~~🟡 **[14]–[17] were added 2026-09-14 from a literature scan and are NOT yet at that standard.**~~
+> ✅ **[14]–[17] verified 2026-09-15** against the Crossref registry and arXiv records.
+> [14]'s and [15]'s quoted figures were read from the papers' full text on arXiv.
+>
+> 🔴 **The pass caught THREE errors, and one was a fabricated title.**
+> 1. **[14] cited the wrong paper.** It listed the 2025 journal *extension* (Eckhoff et al.,
+>    *Neurosymbolic Artificial Intelligence*), but the XSS precision figures quoted in the text come
+>    from the earlier **Grov et al., NeSy 2024** paper — which, for a NeSy submission, is also the more
+>    relevant work to cite correctly.
+> 2. **[15]'s first author was wrong.** It read *"Z. Zhou"*; the first author is **Andy Zhou**. The
+>    initial had been guessed from a survey's "Zhou et al." — the same class of error as [10] below.
+> 3. **[16] carried an invented title and a wrong initial.** Its title was a placeholder composed
+>    during drafting, not the paper's title, and *"C. I. Kalutharage"* is **C. S. Kalutharage**. The
+>    real work is *Neurosymbolic Learning and Domain Knowledge-Driven Explainable AI…*, Computers &
+>    Security 151 (2025). ⚠️ Its bibliographic record is confirmed via Crossref, but the publisher and
+>    SSRN refused automated access, so **its characterisation in the text rests on the published
+>    abstract rather than a reading of the full paper.**
+>
+> A placeholder title that looks like a citation is more dangerous than a missing one, because
+> nothing about it invites checking.
 >
 > 🔴 **It caught a real error, which is why the pass was not skipped.** Reference [10] was drafted as
 > *"E. M. Rudd et al."* from memory; the first author is **Steve Cruz**, and Rudd is third. An
@@ -989,19 +1004,18 @@ about post-hoc scoring on this problem, not as a claim about OOD detection in ge
     Neural Networks.* ICLR 2018.
 13. W. Liu, X. Wang, J. D. Owens, Y. Li. *Energy-Based Out-of-Distribution Detection.* Advances in
     Neural Information Processing Systems (NeurIPS), vol. 33, 2020.
-14. M. W. Eckhoff, J. Halvorsen, B. J. Hansen, M. Eian, V. Mavroeidis, R. A. Chetwyn, G. Skjøtskift,
-    G. Grov. *Experimenting with Neurosymbolic Artificial Intelligence for Defending Against Cyber
-    Attacks.* Neurosymbolic Artificial Intelligence, 2025. doi:10.1177/29498732251377352
-    — extends *On the use of neurosymbolic AI for defending against cyber attacks*, arXiv:2408.04996,
-    2024, which reports the LTN web-server axiom and the XSS precision figures cited above.
-15. Z. Zhou et al. *KnowGraph: Knowledge-Enabled Anomaly Detection via Logical Reasoning on Graph
-    Data.* ACM SIGSAC Conference on Computer and Communications Security (CCS), 2024.
-    doi:10.1145/3658644.3690354
-16. C. I. Kalutharage et al. *Neuro-symbolic intrusion detection with explainable alignment to an
-    external attack taxonomy.* (Cited via the survey in [17]; consult the primary source before
-    final submission.)
-17. *Neuro-Symbolic AI for Cybersecurity: State of the Art, Challenges, and Opportunities.*
-    arXiv:2509.06921, 2025.
+14. G. Grov, J. Halvorsen, M. W. Eckhoff, B. J. Hansen, M. Eian, V. Mavroeidis. *On the Use of
+    Neurosymbolic AI for Defending Against Cyber Attacks.* Neural-Symbolic Learning and Reasoning
+    (NeSy 2024), Lecture Notes in Computer Science, Springer, 2024, pp. 119–140.
+    doi:10.1007/978-3-031-71167-1_7
+15. A. Zhou, X. Xu, R. Raghunathan, A. Lal, X. Guan, B. Yu, B. Li. *KnowGraph: Knowledge-Enabled
+    Anomaly Detection via Logical Reasoning on Graph Data.* ACM SIGSAC Conference on Computer and
+    Communications Security (CCS), 2024, pp. 168–182. doi:10.1145/3658644.3690354
+16. C. S. Kalutharage, X. Liu, C. Chrysoulas. *Neurosymbolic Learning and Domain Knowledge-Driven
+    Explainable AI for Enhanced IoT Network Attack Detection and Response.* Computers & Security,
+    vol. 151, 2025, art. 104318. doi:10.1016/j.cose.2025.104318
+17. S. B. Hakim, M. Adil, A. Velasquez, S. Xu, H. H. Song. *Neuro-Symbolic AI for Cybersecurity:
+    State of the Art, Challenges, and Opportunities.* arXiv:2509.06921, 2025.
 
 ---
 
