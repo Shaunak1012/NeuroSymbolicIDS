@@ -2,6 +2,24 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-15 (VENUE: NeSy — the paper is re-led around the exogeneity precondition)
+
+🎯 **Venue decided by the author: NeSy.** Recommended alternative was RAID 2027 with AISec 2027 as
+fallback; NeSy was chosen, and the draft is re-led rather than left in its security framing.
+
+- **New title:** *Knowledge the Network Already Has: An Exogeneity Precondition for Neuro-Symbolic
+  Intrusion Detection.*
+- **Abstract and §1 now lead with the NeSy question** — when does symbolic knowledge help? — and
+  answer it with the precondition, the mechanism as its second consequence, and the CIC-IDS2017
+  exogeneity test as a negative evaluability result. **One principle, two consequences.**
+- The security-framed abstract is kept in a collapsed block for the record. The security-framed §1
+  lead from 2026-09-14 was replaced; it remains in git history (PR #73).
+- 🔴 **Two hard constraints recorded:** 10 pages excluding references/supplementary (PMLR template),
+  and double-blind anonymisation. The draft is 12,324 words — roughly twice the limit.
+- STATUS's "still open" line had three stale items (cross-dataset "not run", venue undecided,
+  [10]–[13] unverified); all three are struck through with what superseded them, and the newly
+  unverified [14]–[17] are recorded in their place.
+
 ## 2026-09-14 (THE CORRECTED LABELS LAND — and they implicate our own headline)
 
 Six runs on Engelen et al.'s corrected CIC-IDS2017, two pre-registered arms × three seeds.

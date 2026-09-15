@@ -1,17 +1,34 @@
-# DRAFT — Unreachable by Construction: Zero-Day Blindness in Closed-Set Intrusion Detection, and the Two Measurement Failures That Hid It
+# DRAFT — Knowledge the Network Already Has: An Exogeneity Precondition for Neuro-Symbolic Intrusion Detection
 
 > **Status: FIRST PROSE DRAFT (2026-09-05).** Drafted *from* [paper_outline.md](paper_outline.md),
 > not independently of it — every number here traces to that file's second column and every caveat
 > to its third. **If a claim appears here without its caveat, that is a defect in this draft, not a
 > simplification.**
 >
-> **Format:** Markdown, deliberately. No venue template is chosen yet (NeSy / MILCOM-adjacent per
-> [conference_roadmap.md §4](conference_roadmap.md)), and committing to LaTeX before the venue is
-> chosen buys nothing. **Section numbering matches the outline** so the two stay diffable.
+> **Format:** Markdown until the content is stable, then the NeSy PMLR LaTeX template.
+> **Section numbering matches the outline** so the two stay diffable.
+>
+> 🎯 **VENUE DECIDED 2026-09-15: NeSy** (Neurosymbolic Learning and Reasoning), by the author.
+> Recommended alternatives were RAID 2027 with AISec 2027 as fallback, on the grounds that the
+> security-methodology content outweighs the neuro-symbolic content; NeSy was chosen and this draft is
+> re-led accordingly. **Two hard constraints now govern it:**
+> - **10 pages, excluding references and supplementary material** (NeSy 2026 full-paper rules;
+>   2027 not yet announced). At 12,324 words this draft is roughly **twice** that. Supplementary
+>   material is uncounted, so most of §3, §7's lessons and the per-experiment detail move there
+>   rather than being cut.
+> - **Double-blind; submissions must be anonymised.** No author, repository or institution may be
+>   identifiable. A pass for this is required before submission.
 >
 > ✅ **All eleven sections are drafted, all thirteen references verified, and one adversarial review
 > pass applied (2026-09-09).** Figures are built (`paper_figures.py`, `field_gap.py`) and referenced
 > by number.
+>
+> 🔄 **RE-LED FOR NeSy 2026-09-15.** The title and abstract below lead with the neuro-symbolic
+> contribution — the exogeneity precondition — because that is what this venue's reviewers are
+> evaluating. The mechanism and the measurement failures are unchanged and now serve it. The
+> security-framed title (*"Unreachable by Construction: Zero-Day Blindness in Closed-Set Intrusion
+> Detection, and the Two Measurement Failures That Hid It"*) is retained here for the record and for
+> a possible security-venue version.
 >
 > 🔄 **SPINE REFRAMED 2026-09-14, and the reason is a result.** This draft previously led with the
 > metric gap (§3) and titled itself *"What the CIC-IDS2017 Literature Cannot Measure…"*. Retraining on
@@ -26,6 +43,36 @@
 
 ## Abstract
 
+When does injecting symbolic knowledge into a neural model help? For intrusion detection we give a
+precise answer, a mechanism for it, and a benchmark on which the question cannot be tested.
+
+**The neuro-symbolic intrusion detectors that report gains share an unstated property: the knowledge
+they inject is information the network cannot compute from its input.** An asset inventory roughly
+doubles web-attack precision (0.088 → 0.213); logical reasoning over entity relations lifts
+true positives from 0.0 % to 35.5 % at a 0.5 % false-positive rate; alerts are mapped to an external
+attack taxonomy. **Our own symbolic pillar did the opposite** — its Logic Tensor Network axioms are
+deterministic functions of the flow features the network already reads — and it was null alone
+(−0.0004, n.s.) and significantly harmful when stacked (0.6926 → 0.6708, p < 0.0001).
+
+We propose that **symbolic knowledge helps exactly to the extent it lies outside the model's learned
+feature basis**, and show the same property explains a second failure. A closed-set learner reaches a
+novel attack family only insofar as its signature overlaps that basis; for Bot the overlap is empty
+(**0 of 8** discriminative features shared), every flow is classified benign, and the ranking is
+noise (cross-seed ρ = **−0.090**). This unreachability survives five attempts to break it,
+including an independent capture where Bot is abundant (**0.83×** chance) and corrected labels that
+remove attack flows which transmitted no payload.
+
+We then try to satisfy the precondition on CIC-IDS2017 and cannot. Host-role knowledge built from
+metadata the network never sees is still predicted from its features at AUC **0.990–0.994** and
+R² **0.89–0.95**, with an ablation ruling out the obvious shortcut. **Exogenous knowledge cannot be
+manufactured by aggregating the same data**, and a benchmark shipping no external knowledge artefact
+cannot support the experiment its neuro-symbolic results depend on. We report a measured
+reproducibility floor throughout, and the corrected-label result that retracts two of our own three
+headline families.
+
+<details>
+<summary>Security-framed abstract (2026-09-14), retained for the record</summary>
+
 A closed-set discriminative model learns only the features that separate the classes it was trained
 on, so a novel class is reachable exactly to the extent its signature overlaps that basis. We show
 this is not a metaphor but a measurable property with a testable consequence, and that for one attack
@@ -33,75 +80,61 @@ family the overlap is **empty**. For CIC-IDS2017's Bot family, **0 of 8** discri
 shared with the known-class task, **100 %** of Bot flows are classified BENIGN at mean
 p(BENIGN) = 0.9984, and the resulting ranking is **noise** — cross-seed Spearman **ρ = −0.090**,
 against 0.68–0.83 for every other family. The information is present: an oracle with Bot labels
-reaches PR-AUC **0.9988** from the same flow features. This is a limit of closed-set supervision, not
-of the feature modality.
+reaches PR-AUC **0.9988** from the same flow features. The claim survived five attempts to break it;
+two measurement failures — one in the published metric (37 of 169 method pairs indistinguishable
+while ≥2× apart on zero-day), one in the labels (Web Brute Force 0.8861 → 0.0072 once flows with
+no payload are excluded) — explain why it went unnoticed.
 
-**The claim's credential is that it survived five attempts to break it.** Bot remains unreachable on
-an independent capture with the rarity confound removed (CSE-CIC-IDS2018, where Bot is *abundant* and
-the model scores it at **0.83×** chance — below a random ranker); under corrected labels that discard
-attack flows which transmitted no payload (effective-Bot lift **0.57 / 0.64 / 8.99**, two of three
-seeds below chance); against an explicitly trained reject class, whose reach we show is *steerable*
-by what is merged into it but whose ceiling for Bot is chance; against cross-dataset augmentation,
-which made it worse; and against four deep architectures, seven classical baselines, four benign-only
-methods and a nine-scorer out-of-distribution battery.
-
-**Two measurement failures explain why this has not been noticed, and we demonstrate both on our own
-system.** First, the metric the field reports cannot resolve the capability it is used to claim:
-across 31 methods evaluated identically, **37 of 169 method pairs (22 %) are statistically
-indistinguishable on the published metric while differing by a factor of two or more in macro
-zero-day PR-AUC**, the worst pair 0.0052 apart on the former and **16.6×** apart on the latter. The
-metric is neither noisy nor uninformative (run-to-run SD 0.0021; ρ = +0.582 against zero-day
-performance) — it is too coarse in the regime the field reports in. Second, and worse, **the better
-metric we advocate was itself measuring a labelling convention.** On corrected labels, Web Brute
-Force falls from PR-AUC **0.8861 to 0.0072** and XSS drops below any reasonable power bar, because
-roughly nine in ten flows in those families transmitted no payload at all. A better metric on a
-mislabelled benchmark is still the wrong measurement.
-
-⚠️ **This costs us the positive half of our own mechanism.** The evidence that some families *are*
-reachable rested on those web scores. On genuinely-transmitted attacks the **ordering** the mechanism
-predicts survives — Web Brute Force is above chance on every seed, Bot is not — but the magnitudes do
-not. We report a well-tested account of **unreachability** and a much weaker one of reachability.
-
-We then show what does not remove it: four deep architectures, seven classical baselines, four
-benign-only anomaly methods, a nine-scorer out-of-distribution battery, calibration, abstention, and
-**our own symbolic pillar**, which contributes −0.0004 (n.s.) alone and *significantly harms* the
-system when stacked on the knowledge graph. We report one partial success (a knowledge-graph channel,
-+0.0528 macro, direction established on 3/3 seeds and magnitude only bounded to 0.027–0.088) and
-**two retractions of our own claims — one positive, one negative**. Throughout, we report a measured
-reproducibility floor
-(SD 0.0222) and express every delta as a multiple of it; doing so retracted one of our own headline
-results.
+</details>
 
 ---
 
-## §1 Introduction — one family that cannot be reached, and two reasons nobody noticed
+## §1 Introduction — knowledge the network already has
 
-A supervised intrusion detector is trained to separate the attack families it has seen. The features
-it learns are the ones that perform that separation and no others. It follows that a family it has
-*never* seen is visible to such a model only insofar as its signature happens to lie along those same
-features — and that a family whose signature lies elsewhere is not merely hard to detect but
-**unreachable by construction**, no matter how the model is tuned, ensembled, calibrated or fused.
+Neuro-symbolic learning promises that domain knowledge, stated as logic, can supply what data alone
+does not. For intrusion detection the promise is especially attractive: attacks that were never in
+the training set are exactly where a purely data-driven detector is weakest, and exactly where an
+analyst's knowledge of how networks and attacks behave ought to help.
 
-This paper makes that argument concrete on CIC-IDS2017 and then spends most of its length trying to
-break it. The Bot family shares **0 of 8** discriminative features with the known-class task; **100 %**
-of its flows are classified BENIGN at mean p(BENIGN) = 0.9984; and the ranking the model produces
-over them is **noise**, at cross-seed ρ = **−0.090** against 0.68–0.83 for every other family. An
-oracle given Bot labels reaches PR-AUC **0.9988** from the same features, so the information is
-there and the limit is closed-set supervision.
+We built a neuro-symbolic intrusion detector to test that promise and it failed. Its Logic Tensor
+Network axioms — over behaviours such as burst traffic, high packet-size variance and beacon-like
+periodicity — contributed **−0.0004** macro zero-day PR-AUC alone (not significant) and **harmed**
+the system significantly when stacked on a knowledge-graph channel (0.6926 → 0.6708, p < 0.0001).
+This paper is about why, and the answer turns out to be general.
 
-**What makes this worth reporting is not the observation but its durability.** We removed the obvious
-confound — that Bot is simply rare — by testing on a capture where Bot is *abundant*, and the model
-scores it **below a random ranker**. We removed a labelling confound we did not know we had, by
-retraining on a corrected release of the dataset in which attack flows that transmitted no payload
-are marked as such; Bot's effective-flow lift is **0.57 / 0.64 / 8.99** across seeds, two of three
-below chance. We trained an explicit reject class, and found its reach is steerable by what one
-merges into it but its ceiling for Bot is chance. We widened the learned basis with a second dataset,
-and made things worse. None of it moved.
+**The published systems that report gains share a property ours lacked.** Grov et al. add a single
+axiom — *flows not communicating with web servers cannot be web attacks* — and roughly double
+web-attack precision. KnowGraph reasons over relational structure between entities and lifts true
+positives from 0.0 % to 35.5 % at a 0.5 % false-positive rate. Kalutharage et al. align alerts to an
+external attack taxonomy. In each case **the knowledge is information the network cannot compute from
+its own input**: an asset inventory, a relational graph, a curated taxonomy. Every one of our
+behaviour predicates, by contrast, is a deterministic function of the flow features the network
+already reads. Ours supplied an inductive bias; theirs supplied evidence.
 
-🔑 **The second half of the paper asks why a field reporting >99 % has not run into this**, and finds
-two measurement failures — one in the metric, one in the labels. We demonstrate both on our own
-system rather than on anyone else's, and the second one invalidates two of our own three headline
-families.
+We state this as a precondition — **symbolic knowledge helps a neural detector to the extent it lies
+outside the model's learned feature basis** — and make three contributions around it.
+
+1. **A mechanism that unifies two failures.** The same property governs *novel attack families*: a
+   closed-set learner reaches a family it never saw only insofar as that family's signature overlaps
+   the features it learned. For the Bot family the overlap is empty (0 of 8 discriminative features),
+   every flow is classified benign at p(BENIGN) = 0.9984, and the ranking is noise (cross-seed
+   ρ = −0.090). Symbolic knowledge inside the basis adds nothing; a novel class outside it cannot be
+   reached. **One principle, two consequences** (§4).
+2. **A durability test.** That unreachability survives five attempts to break it: an independent
+   capture where Bot is abundant rather than rare, corrected labels that discard attack flows which
+   transmitted no payload, an explicitly trained reject class, cross-dataset augmentation, and a broad
+   architecture and out-of-distribution sweep (§5).
+3. **A negative evaluability result.** We try to satisfy the precondition on CIC-IDS2017 — building
+   host-role knowledge from metadata the network never sees — and find it is still recovered from the
+   features at AUC 0.990–0.994. **Exogenous knowledge cannot be manufactured by aggregating the same
+   data**, and a benchmark with no external knowledge artefact cannot support the experiment its
+   neuro-symbolic results rest on (§5, §9).
+
+⚠️ **Two measurement failures bound how far any of this should be trusted, and we demonstrate both on
+our own system.** The metric the field reports cannot resolve zero-day capability, and — more
+seriously — on corrected labels two of our three headline zero-day families were measuring whether
+the dataset counts an unsuccessful connection attempt as an attack. Both are reported in full below;
+they limit the magnitudes we can claim, and they do not move the mechanism.
 
 ### The metric failure
 
