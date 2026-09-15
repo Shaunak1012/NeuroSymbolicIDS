@@ -283,6 +283,177 @@ def fig5_variance():
     save(fig, "fig5_variance.png")
 
 
+# ============================================================================
+# NeSy SUBMISSION FIGURES  (python scripts/paper_figures.py --nesy)
+# ============================================================================
+# Built to the charting method in the dataviz guidance rather than to this
+# file's older defaults, and two choices DELIBERATELY differ from fig2-5:
+#
+#  1. NO INVENTED THRESHOLDS. fig2_bot_mechanism shades a "noise band" at
+#     rho in [-0.2, 0.2]. Nothing in the record defines that band, so drawing
+#     it presents an arbitrary cut as evidence. These figures draw only the
+#     zero line -- "the seeds do not agree at all" -- which needs no argument.
+#  2. CAVEATS IN THE CAPTION, NOT ON THE IMAGE. fig2-5 burn their limits into
+#     the figure so they survive being lifted into a talk. A PMLR figure's
+#     caption lives in LaTeX beside it, and text inside the image would
+#     duplicate it at an unreadable size. The captions are in nesy_body.md.
+#
+# Palette: the first three categorical slots, which the validator passes on
+# ALL pairs in light mode (worst CVD dE 9.2, normal-vision dE 24.0). Aqua is
+# 2.74:1 on the surface, which obliges visible labels or a table: every
+# figure here has a legend AND direct labels, and the values are in the text.
+# Print is this figure's medium, so texture is ON: the three series carry
+# solid / 45 / 135 degree fills and stay distinguishable in grayscale.
+# One light look only -- a printed PDF has no theme to follow.
+# Bars are square-ended: rounded data-ends need a corrected mutation aspect in
+# matplotlib, and a mis-corrected corner is a worse defect than a square one.
+
+INK, INK2, HAIR = "#0b0b0b", "#52514e", "#e6e5e1"
+S_BLUE, S_ORANGE, S_AQUA = "#2a78d6", "#eb6834", "#1baf7a"
+# tone-on-tone hatch inks: a darker step of each fill's own hue
+H_BLUE, H_ORANGE, H_AQUA = "#1c5cab", "#b04a1f", "#12805a"
+GOOD, CRITICAL = "#0ca30c", "#d03b3b"   # status: always with a glyph AND a label
+
+
+def _nesy_style():
+    plt.rcParams.update({
+        "font.family": "DejaVu Sans", "font.size": 8.5,
+        "axes.edgecolor": HAIR, "axes.linewidth": 0.8,
+        "axes.labelcolor": INK2, "xtick.color": INK2, "ytick.color": INK2,
+        "xtick.major.size": 0, "ytick.major.size": 0,
+        "hatch.linewidth": 0.7, "savefig.facecolor": "white",
+        "figure.facecolor": "white", "axes.facecolor": "white",
+    })
+
+
+def _save_nesy(fig, stem):
+    for ext, kw in (("png", {"dpi": 300}), ("pdf", {})):
+        path = os.path.join(FIG, "%s.%s" % (stem, ext))
+        fig.savefig(path, bbox_inches="tight", pad_inches=0.04, **kw)
+        print("  wrote %s" % path)
+    plt.close(fig)
+
+
+def nesy_fig1_thesis():
+    """One principle, two consequences -- the same region, opposite outcomes.
+
+    The rhyme is the argument: both panels draw the SAME learned basis and ask
+    the inside/outside question twice. For injected knowledge, OUTSIDE is the
+    only place it can help; for an unseen attack family, OUTSIDE is where it
+    cannot be reached. Positions are identical across panels so the verdicts
+    form a checkerboard -- cross/tick over tick/cross -- and that inversion is
+    the second consequence stated visually.
+
+    Web Brute Force sits ON the boundary rather than inside it: it shares 1 of
+    8 features, a partial overlap, and after label correction it is reached only
+    weakly. Drawing it fully inside would overstate that.
+
+    Every label row is at a fixed height and every name is one line, so no
+    label's position depends on another's length -- the defect that made the
+    first version collide.
+    """
+    from matplotlib.patches import Ellipse
+    from matplotlib.colors import to_rgba
+    _nesy_style()
+    fig, axes = plt.subplots(1, 2, figsize=(6.7, 2.35))
+    # The basis sits ABOVE every label row. The second version put the label
+    # rows inside the ellipse's vertical extent, so the inside item's text ran
+    # across the boundary line -- the one line on this figure that carries
+    # meaning. Dots now sit at the ellipse's mid-height, labels below its foot.
+    CY, RX, RY = 0.30, 0.75, 0.525          # ellipse centre y, half-width, half-height
+    IN_X, EDGE_X, OUT_X = 0.0, RX, 2.2      # EDGE_X is exactly on the boundary
+    ROW_NAME, ROW_WHY, ROW_VERDICT = -0.40, -0.60, -0.80
+    panels = [
+        ("(a)  Injected symbolic knowledge",
+         [(IN_X, "Our axioms (Ax3–Ax6)", "functions of the input",
+           "✗", "adds no evidence", CRITICAL),
+          (OUT_X, "External knowledge [14–16]", "inventory, graph, taxonomy",
+           "✓", "can add evidence", GOOD)]),
+        ("(b)  Unseen attack families",
+         [(EDGE_X, "Web Brute Force", "overlap 1 of 8",
+           "✓", "reached, weakly", GOOD),
+          (OUT_X, "Bot", "overlap 0 of 8",
+           "✗", "unreachable", CRITICAL)]),
+    ]
+    for ax, (title, items) in zip(axes, panels):
+        ax.set_xlim(-0.95, 3.15)
+        ax.set_ylim(-0.92, 0.92)
+        ax.set_aspect("equal")
+        ax.axis("off")
+        # fill and boundary set separately: the boundary IS the argument, so it
+        # must not inherit the fill's 10 % opacity
+        ax.add_patch(Ellipse((0.0, CY), 2 * RX, 2 * RY,
+                             facecolor=to_rgba(S_BLUE, 0.10),
+                             edgecolor=S_BLUE, lw=1.0, zorder=1))
+        ax.text(0.0, CY + 0.30, "learned\nfeature basis", ha="center",
+                va="center", fontsize=7.4, color=H_BLUE, linespacing=1.1,
+                zorder=2)
+        ax.set_title(title, loc="left", fontsize=9, color=INK, pad=2,
+                     fontweight="bold")
+        for x, name, why, glyph, verdict, col in items:
+            ax.plot([x], [CY], "o", ms=7, color=INK, mec="white", mew=1.6,
+                    zorder=5)
+            ax.text(x, ROW_NAME, name, ha="center", va="center", fontsize=7.5,
+                    color=INK, zorder=4)
+            ax.text(x, ROW_WHY, why, ha="center", va="center", fontsize=6.9,
+                    color=INK2, style="italic", zorder=4)
+            ax.text(x - 0.03, ROW_VERDICT, glyph, ha="right", va="center",
+                    fontsize=9, color=col, fontweight="bold", zorder=4)
+            ax.text(x + 0.03, ROW_VERDICT, verdict, ha="left", va="center",
+                    fontsize=7.3, color=INK, zorder=4)
+    fig.subplots_adjust(wspace=0.04, left=0.005, right=0.995, top=0.9,
+                        bottom=0.02)
+    _save_nesy(fig, "nesy_fig1_thesis")
+
+
+def nesy_fig2_mechanism():
+    """Cross-seed rank agreement by family: Bot's ranking is noise for
+    closed-set discriminative learners, not for the benign-only autoencoder."""
+    from matplotlib.patches import Patch
+    _nesy_style()
+    rank = load("bot_failure_analysis.json")["results"]["H2b_cross_seed_rank_corr"]
+    fams = ["Bot", "Web Attack Brute Force", "Web Attack XSS"]
+    short = ["Bot", "Web Brute Force", "Web XSS"]
+    models = [("cnn_paper", "1D CNN", S_BLUE, H_BLUE, None),
+              ("random_forest", "Random forest", S_ORANGE, H_ORANGE, "////"),
+              ("autoencoder", "Autoencoder (benign-only)", S_AQUA, H_AQUA, "\\\\\\\\")]
+    fig, ax = plt.subplots(figsize=(6.6, 2.45))
+    group_w, gap = 0.72, 0.012              # about 2px at this size
+    bw = group_w / len(models)
+    for j, (key, label, fill, hink, hatch) in enumerate(models):
+        for i, fam in enumerate(fams):
+            v = rank[key][fam]
+            x = i + (j - 1) * bw
+            ax.bar(x, v, width=bw - gap, color=fill, edgecolor=hink, lw=0,
+                   hatch=hatch, zorder=3)
+            if fam == "Bot":               # label the story, not every bar
+                ax.text(x, v + (0.035 if v >= 0 else -0.035), ("%+.3f" % v).replace("-", "−"),
+                        ha="center", va="bottom" if v >= 0 else "top",
+                        fontsize=7.3, color=INK, zorder=4)
+    ax.axhline(0, color=INK2, lw=0.9, zorder=2)
+    ax.set_ylim(-0.22, 1.02)
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+    ax.yaxis.grid(True, color=HAIR, lw=0.7, zorder=0)
+    ax.set_axisbelow(True)
+    for side in ("top", "right", "left", "bottom"):
+        ax.spines[side].set_visible(False)
+    ax.set_xticks(range(len(fams)))
+    ax.set_xticklabels(short, color=INK)
+    ax.set_ylabel("Cross-seed rank agreement\n(Spearman ρ)", fontsize=8)
+    handles = [Patch(facecolor=f, edgecolor=h, hatch=ht, lw=0, label=l)
+               for _, l, f, h, ht in models]
+    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, 1.16),
+              ncol=3, frameon=False, fontsize=7.8, handlelength=1.6,
+              columnspacing=1.4, labelcolor=INK)
+    _save_nesy(fig, "nesy_fig2_mechanism")
+
+
+def nesy():
+    print("Building NeSy submission figures from outputs/metadata/*.json")
+    nesy_fig1_thesis()
+    nesy_fig2_mechanism()
+    print("DONE (nesy figures)")
+
 def main():
     print("Building paper figures 2-5 from outputs/metadata/*.json (no retraining)")
     fig2_bot_mechanism()
@@ -293,4 +464,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    nesy() if "--nesy" in sys.argv else main()

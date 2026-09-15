@@ -814,6 +814,33 @@ they disagree, exactly one is stale and it is discoverable.
 python scripts/paper_figures.py
 ```
 
+### NeSy submission figures — `python scripts/paper_figures.py --nesy`
+
+Two figures for [nesy_body.md](target/nesy_body.md), written as 300-dpi PNG (committed) and vector
+PDF (gitignored; regenerated for LaTeX). The flag keeps the master draft's figures 2–5 from being
+rebuilt as a side effect.
+
+| # | figure | shows |
+|---|---|---|
+| 1 | `nesy_fig1_thesis` | *One principle, two consequences* — the same learned basis drawn twice; inside/outside maps to opposite outcomes for injected knowledge and for unseen families, so the verdicts form a checkerboard |
+| 2 | `nesy_fig2_mechanism` | cross-seed rank agreement per family: CNN −0.090, RF +0.068, **AE +0.827** on Bot |
+
+**Built to the charting method, and two choices deliberately differ from figures 2–5:**
+- **No invented thresholds.** `fig2_bot_mechanism` shades a ±0.2 "noise band" that nothing in the
+  record defines. These figures draw only the zero line.
+- **Caveats in the caption, not on the image**, because a PMLR caption sits beside the figure in
+  LaTeX. The captions are in `nesy_body.md`.
+
+Palette: the first three categorical slots, **validated all-pairs** by the palette script (worst CVD
+ΔE 9.2, normal-vision ΔE 24.0). Aqua sits at 2.74:1, which requires visible labels or a table — both
+figures have a legend and direct labels, and the values are in the text. Print is the medium, so
+**texture is on**: solid / 45° / 135° fills keep the series apart in grayscale.
+
+⚠️ **Figure 1 took two layout passes after rendering, and neither defect was visible in the code.**
+The first version's sub-labels collided and its boundary line inherited the fill's 10 % opacity,
+leaving the one line that carries the argument nearly invisible. The second ran the inside item's
+labels across that boundary. Both were found only by looking at the output.
+
 ## `scripts/noise_postdet.py` + `scripts/noise_postdet.sh`
 
 **Purpose**: Decompose the project's uncertainty into its actual sources. The ~0.0256
