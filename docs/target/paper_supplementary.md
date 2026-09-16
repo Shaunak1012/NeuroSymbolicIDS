@@ -134,9 +134,14 @@ statement about attention models in general.
 reported 1D CNN by 18.8 and 28.7 percentage points on the two multi-class known-class views, and by
 0.4 and 7.1 points on the two binary views, where known-class detection is already near saturation for
 both input modalities. On zero-day accuracy we
-reproduce their 1D CNN closely, with 47.85 % against 48.34 %. We cannot reproduce the +12 percentage
-point gain they report for their hybrid LTN model. Our closest reproduction of that model scores
-47.24 %, which is no better than our CNN. The comparison is approximate rather than direct. The input
+reproduce their 1D CNN closely, with 47.85 % against 48.34 %. We do not reproduce the gain they report
+for their hybrid LTN model. We trained their loss (cross-entropy plus the satisfiability term at
+ω = 1) and a matched control with the term switched off (ω = 0), identical in every other respect,
+with three deterministic seeds each. The satisfiability term changes zero-day accuracy by +0.55
+percentage points (+0.60, −0.84 and +1.89 on the three seeds), against the +12.13 they report, and
+changes macro zero-day PR-AUC by −0.0090, better on 1 seed of 3. Neither change is consistent in
+direction. An earlier comparison of ours set this model against controls trained with a different loss
+and so could not isolate the term; the matched control replaces it. The comparison is approximate rather than direct. The input
 modality differs (flow features instead of payload bytes), the zero-day sets differ by one swap (they
 hold out PortScan and train on Infiltration, and we do the reverse), and the class sizes differ. They
 also equalise every known attack class and delete duplicate and payload-less records, and we do neither,
@@ -766,8 +771,9 @@ standard CNN on CIC-IDS2017. That paper was our starting point, and a later surv
 situates it in a growing literature.
 
 We reproduced their CNN but not their symbolic gain. On their metric we obtain 47.85 % against their
-48.34 % for the 1D CNN, while our closest reproduction of their hybrid model scores 47.24 %, no better than
-our CNN (Appendix B). The comparison is approximate: the modality differs (flow features instead of payload
+48.34 % for the 1D CNN. Against a matched control that differs only in the satisfiability term, their
+hybrid loss changes zero-day accuracy by +0.55 percentage points, not consistently in direction, where
+they report +12.13 (Appendix B). The comparison is approximate: the modality differs (flow features instead of payload
 bytes), the zero-day sets differ by one swap, class sizes differ, and they delete duplicate and
 payload-less records while we do not, with composition explaining roughly
 4 of the 12 missing points. Appendix B describes four problems with the evaluation on which the gain is

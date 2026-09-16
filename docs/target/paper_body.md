@@ -318,8 +318,11 @@ the neural baseline.
 logic into a loss. Bizzarri et al. [8] applied it to CIC-IDS2017 with a combined cross-entropy and
 satisfiability loss and reported better accuracy on unknown attacks. Our work started from that paper,
 and a survey by the same group [9] places it within a growing body of work. We reproduced its CNN but not
-its symbolic gain. On its own metric we obtain 47.85 % for the CNN against the reported 48.34 %, and our
-closest reproduction of the hybrid model scores 47.24 %. The comparison is indicative rather than exact,
+its symbolic gain. On its own metric we obtain 47.85 % for the CNN against the reported 48.34 %. To test
+the gain we trained its loss (cross-entropy plus the satisfiability term) and the same loss without that
+term, otherwise identical, three deterministic seeds each: the term changes zero-day accuracy by
++0.55 percentage points, not consistently in direction, against the +12.13 reported (Appendix B). The
+comparison is indicative rather than exact,
 because the input modality, the set of zero-day classes, the class balancing and the cleaning all
 differ. In particular they delete duplicate and payload-less records and we do not, so the two CNN
 figures are measured on differently filtered populations. The reported gain is also confined to the

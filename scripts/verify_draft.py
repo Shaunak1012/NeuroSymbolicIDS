@@ -524,8 +524,28 @@ if pm:
         _pt["Binary 6 unknown classes"]["1D CNN"], "{:.2f}")
     chk("our CNN zero-day accuracy (view 5)", "paper_metrics",
         _us["Binary 6 unknown classes"], "{:.2f}")
-    chk("ltn_repro zero-day accuracy (view 5)", "paper_metrics",
-        pm["ours"]["LTN repro (CE+Ax1/2)"]["Binary 6 unknown classes"], "{:.2f}")
+    # The pre-flag, n=1 `ltn_repro` view-5 figure (47.24) is no longer quoted: it
+    # was compared against focal-loss arms, which cannot isolate the SAT term
+    # (audit CL-02). The matched comparison below replaced it on 2026-09-16.
+    chk("pre-flag ltn_repro view 5 (retired)", "paper_metrics",
+        pm["ours"]["LTN repro (CE+Ax1/2)"]["Binary 6 unknown classes"], "{:.2f}",
+        quoted=False)
+    _rb = load("rebase_deterministic")
+    _mc = (_rb or {}).get("ltn_matched", {}).get("matched_comparison")
+    if _mc:
+        _a = _rb["ltn_matched"]["ltn_repro_det"]["view5_per_seed"]
+        _b = _rb["ltn_matched"]["ltn_repro_ctrl"]["view5_per_seed"]
+        chk("CL-02 SAT-term effect on view 5 (matched)", "rebase_deterministic",
+            _mc["view5_delta"]["mean_delta"], "+{:.2f}")
+        chk("CL-02 per-seed view-5 effects", "rebase_deterministic",
+            "%+.2f, %+.2f and %+.2f" % tuple(x - y for x, y in zip(_a, _b)), "{}")
+        chk("CL-02 SAT-term effect on macro (matched)", "rebase_deterministic",
+            _mc["macro_delta"]["mean_delta"], "{:.4f}")
+        if _mc["view5_delta"]["direction_consistent"]:
+            BAD.append(("CL-02: the draft says the effect is not direction-consistent",
+                        "inconsistent", "rebase_deterministic"))
+    else:
+        unbacked("CL-02 matched SAT-term comparison", "rebase_deterministic.json has no ltn_matched")
     # pairs, not bare decimals: a lone "0.4" occurs all over the draft, so a
     # substring check on it could never fail.
     chk("known-class delta, multi-class views", "paper_metrics",

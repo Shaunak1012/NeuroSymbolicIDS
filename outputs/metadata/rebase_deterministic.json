@@ -169,6 +169,15 @@
    }
   }
  },
+ "reproduction_check": {
+  "rerun": "cnn_det_verify_s42",
+  "original": "c4_log1p_s42",
+  "predictions_byte_identical": true,
+  "loss_curve_identical": true,
+  "test_embeddings_byte_identical": true,
+  "epochs": 38,
+  "note": "re-run 2026-09-16 while another training lane loaded the machine; original trained 2026-08-10"
+ },
  "checkpoint_pair_identical": {
   "cnn_paper": true,
   "c4_log1p_s42": true
@@ -276,7 +285,8 @@
    "Multi-class 15 classes": 96.17122224354165,
    "Binary 15 classes": 97.94519353206927,
    "Binary 6 unknown classes": 47.85241851940393,
-   "_f1_Binary 6 unknown classes": 64.72996714840798
+   "_f1_Binary 6 unknown classes": 64.72996714840798,
+   "_balanced_Multi-class 9 known classes": 99.77585978448444
   },
   "cnn_new": {
    "Multi-class 9 known classes": 99.81685147469261,
@@ -284,7 +294,8 @@
    "Multi-class 15 classes": 96.17529231860549,
    "Binary 15 classes": 97.9396698587684,
    "Binary 6 unknown classes": 47.55757430870986,
-   "_f1_Binary 6 unknown classes": 64.45966119217171
+   "_f1_Binary 6 unknown classes": 64.45966119217171,
+   "_balanced_Multi-class 9 known classes": 99.72657667743651
   },
   "delta_vs_their_1d_cnn_new": {
    "Multi-class 9 known classes": 18.826851474692617,
@@ -304,11 +315,67 @@
  "ltn_matched": {
   "ltn_repro_det": {
    "description": "CE + base axioms, omega=1 (the base paper's Hybrid-LTN)",
-   "status": "not yet trained (audit_rebase.sh)"
+   "views_mean": {
+    "Multi-class 9 known classes": 99.8705589499887,
+    "Binary 9 known classes": 99.89318850418647,
+    "Multi-class 15 classes": 96.2270404158454,
+    "Binary 15 classes": 97.94955432678051,
+    "Binary 6 unknown classes": 46.61726033946928,
+    "_f1_Binary 6 unknown classes": 63.59019231336623,
+    "_balanced_Multi-class 9 known classes": 99.53365984816888
+   },
+   "view5_per_seed": [
+    46.736791776237155,
+    46.35429117857996,
+    46.76069806359072
+   ],
+   "macro_per_seed": [
+    0.5576941154358416,
+    0.5050689559413517,
+    0.5565030662644209
+   ],
+   "macro_mean": 0.5397553792138714
   },
   "ltn_repro_ctrl": {
    "description": "CE + base axioms, omega=0 (its matched control)",
-   "status": "not yet trained (audit_rebase.sh)"
+   "views_mean": {
+    "Multi-class 9 known classes": 99.87780040733197,
+    "Binary 9 known classes": 99.89892132458324,
+    "Multi-class 15 classes": 96.23401768738336,
+    "Binary 15 classes": 97.93501834440974,
+    "Binary 6 unknown classes": 46.067415730337075,
+    "_f1_Binary 6 unknown classes": 63.07115040483834,
+    "_balanced_Multi-class 9 known classes": 99.55794774259589
+   },
+   "view5_per_seed": [
+    46.1391345923978,
+    47.19101123595505,
+    44.87210136265838
+   ],
+   "macro_per_seed": [
+    0.5419844493632716,
+    0.5471162257739138,
+    0.5570990659357631
+   ],
+   "macro_mean": 0.5487332470243161
+  },
+  "matched_comparison": {
+   "question": "does the base paper's SAT term (omega=1 vs 0, everything else equal) raise zero-day accuracy on our data?",
+   "view5_delta": {
+    "mean_delta": 0.5498446091322032,
+    "paired_sd": 1.3632873468212534,
+    "sigma": 0.4033226087033402,
+    "seeds_better": 2,
+    "direction_consistent": false
+   },
+   "macro_delta": {
+    "mean_delta": -0.008977867810444776,
+    "paired_sd": 0.029776797954336222,
+    "sigma": 0.30150548169123675,
+    "seeds_better": 1,
+    "direction_consistent": false
+   },
+   "base_paper_claim_pp": 12.13
   }
  },
  "operational_best_c4_log1p": {

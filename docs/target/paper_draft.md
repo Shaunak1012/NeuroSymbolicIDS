@@ -271,8 +271,12 @@ configuration**, not a claim about attention.
 reported 1D CNN by 18.8 and 28.7 pp on the two multi-class known-class views and by 0.4 and 7.1 pp on
 the two binary ones, where both input modalities are already near saturation, and **reproduce their 1D CNN's zero-day
 accuracy almost exactly — 47.85 % against 48.34 %.** What we cannot reproduce is their Hybrid-LTN's
-**+12 pp symbolic gain**: our closest reproduction of their model scores **47.24 %**, no better than
-our own CNN. ⚠️ This is a comparison in **form, not head-to-head** — different modality (flow features
+**+12 pp symbolic gain**, and that is now tested against a matched control: their loss (CE + SAT, ω = 1)
+against the same loss with the SAT term off (ω = 0), otherwise identical, three deterministic seeds each.
+The SAT term moves zero-day accuracy by **+0.55 pp** (+0.60, −0.84 and +1.89 on the three seeds) where
+they report **+12.13**, and macro zero-day PR-AUC by **−0.0090** (1 seed of 3 better) — neither
+direction-consistent. ~~our closest reproduction of their model scores **47.24 %**, no better than
+our own CNN~~ *(replaced 2026-09-16: that comparison crossed loss functions — audit CL-02)*. ⚠️ This is a comparison in **form, not head-to-head** — different modality (flow features
 versus payload bytes, and so packets versus flows), zero-day membership differing by a swap (they hold
 out PortScan and train Infiltration; we do the reverse), different class sizes, and different cleaning
 and balancing: they equalise every known attack class and delete duplicate and payload-less records, and
@@ -943,8 +947,8 @@ vanilla CNN on CIC-IDS2017. That paper is our starting point, and a recent surve
 [9] places it in a fast-growing literature.
 
 🔴 **We reproduce their CNN and cannot reproduce their symbolic gain.** On their own metric our
-figures are 47.85 % against their 48.34 % for the 1D CNN — close agreement — while our nearest
-reproduction of their hybrid model scores 47.24 %, no better than our own CNN (§3d). We report this
+figures are 47.85 % against their 48.34 % for the 1D CNN — close agreement — while a matched
+control shows their SAT term moving zero-day accuracy by +0.55 pp where they report +12.13 (§3d). We report this
 as a comparison **in form, not head-to-head**: the modality differs (flow features versus payload
 bytes), the zero-day membership differs by a swap, the class sizes differ, and they delete duplicate and
 payload-less records while we do not, with composition
