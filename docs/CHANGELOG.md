@@ -2,6 +2,54 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-16 (Repository audit, base-paper comparison, remediation — the fusion result is withdrawn)
+
+Branch `fix/audit-remediation`, stacked on `docs/paper-revision`. **Not pushed** (decision D5).
+
+**Audit.** `AUDIT_REPORT.md` (read-only Phase 1; 25 findings), `BASEPAPER_COMPARISON.md` (Bizzarri et
+al., ICCCN 2024, read in full; 15 findings), `REMEDIATION_ITINERARY.md` (40 findings in 8 stages). Three
+of the audit's own statements were wrong and are corrected in place: F-06's figures *do* regenerate
+(the audit used a different split), F-15's columns are *not* all constant, BP-03's test set is 159,160
+rows (35.0 %), not 159,540.
+
+**🔴 Withdrawn: the CNN + KG fusion gain** (`fusion_population.py`). Measured with the same three
+reference CNN runs throughout. Across 11 pre-flag CNN runs the online k=800 fusion gains in 5 (reference
+three +0.0615, other eight −0.1190), across 6 deterministic runs in 0. The gain tracks each run's median
+XSS rank among all test flows (Spearman +0.95). Paper body, supplementary §D and master draft §6 now say
+so; STATUS retracts "CURRENT BEST", "THE SCORE IMPROVED" and "ONLY THE KG EARNS ITS PLACE" in place.
+
+**Re-base (F-01).** CNN baseline 0.6399 (pre-flag) → **0.6299** (deterministic). Online k=800 fusion
+−0.1269 vs the det CNN (0/3); recall at 1 % FPR 48.2 % (CNN) vs 46.5 % (fusion). Capture-faithful
+prevalence: 0.5845. Validation-fixed threshold: achieved test FPR 1.06 %. `rebase_deterministic.py`.
+
+**Base paper.** "18–29 pp on all four known-class views" was false (+18.82 / +0.42 / +28.72 / +7.07),
+corrected in 10 places. The paper's primary criticism of Bizzarri et al. is now the threshold shift
+(+0.09/+0.15/+0.07/+2.15 pp with benign rows, +12.13 without; FP 380 → 452), plus one-connection
+Heartbleed (42.2 % of their zero-day set), a 35.0 % test set against a stated 10 %, and three Table II
+cells that disagree with their Fig. 3. `basepaper_audit.py`. The 47.85/48.34 agreement is qualified as
+two differently filtered populations.
+
+**New scripts:** `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`,
+`rebase_deterministic.py`, `fusion_population.py`, `kg_graph.py`, `audit_rebase.sh`. **New:** `tests/`
+(30 tests, the project's first), `requirements.lock.txt`.
+
+**Code fixes:** `metrics.evaluate(thr=...)` (F-07); `operational_best` names its online row and takes
+`CNN_CHANNEL` (F-05); Holm–Bonferroni in `significance.py` (F-11, no verdict changes); `PYTHONHASHSEED`
+exported by `run_long.sh` (F-19); `tracking` records `scoring` (F-20); dashboard escaping (F-21);
+`KnowledgeGraph` importable, `exec` removed (F-22); `ltn_paper.py` logs determinism state (F-01);
+`run_long.sh` `RUN_LONG_NAME`; `verify_draft.py` checks every new number (207 verified, 0 mismatched).
+
+**Docs:** `config.yaml` / `preprocess_paper.py` call the split paper-*inspired* (FD-01); `BeaconLike`
+marked oracle-informed and described correctly (F-08; the body had called it "periodicity"); the
+limitations name the evasion techniques and the single split (F-16, F-17); the field-gap paragraph
+gives deduplicated values (F-10); "70 features" fixed where unbannered (F-18); pid file untracked (F-23).
+
+**Running at end of day:** `audit_rebase.sh` — CL-02's matched control (CE, ω=0) and `ltn_repro` at
+three deterministic seeds, plus a seed-42 CNN byte-identity check.
+
+**Open for the author:** D1 (benign under-sampling), D3 (notebook), D4 (grouped/chronological splits),
+D5 (push), and how to reframe the paper now that its positive result is gone.
+
 ## 2026-09-15 (Venue dropped — the paper is now a plain, venue-free research paper)
 
 - **Author's decision:** no venue, no template, no author line. Replaces the NeSy decision made
