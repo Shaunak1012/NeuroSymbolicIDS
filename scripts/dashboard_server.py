@@ -386,7 +386,15 @@ function fmtAgo(ts) {
   if (s < 60) return s + 's ago';
   return Math.floor(s/60) + 'm ago';
 }
-function chip(text, cls) { return `<span class="chip ${cls}">${text}</span>`; }
+// Every string that comes from data on disk (run names, class names, KG explanation
+// paths, caveats, branch and file names) goes through esc() before innerHTML.
+// Audit F-21: localhost-only, so not exploitable as configured, but a class name
+// containing markup should never become markup.
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g,
+    ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[ch]));
+}
+function chip(text, cls) { return `<span class="chip ${cls}">${esc(text)}</span>`; }
 
 function renderStats(d) {
   const sys = d.system, git = d.git, training = d.training;
@@ -398,7 +406,7 @@ function renderStats(d) {
   } else {
     cells.push(`<div class="stat"><div class="label">CPU / RAM</div><div class="value">${chip('psutil not installed','warn')}</div></div>`);
   }
-  cells.push(`<div class="stat"><div class="label">Branch</div><div class="value mono">${git.branch}</div>${git.dirty ? chip(git.dirty + ' uncommitted', 'warn') : chip('clean', 'good')}</div>`);
+  cells.push(`<div class="stat"><div class="label">Branch</div><div class="value mono">${esc(git.branch)}</div>${git.dirty ? chip(git.dirty + ' uncommitted', 'warn') : chip('clean', 'good')}</div>`);
   cells.push(`<div class="stat"><div class="label">Active run</div><div class="value">${running ? chip(running + ' running', 'good') : chip('idle', 'neutral')}</div></div>`);
   document.getElementById('stat-grid').innerHTML = cells.join('');
 }
@@ -409,7 +417,7 @@ function renderProcs(d) {
   if (!t.available) { tb.innerHTML = '<tr><td class="empty" colspan="5">psutil not installed — no process visibility</td></tr>'; return; }
   if (!t.processes.length) { tb.innerHTML = '<tr><td class="empty" colspan="5">no training scripts currently running</td></tr>'; return; }
   tb.innerHTML = t.processes.map(p => `<tr>
-    <td class="mono">${p.pid}</td><td class="mono">${p.script}</td>
+    <td class="mono">${p.pid}</td><td class="mono">${esc(p.script)}</td>
     <td class="mono">${p.cpu_pct.toFixed(0)}%</td><td class="mono">${p.mem_mb.toFixed(0)} MB</td>
     <td class="mono">${fmtElapsed(p.elapsed_s)}</td></tr>`).join('');
 }
@@ -430,7 +438,7 @@ function renderRuns(d) {
     const m = r.metrics || {};
     const macro = m.macro_zd_pr_auc, zd = m.zd_pr_auc, sat = m.saturated;
     const fmt = v => (v === null || v === undefined) ? '—' : Number(v).toFixed(4);
-    return `<tr><td class="mono">${r.name || '—'}</td><td class="mono">${fmt(macro)}</td><td class="mono">${fmt(zd)}</td>
+    return `<tr><td class="mono">${esc(r.name || '—')}</td><td class="mono">${fmt(macro)}</td><td class="mono">${fmt(zd)}</td>
       <td>${sat ? chip('saturated','critical') : chip('ok','good')}</td></tr>`;
   }).join('');
 }
@@ -455,7 +463,7 @@ function renderKG(d) {
       ${chip('growth-rate criterion only', 'neutral')}
       ${kg.graph_html ? '<a class="btn-link" href="/kg" target="_blank" rel="noopener">Open interactive graph &#8599;</a>' : ''}
     </div>
-    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">Scope: ${base.scope || 'corroboration + explanation, NOT primary detection'}</div>`;
+    <div style="font-size:12px;color:var(--text-secondary);margin-bottom:4px">Scope: ${esc(base.scope || 'corroboration + explanation, NOT primary detection')}</div>`;
 
   const structure = `<div class="stat-grid" style="margin-top:12px">
       <div class="stat"><div class="label">Nodes</div><div class="value mono">${base.nodes}</div></div>
@@ -481,7 +489,7 @@ function renderKG(d) {
       + '<div class="table-wrap"><table><thead><tr><th>Channel</th><th>Global</th><th>Global lift</th><th>Within-window</th><th>Within-window lift</th></tr></thead><tbody>'
       + keys.map(k => {
           const v = cf[k];
-          return `<tr><td class="mono">${k}</td><td class="mono">${f4(v.bot_global)}</td><td class="mono">${f4(v.bot_global_lift)}&times;</td>
+          return `<tr><td class="mono">${esc(k)}</td><td class="mono">${f4(v.bot_global)}</td><td class="mono">${f4(v.bot_global_lift)}&times;</td>
                   <td class="mono">${f4(v.bot_within_window)}</td><td class="mono">${f4(v.bot_within_window_lift)}&times;</td></tr>`;
         }).join('')
       + '</tbody></table></div>';
@@ -489,12 +497,12 @@ function renderKG(d) {
 
   const expl = (base.explanations || []).length
     ? '<div class="subhead">Explanation paths (sample)</div>'
-      + base.explanations.map(e => `<div class="pathline">${e.path}</div>`).join('')
+      + base.explanations.map(e => `<div class="pathline">${esc(e.path)}</div>`).join('')
     : '';
 
   const caveats = (base.caveats || []).length
     ? '<div class="subhead">Caveats that travel with these numbers</div>'
-      + base.caveats.map(c => `<div class="caveat">${c}</div>`).join('')
+      + base.caveats.map(c => `<div class="caveat">${esc(c)}</div>`).join('')
     : '';
 
   el.innerHTML = head + structure + emerging + confound + expl + caveats;
@@ -505,9 +513,9 @@ function renderFigures(d) {
   const figs = d.figures || [];
   if (!figs.length) { el.innerHTML = '<div class="empty">no figures in outputs/figures</div>'; return; }
   el.innerHTML = figs.map(f =>
-    `<a class="fig" href="/figures/${f.name}" target="_blank" rel="noopener">
-       <img src="/figures/${f.name}" alt="${f.name}" loading="lazy">
-       <div class="cap">${f.name} &middot; ${f.size_kb} KB</div>
+    `<a class="fig" href="/figures/${encodeURIComponent(f.name)}" target="_blank" rel="noopener">
+       <img src="/figures/${encodeURIComponent(f.name)}" alt="${esc(f.name)}" loading="lazy">
+       <div class="cap">${esc(f.name)} &middot; ${f.size_kb} KB</div>
      </a>`).join('');
 }
 
