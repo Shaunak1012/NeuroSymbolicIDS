@@ -1,0 +1,104 @@
+{
+ "zero_day_in_train": [],
+ "zero_day_in_val": [],
+ "n_features": 68,
+ "sizes": {
+  "train": 883796,
+  "val": 110475,
+  "test": 114658
+ },
+ "duplicates": {
+  "test_rows_duplicated_in_train": 19513,
+  "fraction": 0.17018437440039072,
+  "per_class": {
+   "BENIGN": 0.0691203360066622,
+   "Bot": 0.0,
+   "DDoS": 7.811279487580065e-05,
+   "DoS GoldenEye": 0.003883495145631068,
+   "DoS Hulk": 0.2527701733802633,
+   "DoS Slowhttptest": 0.06363636363636363,
+   "DoS slowloris": 0.09137931034482759,
+   "FTP-Patator": 0.296343001261034,
+   "Heartbleed": 0.0,
+   "Infiltration": 0.0,
+   "PortScan": 0.583338580693911,
+   "SSH-Patator": 0.4855687606112054,
+   "Web Attack Brute Force": 0.0,
+   "Web Attack Sql Injection": 0.0,
+   "Web Attack XSS": 0.0
+  }
+ },
+ "group_overlap": {
+  "flow_id_fraction": 0.5487885712292209,
+  "flow_id_per_class": {
+   "BENIGN": 0.4133099190759817,
+   "Bot": 0.0,
+   "DDoS": 0.9023590064052491,
+   "DoS GoldenEye": 1.0,
+   "DoS Hulk": 1.0,
+   "DoS Slowhttptest": 1.0,
+   "DoS slowloris": 1.0,
+   "FTP-Patator": 0.7868852459016393,
+   "Heartbleed": 0.0,
+   "Infiltration": 0.0,
+   "PortScan": 0.0052263711353189345,
+   "SSH-Patator": 0.8166383701188455,
+   "Web Attack Brute Force": 1.0,
+   "Web Attack Sql Injection": 1.0,
+   "Web Attack XSS": 1.0
+  },
+  "source_ip_fraction": 0.9892462802421114
+ },
+ "temporal": {
+  "train_start": "2017-07-03 08:55:58",
+  "train_end": "2017-07-07 17:02:00",
+  "test_start": "2017-07-03 08:56:38",
+  "test_end": "2017-07-07 17:02:00",
+  "test_inside_train_range": 1.0
+ },
+ "benign": {
+  "pooled": 2271320,
+  "kept": 552373,
+  "undersample_factor": 4.111931611429234,
+  "pooled_share": 0.8031893901995703,
+  "test_share": 0.48175443492822134
+ },
+ "constant_columns": {
+  "dropped": [
+   "Bwd PSH Flags",
+   "Fwd URG Flags",
+   "Bwd URG Flags",
+   "CWE Flag Count",
+   "Fwd Avg Bytes/Bulk",
+   "Fwd Avg Packets/Bulk",
+   "Fwd Avg Bulk Rate",
+   "Bwd Avg Bytes/Bulk",
+   "Bwd Avg Packets/Bulk",
+   "Bwd Avg Bulk Rate"
+  ],
+  "any_dropped_column_still_present": false,
+  "checked_on_full_capture": true,
+  "non_constant_on_full_capture": {
+   "Fwd URG Flags": {
+    "rows": 315,
+    "labels": {
+     "BENIGN": 315
+    },
+    "files": [
+     "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"
+    ],
+    "urg_flag_count_also_1": 315
+   },
+   "CWE Flag Count": {
+    "rows": 315,
+    "labels": {
+     "BENIGN": 315
+    },
+    "files": [
+     "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"
+    ],
+    "urg_flag_count_also_1": 315
+   }
+  }
+ }
+}

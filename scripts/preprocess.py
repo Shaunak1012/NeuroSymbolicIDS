@@ -82,6 +82,16 @@ Xtr.insert(0, "Destination Port", meta_tr["Destination Port"].astype(np.int64).v
 Xte.insert(0, "Destination Port", meta_te["Destination Port"].astype(np.int64).values)
 
 # align columns, drop constants (computed on train)
+#
+# ⚠️ AUDIT F-15 (2026-09-16). "Train" here is the TEMPORAL train half (Mon-Wed),
+# and preprocess_paper.py later re-pools both halves, so this decision was taken on
+# a subset of the data it is applied to. Measured on the full capture
+# (scripts/split_integrity.py): 8 of the 10 dropped columns are constant
+# everywhere, but `Fwd URG Flags` and `CWE Flag Count` are 1 on 315 BENIGN rows in
+# Thursday afternoon's file. On all 315 the retained `URG Flag Count` is also 1,
+# so no information is lost. Deliberately NOT changed: keeping them would turn the
+# 68-feature basis every result is defined on into 70, for no information gain.
+# tests/test_split_integrity.py pins this so it cannot drift silently.
 common = [c for c in Xtr.columns if c in Xte.columns]
 Xtr, Xte = Xtr[common], Xte[common]
 nunique = Xtr.nunique()
