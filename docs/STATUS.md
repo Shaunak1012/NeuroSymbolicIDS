@@ -58,7 +58,23 @@ det CNN's macro is **0.5845**. `audit_rebase.sh` lane A re-trains seed 42 to con
 - **F-15** two of the ten "constant" dropped columns are not constant (315 benign rows, redundant with
   the kept `URG Flag Count`). Feature set left at 68.
 
-### ⏳ Running when this was written
+### ✅ CL-02 answered (2026-09-16, same day) — the base paper's gain does not appear under a matched control
+
+`audit_rebase.sh` trained the base paper's loss (CE + SAT, base axioms, ω=1) and the same loss with the
+SAT term off (ω=0), otherwise identical, **three deterministic seeds each** (`rebase_deterministic.json`
+→ `ltn_matched`):
+
+| | ω=1 (their Hybrid-LTN) | ω=0 (matched control) | effect of the SAT term |
+|---|---:|---:|---:|
+| zero-day accuracy (their view 5), mean | 46.62 % | 46.07 % | **+0.55 pp** (+0.60 / −0.84 / +1.89; 0.40σ) |
+| macro zero-day PR-AUC, mean | 0.5398 | 0.5487 | **−0.0090** (1/3 better; 0.30σ) |
+
+They report **+12.13 pp**. Neither of our effects is consistent in direction. The paper's sentence now
+says this; the old pre-flag n=1 figure (47.24 %) is retired. ✅ Also confirmed: `cnn_det_verify_s42` is
+**byte-identical** to `c4_log1p_s42` (predictions, 38-epoch loss, embeddings), trained while the other
+lane loaded the machine.
+
+~~### ⏳ Running when this was written~~ *(finished 16:04 UTC)*
 
 `audit_rebase.sh` — lane A: `cnn_det_verify_s42` then `ltn_repro_det_s42-44` (CE, ω=1); lane B:
 `ltn_repro_ctrl_s42-44` (CE, ω=0) — **CL-02, the matched control the base-paper reproduction never
@@ -1224,7 +1240,10 @@ Both metric systems are now produced from the same runs.
    detection is saturated for both modalities. ⚠️ **This is a MODALITY
    advantage, not a method one** — 68 engineered flow features are far more separable than raw
    payload bytes. Do not write it up as an algorithmic win.
-2. 🔴 **We reproduce their 1D CNN's zero-day number almost exactly (47.85 % vs 48.34 %) and CANNOT
+2. 🔴 *(2026-09-16: the "cannot reproduce" half is now backed by a matched control — the SAT term moves
+   zero-day accuracy +0.55 pp, not direction-consistent, vs their +12.13; see the audit section at the
+   top. The `ltn_repro` 47.24 % comparison below crossed loss functions and is superseded.)*
+   **We reproduce their 1D CNN's zero-day number almost exactly (47.85 % vs 48.34 %) and CANNOT
    reproduce the Hybrid-LTN's +12 pp symbolic gain.** Our closest reproduction of their model
    (`ltn_repro`, plain CE + Ax1/Ax2 label anchors) scores **47.24 %** — no gain over our own CNN.
    **This is the project's central finding stated for the first time on the base paper's own

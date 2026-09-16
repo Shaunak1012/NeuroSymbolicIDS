@@ -248,10 +248,10 @@ STAGE 0  decisions      [ ] D1  [x] D2  [ ] D3  [ ] D4  [ ] D5
 STAGE 1  no compute     [x] 1.1 [x] 1.2 [x] 1.3 [x] 1.4 [x] 1.5 [x] 1.6 [x] 1.7 [x] 1.8 [x] 1.9
 STAGE 2  write-up       [x] 2.1 [x] 2.2 [x] 2.3 [x] 2.4 [x] 2.5 [x] 2.6 [x] 2.7 [x] 2.8 [x] 2.9
 STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
-STAGE 4  RE-BASE        [x] 4.1 [~] 4.2 [~] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
-                        [~] 4.10 [x] 4.11
+STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
+                        [x] 4.10 [x] 4.11
 STAGE 5  protocol (D4)  [ ] 5.1 [ ] 5.2 [ ] 5.3 [ ] 5.4
-STAGE 6  modelling      [ ] 6.1 [~] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
+STAGE 6  modelling      [ ] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
 STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [ ] 7.4
 STAGE 8  hygiene        [ ] 8.1 [x] 8.2
 ```
@@ -301,3 +301,10 @@ overstated how many docs lacked a banner; F-13's notebook uses the base paper's 
 **Not done, and why.** D1, D3, D4, D5 and the paper reframe need the author. 5.x waits on D4. 6.1
 (tuning-matched baselines) and 7.4 (end-to-end run) were deferred to keep the CPU for the training
 lanes. 6.4 and 6.5 are optional. 8.1 waits on D3.
+
+**Update, 16:04 UTC.** `audit_rebase.sh` finished. 4.2: the seed-42 re-run is byte-identical to
+`c4_log1p_s42`. 4.3 / CL-02: against a matched control the base paper's SAT term changes zero-day
+accuracy by +0.55 pp (+0.60 / −0.84 / +1.89; not direction-consistent) where they report +12.13, and
+macro by −0.0090 (1/3); the paper now says so. 4.10: balanced known-class accuracy is recorded
+(deterministic CNN 99.73 %). 6.2: `significance.json` regenerated with Holm, no verdict changes.
+4.4 stays partial: novelty, ablation, field_gap and the figures still use the pre-flag CNN.

@@ -36,7 +36,11 @@ variants is decision **D4** (STATUS).
 Benign is under-sampled before the split. At capture-faithful prevalence the det CNN's macro is
 0.5845, not 0.6299; online fusions fall to ~0.325. Recall and FPR are unaffected. Decision **D1**.
 
-### [OPEN 2026-09-16] 🟡 The base-paper reproduction still lacks its result (CL-02)
+### [FIXED 2026-09-16] 🟡 The base-paper reproduction still lacks its result (CL-02)
+
+> ✅ **Fixed the same day.** Matched control run at three deterministic seeds: the SAT term changes
+> zero-day accuracy by +0.55 pp (+0.60 / −0.84 / +1.89) against the base paper's +12.13, and macro by
+> −0.0090 (1/3); neither direction-consistent. Paper sentences rewritten; `verify_draft.py` checks them.
 
 `ltn_repro` (CE + ω=1) was compared only against focal-loss arms, so "their +12 pp gain does not
 appear" crossed loss functions. The matched control (CE + ω=0) and a 3-seed deterministic `ltn_repro`

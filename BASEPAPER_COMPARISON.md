@@ -108,7 +108,7 @@ own claims about the base paper.
 | ID | Sev | Finding | Confidence |
 |---|---|---|---|
 | **CL-01** | **HIGH** | "We beat the base paper by 18–29 pp on all four known-class views" is arithmetically false (+18.82 / **+0.42** / +28.72 / **+7.07**). In 7 files including the submission text | CONFIRMED |
-| **CL-02** | **HIGH** | `ltn_repro` (CE + ω=1) has **no matched control**. No CE + ω=0 run exists, so "their +12 pp gain does not appear" is confounded with the loss function | CONFIRMED |
+| **CL-02** | **HIGH** | `ltn_repro` (CE + ω=1) has **no matched control**. No CE + ω=0 run exists, so "their +12 pp gain does not appear" is confounded with the loss function. *Resolved 2026-09-16: matched control at three deterministic seeds — SAT term +0.55 pp on zero-day accuracy (+0.60 / −0.84 / +1.89), macro −0.0090; their claim was +12.13* | CONFIRMED |
 | **BP-01** | **HIGH** | The entire claimed symbolic gain is in the one view with no negatives (+12.13 pp there, +0.07 to +2.15 pp on the four views that have benign rows), and their Fig. 3 shows false positives *rising* 380 → 452. It is a threshold shift, and no threshold-free metric is reported | CONFIRMED |
 | **BP-02** | **HIGH** | **42.2 % of their zero-day headline is Heartbleed**, which is 13,486 payload packets drawn from **11 flows** — ~~effective sample size ≈ 11~~ and those 11 flows share **one 5-tuple** (172.16.0.1:45022 → 192.168.10.51:444) inside **20 minutes**: effectively **a single connection** *(verified 2026-09-16, `basepaper_audit.py`)*. Heartbleed + Web Brute Force = **79.0 %** of the zero-day set | CONFIRMED |
 | **BP-03** | MEDIUM | The confusion matrices imply a known-class evaluation set of ~~≈159,540 rows = 35.1 %~~ **159,160 rows = exactly 35.0 %** of Table I's 454,744 — not the 10 % the stated 80/10/10 split gives (45,474). *Corrected 2026-09-16 by `basepaper_audit.py`* | CONFIRMED |
@@ -522,7 +522,7 @@ CL-01 fixed, correctly sized.
 | 21 | "their Heartbleed is 13,486 payload packets; flow data has 11" | STATUS | Table I + ours | ✅ correct; ⚠️ the implication (effective n ≈ 11 carrying 42 % of their headline) is not drawn (BP-02) |
 | 22 | "composition explains ~4 pp: 48.32 % → 44.38 %" | STATUS | `paper_metrics.json` | ✅ internally consistent |
 | 23 | **"we beat them 18–29 pp on all four known-class views"** | 7 files incl. drafts | derived | ❌ **FALSE** — +18.82 / +0.42 / +28.72 / +7.07 (CL-01) |
-| 24 | "we cannot reproduce the Hybrid-LTN's +12 pp symbolic gain" | STATUS:1141 | derived | ⚠️ **not supported as run** — no matched control (CL-02) |
+| 24 | "we cannot reproduce the Hybrid-LTN's +12 pp symbolic gain" | STATUS:1141 | derived | ⚠️ **not supported as run** — no matched control (CL-02). ✅ *Now supported (2026-09-16): matched control gives +0.55 pp, not direction-consistent* |
 | 25 | "their benign was decreased from 362,108 to 200,000" | not currently quoted | §Dataset p.4 | ℹ️ worth adding — it shows their benign pool is ~11× smaller than ours after packet filtering |
 
 ---

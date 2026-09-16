@@ -135,9 +135,9 @@ Do not restate it here — that is exactly what kept rotting.
 
 **Next action (resume here — as of end of 2026-09-16):** read STATUS → "AUDIT + REMEDIATION" and
 `REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).
-1. **Collect `audit_rebase.sh`** (logs `outputs/audit_rebase_{A,B}.log`): check `cnn_det_verify_s42`
-   is byte-identical to `c4_log1p_s42`, re-run `rebase_deterministic.py`, and rewrite the paper's
-   "we cannot reproduce their +12 pp" sentence to match the matched-control result (CL-02).
+1. ~~Collect `audit_rebase.sh`~~ ✅ **done 2026-09-16**: seed-42 CNN byte-identical; CL-02 answered —
+   the base paper's SAT term moves zero-day accuracy **+0.55 pp** (not direction-consistent) against a
+   matched control, where they report +12.13. The paper says so.
 2. **Author decisions D1, D3, D4, D5** and how to reframe the paper without its positive result.
 3. Remaining itinerary items: 6.1 tuning-matched baselines, 5.1/5.2 split variants (if D4), 7.4 the
    first real end-to-end `run_all.py --run`, re-run `significance.py` (Holm now in code).

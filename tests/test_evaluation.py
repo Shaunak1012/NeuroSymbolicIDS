@@ -146,6 +146,19 @@ class Rebase(unittest.TestCase):
         self.assertLess(p["mean_delta"], 0)
         self.assertEqual(p["seeds_better"], 0)
 
+    def test_base_paper_sat_term_matched_control(self):
+        """CL-02: with everything else equal, the SAT term does not reproduce the
+        base paper's +12.13 pp zero-day gain, and its effect is not consistent."""
+        r = _load("rebase_deterministic")
+        mc = (r or {}).get("ltn_matched", {}).get("matched_comparison")
+        if mc is None:
+            self.skipTest("matched LTN comparison not recorded yet")
+        self.assertLess(abs(mc["view5_delta"]["mean_delta"]), 2.0)
+        self.assertFalse(mc["view5_delta"]["direction_consistent"])
+        self.assertFalse(mc["macro_delta"]["direction_consistent"])
+        for arm in ("ltn_repro_det", "ltn_repro_ctrl"):
+            self.assertEqual(len(r["ltn_matched"][arm]["view5_per_seed"]), 3)
+
     def test_fusion_gain_is_not_a_property_of_the_method(self):
         """The withdrawal, pinned: the reference three gain, the other eight lose, and
         the gain is explained by where the CNN run ranks XSS."""

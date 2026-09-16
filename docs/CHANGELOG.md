@@ -44,8 +44,11 @@ marked oracle-informed and described correctly (F-08; the body had called it "pe
 limitations name the evasion techniques and the single split (F-16, F-17); the field-gap paragraph
 gives deduplicated values (F-10); "70 features" fixed where unbannered (F-18); pid file untracked (F-23).
 
-**Running at end of day:** `audit_rebase.sh` — CL-02's matched control (CE, ω=0) and `ltn_repro` at
-three deterministic seeds, plus a seed-42 CNN byte-identity check.
+**CL-02 answered (16:04 UTC).** `audit_rebase.sh` finished: against a matched control (CE, ω=0, three
+deterministic seeds each) the base paper's SAT term changes zero-day accuracy by **+0.55 pp** (+0.60 /
+−0.84 / +1.89) where they report +12.13, and macro by −0.0090 (1/3). The paper now says so. The seed-42
+CNN re-run is byte-identical to `c4_log1p_s42`. `significance.json` regenerated with Holm (no verdict
+changes). 32 tests.
 
 **Open for the author:** D1 (benign under-sampling), D3 (notebook), D4 (grouped/chronological splits),
 D5 (push), and how to reframe the paper now that its positive result is gone.
