@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (80 Python scripts, plus 14 shell launchers; `basepaper_audit.py`, `split_integrity.py` and `ksweep_heldout.py` added 2026-09-16, plus `tests/`).
+> Last verified against source: **2026-09-05** (80 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py` and `ksweep_heldout.py` added 2026-09-16, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -1129,6 +1129,26 @@ range (**100 %**), and the benign under-sample factor (**4.11×**). Also re-chec
 1 on 315 benign Thursday rows, where the retained `URG Flag Count` is also 1.
 
 **Writes** `outputs/metadata/split_integrity.json`, which `tests/test_split_integrity.py` pins.
+
+## `scripts/audit_rebase.sh`
+
+*(added 2026-09-16, audit F-01 / CL-02.)* The training the audit's re-base needs, in two concurrent
+lanes, each launched through `run_long.sh` with `RUN_LONG_NAME` so the lanes get their own log and
+pid file:
+
+```bash
+RUN_LONG_NAME=audit_rebase_A scripts/run_long.sh audit_rebase.sh A
+```
+
+```bash
+RUN_LONG_NAME=audit_rebase_B scripts/run_long.sh audit_rebase.sh B
+```
+
+Lane A re-trains the CNN at seed 42 as `cnn_det_verify_s42` and is expected to be byte-identical to
+`c4_log1p_s42` (proving that population is what current code produces, under concurrent load), then
+runs `ltn_repro_det_s{42,43,44}` (CE, base axioms, ω=1 — the base paper's configuration). Lane B runs
+the missing matched control `ltn_repro_ctrl_s{42,43,44}` (CE, base axioms, ω=0). 50 epochs, determinism
+on, new tags only.
 
 ## `tests/` — the test suite
 
