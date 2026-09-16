@@ -22,6 +22,13 @@ shuffling, dropout); it does nothing about *scheduling*.
 WHAT `enable()` SETS, AND WHY EACH ONE IS NEEDED
 ------------------------------------------------
   * `PYTHONHASHSEED`          — Python's string hashing is randomised per process.
+    ⚠️ Corrected 2026-09-16 (audit F-19): setting it HERE does nothing for the
+    running interpreter, which read it at start-up. It only reaches child
+    processes. It is now pinned where it can work — `run_long.sh` exports it
+    before launching Python — and `enable()` records the value the interpreter
+    actually started with as `hash_seed`. No result in this project depends on
+    hash order (label encoders sort; metrics iterate `sorted()`), which is why
+    `det_verify_a` and `det_verify_b` were byte-identical without it.
   * `TF_DETERMINISTIC_OPS`    — the pre-2.8 env-var form; harmless and belt-and-braces.
   * `TF_CUDNN_DETERMINISTIC`  — no-op on CPU; set so a future GPU move inherits it.
   * `tf.keras.utils.set_random_seed` — seeds Python `random`, numpy AND TF in one call.
@@ -66,6 +73,9 @@ def enable(seed, intra=16, inter=2, verbose=True):
     `runs.jsonl` so a run's determinism state travels with its numbers.
     """
     on = os.environ.get("TF_DETERMINISM", "1") != "0"
+    # What this interpreter was actually started with. Anything set below only
+    # reaches subprocesses; see the PYTHONHASHSEED note in the module docstring.
+    hash_seed = os.environ.get("PYTHONHASHSEED", "random")
     os.environ["PYTHONHASHSEED"] = str(seed)
     random.seed(seed)
 
@@ -78,7 +88,8 @@ def enable(seed, intra=16, inter=2, verbose=True):
         if verbose:
             print(f"DETERMINISM: DISABLED (TF_DETERMINISM=0) — seed {seed} only. "
                   f"Expect run-to-run SD ~0.0222 on macro.")
-        return {"deterministic": False, "seed": seed, "intra": None, "inter": None}
+        return {"deterministic": False, "seed": seed, "intra": None, "inter": None,
+                "hash_seed": hash_seed}
 
     os.environ["TF_DETERMINISTIC_OPS"] = "1"
     os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
@@ -87,7 +98,8 @@ def enable(seed, intra=16, inter=2, verbose=True):
     tf.keras.utils.set_random_seed(seed)
 
     applied = {"deterministic": True, "seed": seed, "intra": intra, "inter": inter,
-               "op_determinism": False, "threads_pinned": False}
+               "op_determinism": False, "threads_pinned": False,
+               "hash_seed": hash_seed}
     try:
         tf.config.experimental.enable_op_determinism()
         applied["op_determinism"] = True
