@@ -59,7 +59,7 @@ Sorted by severity, then by impact within severity.
 | **F-15** | MEDIUM | Pipeline order | `scripts/preprocess.py:87-91` | Constant-column selection computed on the *temporal* train half, which contains rows that later land in the paper test split | A feature-selection decision informed by rows that end up in test. Effect almost certainly nil (10 all-zero columns) but the boundary is crossed | CONFIRMED |
 | **F-16** | MEDIUM | IDS realism | repository-wide | No adversarial-evasion evaluation of any kind (only ODIN's input perturbation, `ood_scores.py:23`, which is an OOD technique, not a threat model) | Nothing measures whether padding, timing manipulation or rate shaping defeats the detector | CONFIRMED |
 | **F-17** | MEDIUM | Statistical validity | project-wide | One test split (`X_test.npy`, 114,658 rows) has been the reporting surface for every experiment across ~5 months and 239 logged runs | Cumulative selection pressure on a single split; the split-half protocol covers only two experiments | CONFIRMED |
-| **F-18** | MEDIUM | Documentation | `docs/architecture.md:34,83`; `docs/dataset.md:86`; `docs/pipeline.md:41`; `docs/target/target_architecture.md:85` | Four docs state "70 features"; the verified count is 68 | Reader-facing contradiction with `config.yaml` and `check.py` | CONFIRMED |
+| **F-18** | MEDIUM | Documentation | `docs/architecture.md:34,83`; `docs/dataset.md:86`; `docs/pipeline.md:41`; `docs/target/target_architecture.md:85` | Four docs state "70 features"; the verified count is 68. *Corrected 2026-09-16: `architecture.md` and `dataset.md` already carry a frozen banner naming 68; only `pipeline.md` (banner silent on the count) and `target_architecture.md` (not frozen) were live errors* | Reader-facing contradiction with `config.yaml` and `check.py` | CONFIRMED |
 | **F-19** | LOW | Reproducibility | `scripts/determinism.py:69` | `os.environ["PYTHONHASHSEED"]` is set inside the running interpreter, after hash randomisation has already been seeded | The one listed control that does nothing. Harmless, but documented as effective | CONFIRMED |
 | **F-20** | LOW | Metric hygiene | `outputs/predictions/y_prob_*_{,logodds_}test.npy` | Two score variants of the same run circulate and disagree in the 4th decimal (s43: macro 0.6355 vs 0.6353; Bot 0.0245 vs 0.0241) | The project quotes 4 dp; which array a number came from is not recorded | CONFIRMED |
 | **F-21** | LOW | Security hygiene | `scripts/dashboard_server.py:491-492` | KG explanation strings interpolated into HTML with no escaping | Stored-XSS shape. Bound to 127.0.0.1 and fed only local data, so not exploitable as configured | CONFIRMED |
@@ -561,7 +561,9 @@ Each is bounded and the fix follows from the location.
   once at the start is the structural fix; it is too late here, so state the exposure instead.
 * **F-18** "70 features" in `docs/architecture.md:34,83`, `docs/dataset.md:86`, `docs/pipeline.md:41`,
   `docs/target/target_architecture.md:85`. Verified count is 68 (`check.py`; `X_train.npy` is
-  `(883796, 68)`). CLAUDE.md says frozen docs are "banner-marked"; `architecture.md` is not.
+  `(883796, 68)`). ~~CLAUDE.md says frozen docs are "banner-marked"; `architecture.md` is not.~~ *Wrong — corrected
+  2026-09-16: `architecture.md:3-8` and `dataset.md:3-12` both carry a frozen banner that names 68. Only
+  `pipeline.md` (banner silent on the count) and `target_architecture.md` (not a frozen doc) needed fixing.*
 * **F-19** `determinism.py:69` sets `PYTHONHASHSEED` after interpreter start, where it has no effect.
   Either set it in the launcher (`run_long.sh`) and re-exec, or drop it from the documented list.
 * **F-20** `y_prob_cnn_paper_s43_test.npy` gives macro 0.6355 / Bot 0.0245; the `_logodds_` twin gives
