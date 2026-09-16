@@ -1,6 +1,7 @@
 # NeuroSymbolic-IDS — Python dependencies
 # Target: Python 3.11 (TensorFlow 2.15 supports Python 3.9–3.11)
 # Install:  pip install -r requirements.txt
+# Exact environment (every transitive package, 2026-09-16): requirements.lock.txt
 #
 # Note: native Windows TensorFlow is CPU-only since 2.11.
 #       TF 2.15 uses Keras 2 by default, matching the existing
