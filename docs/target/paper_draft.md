@@ -198,8 +198,8 @@ figure, so the strong forms cannot be reintroduced by accident.
    independent symptoms traced to one cause (§4).
 3. A negative result that is expensive to obtain: four categories of method, a standard OOD battery,
    two post-hoc remedies and our own symbolic architecture all fail in the same way (§5).
-4. One partial success and its honest bound (§6), and a measurement-discipline section that retracts
-   two of our own claims (§7).
+4. ~~One partial success and its honest bound (§6)~~ **One apparent success, withdrawn (§6)**, and a
+   measurement-discipline section that retracts two of our own claims (§7).
 
 ---
 
@@ -585,7 +585,20 @@ we came to state the impossibility too broadly.
 
 ## §6 What partially works, stated without overclaiming
 
-**The knowledge-graph channel is the only component of our architecture that earns its place**, and
+> 🔴 **RETRACTED 2026-09-16 — the knowledge-graph fusion gain belongs to three CNN runs, not to the
+> method** (`scripts/fusion_population.py`, `outputs/metadata/fusion_population.json`). Everything
+> below was measured with the same three reference CNN runs. Fused with each of **11** pre-determinism
+> CNN runs of the same configuration and each of the 3 KG seeds, the online variant at k = 800 improves
+> on its own CNN run in **5 of the 11**, and in **0 of the 6** deterministic runs; the three reference
+> runs gain **+0.0615**, the other eight lose **−0.1190**. The transductive variant gains in 7 of 11, the
+> other eight losing **−0.0837**. The gain tracks where each CNN run ranks XSS among **all** test flows
+> (**0.52 to 0.88** across runs; Spearman with the gain **+0.95**); the reference runs sit at
+> **0.88, 0.85 and 0.85**. On the deterministic CNN (0.6299) the online k = 800 fusion is **−0.1269, 0/3**,
+> and its recall of unknown flows at 1 % FPR is **46.5 %** against the CNN's **48.2 %**. The
+> held-out k selection could not catch this: it varied k and the test half, never the CNN runs. The
+> original text is kept below as the record of what was believed.
+
+~~**The knowledge-graph channel is the only component of our architecture that earns its place**~~, and
 its size depends on one hyper-parameter we had never swept. At the cluster count used throughout our
 earlier experiments (k = 200) it is **+0.0528 macro** [+0.0466, +0.0592], p < 0.0001, **3/3 seeds**,
 lifting Bot from 0.0446 to 0.2518. Sweeping k shows the fused macro is **monotone** in it, in both

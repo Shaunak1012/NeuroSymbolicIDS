@@ -589,6 +589,50 @@ if ba:
                     "basepaper_audit"))
 else:
     unbacked("base-paper Table I / Fig. 3 claims", "basepaper_audit.json missing")
+
+# The KG fusion WITHDRAWAL (audit F-01, 2026-09-16). The draft withdraws the one
+# positive result because it does not hold across CNN runs; every number in that
+# withdrawal is checked against the population record and the deterministic re-base.
+fp = load("fusion_population")
+if fp:
+    _on = fp["fusion"]["k=800 causal"]["summary"]
+    _tr = fp["fusion"]["k=800 s_kg"]["summary"]
+    chk("withdrawal: online k800 runs gaining (pre-flag)", "fusion_population",
+        "%d of the %d" % (_on["pre_flag"]["runs_positive"], _on["pre_flag"]["n_cnn_runs"]), "{}")
+    chk("withdrawal: online k800 runs gaining (deterministic)", "fusion_population",
+        "%d of the %d" % (_on["deterministic"]["runs_positive"], _on["deterministic"]["n_cnn_runs"]), "{}")
+    chk("withdrawal: reference three, online", "fusion_population",
+        _on["pre_flag"]["reference_three_mean"], "+{:.4f}")
+    chk("withdrawal: other eight, online", "fusion_population",
+        _on["pre_flag"]["other_eight_mean"], "{:.4f}")
+    chk("withdrawal: transductive runs gaining", "fusion_population",
+        "%d of %d" % (_tr["pre_flag"]["runs_positive"], _tr["pre_flag"]["n_cnn_runs"]), "{}")
+    chk("withdrawal: other eight, transductive", "fusion_population",
+        _tr["pre_flag"]["other_eight_mean"], "{:.4f}")
+    chk("withdrawal: XSS rank vs gain, online", "fusion_population",
+        _on["pre_flag"]["xss_rank_vs_delta_spearman"], "+{:.2f}")
+    _xr = [fp["cnn"][t]["xss_median_rank"] for t in fp["populations"]["pre_flag"]]
+    chk("withdrawal: XSS rank range", "fusion_population",
+        "%.2f to %.2f" % (min(_xr), max(_xr)), "{}")
+    chk("withdrawal: reference runs' XSS ranks", "fusion_population",
+        "%.2f, %.2f and %.2f" % tuple(fp["cnn"][t]["xss_median_rank"]
+                                     for t in ("cnn_paper", "cnn_paper_s43", "cnn_paper_s44")), "{}")
+else:
+    unbacked("KG fusion withdrawal", "fusion_population.json missing")
+rb = load("rebase_deterministic")
+if rb:
+    chk("re-base: deterministic CNN macro", "rebase_deterministic",
+        rb["cnn_alone"]["new_mean"], "{:.4f}")
+    chk("re-base: online k800 fusion vs det CNN", "rebase_deterministic",
+        rb["fusion"]["CNN + KG k=800 (causal)"]["new_vs_new_cnn"]["mean_delta"], "{:.4f}",
+        quoted=True)
+obd = load("operational_best_c4_log1p")
+if obd:
+    _r = lambda c: 100 * obd["configs"][c]["recall_at_fpr"]["ALL unknown flows"]["0.010"]["mean"]  # noqa: E731
+    chk("re-base: det CNN unknown recall @1% FPR", "operational_best_c4_log1p",
+        _r("CNN alone"), "{:.1f} %")
+    chk("re-base: det CNN + online KG unknown recall @1% FPR", "operational_best_c4_log1p",
+        _r("CNN + KG k=800 (causal)"), "{:.1f} %")
 unbacked("Tier A/B per-method figures", "baselines_classic.json / deep_zoo.json - not itemised here yet")
 unbacked("double dissociation SD multiples (40 / 37 / 3.9)", "derived in STATUS from AE + CNN runs")
 # CLOSED 2026-09-12. This was unbacked for two days -- the note used to point

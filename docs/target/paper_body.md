@@ -296,12 +296,16 @@ apart on zero-day performance. The metric is neither noisy nor unrelated to zero
 (ρ = +0.582); it is simply too coarse in the range where results are reported. Supplementary §B gives the
 full analysis.
 
-**The one component that helps.** The knowledge-graph channel, which scores cluster growth over time,
-does improve macro zero-day PR-AUC. Its number of clusters was chosen on the test set, so we report the
-improvement on a held-out half that was never used for selection: +0.0305 at 2.86σ. Much of this signal
-depends on the fixed attack windows scripted into CIC-IDS2017, and detecting bursts in raw-feature
-clusters does not require a knowledge graph. We therefore do not count it as evidence for the
-neuro-symbolic approach (supplementary §D).
+**A component that appeared to help, withdrawn.** Fused with our three reference CNN runs, the
+knowledge-graph channel, which scores cluster growth over time, raised macro zero-day PR-AUC, and the gain
+held when its number of clusters was selected on one half of the test set and reported on the other
+(+0.0305 at 2.86σ). It does not hold across a wider set of CNN runs. Fused with each of 11 training runs
+of the same CNN configuration, the online variant improves on its own CNN run in 5 of the 11, and in 0 of
+the 6 deterministic re-runs. The gain follows where each CNN run happens to rank one web-attack family
+among all test flows (Spearman +0.95), a property that varies between runs of one configuration and that
+no per-family score reveals. The gain belonged to three runs rather than to the method, and we withdraw
+it (supplementary §D). With it withdrawn, no component of our architecture has been shown to improve on
+the neural baseline.
 
 ---
 

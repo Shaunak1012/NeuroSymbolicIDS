@@ -407,11 +407,11 @@ explains how we first stated the obstacle too broadly.
 
 ### What partially works
 
-**The knowledge-graph channel.** This is the only part of our architecture that improves results, and the
-size of the improvement depends on a hyper-parameter we had not initially swept. At the cluster count used
-in our earlier experiments (k = 200) it adds +0.0528 macro [+0.0466, +0.0592] (p < 0.0001, 3/3 seeds) and
-raises Bot from 0.0446 to 0.2518. Sweeping k shows that the fused macro score increases with k in both
-knowledge-graph variants and at every step, on 3/3 seeds:
+**The knowledge-graph channel, withdrawn.** Fused with our three reference CNN runs, the
+knowledge-graph channel appeared to be the only part of our architecture that improves results. At the
+cluster count used in our earlier experiments (k = 200) it added +0.0528 macro [+0.0466, +0.0592]
+(p < 0.0001, 3/3 seeds) and raised Bot from 0.0446 to 0.2518, and the fused macro score increased with k
+in both knowledge-graph variants and at every step, on 3/3 seeds:
 
 | k | 100 | 200 | 400 | 800 |
 |---|---:|---:|---:|---:|
@@ -433,12 +433,30 @@ therefore report its direction as established and its size as a range.
 
 We do not claim that `s_kg` is the better variant. The ranking of the two variants changes with k
 (`causal` is ahead at k = 200 and `s_kg` at k = 800), neither gap has been tested with a paired
-comparison, and both are within the 0.0285 uncertainty carried by an absolute number in our pipeline. The
-increase with k is established; the choice of variant is not.
+comparison, and both are within the 0.0285 uncertainty carried by an absolute number in our pipeline.
+
+**Why we withdraw it.** Everything above was measured with the same three CNN runs. Our record holds 11
+training runs of that CNN configuration made before determinism controls were added (the three reference
+seeds, three further seeds and five further runs of seed 42) and 6 distinct deterministic runs. We fused
+each of them with each of the three knowledge-graph seeds. The online variant at k = 800 improves on its
+own CNN run in 5 of the 11 earlier runs and in 0 of the 6 deterministic ones (on the three deterministic
+reference seeds it scores −0.1269 below the CNN); the three reference runs
+gain +0.0615 on average and the other eight lose −0.1190. The transductive variant gains in 7 of 11
+runs, but the other eight lose −0.0837 on average. The outcome is decided by a property of the CNN run
+that no per-family score measures: where it ranks Web Attack XSS flows among all test flows, known
+attacks included. Rank fusion is computed over the whole test set, so that position carries into the
+fused score, whereas a PR-AUC against benign flows ignores it. The position ranges from 0.52 to 0.88
+across runs of one configuration, and its Spearman correlation with the fusion gain is +0.95 for the
+online variant. The three reference runs rank XSS at 0.88, 0.85 and 0.85. The gain belongs to those runs
+rather than to the method, and we withdraw it. The held-out selection of k could not have caught this,
+because it varied k and the test half while the three CNN runs stayed fixed. Three runs that agreed with
+one another were not representative, which is the failure described in Appendix E in a new form.
 
 **Operating points.** A single operating point hides the shape of the result, so we vary the false-alarm
-rate. The table shows recall on flows from families the model has never seen, over three seeds, with the
-threshold set on benign flows only:
+rate. The table shows recall on flows from families the model has never seen, over the three reference
+CNN runs, with the threshold set on benign flows only. It inherits the withdrawal above: with the
+deterministic CNN runs, recall at a 1 % false-alarm rate is 48.2 % for the CNN and 46.5 % for its online
+fusion with the knowledge graph.
 
 | recall of unknown flows @ FPR | 0.1 % | 1 % | 5 % | 10 % |
 |---|---:|---:|---:|---:|
@@ -455,8 +473,8 @@ point.
 
 **Review depth.** To find half of the zero-day flows, an analyst would have to review 52 % of all traffic
 ranked by the CNN, but only 29–32 % when ranked by the knowledge graph or the fusion. This reduction of
-about 20 points is the clearest practical statement of what the knowledge graph adds, and it is easier to
-interpret than a PR-AUC difference. It is subject to the scripted-window caveat below: the knowledge
+about 20 points was measured with the three reference CNN runs and is withdrawn with the fusion gain
+above. It is subject to the scripted-window caveat below: the knowledge
 graph's advantage relies on the temporal concentration created by this capture's attack schedule, so the
 reduction is an upper bound on what a real network would show. There is also a less encouraging result.
 At any alert budget small enough to deploy, only known attacks appear. Precision is about 1.000 at every
@@ -470,13 +488,14 @@ a positive weight on every seed, so it does not simply learn to ignore that chan
 fitted on the validation set, which contains no zero-day flows by construction (this is checked in the
 code), and applied unchanged to the test set, where it achieves a false-positive rate of exactly 0.0100 on
 all three seeds. The +0.0103 gain is 0.80σ, so again the direction is established and the size is not.
-The accurate summary is that a fitted combiner is possible and slightly positive. It does not replace the
-knowledge-graph result.
+The accurate summary is that a fitted combiner is possible and slightly positive. It is measured against
+the same three reference CNN runs as the withdrawn knowledge-graph result and has not been re-tested on
+the wider set of runs, so it carries the same risk.
 
 **Parameter-free fusion is not always safe.** Equal-weight rank fusion of the CNN and the autoencoder
 performs worse than the CNN alone, by −0.0501 (3/3 seeds, 4.34σ). Equal weights cannot express that one
 channel is worth about a sixth of another, so they help when the partner channel is comparable and hurt
-when it is weak. Our +0.0528 is a result about the knowledge graph, not about equal weighting.
+when it is weak. Our +0.0528, since withdrawn, was a result about three CNN runs, not about equal weighting.
 
 **The emerging-pattern rule.** Scoring clusters by growth rate gives a lift of 5.94× [5.66, 6.11] over
 three seeds at roughly 81 % recall. Two caveats apply. First, growth works largely because the attacks in
