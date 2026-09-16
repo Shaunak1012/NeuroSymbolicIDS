@@ -313,7 +313,9 @@ satisfiability loss and reported better accuracy on unknown attacks. Our work st
 and a survey by the same group [9] places it within a growing body of work. We reproduced its CNN but not
 its symbolic gain. On its own metric we obtain 47.85 % for the CNN against the reported 48.34 %, and our
 closest reproduction of the hybrid model scores 47.24 %. The comparison is indicative rather than exact,
-because the input modality and the set of zero-day classes differ. As we read them, the gains reported in
+because the input modality, the set of zero-day classes, the class balancing and the cleaning all
+differ. In particular they delete duplicate and payload-less records and we do not, so the two CNN
+figures are measured on differently filtered populations. As we read them, the gains reported in
 [14]–[16] come from exogenous knowledge. We do not criticise those papers, since their knowledge really is
 exogenous. Our point is that this property does the work and is usually left implicit, and without it a
 reader cannot tell a knowledge result from a feature-engineering result. We state the property, test it,

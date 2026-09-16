@@ -136,7 +136,9 @@ reproduce their 1D CNN closely, with 47.85 % against 48.34 %. We cannot reproduc
 point gain they report for their hybrid LTN model. Our closest reproduction of that model scores
 47.24 %, which is no better than our CNN. The comparison is approximate rather than direct. The input
 modality differs (flow features instead of payload bytes), the zero-day sets differ by one swap (they
-hold out PortScan and train on Infiltration, and we do the reverse), and the class sizes differ. Keeping
+hold out PortScan and train on Infiltration, and we do the reverse), and the class sizes differ. They
+also equalise every known attack class and delete duplicate and payload-less records, and we do neither,
+so the agreement at 47.85 % and 48.34 % is between two differently filtered populations. Keeping
 the model fixed and changing only the family mix moves their headline from 48.32 % to 44.38 %, so the
 composition of the zero-day set accounts for roughly 4 of the 12 missing points.
 
@@ -706,7 +708,8 @@ situates it in a growing literature.
 We reproduced their CNN but not their symbolic gain. On their metric we obtain 47.85 % against their
 48.34 % for the 1D CNN, while our closest reproduction of their hybrid model scores 47.24 %, no better than
 our CNN (Appendix B). The comparison is approximate: the modality differs (flow features instead of payload
-bytes), the zero-day sets differ by one swap, and class sizes differ, with composition explaining roughly
+bytes), the zero-day sets differ by one swap, class sizes differ, and they delete duplicate and
+payload-less records while we do not, with composition explaining roughly
 4 of the 12 missing points. Appendix B also describes two arithmetic problems in the metric on which the
 gain is reported. Our own symbolic component did no better, having no effect alone and a harmful effect in
 combination (Appendix D).

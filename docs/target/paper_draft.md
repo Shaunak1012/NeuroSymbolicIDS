@@ -271,8 +271,11 @@ the two binary ones, where both input modalities are already near saturation, an
 accuracy almost exactly — 47.85 % against 48.34 %.** What we cannot reproduce is their Hybrid-LTN's
 **+12 pp symbolic gain**: our closest reproduction of their model scores **47.24 %**, no better than
 our own CNN. ⚠️ This is a comparison in **form, not head-to-head** — different modality (flow features
-versus payload bytes), zero-day membership differing by a swap (they hold out PortScan and train
-Infiltration; we do the reverse), and different class sizes. Holding the model fixed and changing only
+versus payload bytes, and so packets versus flows), zero-day membership differing by a swap (they hold
+out PortScan and train Infiltration; we do the reverse), different class sizes, and different cleaning
+and balancing: they equalise every known attack class and delete duplicate and payload-less records, and
+we do neither. The 47.85 % / 48.34 % agreement is therefore between two differently filtered
+populations, not a replication. Holding the model fixed and changing only
 the family mix moves their headline from 48.32 % to 44.38 %, so **composition explains roughly 4 pp of
 the missing 12** — it is not explained away, but we say what is controlled.
 
@@ -903,7 +906,8 @@ vanilla CNN on CIC-IDS2017. That paper is our starting point, and a recent surve
 figures are 47.85 % against their 48.34 % for the 1D CNN — close agreement — while our nearest
 reproduction of their hybrid model scores 47.24 %, no better than our own CNN (§3d). We report this
 as a comparison **in form, not head-to-head**: the modality differs (flow features versus payload
-bytes), the zero-day membership differs by a swap, and the class sizes differ, with composition
+bytes), the zero-day membership differs by a swap, the class sizes differ, and they delete duplicate and
+payload-less records while we do not, with composition
 accounting for roughly 4 of the missing 12 points. We also identify two arithmetic defects in the
 metric that gain is reported on (§3b). **And our own symbolic pillar fares no better** — it is null
 alone and significantly harmful in combination (§5), which is a negative result about our
