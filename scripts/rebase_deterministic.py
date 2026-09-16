@@ -43,7 +43,8 @@ import pickle
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 import numpy as np
 from scipy.stats import rankdata
-from sklearn.metrics import accuracy_score, f1_score, average_precision_score
+from sklearn.metrics import (accuracy_score, balanced_accuracy_score, f1_score,
+                             average_precision_score)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import paths                                        # noqa: E402
@@ -285,7 +286,11 @@ def main():
                 "Multi-class 15 classes": 100 * accuracy_score(tc, pc),
                 "Binary 15 classes": 100 * accuracy_score(yb, pb),
                 "Binary 6 unknown classes": 100 * accuracy_score(yb[is_zd], pb[is_zd]),
-                "_f1_Binary 6 unknown classes": 100 * f1_score(yb[is_zd], pb[is_zd], zero_division=0)}
+                "_f1_Binary 6 unknown classes": 100 * f1_score(yb[is_zd], pb[is_zd], zero_division=0),
+                # audit FD-01 / 4.10: the base paper equalises its known classes, we do
+                # not. Per-class balanced accuracy is the composition-neutral analogue.
+                "_balanced_Multi-class 9 known classes":
+                    100 * balanced_accuracy_score(tc[kn], pc[kn])}
 
     def mean_views(runs):
         return {k: float(np.mean([r[k] for r in runs])) for k in runs[0]}
@@ -295,7 +300,7 @@ def main():
     old_views = mean_views([views(OLD[s], "scaler_paper.pkl", "label_encoder_paper.pkl")
                             for s in SEEDS])
     ref = pm["ours"]["CNN (ours)"]
-    bad = {k: (v, ref[k]) for k, v in old_views.items() if abs(v - ref[k]) > 1e-9}
+    bad = {k: (v, ref[k]) for k, v in old_views.items() if k in ref and abs(v - ref[k]) > 1e-9}
     out["base_paper_views_validation"] = {"reproduces_paper_metrics": not bad, "mismatch": bad}
     print("6. view code reproduces paper_metrics.json:", not bad, bad or "")
     if bad:
