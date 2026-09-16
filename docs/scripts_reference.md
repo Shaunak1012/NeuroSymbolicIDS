@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (82 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py` and `fusion_population.py` added 2026-09-16, plus `tests/`).
+> Last verified against source: **2026-09-05** (83 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -24,7 +24,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 | **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
-| **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
+| **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
 | **Phase 5 — fusion + rigor** | **`fusion_kg`** · **`fusion_multi`** · `significance` · **`significance_seed`** |
 | **Phase 7.5 — operational readiness** | **`operational`** (Tier 1, gates Phase R) · **`determinism`** (Tier 2 — imported by trainable scripts) · **`ablation`** |
 | **Tier B — deep architectures** | **`deep_zoo`** (LSTM · GRU · CNN-LSTM · Transformer) |
@@ -1129,6 +1129,12 @@ range (**100 %**), and the benign under-sample factor (**4.11×**). Also re-chec
 1 on 315 benign Thursday rows, where the retained `URG Flag Count` is also 1.
 
 **Writes** `outputs/metadata/split_integrity.json`, which `tests/test_split_integrity.py` pins.
+
+## `scripts/kg_graph.py`
+
+*(added 2026-09-16, audit F-22.)* The `KnowledgeGraph` class, moved **verbatim** out of `kg.py`
+(the class's AST is identical before and after) so it can be imported. `kg.py` and `latency.py` both
+import it; `latency.py` previously lifted it from `kg.py`'s source with `exec(compile(ast...))`.
 
 ## `scripts/rebase_deterministic.py`
 

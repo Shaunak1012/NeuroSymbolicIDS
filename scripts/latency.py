@@ -202,34 +202,12 @@ print("[setup] done in %.1fs | test %s | %d active behaviours"
       % (setup_s, Xte_s.shape, len(BEH)))
 
 # --- KnowledgeGraph, exec'd from kg.py's own source (see module docstring) ---
-kg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kg.py")
-with open(kg_path, encoding="utf-8") as fh:
-    kg_src = fh.read()
-kg_tree = ast.parse(kg_src)
-kg_cls = next(n for n in kg_tree.body
-              if isinstance(n, ast.ClassDef) and n.name == "KnowledgeGraph")
-
-# The exec'd class still closes over kg.py's MODULE scope -- on the first run it
-# raised NameError on `behavior`, which `__init__` uses for BEHAVIOUR_KIND. That
-# is the exec approach earning its keep: a hand-copied class would have silently
-# dropped the same dependency. Rather than hardcode the list, resolve kg.py's
-# module-level imports/assignments against the ones latency.py already holds, so
-# a new dependency in kg.py is picked up instead of needing a fix here.
-kg_mod_names = set()
-for _n in kg_tree.body:
-    if isinstance(_n, (ast.Import, ast.ImportFrom)):
-        for _a in _n.names:
-            kg_mod_names.add(_a.asname or _a.name.split(".")[0])
-    elif isinstance(_n, ast.Assign):
-        for _t in _n.targets:
-            if isinstance(_t, ast.Name):
-                kg_mod_names.add(_t.id)
-ns = {n: globals()[n] for n in kg_mod_names if n in globals()}
-exec(compile(ast.Module(body=[kg_cls], type_ignores=[]), "kg.py", "exec"), ns)
-KnowledgeGraph = ns["KnowledgeGraph"]
-print("[setup] KnowledgeGraph exec'd from kg.py source (line %d), "
-      "globals bridged: %s" % (kg_cls.lineno, ", ".join(sorted(
-          n for n in kg_mod_names if n in globals()))))
+# KnowledgeGraph is imported from kg_graph.py, where it was moved verbatim from
+# kg.py (audit F-22, 2026-09-16). This used to lift the class out of kg.py's source
+# with exec(compile(ast...)) so that the timed code was exactly kg.py's; importing
+# the one shared definition gives the same guarantee.
+from kg_graph import KnowledgeGraph  # noqa: E402
+print("[setup] KnowledgeGraph imported from kg_graph.py (shared with kg.py)")
 
 OUT = {
     "arm": ARM,
