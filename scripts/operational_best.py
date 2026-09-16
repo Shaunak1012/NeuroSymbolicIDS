@@ -36,6 +36,19 @@ would be the same size-weighted-mixture trap `metrics.py` forbids for the macro.
 Every FPR in the sweep is persisted, and the 10 % point is flagged as NOT
 deployable rather than quoted as a capability.
 
+🔴 WHICH ROW IS OPERATIONAL (audit F-05, 2026-09-16). Only the CAUSAL KG score can be
+computed by a live system: `s_kg` ranks a flow using test windows that arrive after
+it (kg.py). The docs had been quoting the s_kg row (0.7123, 57.6 % @1 % FPR) as "the
+operational number". The record now names the operational row explicitly
+(`operational_config`), and each KG row carries `online`. The s_kg row stays in the
+record as the offline upper bound. Note also that the held-out evidence for k=800
+holds for s_kg (+0.0305, 2.86 sigma) but NOT for causal (+0.0077, 1.10 sigma, 2/3):
+see ksweep_heldout.py.
+
+CNN_CHANNEL selects the CNN prediction family (default `cnn_paper`, the pre-determinism
+reference; `c4_log1p` is the deterministic re-run, audit F-01). A non-default channel
+writes `operational_best_<channel>.json` and never touches the reference record.
+
 Run:  python scripts/operational_best.py
 Out:  outputs/metadata/operational_best.json
 """
@@ -55,6 +68,8 @@ SEEDS = [42, 43, 44]
 FPRS = [0.001, 0.01, 0.05, 0.10]
 K = 800
 NOISE = 0.0285
+CHANNEL = os.environ.get("CNN_CHANNEL", "cnn_paper")
+OPERATIONAL = "CNN + KG k=%d (causal)" % K
 
 
 def load(name):
@@ -83,8 +98,8 @@ def main():
     fam_n = {f: int((yte == f).sum()) for f in zd}
     powered = [f for f in zd if fam_n[f] >= metrics.MIN_FAMILY_N]
 
-    cnn = {s: load("y_prob_cnn_paper_test.npy" if s == 42
-                   else "y_prob_cnn_paper_s%d_test.npy" % s) for s in SEEDS}
+    cnn = {s: load("y_prob_cnn_paper_test.npy" if (CHANNEL == "cnn_paper" and s == 42)
+                   else "y_prob_%s_s%d_test.npy" % (CHANNEL, s)) for s in SEEDS}
     if any(cnn[s] is None for s in SEEDS):
         sys.exit("missing CNN predictions")
 
@@ -111,6 +126,7 @@ def main():
         return float((sc[mask] >= thr).mean())
 
     out = {"k": K, "seeds": SEEDS, "fprs": FPRS, "noise_band": NOISE,
+           "cnn_channel": CHANNEL, "operational_config": OPERATIONAL,
            "n_test": len(yte), "n_benign": int(ben.sum()),
            "n_zero_day": int(anyzd.sum()), "family_n": fam_n,
            "powered_families": powered, "configs": {}}
@@ -141,6 +157,8 @@ def main():
                 line.append("%7.1f%%" % (100 * v.mean()))
             row["recall_at_fpr"][nm] = vals
             print("%-28s %s" % (nm, "  ".join(line)))
+        if label != "CNN alone":
+            row["online"] = label.endswith("(causal)")
         out["configs"][label] = row
 
     # the headline delta, paired over shared seeds -- the only comparable form
@@ -162,8 +180,12 @@ def main():
     out["caveats"] = [
         "k was selected on test. ksweep_heldout.json re-selected it on a "
         "stratified half (rng 9001) and reported +0.0305 at 2.86 sigma on the "
-        "other half - that is the honest number for the improvement; these are "
-        "the operating profile of the selected system.",
+        "other half for the transductive s_kg score - but only +0.0077 at 1.10 "
+        "sigma, 2/3 seeds, for the causal score. k=800 is supported on held-out "
+        "data for the offline variant only.",
+        "Only the causal row is operational (`operational_config`). s_kg uses "
+        "test windows that arrive after the flow it scores; it is an offline "
+        "upper bound, not a deployable number (audit F-05).",
         "The variant ranking flips with k (causal leads at k=200, s_kg at "
         "k=800). Neither cross-variant gap is tested paired and both sit inside "
         "the 0.0285 band, so neither variant is asserted better.",
@@ -178,7 +200,8 @@ def main():
         "Heartbleed, Infiltration and SQL Injection are below MIN_FAMILY_N=100 "
         "and are excluded from the macro and from the per-family table.",
     ]
-    p = os.path.join(paths.METADATA, "operational_best.json")
+    name = "operational_best" if CHANNEL == "cnn_paper" else "operational_best_%s" % CHANNEL
+    p = os.path.join(paths.METADATA, name + ".json")
     with open(p, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=2)
     print("\nwrote %s" % p)

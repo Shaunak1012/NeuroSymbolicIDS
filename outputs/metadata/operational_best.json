@@ -12,6 +12,8 @@
     0.1
   ],
   "noise_band": 0.0285,
+  "cnn_channel": "cnn_paper",
+  "operational_config": "CNN + KG k=800 (causal)",
   "n_test": 114658,
   "n_benign": 55237,
   "n_zero_day": 4183,
@@ -358,6 +360,7 @@
           }
         }
       },
+      "online": false,
       "paired_vs_cnn": {
         "mean_delta": 0.07236666666666669,
         "paired_sd": 0.021823000099283632,
@@ -530,6 +533,7 @@
           }
         }
       },
+      "online": true,
       "paired_vs_cnn": {
         "mean_delta": 0.06326666666666673,
         "paired_sd": 0.0373793169190307,
@@ -540,7 +544,8 @@
     }
   },
   "caveats": [
-    "k was selected on test. ksweep_heldout.json re-selected it on a stratified half (rng 9001) and reported +0.0305 at 2.86 sigma on the other half - that is the honest number for the improvement; these are the operating profile of the selected system.",
+    "k was selected on test. ksweep_heldout.json re-selected it on a stratified half (rng 9001) and reported +0.0305 at 2.86 sigma on the other half for the transductive s_kg score - but only +0.0077 at 1.10 sigma, 2/3 seeds, for the causal score. k=800 is supported on held-out data for the offline variant only.",
+    "Only the causal row is operational (`operational_config`). s_kg uses test windows that arrive after the flow it scores; it is an offline upper bound, not a deployable number (audit F-05).",
     "The variant ranking flips with k (causal leads at k=200, s_kg at k=800). Neither cross-variant gap is tested paired and both sit inside the 0.0285 band, so neither variant is asserted better.",
     "Bot's detectability rides substantially on CIC-IDS2017's SCRIPTED attack windows; a real network with continuous low-rate C2 would not produce this signal.",
     "The 10 % FPR column is reported for shape only. It is NOT a deployable operating point - at 55,237 benign test flows it is ~5,500 false alerts.",
