@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (78 Python scripts, plus 14 shell launchers; `basepaper_audit.py` added 2026-09-16).
+> Last verified against source: **2026-09-05** (80 Python scripts, plus 14 shell launchers; `basepaper_audit.py`, `split_integrity.py` and `ksweep_heldout.py` added 2026-09-16, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
@@ -1118,6 +1118,34 @@ printed metric agrees (which says which cell is wrong).
 pooled `labels_*_multiclass.npy` (PortScan's flow count). **Writes**
 `outputs/metadata/basepaper_audit.json`. Exit 1 if the transcription check fails.
 
+## `scripts/split_integrity.py`
+
+**Purpose** (added 2026-09-16, audit F-02/F-03/F-04/F-10/F-15): records what crosses the paper
+split's boundary, from the artefacts, with no model. Exact train/test duplicates (**17.02 %**, none
+in any zero-day family), Flow-ID (5-tuple) overlap (**54.88 %**; 100 % for four DoS families and all
+three Web Attack zero-day families), Source-IP overlap (98.92 %), test rows inside the training time
+range (**100 %**), and the benign under-sample factor (**4.11×**). Also re-checks the ten columns
+`preprocess.py` dropped as constant on the Mon–Wed half: two (`Fwd URG Flags`, `CWE Flag Count`) are
+1 on 315 benign Thursday rows, where the retained `URG Flag Count` is also 1.
+
+**Writes** `outputs/metadata/split_integrity.json`, which `tests/test_split_integrity.py` pins.
+
+## `tests/` — the test suite
+
+*(added 2026-09-16, audit F-09; the project had none.)* Stdlib `unittest`, no extra dependency:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+`test_split_integrity.py` holds **invariants** (no zero-day in train/val, 68 features, behaviour
+indices, scaler fitted on train only) and **pinned measurements** of known defects (duplicates,
+Flow-ID overlap, temporal overlap, benign factor, the two non-constant columns) — a pin is not a claim
+that the value is acceptable, only that it cannot change unnoticed. `test_evaluation.py` covers the
+`metrics.evaluate` contract (a given threshold is used, not refitted; ranking metrics ignore it) and
+checks the records the paper cites, then runs `verify_draft.py` in both modes. Tests skip when the
+gitignored artefacts are absent.
+
 ## `scripts/comparability.py`
 
 **Purpose**: **The table that makes this project comparable to the literature.** Published
@@ -1552,6 +1580,14 @@ other half: **+0.0305, 2.86σ, 3/3** — it survives held-out selection.
 🔑 `kg.py` needed a `KG_TAG` override first: without it every k at a given seed wrote the same report
 and clobbered the others, and the sweep would have "finished" having measured only its last k.
 
+**`ksweep_heldout.py`** *(added 2026-09-16, audit F-06)* — the script behind `ksweep_heldout.json`,
+which had been committed with no generating code. Selects k on half A of test and reports on half B,
+using `fusion_weight.py`'s per-class split (rng 9001). With defaults it regenerates the committed
+record **identically** (s_kg: +0.0305, 2.86σ, 3/3). It also runs the **causal** KG score, which a live
+system could compute: **+0.0077 at 1.10σ, 2/3 seeds — not established.** k = 800 is supported on
+held-out data for the offline variant only. `CNN_CHANNEL` / `CNN_SCORING` select another CNN
+prediction family and write `ksweep_heldout_<channel>_<scoring>.json`.
+
 **`fusion_weight.py`** — 🔴 **negative, and it caught a would-be artefact.** Hypothesis: Bot (47 % of
 unknown flows) sits at 23.2 % recall at 1 % FPR but 85.2 % at 10 %, so the KG signal looked *diluted*
 by 50/50 fusion. Measured, **w=0.5 IS the optimum** for every k-set, with a sharp cliff past 0.6.
@@ -1756,6 +1792,9 @@ no per-seed spread. Claim the direction, drop the magnitude.
 **below a random ranker**, so Bot's failure was never a rarity artefact.
 
 **`operational_best.py`** — persists the operational profile of the selected system, because the
+*(2026-09-16, audit F-05: the record now names `operational_config` = the **causal** row and marks each
+KG row `online`; the `s_kg` row below is the offline upper bound, not an operational figure.
+`CNN_CHANNEL` writes `operational_best_<channel>.json`.)*
 numbers the project leads with had been computed in-session and never written to disk. Sweeps FPR
 rather than quoting one point, and that is what exposed the limitation:
 
