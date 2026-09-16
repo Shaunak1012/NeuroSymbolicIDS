@@ -222,6 +222,11 @@ if npd:
 cmp_ = REC["comparability"]
 if cmp_:
     chk("duplicate rate", "comparability", 100.0 * cmp_["duplicate_rate_overall"], "{:.1f} %")
+    # audit F-10: the field-gap argument now leads with the deduplicated values too
+    chk("dedup published metric, CNN", "comparability",
+        cmp_["channels"]["CNN (cnn_paper)"]["overall_binary_dedup"], "{:.4f}")
+    chk("dedup published metric, XGBoost", "comparability",
+        cmp_["channels"]["XGBoost"]["overall_binary_dedup"], "{:.4f}")
 
 kgc = REC["kg_criteria"]
 if kgc:
@@ -536,6 +541,54 @@ if pm:
                         "paper_metrics"))
 else:
     unbacked("base paper 48.34 % / 47.85 % / 47.24 %", "paper_metrics.json missing")
+
+# The base paper's OWN figures (audit BP-01..BP-04), transcribed and cross-checked
+# by basepaper_audit.py. Every number the draft states about their evaluation is
+# checked against that record, not against memory of the PDF.
+ba = load("basepaper_audit")
+if ba:
+    if not ba.get("transcription_validated"):
+        BAD.append(("base-paper transcription failed its own check", "validated",
+                    "basepaper_audit"))
+    _h = ba["hybrid_minus_cnn"]
+    _pv = list(_h["per_view"].values())
+    chk("BP-01 gain on the four views with benign rows", "basepaper_audit",
+        "+%.2f, +%.2f, +%.2f and +%.2f" % tuple(_pv[:4]), "{}")
+    chk("BP-01 gain on the view without benign rows", "basepaper_audit",
+        _h["gain_on_view_without_benign"], "+{:.2f}")
+    chk("BP-01 false positives, hybrid vs CNN", "basepaper_audit",
+        "%d false positives against the CNN's %d" % (_h["fp_hybrid"], _h["fp_cnn"]), "{}")
+    chk("BP-01 known false negatives, hybrid vs CNN", "basepaper_audit",
+        "%d false negatives against %d" % (_h["fn_known_hybrid"], _h["fn_known_cnn"]), "{}")
+    _z = ba["zero_day_composition"]
+    _hb = _z["families"]["Heartbleed"]
+    chk("BP-02 Heartbleed share of their zero-day set", "basepaper_audit",
+        100 * _z["heartbleed_share"], "{:.1f} %")
+    chk("BP-02 top-two share", "basepaper_audit", 100 * _z["top_two_share"], "{:.1f} %")
+    chk("BP-02 Heartbleed flows share one 5-tuple", "basepaper_audit",
+        "%d Heartbleed flows" % _hb["our_flows"], "{}",
+        note="and distinct_5tuples == 1")
+    if _hb.get("distinct_5tuples") != 1:
+        BAD.append(("BP-02 'one 5-tuple' no longer holds", "1", "basepaper_audit"))
+    chk("BP-02 Heartbleed time span", "basepaper_audit",
+        "within %d minutes" % round(_hb["span_minutes"]), "{}",
+        alt=("inside %d minutes" % round(_hb["span_minutes"]),))
+    chk("BP-02 PortScan payload survival", "basepaper_audit",
+        100 * _z["portscan_survival"], "{:.2f} %")
+    _t = ba["test_size"]
+    chk("BP-03 implied known-class test rows", "basepaper_audit",
+        _t["implied_known_test_from_fig3"], "{:,d}")
+    chk("BP-03 implied fraction", "basepaper_audit", 100 * _t["implied_fraction"], "{:.1f} %")
+    chk("BP-03 rows a 10 % split would give", "basepaper_audit",
+        _t["expected_known_test_at_10pct"], "{:,d}")
+    for _x in ba["table_ii_inconsistent"]:
+        chk("BP-04 %s %s %s from Fig. 3" % (_x["model"], _x["view"].split()[1], _x["metric"]),
+            "basepaper_audit", _x["from_fig3"], "{:.2f}")
+    if not ba.get("headline_pair_reproduces"):
+        BAD.append(("BP-04 the draft says their headline pair reproduces", "True",
+                    "basepaper_audit"))
+else:
+    unbacked("base-paper Table I / Fig. 3 claims", "basepaper_audit.json missing")
 unbacked("Tier A/B per-method figures", "baselines_classic.json / deep_zoo.json - not itemised here yet")
 unbacked("double dissociation SD multiples (40 / 37 / 3.9)", "derived in STATUS from AE + CNN runs")
 # CLOSED 2026-09-12. This was unbacked for two days -- the note used to point

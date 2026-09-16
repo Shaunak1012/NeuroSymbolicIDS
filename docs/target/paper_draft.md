@@ -242,7 +242,9 @@ are separate facts, and the re-run was necessary regardless of which way it came
 
 **(a) One model, two protocols.** Holding the model fixed and changing only the evaluation protocol
 moves XGBoost from **0.9936 to 0.6372** and our CNN from **0.9928 to 0.6446** — a gap of **0.3564**
-produced by nothing but the question asked.
+produced by nothing but the question asked. It is **not a duplication artefact**: removing the 17.0 % of
+test rows that duplicate a training row gives **0.9884** (CNN) and **0.9901** (XGBoost) on the published
+metric, and leaves the zero-day values unchanged, since no zero-day row has a training duplicate.
 
 **(b) Seven classical baselines.** All seven land in **0.977–0.985** on the published metric, against
 the CNN's 0.9928 — the field's regime. On zero-day they span **0.0374 to 0.6049, a factor of 16**.
@@ -279,15 +281,40 @@ populations, not a replication. Holding the model fixed and changing only
 the family mix moves their headline from 48.32 % to 44.38 %, so **composition explains roughly 4 pp of
 the missing 12** — it is not explained away, but we say what is controlled.
 
-### §3b Two defects in that zero-day metric, verified arithmetically
+### §3b Four problems in their evaluation, checked against their own figures
+
+We transcribed their Table I, Table II and the confusion matrices of their Figure 3 and checked them
+against one another (the counts reproduce all eight binary known-class and all-class accuracies).
+
+**The gain is a change of operating point, not a demonstrated better model.** Hybrid-LTN minus 1D CNN,
+per view: **+0.09, +0.15, +0.07 and +2.15** pp on the four views that contain benign rows, **+12.13** on
+the one that does not. On the nine known classes the hybrid model makes
+**452 false positives against the CNN's 380**, and 227 false negatives against 536. The SAT term penalises calling an attack benign,
+so it moves the boundary toward "attack" — free on a view with no negatives, paid for everywhere else.
+They report no ROC-AUC, PR-AUC or PR curve, so **their evaluation cannot tell a better ranking from a
+different threshold** — this paper's own thesis, on their own figures.
 
 **It has no false-positive term.** Their zero-day view contains only attack rows, so precision ≡ 1,
 accuracy *is* recall, and F1 = 2A/(1+A) exactly — we reproduce every published F1 from its matching
 accuracy to within 0.02 pp. The headline "accuracy 48 → 60 %, F1 65 → 75 %" is therefore **one result
 reported twice**, and **a model that flags every flow scores 100 % on both**. We know this failure
 mode is reachable because a float32 saturation bug in our own pipeline did exactly that, and was
-caught only because our metric has a benign side. **It is also a size-weighted mixture**, the same
-defect described in §2.
+caught only because our metric has a benign side.
+
+**It is a size-weighted mixture dominated by one connection.** Heartbleed is **42.2 %** of their
+zero-day set and Web Brute Force 36.8 % — **79.0 %** together. They count payload-bearing packets, and
+their 13,486 Heartbleed packets come from CIC-IDS2017's 11 Heartbleed flows, which **share one 5-tuple
+inside 20 minutes**: the largest component of their headline is **one network event**. Conversely only
+**0.52 %** of PortScan flows survive their payload filter, leaving 830 packets. No count in their Table I
+is comparable to a flow count.
+
+**It is internally inconsistent.** The known-class matrices hold **159,160** rows — exactly **35.0 %** of
+Table I, where the stated 80/10/10 gives 45,474. Three Table II cells disagree with the matrices: 1D CNN
+fifteen-class F1 (printed 90.88, equal to its accuracy; the matrix gives **92.27**), and the zero-day
+accuracy of M-LTN (56.06 vs **56.02**) and B-LTN (39.40 vs **39.48**) — each time the model's other
+printed metric agrees with the matrix. The headline pair (48.34, 60.47) reproduces. The text says five
+classes were held out; Table I lists six. It is **one run, no seeds**, so the 0.07–0.15 pp known-class
+differences are not interpretable (§7 shows how large training noise was in our pipeline).
 
 ---
 
@@ -908,8 +935,8 @@ reproduction of their hybrid model scores 47.24 %, no better than our own CNN (�
 as a comparison **in form, not head-to-head**: the modality differs (flow features versus payload
 bytes), the zero-day membership differs by a swap, the class sizes differ, and they delete duplicate and
 payload-less records while we do not, with composition
-accounting for roughly 4 of the missing 12 points. We also identify two arithmetic defects in the
-metric that gain is reported on (§3b). **And our own symbolic pillar fares no better** — it is null
+accounting for roughly 4 of the missing 12 points. We also identify four problems in the evaluation
+that gain is reported on (§3b) — above all, the gain is confined to the one view without benign traffic. **And our own symbolic pillar fares no better** — it is null
 alone and significantly harmful in combination (§5), which is a negative result about our
 architecture, not only about theirs.
 
