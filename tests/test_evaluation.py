@@ -129,6 +129,15 @@ class Rebase(unittest.TestCase):
         self.assertTrue(r["base_paper_views_validation"]["reproduces_paper_metrics"])
         self.assertTrue(all(r["checkpoint_pair_identical"].values()))
 
+    def test_current_code_reproduces_the_deterministic_population(self):
+        r = _load("rebase_deterministic")
+        if r is None or "reproduction_check" not in r:
+            self.skipTest("seed-42 re-run not recorded yet")
+        rc = r["reproduction_check"]
+        self.assertTrue(rc["predictions_byte_identical"])
+        self.assertTrue(rc["loss_curve_identical"])
+        self.assertTrue(rc["test_embeddings_byte_identical"])
+
     def test_online_fusion_does_not_beat_the_deterministic_cnn(self):
         r = _load("rebase_deterministic")
         if r is None:

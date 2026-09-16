@@ -149,6 +149,29 @@ def main():
                      p["seeds_better"]))
     out["fusion"] = fus
 
+    # ---- 1b. does today's code still produce that population? ----------------
+    # audit_rebase.sh lane A re-trains seed 42 as cnn_det_verify_s42, with lane B
+    # training at the same time. Byte-identity with c4_log1p_s42 (trained
+    # 2026-08-10) is what licenses using the c4 population as "the current code".
+    ver = pred("cnn_det_verify_s42")
+    if ver is not None:
+        import pickle as _pk
+        def _hist(t):
+            with open(os.path.join(MD, "%s_history.pkl" % t), "rb") as f:
+                return _pk.load(f)
+        emb = [np.load(os.path.join(paths.EMBEDDINGS, "X_test_%s_emb.npy" % t))
+               for t in ("c4_log1p_s42", "cnn_det_verify_s42")]
+        out["reproduction_check"] = {
+            "rerun": "cnn_det_verify_s42", "original": "c4_log1p_s42",
+            "predictions_byte_identical": ver.tobytes() == cnn_new[42].tobytes(),
+            "loss_curve_identical": _hist("c4_log1p_s42")["loss"] == _hist("cnn_det_verify_s42")["loss"],
+            "test_embeddings_byte_identical": emb[0].tobytes() == emb[1].tobytes(),
+            "epochs": len(_hist("cnn_det_verify_s42")["loss"]),
+            "note": "re-run 2026-09-16 while another training lane loaded the machine; "
+                    "original trained 2026-08-10"}
+        print("1b. seed-42 re-run byte-identical to c4_log1p_s42:",
+              out["reproduction_check"]["predictions_byte_identical"])
+
     # ---- 8. are the two saved checkpoints the same weights? -------------------
     same = {}
     for tag in (OLD[42], NEW[42]):
