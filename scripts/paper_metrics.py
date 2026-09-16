@@ -99,6 +99,11 @@ PAPER_TABLE = {
 }
 PAPER_F1 = {
     "Binary 9 known classes":   {"Hybrid-LTN": 99.62, "1D CNN": 99.49},
+    # 1D CNN value transcribed faithfully, but it is almost certainly an error in the
+    # source: it is identical to that model's ACCURACY on the same view (90.88), while
+    # every other F1 on this row exceeds its accuracy. Recomputed from their Fig. 3(e)
+    # (TP 104,077 / FP 380 / FN 17,049) it is ~92.3; the same method reproduces the
+    # Hybrid-LTN cell at 94.20 exactly. Audit BP-04, BASEPAPER_COMPARISON.md.
     "Binary 15 classes":        {"Hybrid-LTN": 94.20, "1D CNN": 90.88},
     "Binary 6 unknown classes": {"Hybrid-LTN": 75.37, "1D CNN": 65.18},
 }
