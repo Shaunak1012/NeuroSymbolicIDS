@@ -124,10 +124,25 @@ the resulting Bot ranking is **noise** (cross-seed ρ = −0.090); **(3)** **tra
 reproducible at fixed seed** (SD 0.0222 — see the noise floor below), which retracted C2 and demotes
 every within-tier comparison this project spent months on.
 
+🔴 **Withdrawn 2026-09-16: the CNN + KG fusion gain** — the project's only positive result. It was
+measured with the same three CNN runs; across 11 CNN runs of that configuration the online fusion
+gains in 5, and in 0 of 6 deterministic runs (`fusion_population.py`). **Nothing in the architecture
+has been shown to beat the neural baseline.** The CNN baseline itself is re-based **0.6399 → 0.6299**
+(deterministic population, `rebase_deterministic.py`); never pool the two populations.
+
 👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
-**Next action (resume here — as of end of 2026-08-10):**
+**Next action (resume here — as of end of 2026-09-16):** read STATUS → "AUDIT + REMEDIATION" and
+`REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).
+1. **Collect `audit_rebase.sh`** (logs `outputs/audit_rebase_{A,B}.log`): check `cnn_det_verify_s42`
+   is byte-identical to `c4_log1p_s42`, re-run `rebase_deterministic.py`, and rewrite the paper's
+   "we cannot reproduce their +12 pp" sentence to match the matched-control result (CL-02).
+2. **Author decisions D1, D3, D4, D5** and how to reframe the paper without its positive result.
+3. Remaining itinerary items: 6.1 tuning-matched baselines, 5.1/5.2 split variants (if D4), 7.4 the
+   first real end-to-end `run_all.py --run`, re-run `significance.py` (Holm now in code).
+
+~~**Next action (resume here — as of end of 2026-08-10):**~~ *(superseded 2026-09-16; kept for the record)*
 1. **Write.** Spine decided: **field-metric gap leads, mechanism is the body**, double dissociation
    demoted to support. ⚠️ Write the **resolution** claim (67/204 method pairs indistinguishable on the
    published metric while ≥2× apart on zero-day), **not** the *information* claim — ρ=+0.568 refutes
