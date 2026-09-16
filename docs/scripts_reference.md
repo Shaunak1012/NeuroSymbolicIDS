@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (77 Python scripts, plus 14 shell launchers).
+> Last verified against source: **2026-09-05** (78 Python scripts, plus 14 shell launchers; `basepaper_audit.py` added 2026-09-16).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
@@ -1088,6 +1088,35 @@ Infiltration; we do the reverse** — 5 of 6 overlap), and class sizes (their He
 payload packets; flow data has 11).
 
 **Writes** `outputs/metadata/paper_metrics.json`.
+
+## `scripts/basepaper_audit.py`
+
+**Purpose** (added 2026-09-16, audit BP-01..BP-04): the record behind every claim we make *about*
+the base paper. `paper_metrics.py` transcribes their Table II and scores *our* models in it; this
+script transcribes their **Table I** and **Fig. 3** as well, completes the twelve confusion matrices
+from their exactly printed cells, and checks the paper against itself. Loads no model.
+
+**Validation.** All eight binary known-class and all-class accuracy cells of Table II reproduce from
+the completed matrices, which is what makes the transcription trustworthy. Any other printed cell
+that disagrees is reported as a finding about the paper, together with whether that model's *other*
+printed metric agrees (which says which cell is wrong).
+
+**What it establishes.**
+* **BP-01** Hybrid-LTN minus 1D CNN per view: **+0.09 / +0.15 / +0.07 / +2.15 / +12.13 pp** — the gain
+  is in the one view with no benign rows. False positives **380 → 452**; known false negatives
+  **536 → 227**. A threshold shift, and no threshold-free metric is reported.
+* **BP-02** Heartbleed is **42.2 %** of their zero-day set; its 11 flows share **one 5-tuple** inside
+  **20 minutes** — one connection. Heartbleed + Web Brute Force = **79.0 %**. PortScan survives their
+  payload filter at **0.52 %**.
+* **BP-03** The known-class matrices hold **159,160** rows — **exactly 35.0 %** of Table I, not the
+  10 % (45,474) their stated 80/10/10 split gives.
+* **BP-04** Three cells disagree with Fig. 3: 1D CNN Binary-15 F1 (90.88 printed, 92.27), M-LTN
+  Binary-6 accuracy (56.06, 56.02), B-LTN Binary-6 accuracy (39.40, 39.48). The headline pair
+  (48.34, 60.47) reproduces exactly.
+
+**Reads** `data/processed/paper/y_test_mc.npy`, `meta_test.csv`, corrected test timestamps, and the
+pooled `labels_*_multiclass.npy` (PortScan's flow count). **Writes**
+`outputs/metadata/basepaper_audit.json`. Exit 1 if the transcription check fails.
 
 ## `scripts/comparability.py`
 
