@@ -118,6 +118,39 @@ class Records(unittest.TestCase):
         self.assertTrue(offline, "the transductive row should be marked offline")
 
 
+class Rebase(unittest.TestCase):
+    """F-01: the deterministic re-base and the withdrawal of the fusion gain."""
+
+    def test_deterministic_cnn_baseline(self):
+        r = _load("rebase_deterministic")
+        if r is None:
+            self.skipTest("rebase_deterministic.json not generated")
+        self.assertEqual(r["cnn_alone"]["new_per_seed"], [0.6298, 0.6269, 0.633])
+        self.assertTrue(r["base_paper_views_validation"]["reproduces_paper_metrics"])
+        self.assertTrue(all(r["checkpoint_pair_identical"].values()))
+
+    def test_online_fusion_does_not_beat_the_deterministic_cnn(self):
+        r = _load("rebase_deterministic")
+        if r is None:
+            self.skipTest("rebase_deterministic.json not generated")
+        p = r["fusion"]["CNN + KG k=800 (causal)"]["new_vs_new_cnn"]
+        self.assertLess(p["mean_delta"], 0)
+        self.assertEqual(p["seeds_better"], 0)
+
+    def test_fusion_gain_is_not_a_property_of_the_method(self):
+        """The withdrawal, pinned: the reference three gain, the other eight lose, and
+        the gain is explained by where the CNN run ranks XSS."""
+        r = _load("fusion_population")
+        if r is None:
+            self.skipTest("fusion_population.json not generated")
+        s = r["fusion"]["k=800 causal"]["summary"]
+        self.assertEqual((s["pre_flag"]["runs_positive"], s["pre_flag"]["n_cnn_runs"]), (5, 11))
+        self.assertEqual(s["deterministic"]["runs_positive"], 0)
+        self.assertGreater(s["pre_flag"]["reference_three_mean"], 0)
+        self.assertLess(s["pre_flag"]["other_eight_mean"], 0)
+        self.assertGreater(s["pre_flag"]["xss_rank_vs_delta_spearman"], 0.9)
+
+
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""
 

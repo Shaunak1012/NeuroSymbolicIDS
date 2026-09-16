@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (80 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py` and `ksweep_heldout.py` added 2026-09-16, plus `tests/`).
+> Last verified against source: **2026-09-05** (82 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py` and `fusion_population.py` added 2026-09-16, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** → **`kg_visualize`** · **`explain`** |
@@ -1129,6 +1129,26 @@ range (**100 %**), and the benign under-sample factor (**4.11×**). Also re-chec
 1 on 315 benign Thursday rows, where the retained `URG Flag Count` is also 1.
 
 **Writes** `outputs/metadata/split_integrity.json`, which `tests/test_split_integrity.py` pins.
+
+## `scripts/rebase_deterministic.py`
+
+*(added 2026-09-16, audit F-01.)* Re-states every CNN-anchored headline on the **deterministic** CNN
+population (`c4_log1p_s42/43/44`) with the pre-flag value beside each new one. CNN alone
+**0.6299** (was 0.6399). CNN + KG vs the deterministic CNN: k=800 causal **−0.1269, 0/3**; k=800
+`s_kg` +0.0340, 3/3. A 1 % threshold fixed on validation gives an achieved test FPR of 1.06 % (F-07,
+small). Capture-faithful prevalence: CNN 0.6299 → **0.5845** (F-04). Base-paper views for the
+deterministic CNN, with the view code first validated by reproducing `paper_metrics.json` exactly.
+`<tag>.keras` and `<tag>_best.keras` hold identical weights (F-25 cleared). Fills in the matched LTN
+comparison (CL-02) once `audit_rebase.sh` has run. **Writes** `rebase_deterministic.json`.
+
+## `scripts/fusion_population.py`
+
+*(added 2026-09-16, audit F-01.)* 🔴 **The script that withdrew the project's one positive result.**
+Fuses every CNN run on disk — 11 pre-flag, 6 distinct deterministic — with each of the three KG seeds,
+no training, and reports the gain per CNN run. Online k=800: **5/11** pre-flag runs gain (reference
+three **+0.0615**, other eight **−0.1190**), **0/6** deterministic. The gain tracks each run's median
+XSS rank among **all** test flows (0.52–0.88 across runs; Spearman **+0.95**), which a benign-only
+PR-AUC cannot see and a whole-set rank fusion does. **Writes** `fusion_population.json`.
 
 ## `scripts/audit_rebase.sh`
 
