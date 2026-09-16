@@ -129,7 +129,9 @@ epochs). The Transformer result comes from a single configuration with little tu
 statement about attention models in general.
 
 **(d) The base paper's metrics.** On the five views used by Bizzarri et al. [8], our scores exceed their
-reported figures by 18–29 percentage points on all four known-class views. On zero-day accuracy we
+reported 1D CNN by 18.8 and 28.7 percentage points on the two multi-class known-class views, and by
+0.4 and 7.1 points on the two binary views, where known-class detection is already near saturation for
+both input modalities. On zero-day accuracy we
 reproduce their 1D CNN closely, with 47.85 % against 48.34 %. We cannot reproduce the +12 percentage
 point gain they report for their hybrid LTN model. Our closest reproduction of that model scores
 47.24 %, which is no better than our CNN. The comparison is approximate rather than direct. The input
@@ -644,7 +646,8 @@ but below the maximum, as expected given that the maximum was never a typical ru
    the macro average combines one strong signal and one weak one that move in opposite directions.
    Regrouping the families changes the values by 0.11–0.15 but leaves every ordering we report unchanged.
 3. **Flow features rather than payload bytes.** This departs from the base paper's input modality, and our
-   advantage of 18–29 percentage points on the known-class views is a modality advantage rather than an
+   advantage on the known-class views (18.8 and 28.7 percentage points on the multi-class views, 0.4 and
+   7.1 on the binary ones) is a modality advantage rather than an
    algorithmic one. The oracle probe, however, separates every sufficiently large family from benign
    traffic using flow features alone (Bot 0.9988, Web Brute Force 0.9999, XSS 0.9984). The Bot gap is
    therefore a gap in closed-set supervision rather than in modality. The mechanism of Appendix C would

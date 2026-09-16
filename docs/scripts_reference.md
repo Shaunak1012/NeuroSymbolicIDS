@@ -1035,7 +1035,8 @@ for our models.**
 
 **Two results, and they point opposite ways:**
 
-1. ✅ **We beat the base paper by 18–29 pp on all four known-class views** (multi-class 15: 96.17 %
+1. ✅ ~~**We beat the base paper by 18–29 pp on all four known-class views**~~ *(wrong range —
+   corrected 2026-09-16, CL-01: +18.82 / +0.42 / +28.72 / +7.07 pp)* (multi-class 15: 96.17 %
    vs 67.52 %). ⚠️ That is a **modality** advantage, not a method one — 68 engineered flow features
    are far more separable than raw payload bytes. Do not claim it as an algorithmic win.
 2. 🔴 **We reproduce their 1D CNN's zero-day number almost exactly (47.85 % vs 48.34 %) and CANNOT

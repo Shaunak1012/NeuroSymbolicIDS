@@ -184,8 +184,9 @@ have to be visibly higher than the field's. This section is the credibility of �
 2. **Three powered zero-day families**, not six. Bot / Web BF / XSS. And **Web BF and XSS correlate at
    r = +0.992** (same Thursday campaign, same tool), so macro is ⅓ Bot + ⅔ *one* web signal.
    Robustness row: regrouping shifts values ~0.11–0.15 but **preserves every ordering**.
-3. **Flow features, not payload** — a deviation from the base paper's modality. Our 18–29 pp advantage
-   on known-class views is a **modality** advantage, **not** an algorithmic one. Say so.
+3. **Flow features, not payload** — a deviation from the base paper's modality. Our known-class advantage
+   (+18.8 / +0.4 / +28.7 / +7.1 pp — ~~"18–29 pp on all four"~~ was wrong, corrected 2026-09-16, CL-01)
+   is a **modality** advantage, **not** an algorithmic one. Say so.
    ✅ **But answer the "why not payload?" question rather than conceding it** (decided 2026-09-05,
    STATUS → Open Decisions → *Input modality*): the H4 oracle probe separates every powered family
    from benign **in the flow-feature basis alone** — **Bot 0.9988 · Web BF 0.9999 · XSS 0.9984**

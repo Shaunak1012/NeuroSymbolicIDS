@@ -266,7 +266,8 @@ unmatched (the LSTM hit its 30-epoch cap). The Transformer result is **one under
 configuration**, not a claim about attention.
 
 **(d) The base paper's own metric set.** Evaluated on Bizzarri et al.'s five views, we exceed their
-reported figures by 18–29 pp on all four known-class views and **reproduce their 1D CNN's zero-day
+reported 1D CNN by 18.8 and 28.7 pp on the two multi-class known-class views and by 0.4 and 7.1 pp on
+the two binary ones, where both input modalities are already near saturation, and **reproduce their 1D CNN's zero-day
 accuracy almost exactly — 47.85 % against 48.34 %.** What we cannot reproduce is their Hybrid-LTN's
 **+12 pp symbolic gain**: our closest reproduction of their model scores **47.24 %**, no better than
 our own CNN. ⚠️ This is a comparison in **form, not head-to-head** — different modality (flow features
@@ -835,8 +836,8 @@ which beats the mean and *not* the maximum — because the maximum was never a t
    shifts values by 0.11–0.15 but **preserves every ordering** we report.
    ⚠️ *This figure was quoted as r = +0.992 in an earlier draft with no record behind it; it is now
    recomputed from the per-method matrix and persisted.*
-3. **Flow features, not payload bytes** — a deviation from the base paper's modality, and our 18–29 pp
-   advantage on known-class views is a **modality** advantage rather than an algorithmic one. But we
+3. **Flow features, not payload bytes** — a deviation from the base paper's modality, and our known-class
+   advantage (18.8 and 28.7 pp on the multi-class views, 0.4 and 7.1 pp on the binary ones) is a **modality** advantage rather than an algorithmic one. But we
    answer the "why not payload?" question rather than conceding it: the oracle probe separates every
    powered family from benign **in the flow-feature basis alone** (Bot 0.9988, Web BF 0.9999,
    XSS 0.9984), so the Bot gap is a closed-set-supervision gap and not a modality gap — and §4's
