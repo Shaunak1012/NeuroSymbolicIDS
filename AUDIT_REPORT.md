@@ -19,7 +19,10 @@ Three things matter.
 1. **The reported CNN baseline cannot be reproduced by the code in the repository.** `cnn_paper =
    0.6446` and the 3-seed mean `0.6399` were produced before `determinism.py` existed. Re-running
    today's code at the same seeds gives **0.6298 / 0.6269 / 0.6330 (mean 0.6299)**. Every improvement
-   in the project is quoted against the 0.6399 anchor. Directions survive; the numbers do not.
+   in the project is quoted against the 0.6399 anchor. ~~Directions survive; the numbers do not.~~
+   **Corrected 2026-09-16 (remediation):** one direction did *not* survive. The CNN + KG fusion gain
+   reverses on the deterministic CNN (−0.1269, 0/3) and holds in only 5 of 11 pre-flag CNN runs
+   (`fusion_population.py`); it is withdrawn.
 2. **The split is random over a chronologically ordered capture and is not grouped by session or
    host.** 54.9 % of test flows share an exact 5-tuple with a training flow — 100 % for four known
    families *and for all three Web Attack zero-day families*. 17.0 % of test rows are exact
@@ -108,9 +111,13 @@ byte-deterministic at 0.6298. The two are not the same estimand.
 
 **Impact.** The single most-quoted number in the project, the anchor of every reported improvement,
 and the value `verify_draft.py` treats as ground truth, cannot be produced by running the repository.
-The 3-seed deterministic baseline is **0.6299**, i.e. −0.0100 from the quoted 0.6399. Directions of
+The 3-seed deterministic baseline is **0.6299**, i.e. −0.0100 from the quoted 0.6399. ~~Directions of
 every comparison survive (the KG fusion still improves; the AE still loses macro and wins Bot); the
-magnitudes are all re-based.
+magnitudes are all re-based.~~
+
+> 🔴 **Wrong, corrected 2026-09-16.** The fusion direction did not survive: on the deterministic CNN the
+> online k=800 CNN + KG fusion is −0.1269 (0/3), and across 11 pre-flag CNN runs it gains in only 5 — the
+> three reference runs are the ones that gain. See `fusion_population.py` and STATUS.
 
 **Fix.** Re-run `cnn_paper.py` at seeds 42/43/44 with determinism on, re-derive every fusion channel
 from those predictions, and re-state the baseline as 0.6299. Then mark the pre-flag runs in
