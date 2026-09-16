@@ -114,8 +114,8 @@ that a paired bootstrap had reported as significant (p = 0.001; supplementary §
 **Architecture.** The system has three parts: a 1D CNN over the flow features, a Logic Tensor Network [7]
 layer that grounds fuzzy axioms in network behaviours, and a knowledge-graph channel that scores how
 quickly clusters of flows grow over time. The axioms (Ax3–Ax6) tie the network's attack output to
-behaviour predicates such as large packets with high size variance, bursts, scan-like probing and
-beacon-like periodicity.
+behaviour predicates such as large packets with high size variance, bursts, scan-like probing and a
+destination port outside a list of standard service ports (`BeaconLike`).
 
 **Results.** We tried injecting the axioms at the loss, at the representation and at inference. In every
 case the symbolic component either lowered macro zero-day PR-AUC or left it unchanged. On its own it
@@ -136,7 +136,10 @@ Comparing our system with published ones that report gains suggests why:
 
 All seven of our behaviour predicates are deterministic functions of features the network already
 consumes. `HighEntropy`, for example, is the standard deviation of packet length rather than Shannon
-entropy, and `BeaconLike` depends on the destination port. A predicate that the network can compute
+entropy, and `BeaconLike` depends on the destination port. `BeaconLike` was also selected by testing candidate
+encodings against Bot flows, which belong to a zero-day family, so it is not a clean test of transfer to
+unseen attacks. The axioms made no positive difference, so this weakens nothing we conclude, but a
+positive result from it would not have counted. A predicate that the network can compute
 for itself carries no new information. The most it can do is reshape the hypothesis space, which is a
 form of regularisation. In short, the knowledge we injected was endogenous.
 

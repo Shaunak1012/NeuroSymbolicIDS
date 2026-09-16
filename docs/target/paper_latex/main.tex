@@ -65,7 +65,7 @@ Two measurement problems limit the magnitudes we can report (Section~\ref{sec:7}
 
 \section{A symbolic pillar that could not help}\label{sec:3}
 
-\textbf{Architecture.} The system has three parts: a 1D CNN over the flow features, a Logic Tensor Network \citep{badreddine2022} layer that grounds fuzzy axioms in network behaviours, and a knowledge-graph channel that scores how quickly clusters of flows grow over time. The axioms (Ax3--Ax6) tie the network's attack output to behaviour predicates such as large packets with high size variance, bursts, scan-like probing and beacon-like periodicity.
+\textbf{Architecture.} The system has three parts: a 1D CNN over the flow features, a Logic Tensor Network \citep{badreddine2022} layer that grounds fuzzy axioms in network behaviours, and a knowledge-graph channel that scores how quickly clusters of flows grow over time. The axioms (Ax3--Ax6) tie the network's attack output to behaviour predicates such as large packets with high size variance, bursts, scan-like probing and a destination port outside a list of standard service ports (\texttt{BeaconLike}).
 
 \textbf{Results.} We tried injecting the axioms at the loss, at the representation and at inference. In every case the symbolic component either lowered macro zero-day PR-AUC or left it unchanged. On its own it contributes $-$0.0004 (n.s.). On top of the knowledge graph it significantly reduces performance (0.6926 $\rightarrow$ 0.6708, p $<$ 0.0001) and lowers the Bot score from 0.2518 to 0.2043. One axiom seemed at first to help on Bot, but the effect disappeared when we repeated the experiment over several seeds. Because the sign of the effect is the same in every configuration, we do not think better tuning would change the conclusion.
 
@@ -84,7 +84,7 @@ ours & behaviour predicates (Ax3--Ax6) & yes, each is a function of the input \\
 \end{tabular}
 \end{center}
 
-All seven of our behaviour predicates are deterministic functions of features the network already consumes. \texttt{HighEntropy}, for example, is the standard deviation of packet length rather than Shannon entropy, and \texttt{BeaconLike} depends on the destination port. A predicate that the network can compute for itself carries no new information. The most it can do is reshape the hypothesis space, which is a form of regularisation. In short, the knowledge we injected was endogenous.
+All seven of our behaviour predicates are deterministic functions of features the network already consumes. \texttt{HighEntropy}, for example, is the standard deviation of packet length rather than Shannon entropy, and \texttt{BeaconLike} depends on the destination port. \texttt{BeaconLike} was also selected by testing candidate encodings against Bot flows, which belong to a zero-day family, so it is not a clean test of transfer to unseen attacks. The axioms made no positive difference, so this weakens nothing we conclude, but a positive result from it would not have counted. A predicate that the network can compute for itself carries no new information. The most it can do is reshape the hypothesis space, which is a form of regularisation. In short, the knowledge we injected was endogenous.
 
 This leads to the precondition we propose: \emph{symbolic knowledge helps a neural detector to the extent that it lies outside the model's learned feature basis.} The next section shows that the same condition also accounts for a failure that at first seems unrelated.
 
