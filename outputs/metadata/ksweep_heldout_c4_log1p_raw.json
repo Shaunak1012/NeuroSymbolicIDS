@@ -1,0 +1,41 @@
+{
+  "selected_k": 800,
+  "half_a_means": {
+    "100": 0.563852337043926,
+    "200": 0.6361048437251805,
+    "400": 0.6684336969390167,
+    "800": 0.6694568987841966
+  },
+  "half_b_means": {
+    "100": 0.5630920768188371,
+    "200": 0.6314060256897235,
+    "400": 0.6579038583767013,
+    "800": 0.6597878349659544
+  },
+  "held_out_delta_vs_k200": 0.028381809276230907,
+  "held_out_sigma": 1.56533340345936,
+  "held_out_seeds_better": 3,
+  "rng": 9001,
+  "cnn_channel": "c4_log1p",
+  "cnn_scoring": "raw",
+  "note": "k selected on half A, reported on half B; removes the test-set selection bias in ksweep_fusion.json. Top-level values are the transductive s_kg variant; `causal` is the online one.",
+  "causal": {
+    "selected_k": 200,
+    "half_a_means": {
+      "100": 0.45556549995658946,
+      "200": 0.5099073498703571,
+      "400": 0.5025314769590948,
+      "800": 0.5062608495805462
+    },
+    "half_b_means": {
+      "100": 0.4553987785936168,
+      "200": 0.5123118889052064,
+      "400": 0.4989219011113913,
+      "800": 0.5008875191982568
+    },
+    "held_out_delta_vs_k200": 0.0,
+    "held_out_sigma": Infinity,
+    "held_out_seeds_better": 0
+  },
+  "generated_by": "scripts/ksweep_heldout.py"
+}
