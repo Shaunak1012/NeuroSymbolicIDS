@@ -1,0 +1,216 @@
+{
+ "source": "Bizzarri et al., ICCCN 2024, DOI 10.1109/ICCCN61486.2024.10637618",
+ "transcribed": "2026-09-16",
+ "confusion_matrices": {
+  "1D CNN": {
+   "TN": 69620,
+   "FP": 380,
+   "FN_known": 536,
+   "TP_known": 88624,
+   "FN_unknown": 16513,
+   "TP_unknown": 15453,
+   "FN_all": 17049,
+   "TP_all": 104077
+  },
+  "M-LTN": {
+   "TN": 69364,
+   "FP": 636,
+   "FN_known": 224,
+   "TP_known": 88936,
+   "FN_unknown": 14060,
+   "TP_unknown": 17906,
+   "FN_all": 14284,
+   "TP_all": 106842
+  },
+  "B-LTN": {
+   "TN": 69307,
+   "FP": 693,
+   "FN_known": 224,
+   "TP_known": 88936,
+   "FN_unknown": 19345,
+   "TP_unknown": 12621,
+   "FN_all": 19569,
+   "TP_all": 101557
+  },
+  "Hybrid-LTN": {
+   "TN": 69548,
+   "FP": 452,
+   "FN_known": 227,
+   "TP_known": 88933,
+   "FN_unknown": 12636,
+   "TP_unknown": 19330,
+   "FN_all": 12863,
+   "TP_all": 108263
+  }
+ },
+ "recomputed_from_fig3": {
+  "1D CNN": {
+   "accuracy": {
+    "Binary 9 known classes": 99.424478512189,
+    "Binary 15 classes": 90.88088486129568,
+    "Binary 6 unknown classes": 48.3419883626353
+   },
+   "f1": {
+    "Binary 9 known classes": 99.48586695404235,
+    "Binary 15 classes": 92.27379722762798,
+    "Binary 6 unknown classes": 65.17640608195028
+   }
+  },
+  "M-LTN": {
+   "accuracy": {
+    "Binary 9 known classes": 99.45966323196784,
+    "Binary 15 classes": 92.19363142638888,
+    "Binary 6 unknown classes": 56.01576675217419
+   },
+   "f1": {
+    "Binary 9 known classes": 99.51883266566705,
+    "Binary 15 classes": 93.47343003621984,
+    "Binary 6 unknown classes": 71.80782803978184
+   }
+  },
+  "B-LTN": {
+   "accuracy": {
+    "Binary 9 known classes": 99.4238502136215,
+    "Binary 15 classes": 89.3986166194029,
+    "Binary 6 unknown classes": 39.48257523618845
+   },
+   "f1": {
+    "Binary 9 known classes": 99.48710491137598,
+    "Binary 15 classes": 90.92919561635986,
+    "Binary 6 unknown classes": 56.61291407809451
+   }
+  },
+  "Hybrid-LTN": {
+   "accuracy": {
+    "Binary 9 known classes": 99.57338527268158,
+    "Binary 15 classes": 93.0333915846091,
+    "Binary 6 unknown classes": 60.47049990615029
+   },
+   "f1": {
+    "Binary 9 known classes": 99.61970371614998,
+    "Binary 15 classes": 94.2068647456285,
+    "Binary 6 unknown classes": 75.36650031191516
+   }
+  }
+ },
+ "transcription_validated": true,
+ "table_ii_inconsistent": [
+  {
+   "model": "1D CNN",
+   "view": "Binary 15 classes",
+   "metric": "f1",
+   "printed": 90.88,
+   "from_fig3": 92.27,
+   "other_metric_agrees_with_fig3": true
+  },
+  {
+   "model": "M-LTN",
+   "view": "Binary 6 unknown classes",
+   "metric": "accuracy",
+   "printed": 56.06,
+   "from_fig3": 56.02,
+   "other_metric_agrees_with_fig3": true
+  },
+  {
+   "model": "B-LTN",
+   "view": "Binary 6 unknown classes",
+   "metric": "accuracy",
+   "printed": 39.4,
+   "from_fig3": 39.48,
+   "other_metric_agrees_with_fig3": true
+  }
+ ],
+ "headline_pair_reproduces": true,
+ "test_size": {
+  "table_i_total": 454744,
+  "stated_split": [
+   0.8,
+   0.1,
+   0.1
+  ],
+  "expected_known_test_at_10pct": 45474,
+  "implied_known_test_from_fig3": 159160,
+  "implied_fraction": 0.34999912038421616,
+  "benign_fraction": 0.35,
+  "attack_fraction": 0.34999842979618756,
+  "zero_day_used_in_full": true
+ },
+ "hybrid_minus_cnn": {
+  "per_view": {
+   "Multi-class 9 known classes": 0.09,
+   "Binary 9 known classes": 0.15,
+   "Multi-class 15 classes": 0.07,
+   "Binary 15 classes": 2.15,
+   "Binary 6 unknown classes": 12.13
+  },
+  "view_has_benign_rows": {
+   "Multi-class 9 known classes": true,
+   "Binary 9 known classes": true,
+   "Multi-class 15 classes": true,
+   "Binary 15 classes": true,
+   "Binary 6 unknown classes": false
+  },
+  "max_gain_on_views_with_benign": 2.15,
+  "gain_on_view_without_benign": 12.13,
+  "fp_cnn": 380,
+  "fp_hybrid": 452,
+  "fp_change_pct": 18.947368421052623,
+  "fn_known_cnn": 536,
+  "fn_known_hybrid": 227,
+  "fn_known_change_pct": -57.649253731343286,
+  "tp_unknown_cnn": 15453,
+  "tp_unknown_hybrid": 19330,
+  "threshold_free_metric_reported": false
+ },
+ "zero_day_composition": {
+  "families": {
+   "Heartbleed": {
+    "their_packets": 13486,
+    "our_flows": 11,
+    "packets_per_flow": 1226.0,
+    "their_share": 0.42188575361321407,
+    "distinct_5tuples": 1,
+    "distinct_host_pairs": 1,
+    "span_minutes": 20.0
+   },
+   "Web Attack Brute Force": {
+    "their_packets": 11754,
+    "our_flows": 1507,
+    "packets_per_flow": 7.799601857996018,
+    "their_share": 0.3677031846336733
+   },
+   "Web Attack XSS": {
+    "their_packets": 3341,
+    "our_flows": 652,
+    "packets_per_flow": 5.124233128834356,
+    "their_share": 0.10451729963085779
+   },
+   "Bot": {
+    "their_packets": 2543,
+    "our_flows": 1956,
+    "packets_per_flow": 1.3001022494887526,
+    "their_share": 0.07955327535506476
+   },
+   "PortScan": {
+    "their_packets": 830,
+    "our_flows": 158804,
+    "packets_per_flow": 0.005226568600287146,
+    "their_share": 0.02596508790590002
+   },
+   "Web Attack Sql Injection": {
+    "their_packets": 12,
+    "our_flows": 21,
+    "packets_per_flow": 0.5714285714285714,
+    "their_share": 0.00037539886129012075
+   }
+  },
+  "top_two": [
+   "Heartbleed",
+   "Web Attack Brute Force"
+  ],
+  "top_two_share": 0.7895889382468874,
+  "heartbleed_share": 0.42188575361321407,
+  "heartbleed_flows": 11,
+  "portscan_survival": 0.005226568600287146
+ }
+}

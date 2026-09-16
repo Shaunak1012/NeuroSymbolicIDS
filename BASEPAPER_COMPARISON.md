@@ -110,9 +110,9 @@ own claims about the base paper.
 | **CL-01** | **HIGH** | "We beat the base paper by 18–29 pp on all four known-class views" is arithmetically false (+18.82 / **+0.42** / +28.72 / **+7.07**). In 7 files including the submission text | CONFIRMED |
 | **CL-02** | **HIGH** | `ltn_repro` (CE + ω=1) has **no matched control**. No CE + ω=0 run exists, so "their +12 pp gain does not appear" is confounded with the loss function | CONFIRMED |
 | **BP-01** | **HIGH** | The entire claimed symbolic gain is in the one view with no negatives (+12.13 pp there, +0.07 to +2.15 pp on the four views that have benign rows), and their Fig. 3 shows false positives *rising* 380 → 452. It is a threshold shift, and no threshold-free metric is reported | CONFIRMED |
-| **BP-02** | **HIGH** | **42.2 % of their zero-day headline is Heartbleed**, which is 13,486 payload packets drawn from **11 flows** — effective sample size ≈ 11, all between one host pair. Heartbleed + Web Brute Force = **79.0 %** of the zero-day set | CONFIRMED |
-| **BP-03** | MEDIUM | The confusion matrices imply a known-class evaluation set of **≈159,540 rows = 35.1 %** of Table I's 454,744 — not the 10 % the stated 80/10/10 split gives (45,474). Verified three ways | CONFIRMED |
-| **BP-04** | MEDIUM | Table II, 1D CNN, "Binary 15 classes" F1 @50 epochs is printed as **90.88 %, identical to its accuracy**. Recomputed from their own Fig. 3(e): **≈92.3 %**. The same method reproduces the Hybrid-LTN cell (94.20 %) exactly | CONFIRMED |
+| **BP-02** | **HIGH** | **42.2 % of their zero-day headline is Heartbleed**, which is 13,486 payload packets drawn from **11 flows** — ~~effective sample size ≈ 11~~ and those 11 flows share **one 5-tuple** (172.16.0.1:45022 → 192.168.10.51:444) inside **20 minutes**: effectively **a single connection** *(verified 2026-09-16, `basepaper_audit.py`)*. Heartbleed + Web Brute Force = **79.0 %** of the zero-day set | CONFIRMED |
+| **BP-03** | MEDIUM | The confusion matrices imply a known-class evaluation set of ~~≈159,540 rows = 35.1 %~~ **159,160 rows = exactly 35.0 %** of Table I's 454,744 — not the 10 % the stated 80/10/10 split gives (45,474). *Corrected 2026-09-16 by `basepaper_audit.py`* | CONFIRMED |
+| **BP-04** | MEDIUM | ~~One~~ **Three** Table II cells disagree with the paper's own Fig. 3: 1D CNN Binary-15 **F1** (printed 90.88, identical to its accuracy; Fig. 3 gives **92.27**), M-LTN Binary-6 **accuracy** (56.06 vs **56.02**), B-LTN Binary-6 **accuracy** (39.40 vs **39.48**). In each case the model's *other* printed metric agrees with Fig. 3, which identifies the wrong cell. The headline pair (48.34, 60.47) reproduces exactly. *Two cells added 2026-09-16 by `basepaper_audit.py`* | CONFIRMED |
 | **BP-05** | LOW | Text says "we removed **five** attack classes"; Table I lists six and every other reference says "6 unknown classes" | CONFIRMED |
 | **BP-06** | LOW | n = 1, no seeds, no variance. Differences of **0.07–0.15 pp** (Multi-class 9 known 81.08 vs 80.99) are reported as results | CONFIRMED |
 | **BP-07** | LOW | Fig. 2 specifies "**63 filters**" in conv2 — certainly 64 | CONFIRMED |
@@ -261,11 +261,16 @@ CIC-IDS2017 flow data are:
 | PortScan | 830 | 158,804 | **0.005** | 2.60 % |
 | Web Attack Sql Injection | 12 | 21 | 0.57 | 0.04 % |
 
-**Mechanism.** CIC-IDS2017 contains 11 Heartbleed flows, all between one attacker–victim pair in one
-short window. Payload-Byte expands them into 13,486 packets because a Heartbleed exfiltration is one
-connection emitting many large payloads. Those 13,486 rows are **not 13,486 independent observations**
-— they are ~11, massively correlated, and they are split 80/10/10 *at the packet level*, so packets
-from the same connection sit on both sides of the boundary.
+**Mechanism.** CIC-IDS2017 contains 11 Heartbleed flows. **All 11 share one 5-tuple**
+(172.16.0.1:45022 → 192.168.10.51:444) and fall inside a **20-minute** window on 5 July — they are one
+connection that CICFlowMeter's timeout cut into 11 records. Payload-Byte expands that connection into
+13,486 packets because a Heartbleed exfiltration emits many large payloads. Those 13,486 rows are **not
+13,486 independent observations — they are one event**.
+
+> ~~and they are split 80/10/10 *at the packet level*, so packets from the same connection sit on both
+> sides of the boundary.~~ *Wrong, corrected 2026-09-16: in their protocol the zero-day classes are
+> test-only, so Heartbleed is never split. The independence problem is within the test set, not across
+> the boundary.*
 
 **Impact.** Their headline "Binary 6 unknown classes" is 42.2 % Heartbleed and 36.8 % Web Brute
 Force — **79.0 % from two families**, one of which has an effective n of about 11. The 48.34 % →
@@ -286,20 +291,23 @@ zero-day task easier than ours. It does not; it makes it *smaller*.
 
 ### BP-03 — MEDIUM — The confusion matrices contradict the stated 80/10/10 split
 
-**Evidence.** From Fig. 3(a), the 1D CNN on 9 known classes: 70,000 + 380 + 536 + 88,624 =
-**159,540 rows**. A stratified 10 % test split of Table I's 454,744 gives **45,474**.
+> 🔴 **Corrected 2026-09-16 (same day), by `scripts/basepaper_audit.py`.** The first version of this
+> finding read the rounded "7e+04" TN cell as 70,000 and added FP to it, giving ~~159,540 rows =
+> 35.1 %~~. TN + FP is the benign total, and it is printed exactly in two matrices (M-LTN
+> 69,364 + 636, B-LTN 69,307 + 693), both **70,000**. The finding stands and is sharper; the struck
+> figures were wrong.
 
-Three independent checks say the matrices, not my reading, are self-consistent:
+**Evidence.** Benign rows in the known-class matrices: **70,000** (exact, from M-LTN and B-LTN).
+Attack rows: **89,160** in all four matrices (e.g. 1D CNN 536 + 88,624). Total **159,160**. A
+stratified 10 % test split of Table I's 454,744 gives **45,474**.
 
-1. Accuracy from Fig. 3(a): 158,624 / 159,540 = **99.43 %** vs their printed **99.42 %**.
-2. Accuracy from Fig. 3(d) (Hybrid-LTN): 158,933 / 159,612 = **99.57 %** vs printed **99.57 %**.
-3. The benign : attack ratio in the matrices is 70,380 : 89,160 = **44.1 : 55.9**, matching Table I's
-   200,000 : 254,744 = 44.0 : 56.0 exactly.
+**159,160 / 454,744 = 35.0 %**, and both components agree: 70,000 = 35.0 % of 200,000 benign, and
+89,160 = 35.0 % of 254,744 attack. The matrices are a correctly stratified **35 %** sample.
 
-So the evaluation set is a correctly stratified sample of **35.1 %** of the dataset. The zero-day
-matrices total exactly 31,966 — the full Table I zero-day count — consistent with "zero-day used only
-in the test phase". Adding the two gives 191,506, and the all-15 accuracy recomputes to 90.90 %
-against their printed 90.88 %.
+The counts are validated, not assumed: from them, all eight binary known-class and all-class accuracy
+cells of Table II reproduce exactly (1D CNN 99.42 / 90.88, M-LTN 99.46 / 92.19, B-LTN 99.42 / 89.40,
+Hybrid-LTN 99.57 / 93.03). The zero-day matrices total exactly 31,966 — the full Table I zero-day count
+— consistent with "zero-day used only in the test phase".
 
 **Impact.** Either Table I's counts are not the quantity the split is applied to, or the split is not
 80/10/10. Since every accuracy reproduces at the larger size, the numbers in Table II are internally
@@ -309,15 +317,28 @@ treat "paper-aligned split" as an approximation rather than a replication (see F
 
 ---
 
-### BP-04 — MEDIUM — A transcription error in Table II
+### BP-04 — MEDIUM — Three Table II cells disagree with the paper's own Fig. 3
 
-**Evidence.** Table II, 50 epochs, "Binary 15 classes": accuracy row gives 1D CNN **90.88 %**; the F1
-row gives 1D CNN **90.88 %** — identical. Every other model on that row has F1 > accuracy
+> *Extended 2026-09-16 by `basepaper_audit.py`, which checks every printed cell against the completed
+> matrices. It found two more, both in the zero-day view:*
+>
+> | model | cell | printed | from Fig. 3 | the model's other printed cell |
+> |---|---|---:|---:|---|
+> | 1D CNN | Binary 15 **F1** | 90.88 | **92.27** | accuracy 90.88 agrees with Fig. 3 |
+> | M-LTN | Binary 6 **accuracy** | 56.06 | **56.02** | F1 71.80 agrees with Fig. 3 |
+> | B-LTN | Binary 6 **accuracy** | 39.40 | **39.48** | F1 56.61 agrees with Fig. 3 exactly |
+>
+> In each case one printed cell agrees with the matrix and the other does not, which identifies the
+> wrong one. **The headline pair (1D CNN 48.34, Hybrid-LTN 60.47) reproduces exactly**, so none of
+> this touches their main claim.
+
+**Evidence (the first cell).** Table II, 50 epochs, "Binary 15 classes": accuracy row gives 1D CNN
+**90.88 %**; the F1 row gives 1D CNN **90.88 %** — identical. Every other model on that row has F1 > accuracy
 (Hybrid-LTN 93.03 → 94.20; M-LTN 92.19 → 93.47; B-LTN 89.40 → 90.93), and at 30 epochs the 1D CNN
 itself has 90.68 → 92.12.
 
 Recomputing from their Fig. 3(e): TP = 104,077, FP = 380, FN = 17,049 → precision 99.64 %, recall
-85.93 %, **F1 = 92.28 %**. The identical method reproduces the Hybrid-LTN cell at 94.20 %, exactly as
+85.92 %, **F1 = 92.27 %** *(92.28 in the first version; the exact counts give 92.27)*. The identical method reproduces the Hybrid-LTN cell at 94.20 %, exactly as
 printed.
 
 **Impact.** Small in itself, but `paper_metrics.py:102` transcribes the erroneous 90.88 into
@@ -556,7 +577,7 @@ the four known-class views by at most 0.71 pp. The known-class advantage is a mo
 | 8 | Annotate the BP-04 transcription error in `PAPER_F1` | `scripts/paper_metrics.py:102` | 5 min |
 | 9 | Publish the deduplicated and composition-neutral columns (§5) — both already computed | `paper_metrics.py`, STATUS | 1 h |
 | 10 | Add the architecture row to the deviation table (FD-03) | `conference_roadmap.md` §1 | 15 min |
-| 11 | Add BP-03 (the 35.1 % confusion-matrix inconsistency) and BP-06 (n=1, 0.09 pp deltas) to related work | drafts | 30 min |
+| 11 | Add BP-03 (the ~~35.1 %~~ **35.0 %** confusion-matrix inconsistency) and BP-06 (n=1, 0.09 pp deltas) to related work | drafts | 30 min |
 
 ### Optional
 
