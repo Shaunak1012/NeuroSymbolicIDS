@@ -204,8 +204,8 @@ def run(start=None, keep_going=False):
     rc_total = 0
 
     def save():
-        with open(os.path.join(paths.METADATA, "run_all_report.json"), "w",
-                  encoding="utf-8") as f:
+        rp = os.path.join(paths.METADATA, "run_all_report.json")
+        with open(rp, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=1)
 
     for name, script, why, arts in STAGES:
