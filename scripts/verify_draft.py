@@ -676,6 +676,30 @@ if rb:
     chk("re-base: online k800 fusion vs det CNN", "rebase_deterministic",
         rb["fusion"]["CNN + KG k=800 (causal)"]["new_vs_new_cnn"]["mean_delta"], "{:.4f}",
         quoted=True)
+    # D1 (2026-09-17): absolute PR-AUC is measured at the 1:1 benign ratio; the
+    # paper states what it is at the capture's own benign proportion.
+    _cf = rb.get("capture_faithful_prevalence", {}).get("rows", {})
+    if _cf:
+        chk("base rate: det CNN macro, capture-faithful", "rebase_deterministic",
+            _cf["CNN alone"]["capture_faithful_mean"], "{:.4f}")
+        chk("base rate: k800 fusion as reported", "rebase_deterministic",
+            _cf["CNN + KG k=800 (causal)"]["as_reported_mean"], "{:.4f}")
+        chk("base rate: k800 fusion, capture-faithful", "rebase_deterministic",
+            _cf["CNN + KG k=800 (causal)"]["capture_faithful_mean"], "{:.4f}")
+    else:
+        unbacked("capture-faithful PR-AUC", "rebase_deterministic.json has no capture_faithful_prevalence")
+_si = load("split_integrity")
+if _si:
+    chk("split: benign under-sampling factor", "split_integrity",
+        _si["benign"]["undersample_factor"], "{:.2f}")
+    chk("split: test rows duplicated in train", "split_integrity",
+        100 * _si["duplicates"]["fraction"], "{:.1f} %")
+    chk("split: test flows sharing a 5-tuple with train", "split_integrity",
+        100 * _si["group_overlap"]["flow_id_fraction"], "{:.1f} %")
+    chk("split: test flows sharing a source address", "split_integrity",
+        100 * _si["group_overlap"]["source_ip_fraction"], "{:.1f} %")
+else:
+    unbacked("split boundary figures", "split_integrity.json missing")
 obd = load("operational_best_c4_log1p")
 if obd:
     _r = lambda c: 100 * obd["configs"][c]["recall_at_fpr"]["ALL unknown flows"]["0.010"]["mean"]  # noqa: E731

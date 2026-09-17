@@ -43,6 +43,24 @@ effect on the zero-day metric, since all six zero-day families have 0.0 % overla
 Duplication therefore inflates the metric most papers report and leaves ours unchanged. This is a
 difference between the two metrics rather than a problem with our numbers.
 
+**Base rate.** Benign flows are under-sampled before the split, by a factor of 4.11, so every PR-AUC and
+lift in this paper is measured at an attack prevalence about four times that of the capture. Recall and
+false-positive rate are rates within a class and are not affected. Scored at the capture's own benign
+proportion, the CNN's macro zero-day PR-AUC is 0.5845 rather than 0.6299 (three deterministic seeds),
+and its online fusion with the knowledge graph (k = 800, causal) falls from 0.5030 to 0.3255. A
+monitored network carries a smaller share of attacks still, so every absolute PR-AUC here is an upper
+bound for deployment. We keep the 1:1 protocol because it matches the base paper and all comparisons in
+this paper are made within it.
+
+**Split boundary.** The split is stratified at random over a capture recorded in time order, and flows
+are not grouped by connection. 54.9 % of test flows share a Flow ID (5-tuple) with a training flow,
+98.9 % share a source address with one, and every test flow lies inside the training time range. Bot
+flows share no 5-tuple with training. Every Web Attack Brute Force and XSS flow does, with training flows
+of other classes, mostly DoS Hulk and DDoS. The web and DoS attacks were launched from the same address
+(172.16.0.1) against the same server (192.168.10.50, port 80), and source ports repeat, so these shared
+5-tuples mark the same attacker and target rather than the same connection. This agrees with the
+absorption result in Appendix D: the CNN places most web-attack flows in a known DoS class.
+
 **Feature transform.** We apply `log1p` to the features. On the main metric this gives 0.6299 ± 0.0031,
 against 0.1606 ± 0.0039 with raw features, over three seeds per setting (Welch t = 163). Our original
 reason for the choice relied on the contaminated overall binary metric, so we repeated the comparison on

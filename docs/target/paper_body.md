@@ -91,7 +91,8 @@ effect sizes, but they do not affect the mechanism.
 and benign traffic are treated as known. They are split 80/10/10 with stratification, and benign traffic
 is under-sampled to a 1:1 ratio, giving 883,796 training, 110,475 validation and 114,658 test flows. Six
 rare families (Bot, Heartbleed, Infiltration, and Web Attack Brute Force, XSS and SQL Injection) occur
-only in the test set.
+only in the test set. Under-sampling benign traffic raises the attack base rate about fourfold, so
+absolute PR-AUC values here are higher than they would be at the capture's own prevalence (Appendix A).
 
 **Metric.** Our main metric is macro zero-day PR-AUC over the three unseen families with enough samples:
 Bot (n = 1,956), Web Attack Brute Force (n = 1,507) and Web Attack XSS (n = 652). Heartbleed (n = 11),
@@ -367,7 +368,10 @@ show that the findings generalise to other network environments. Under corrected
 zero-day families have enough samples. We use flow features rather than payload bytes throughout,
 although the oracle result suggests that modality is not the obstacle. The thresholds in our exogeneity
 test are conventions. We do not evaluate against adaptive adversaries, and the system has not been
-deployed.
+deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
+optimistic: at the capture's own benign proportion the CNN's macro zero-day PR-AUC is 0.5845, not
+0.6299. The split is stratified at random over a chronologically ordered capture and is not grouped by
+connection; Appendix A reports what crosses the boundary.
 
 **Conclusion.** Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside
 the model's learned feature basis. The same condition makes an attack family with no overlap unreachable,

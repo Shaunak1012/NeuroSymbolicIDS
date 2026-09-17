@@ -236,6 +236,21 @@ zero-day families measure **0.0 % overlap** with training. Duplication therefore
 field's* metric and leaves *ours* untouched — this is a property of the comparison, not a flaw in our
 numbers.
 
+**Base rate.** Benign flows are under-sampled **4.11×** before the split (as in the base paper), so
+every PR-AUC and lift here is measured at roughly four times the capture's attack prevalence. Recall and
+FPR are within-class rates and are unaffected. At the capture's own benign proportion the deterministic
+CNN's macro zero-day PR-AUC is **0.5845**, not 0.6299, and the online CNN + KG fusion (k = 800, causal)
+falls from 0.5030 to **0.3255** (`rebase_deterministic.py`, 200 thinning draws). Every absolute PR-AUC in
+this paper is therefore an upper bound for deployment; comparisons are made within the 1:1 protocol.
+
+**Split boundary.** The split is stratified at random over a time-ordered capture and is not grouped by
+connection: **54.9 %** of test flows share a Flow ID (5-tuple) with a training flow, **98.9 %** share a
+source address, and every test flow lies inside the training time range (`split_integrity.py`). Bot shares
+no 5-tuple with training. **Every** Web Brute Force and XSS flow does, with training flows of *other*
+classes (mostly DoS Hulk and DDoS): the web and DoS attacks come from the same address (172.16.0.1)
+against the same server (192.168.10.50:80), and source ports repeat, so the shared 5-tuples mark the same
+attacker and target, not the same connection. This is consistent with the absorption result below.
+
 **Feature transform.** We use `log1p`, justified **on the headline metric**: 0.6299 ± 0.0031 against
 0.1606 ± 0.0039 for raw features, over three seeds per arm (Welch t = 163). We note plainly that our
 *original* justification for this choice cited the contaminated overall-binary metric, and that the
