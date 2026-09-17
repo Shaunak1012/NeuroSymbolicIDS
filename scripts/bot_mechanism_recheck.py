@@ -25,6 +25,14 @@ not blind; they are stated so the result can be read against them.
       (absorption, H1) -- this does not depend on ranking.
   E3  tuned forest's Bot rho is high, so "a random forest shows the same pattern"
       depends on one hyperparameter.
+  E4  (RECHECK_FOREST=1; written 2026-09-17 BEFORE that section was first run)
+      the paper's mechanism says a closed-set learner reaches a family in
+      proportion to how far its learned features overlap the family's. The tuned
+      forest reaches Bot (PR-AUC 0.2196) and the default forest barely does
+      (0.1311), so if the mechanism is right the tuned forest should put MORE of
+      its importance on Bot's eight oracle-discriminative features, on every seed.
+      If it does not, the forest's reach is not explained by overlap as we measure
+      it, and the paper must say so.
 
 Method, identical to bot_failure_analysis.py H1 / H2(b): Spearman correlation
 between each pair of seeds over one family's test flows, averaged over the three
@@ -32,12 +40,13 @@ pairs; absorption = argmax class of each Bot flow. Log-odds are
 logsumexp(attack logits) - benign logit, as in rescore_logits.py. Nothing is
 logged to runs.jsonl (no new method).
 
-Run:  python scripts/bot_mechanism_recheck.py
 The paper's figures come from three runs per population. The script also widens
 them to every CNN run on disk -- the 11 pre-flag runs and the 6 distinct
 deterministic runs -- and reports the spread over all pairs, separating
 different-seed pairs from same-seed pairs (six pre-flag runs are seed 42).
 
+Run:  python scripts/bot_mechanism_recheck.py
+      RECHECK_FOREST=1 python scripts/bot_mechanism_recheck.py   # + E4, six forest fits
 Out:  outputs/metadata/bot_mechanism_recheck.json
       outputs/predictions/y_prob_<run>_logodds_test.npy for runs that had none
 """
@@ -82,6 +91,51 @@ POPULATIONS = {
     "IsolationForest, tuned": ["isolation_forest_tuned_s42", "isolation_forest_tuned_s43",
                                "isolation_forest_tuned_s44"],
 }
+
+
+def forest_overlap():
+    """Refit both forests exactly as logged, check the refit reproduces the logged
+    predictions, and measure how much importance each puts on Bot's oracle
+    features (bot_failure_analysis.json H3/H4)."""
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.preprocessing import StandardScaler
+    with open(os.path.join(paths.METADATA, "bot_failure_analysis.json"), encoding="utf-8") as f:
+        h3 = json.load(f)["results"]["H3_feature_neglect"]
+    bot8, known8 = h3["bot_oracle_top8"], h3["known_class_top8"]
+    import csv
+    with open(os.path.join(paths.PROCESSED, "features_train.csv"), encoding="utf-8") as f:
+        names = next(csv.reader(f))
+    Xtr = features.transform(np.load(os.path.join(P, "X_train.npy")), TFM)
+    Xte = features.transform(np.load(os.path.join(P, "X_test.npy")), TFM)
+    sc = StandardScaler().fit(Xtr)
+    Xtr, Xte = sc.transform(Xtr), sc.transform(Xte)
+    ytr = np.load(os.path.join(P, "y_train_bin.npy"))
+    ib = [names.index(n) for n in bot8]
+    ik = [names.index(n) for n in known8]
+    res = {"bot_oracle_top8": bot8, "known_class_top8": known8}
+    for cfg_name, mf, tag in (("default", "sqrt", lambda s: "random_forest" + ("" if s == 42 else "_s%d" % s)),
+                              ("tuned", 0.3, lambda s: "random_forest_tuned_s%d" % s)):
+        per = []
+        for s in (42, 43, 44):
+            m = RandomForestClassifier(n_estimators=200, max_depth=20, max_features=mf,
+                                       n_jobs=-1, random_state=s).fit(Xtr, ytr)
+            logged = np.load(os.path.join(PR, "y_prob_%s_test.npy" % tag(s)))
+            same = bool(np.allclose(m.predict_proba(Xte)[:, 1], logged, atol=1e-6))
+            imp = m.feature_importances_
+            top8 = [names[i] for i in np.argsort(imp)[::-1][:8]]
+            row = {"seed": s, "refit_reproduces_logged_predictions": same,
+                   "top8": top8,
+                   "top8_overlap_with_bot": sorted(set(top8) & set(bot8)),
+                   "share_on_bot_top8": float(imp[ib].sum()),
+                   "share_on_known_top8": float(imp[ik].sum())}
+            per.append(row)
+            print("forest %-7s s%d reproduces=%s  share on Bot's 8: %.3f  on known 8: %.3f  top-8 overlap with Bot: %d %s"
+                  % (cfg_name, s, same, row["share_on_bot_top8"], row["share_on_known_top8"],
+                     len(row["top8_overlap_with_bot"]), row["top8_overlap_with_bot"]))
+        res[cfg_name] = {"max_features": str(mf), "per_seed": per,
+                         "mean_share_on_bot_top8": float(np.mean([r["share_on_bot_top8"] for r in per])),
+                         "mean_top8_overlap_with_bot": float(np.mean([len(r["top8_overlap_with_bot"]) for r in per]))}
+    return res
 
 
 def main():
@@ -171,6 +225,9 @@ def main():
               row["Web Attack Brute Force"]["mean"], row["Web Attack XSS"]["mean"],
               row["BENIGN"]["mean"]))
 
+    if os.environ.get("RECHECK_FOREST") == "1":
+        out["forest_overlap"] = forest_overlap()
+
     rs = out["rank_stability"]
     out["expectations"] = {
         "E1_det_cnn_bot_rho_near_zero": bool(abs(rs["CNN, deterministic (log-odds)"]["Bot"]["mean"]) < 0.3),
@@ -178,6 +235,11 @@ def main():
                                            for v in out["absorption"]["deterministic"].values()) > 0.8),
         "E3_tuned_rf_bot_rho_high": bool(rs["RandomForest, tuned (max_features=0.3)"]["Bot"]["mean"] > 0.5),
     }
+    if "forest_overlap" in out:
+        fo = out["forest_overlap"]
+        out["expectations"]["E4_tuned_forest_weights_bot_features_more"] = bool(all(
+            t["share_on_bot_top8"] > d["share_on_bot_top8"]
+            for t, d in zip(fo["tuned"]["per_seed"], fo["default"]["per_seed"])))
     print("\n", out["expectations"])
     p = os.path.join(paths.METADATA, "bot_mechanism_recheck.json")
     with open(p, "w", encoding="utf-8") as f:
