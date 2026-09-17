@@ -57,7 +57,9 @@ doubles web-attack precision (0.088 → 0.213); logical reasoning over entity re
 true positives from 0.0 % to 35.5 % at a 0.5 % false-positive rate; alerts are mapped to an external
 attack taxonomy. **Our own symbolic pillar did the opposite** — its Logic Tensor Network axioms are
 deterministic functions of the flow features the network already reads — and it was null alone
-(−0.0004, n.s.) and significantly harmful when stacked (0.6926 → 0.6708, p < 0.0001).
+(−0.0004, n.s.) and ~~significantly harmful when stacked (0.6926 → 0.6708, p < 0.0001)~~ **worse than the
+same trainer without axioms with all 17 CNN runs we paired it with** *(2026-09-17: the stacked comparison
+was built on the withdrawn three-run fusion and reverses on other CNN runs; `ablation_population.py`)*.
 
 We propose that **symbolic knowledge helps exactly to the extent it lies outside the model's learned
 feature basis**, and show the same property explains a second failure. A closed-set learner reaches a
@@ -103,8 +105,12 @@ analyst's knowledge of how networks and attacks behave ought to help.
 
 We built a neuro-symbolic intrusion detector to test that promise and it failed. Its Logic Tensor
 Network axioms — over behaviours such as burst traffic, high packet-size variance and beacon-like
-periodicity — contributed **−0.0004** macro zero-day PR-AUC alone (not significant) and **harmed**
-the system significantly when stacked on a knowledge-graph channel (0.6926 → 0.6708, p < 0.0001).
+periodicity — contributed **−0.0004** macro zero-day PR-AUC alone (not significant), and against the same trainer
+without axioms they are worse with **every one of 17 CNN runs** — by **0.0062** (11/11) and **0.0068**
+(6/6 deterministic) alone, **0.0212** and **0.0324** with the KG fused. ~~and **harmed** the system
+significantly when stacked on a knowledge-graph channel (0.6926 → 0.6708, p < 0.0001)~~ *(withdrawn
+2026-09-17: that comparison is positive on 6/6 deterministic CNN runs — any third channel repairs a
+broken CNN+KG fusion)*.
 This paper is about why, and the answer turns out to be general.
 
 **The published systems that report gains share a property ours lacked.** Grov et al. add a single
@@ -403,7 +409,7 @@ architecture as much as anyone else's.
 | **More architecture** (LSTM, GRU, CNN-LSTM, Transformer) | Nothing escapes the top tier upward and nothing touches Bot (best 0.0626, against the knowledge graph's 0.3103). CNN-LSTM lands **0.0031** from the plain CNN, so the **convolutional front-end is doing the work**; pure recurrence halves the score. |
 | **More classical baselines** | 16× spread, none competitive (§3b caveats apply). |
 | **Benign-only anomaly methods** (VAE, Deep SVDD, OC-SVM, LOF) | **LOF reaches macro 0.3360 ± 0.0135 and does *not* collapse on web attacks** — a correction to our own earlier framing, which attributed that collapse to the benign-only *family* when it is a property of **reconstruction-error scoring**. |
-| **The symbolic pillar itself** | **−0.0004 (n.s.)** alone, and it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043. |
+| **The symbolic pillar itself** | **−0.0004 (n.s.)** alone; against the axiom-free control it is worse with **all 17 CNN runs** (alone and with the KG). ~~it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043~~ *(withdrawn 2026-09-17, `ablation_population.py`: +0.0886 on 6/6 deterministic CNN runs)* |
 | **Calibration** | Isotonic regression reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) — a **287×** gap. **The better the calibration, the wider the gap.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage. |
 | **Training on a second dataset** (CSE-CIC-IDS2018's known pool, doubling the training set) | 🔴 **Actively harmful: −0.1461 macro against a seed-matched control, 0/3 seeds better, direction consistent.** And the harm is *imported false positives*, not lost detection — see below. |

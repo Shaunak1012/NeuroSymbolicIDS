@@ -14,8 +14,8 @@ that is rarely stated: the knowledge they add, whether an asset inventory, a rel
 external attack taxonomy, is information the neural network could not compute from its input. Our own
 system did not have this property. Its Logic Tensor Network axioms are deterministic functions of the
 flow features the network already receives. On its own the symbolic component had no measurable effect
-(−0.0004, n.s.), and combined with a knowledge-graph channel it lowered performance (0.6926 → 0.6708,
-p < 0.0001). We argue that symbolic knowledge can help a neural detector only to the extent that it lies
+(−0.0004, n.s.), and it was worse than the same trainer run without axioms in all 17 CNN training runs
+we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge can help a neural detector only to the extent that it lies
 outside the model's learned feature basis, and that the same condition explains a second failure. A
 closed-set classifier reaches an attack family it has never seen only in so far as that family's
 signature overlaps the features it learned. For Bot there is no overlap (0 of 8 discriminative features
@@ -38,9 +38,10 @@ detector is weakest on attacks that never appeared in training, and those are th
 about how networks and attacks behave should matter most.
 
 We built a neuro-symbolic intrusion detector to test the idea, and it did not work. Its Logic Tensor
-Network axioms encode behaviours such as burst traffic, packet-size variance and periodic, beacon-like
-connections. Alone they changed macro zero-day PR-AUC by −0.0004, which is not significant. Added on top
-of a knowledge-graph channel they made the system significantly worse (0.6926 → 0.6708, p < 0.0001).
+Network axioms encode behaviours such as burst traffic, packet-size variance and destination ports
+outside the standard service ports. Alone they changed macro zero-day PR-AUC by −0.0004, which is not
+significant. Compared with the same trainer run without axioms, they made the system worse with every
+one of the 17 CNN training runs we paired them with, whether or not a knowledge-graph channel was added.
 This paper sets out to explain that outcome, and we think the explanation applies beyond our system.
 
 Published systems that do report gains have something ours did not. Grov et al. [14] add a single axiom
@@ -119,8 +120,13 @@ destination port outside a list of standard service ports (`BeaconLike`).
 
 **Results.** We tried injecting the axioms at the loss, at the representation and at inference. In every
 case the symbolic component either lowered macro zero-day PR-AUC or left it unchanged. On its own it
-contributes −0.0004 (n.s.). On top of the knowledge graph it significantly reduces performance
-(0.6926 → 0.6708, p < 0.0001) and lowers the Bot score from 0.2518 to 0.2043. One axiom seemed at first
+contributes −0.0004 (n.s.). The cleaner test holds everything but the axioms fixed: the same trainer
+with the axiom weight at zero. Against it, the axioms lower macro zero-day PR-AUC with each of the 11
+CNN runs trained before our determinism controls (by 0.0062 on average) and each of the 6 trained after
+(0.0068), and by more when a knowledge-graph channel is also fused (0.0212 and 0.0324). An earlier
+version of this comparison, which added the axioms on top of a knowledge-graph fusion built on three
+CNN runs, reported a significant loss; that fusion does not hold across CNN runs (supplementary §D),
+so we report the matched comparison instead. One axiom seemed at first
 to help on Bot, but the effect disappeared when we repeated the experiment over several seeds. Because
 the sign of the effect is the same in every configuration, we do not think better tuning would change
 the conclusion.

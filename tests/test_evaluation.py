@@ -159,6 +159,21 @@ class Rebase(unittest.TestCase):
         for arm in ("ltn_repro_det", "ltn_repro_ctrl"):
             self.assertEqual(len(r["ltn_matched"][arm]["view5_per_seed"]), 3)
 
+    def test_axioms_are_worse_than_their_control_with_every_cnn_run(self):
+        """The robust symbolic result (2026-09-17): same trainer, axioms on vs off,
+        negative with every CNN run on disk, alone and with the KG fused."""
+        r = _load("ablation_population")
+        if r is None:
+            self.skipTest("ablation_population.json not generated")
+        for rung in ("axioms, alone (Ax6 vs ctrl)", "axioms, on KG (Ax6 vs ctrl)"):
+            for pop in ("pre_flag", "deterministic"):
+                s = r["summary"][rung][pop]
+                with self.subTest(rung=rung, pop=pop):
+                    self.assertEqual(s["runs_negative"], s["n_runs"])
+        # and the withdrawn abstract rung really does reverse off the reference runs
+        self.assertLess(r["summary"]["Ax6 on KG"]["reference_three"]["mean"], 0)
+        self.assertEqual(r["summary"]["Ax6 on KG"]["deterministic"]["runs_positive"], 6)
+
     def test_fusion_gain_is_not_a_property_of_the_method(self):
         """The withdrawal, pinned: the reference three gain, the other eight lose, and
         the gain is explained by where the CNN run ranks XSS."""

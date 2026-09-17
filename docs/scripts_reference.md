@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (83 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, plus `tests/`).
+> Last verified against source: **2026-09-05** (84 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py` 2026-09-17, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
@@ -1155,6 +1155,18 @@ no training, and reports the gain per CNN run. Online k=800: **5/11** pre-flag r
 three **+0.0615**, other eight **−0.1190**), **0/6** deterministic. The gain tracks each run's median
 XSS rank among **all** test flows (0.52–0.88 across runs; Spearman **+0.95**), which a benign-only
 PR-AUC cannot see and a whole-set rank fusion does. **Writes** `fusion_population.json`.
+
+## `scripts/ablation_population.py`
+
+*(added 2026-09-17, audit F-01.)* Re-tests `ablation.py`'s rungs across every CNN run on disk (11
+pre-flag, 6 deterministic), holding the LTN and KG channels at their three seeds. No training.
+🔴 **The abstract's rung does not hold:** adding LTN-Ax6 on top of CNN+KG is −0.0245 on the reference
+three but +0.0294 across pre-flag runs and **+0.0886 on 6/6 deterministic runs** — the axiom-free
+control added the same way does more (+0.1211), because any third channel repairs a broken CNN+KG
+fusion. ✅ **The axiom effect is robust:** axioms on vs off (same trainer, same position) is negative
+with **every one of 17 CNN runs** — −0.0062 / −0.0068 alone, −0.0212 / −0.0324 with the KG. The
+deterministic base-axiom matched pair (`ltn_repro_det` vs `ltn_repro_ctrl`) is negative alone (10/11,
+5/6) and inconsistent with the KG. **Writes** `ablation_population.json`.
 
 ## `scripts/audit_rebase.sh`
 

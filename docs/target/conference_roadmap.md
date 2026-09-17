@@ -16,7 +16,7 @@
 >
 > **What killed it.** *"Inference-time fusion recovers and exceeds the gain"* is false as stated:
 > the **ablation** (2026-08-05, n=3 paired) shows the symbolic pillar adds **−0.0004 (n.s.)** alone
-> and **significantly HURTS** when stacked on the KG (0.6926 → 0.6708, **p<0.0001**). **Only the KG
+> and ~~**significantly HURTS** when stacked on the KG~~ *(withdrawn 2026-09-17; see STATUS)* (0.6926 → 0.6708, **p<0.0001**). **Only the KG
 > earns its place**, and a KG is not "the symbolic knowledge moved to inference time" in the sense
 > this sentence promises. ~~The **fusion wall** (a fitted combiner cannot learn to weight a zero-day
 > channel, because validation contains no zero-day by construction) makes the general form of the

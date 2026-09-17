@@ -171,12 +171,42 @@ if fg:
 ab = REC["ablation"]
 if ab:
     chk("ablation: CNN macro", "ablation", ab["CNN"]["macro_mean"])
-    chk("ablation: CNN+KG macro", "ablation", ab["CNN + KG"]["macro_mean"])
+    chk("ablation: CNN+KG macro (withdrawn fusion)", "ablation", ab["CNN + KG"]["macro_mean"],
+        quoted=False)
     chk("ablation: CNN+KG paired delta", "ablation",
         ab["CNN + KG"]["paired_delta_mean"], "+{:.4f}")
-    chk("ablation: FULL macro", "ablation", ab["CNN + LTN-Ax6 + KG (FULL)"]["macro_mean"])
+    # 2026-09-17: the stacked comparison (CNN+KG 0.6926 -> FULL 0.6708) was built
+    # on the withdrawn three-run fusion and reverses on other CNN runs; the draft
+    # keeps it only struck through, the submission files drop it.
+    chk("ablation: FULL macro (withdrawn claim)", "ablation",
+        ab["CNN + LTN-Ax6 + KG (FULL)"]["macro_mean"], quoted=False)
     chk("ablation: LTN-Ax6 paired delta", "ablation",
         ab["CNN + LTN-Ax6"]["paired_delta_mean"], "{:.4f}")
+
+apop = load("ablation_population")
+if apop:
+    # The robust symbolic result: axioms on vs off, same trainer, same fusion
+    # position, across every CNN run on disk (audit F-01, 2026-09-17).
+    _s = apop["summary"]
+    _al, _kg = _s["axioms, alone (Ax6 vs ctrl)"], _s["axioms, on KG (Ax6 vs ctrl)"]
+    chk("axiom effect, alone, pre-flag runs", "ablation_population",
+        -_al["pre_flag"]["mean"], "{:.4f}")
+    chk("axiom effect, alone, deterministic runs", "ablation_population",
+        -_al["deterministic"]["mean"], "{:.4f}")
+    chk("axiom effect, with KG, pre-flag runs", "ablation_population",
+        -_kg["pre_flag"]["mean"], "{:.4f}")
+    chk("axiom effect, with KG, deterministic runs", "ablation_population",
+        -_kg["deterministic"]["mean"], "{:.4f}")
+    _n = sum(_x[p]["n_runs"] for _x in (_al,) for p in ("pre_flag", "deterministic"))
+    _neg = all(_x[p]["runs_negative"] == _x[p]["n_runs"]
+               for _x in (_al, _kg) for p in ("pre_flag", "deterministic"))
+    chk("axiom effect: number of CNN runs", "ablation_population", "all %d" % _n, "{}",
+        alt=("%d CNN" % _n, "%d CNN runs" % _n))
+    if not _neg:
+        BAD.append(("the draft says the axioms are worse with every CNN run",
+                    "all runs negative", "ablation_population"))
+else:
+    unbacked("axiom effect across CNN runs", "ablation_population.json missing")
 
 op = REC["operational"]
 if op:
