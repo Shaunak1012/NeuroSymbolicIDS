@@ -34,6 +34,10 @@ Determinism flags are on now and verified byte-identical, so a fresh run should
 reproduce the post-flag numbers; it will **not** reproduce figures computed
 before the flags landed, and those two populations are never pooled.
 
+To reproduce WITHOUT touching the canonical artifacts, point NSIDS_WORKDIR at an
+empty directory: raw inputs are still read from the repository, everything
+generated goes under the work directory (paths.py).
+
 Run:
   python scripts/run_all.py                  # check artifacts, print the order
   python scripts/run_all.py --run            # execute every stage in order
@@ -181,9 +185,30 @@ def check():
     return 1 if missing_total else 0
 
 
-def run(start=None):
+def run(start=None, keep_going=False):
+    """Execute stages in order.
+
+    Changed 2026-09-17 (audit item 7.4): a stage now FAILS if it exits 0 but does
+    not leave its declared artifacts on disk. Checking only the exit code let a
+    stage "succeed" while producing something else -- the `ltn` stage, run with
+    default settings, cannot produce the artifact it declares. Artifacts are
+    checked by modification time against the stage's start, so a file left over
+    from an earlier run does not count. Every stage's outcome is written to
+    run_all_report.json in METADATA (which NSIDS_WORKDIR relocates).
+    """
+    import json
+    import time
     started = start is None
-    for name, script, why, _ in STAGES:
+    report = {"workdir": paths.WORK, "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
+              "keep_going": keep_going, "stages": []}
+    rc_total = 0
+
+    def save():
+        with open(os.path.join(paths.METADATA, "run_all_report.json"), "w",
+                  encoding="utf-8") as f:
+            json.dump(report, f, indent=1)
+
+    for name, script, why, arts in STAGES:
         if not started:
             if name == start:
                 started = True
@@ -196,13 +221,28 @@ def run(start=None):
         print(f"RUN  {name}  ->  {script}")
         print("=" * 96, flush=True)
         env = dict(os.environ, PYTHONIOENCODING="utf-8")
+        t0 = time.time()
         rc = subprocess.call(cmd, cwd=paths.ROOT, env=env)
-        if rc != 0:
-            print(f"\nFAILED: stage '{name}' exited {rc} - stopping. "
+        fresh = [a for a in arts if os.path.exists(a) and os.path.getmtime(a) >= t0 - 1]
+        missing = [os.path.relpath(a, paths.WORK) for a in arts if a not in fresh]
+        ok = rc == 0 and not missing
+        report["stages"].append({"name": name, "script": script, "exit_code": rc,
+                                 "seconds": round(time.time() - t0, 1),
+                                 "declared_artifacts_missing": missing, "ok": ok})
+        save()
+        if not ok:
+            why_ = (f"exited {rc}" if rc != 0 else
+                    f"exited 0 but did not write: {', '.join(missing)}")
+            print(f"\nFAILED: stage '{name}' {why_}. "
                   f"Resume with: python scripts/run_all.py --run --from {name}")
-            return rc
-    print("\nall stages completed")
-    return 0
+            rc_total = rc_total or rc or 3
+            if not keep_going:
+                return rc_total
+    n_ok = sum(s_["ok"] for s_ in report["stages"])
+    print(f"\n{n_ok}/{len(report['stages'])} stages completed and wrote their artifacts")
+    report["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+    save()
+    return rc_total
 
 
 if __name__ == "__main__":
@@ -211,5 +251,7 @@ if __name__ == "__main__":
                     help="actually execute the stages (default is check only)")
     ap.add_argument("--from", dest="start", default=None,
                     help="resume execution from this stage name")
+    ap.add_argument("--keep-going", action="store_true",
+                    help="record a failed stage and continue with the next one")
     a = ap.parse_args()
-    sys.exit(run(a.start) if a.run else check())
+    sys.exit(run(a.start, a.keep_going) if a.run else check())

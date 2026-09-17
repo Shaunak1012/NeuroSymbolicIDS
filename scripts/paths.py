@@ -43,20 +43,28 @@ RAW_2018 = os.path.join(ROOT, "data", "raw_2018")
 # RAW_CSV_FULL: flow construction differs, so there is no 1:1 flow mapping.
 IMPROVED_2017 = os.path.join(ROOT, "data", "improved_2017")
 
+# --- Working-directory override (added 2026-09-17, audit item 7.4) ---
+# NSIDS_WORKDIR relocates every GENERATED artifact (processed data, models,
+# outputs) under another directory, while the raw inputs above stay where they
+# are. It exists so `run_all.py --run` can reproduce the pipeline from raw CSVs
+# without overwriting the canonical artifacts every reported number rests on.
+# Unset, every path below is exactly what it always was.
+WORK = os.environ.get("NSIDS_WORKDIR") or ROOT
+
 # --- Intermediate data ---
-PROCESSED = os.path.join(ROOT, "data", "processed")
+PROCESSED = os.path.join(WORK, "data", "processed")
 # Paper-aligned split (the current protocol): X_/y_ arrays + meta_*.csv side-tables.
 PAPER = os.path.join(PROCESSED, "paper")
 
 # --- Models + fitted transformers ---
-MODELS = os.path.join(ROOT, "models")
+MODELS = os.path.join(WORK, "models")
 
 # --- Pipeline outputs ---
-ARRAYS      = os.path.join(ROOT, "outputs", "arrays")
-EMBEDDINGS  = os.path.join(ROOT, "outputs", "embeddings")
-PREDICTIONS = os.path.join(ROOT, "outputs", "predictions")
-METADATA    = os.path.join(ROOT, "outputs", "metadata")
-FIGURES     = os.path.join(ROOT, "outputs", "figures")
+ARRAYS      = os.path.join(WORK, "outputs", "arrays")
+EMBEDDINGS  = os.path.join(WORK, "outputs", "embeddings")
+PREDICTIONS = os.path.join(WORK, "outputs", "predictions")
+METADATA    = os.path.join(WORK, "outputs", "metadata")
+FIGURES     = os.path.join(WORK, "outputs", "figures")
 
 # LEGACY metadata (added 2026-08-03). The superseded temporal-split pipeline
 # (cnn3.py -> eval.py -> ltn.py) writes `class_names.npy` / `zero_day_classes.npy`
