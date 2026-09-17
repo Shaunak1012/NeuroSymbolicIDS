@@ -140,10 +140,8 @@ print("=" * 100)
 # augmentation), so a re-run would crash or silently change the ensemble. The set
 # is now the 11-run pre-flag population, named explicitly (the same list as
 # fusion_population.PRE_FLAG), in the order the glob returned it.
-RUNS = ["cnn_paper", "cnn_paper_s43", "cnn_paper_s44", "cnn_paper_s45", "cnn_paper_s46",
-        "cnn_paper_s47", "cnn_repro_s42", "cnn_noise_r1", "cnn_noise_r2", "cnn_noise_r3",
-        "cnn_noise_r4"]
-cnn_files = sorted(os.path.join(PR, "y_prob_%s_test.npy" % t) for t in RUNS)
+from fusion_population import PRE_FLAG   # noqa: E402
+cnn_files = sorted(os.path.join(PR, "y_prob_%s_test.npy" % t) for t in PRE_FLAG)
 _missing = [f for f in cnn_files if not os.path.exists(f)]
 if _missing:
     sys.exit("operational.py: missing CNN runs: %s" % ", ".join(map(os.path.basename, _missing)))
