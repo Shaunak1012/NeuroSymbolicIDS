@@ -15,19 +15,19 @@ external attack taxonomy, is information the neural network could not compute fr
 system did not have this property. Its Logic Tensor Network axioms are deterministic functions of the
 flow features the network already receives. On its own the symbolic component had no measurable effect
 (−0.0004, n.s.), and it was worse than the same trainer run without axioms in all 17 CNN training runs
-we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge can help a neural detector only to the extent that it lies
-outside the model's learned feature basis, and we ask whether the same condition explains a second
-failure. None of the eight features that best separate Bot from benign traffic is among the eight that a
-model of the known-class task relies on most, and every Bot flow is classified as benign in all 17 of our
-CNN training runs. This failure held under five attempts to overturn it, among them an independent
-capture in which Bot is common and a relabelled release of the dataset. The overlap account is not
-complete, however: a random forest tuned on validation reaches Bot in part without relying more on Bot's
-features, as a test we specified in advance showed. We
-then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not. Host-role
-predicates derived from metadata the network never sees can still be predicted from its features, with
-AUC 0.990–0.994. Knowledge aggregated from the capture itself is not exogenous, and a benchmark with no
-external knowledge source therefore cannot support the experiment that published neuro-symbolic gains
-rely on.
+we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge
+can help a neural detector only to the extent that it lies outside the model's learned feature basis,
+and we ask whether the same condition explains a second failure. None of the eight features that best
+separate Bot from benign traffic is among the eight that a model of the known-class task relies on most,
+and every Bot flow is classified as benign in all 17 of our CNN training runs. This failure held under
+five attempts to overturn it, among them an independent capture in which Bot is common and a relabelled
+release of the dataset. The overlap account is not complete, however: a random forest tuned on
+validation reaches Bot in part without relying more on Bot's features, as a test we specified in advance
+showed. We then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not.
+Host-role predicates derived from metadata the network never sees can still be predicted from its
+features, with AUC 0.990–0.994. Knowledge aggregated from the capture itself is not exogenous, and a
+benchmark with no external knowledge source therefore cannot support the experiment that published
+neuro-symbolic gains rely on.
 
 ---
 
