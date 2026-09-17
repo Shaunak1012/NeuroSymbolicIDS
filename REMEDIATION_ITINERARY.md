@@ -242,17 +242,17 @@ Everything that moves, and why. ~~**Directions of every comparative conclusion s
 ## 12. Tracking
 
 ```
-STATUS 2026-09-16 end of day      [x] done   [~] partial / running   [ ] not started
+STATUS 2026-09-17                 [x] done   [~] partial / running   [ ] not started   [-] not needed
 
-STAGE 0  decisions      [ ] D1  [x] D2  [ ] D3  [ ] D4  [ ] D5
+STAGE 0  decisions      [x] D1  [x] D2  [ ] D3  [x] D4  [ ] D5
 STAGE 1  no compute     [x] 1.1 [x] 1.2 [x] 1.3 [x] 1.4 [x] 1.5 [x] 1.6 [x] 1.7 [x] 1.8 [x] 1.9
 STAGE 2  write-up       [x] 2.1 [x] 2.2 [x] 2.3 [x] 2.4 [x] 2.5 [x] 2.6 [x] 2.7 [x] 2.8 [x] 2.9
 STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
 STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
                         [x] 4.10 [x] 4.11
-STAGE 5  protocol (D4)  [ ] 5.1 [ ] 5.2 [ ] 5.3 [ ] 5.4
-STAGE 6  modelling      [ ] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
-STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [ ] 7.4
+STAGE 5  protocol (D4)  [~] 5.1 [~] 5.2 [-] 5.3 [ ] 5.4
+STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
+STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [~] 7.4
 STAGE 8  hygiene        [ ] 8.1 [x] 8.2
 ```
 
@@ -308,3 +308,35 @@ accuracy by +0.55 pp (+0.60 / −0.84 / +1.89; not direction-consistent) where t
 macro by −0.0090 (1/3); the paper now says so. 4.10: balanced known-class accuracy is recorded
 (deterministic CNN 99.73 %). 6.2: `significance.json` regenerated with Holm, no verdict changes.
 4.4 stays partial: novelty, ablation, field_gap and the figures still use the pre-flag CNN.
+
+---
+
+## 14. Progress, 2026-09-17
+
+**Decisions.** The author approved D1 (keep the 1:1 split, report both), D4 (run the variants) and the
+reframe. D3 and D5 remain the author's.
+
+**Done.**
+* 4.8 / D1 — the paper states the base rate and the capture-faithful figures, and what crosses the split
+  boundary (`verify_draft.py` checks both). 5.3 is therefore not needed.
+* 6.1 — `baselines_tuned.py`: tuned RandomForest 0.6407 ≈ det CNN 0.6299; tuned XGBoost 0.6180; tuned
+  IsolationForest 0.0564.
+* 4.4 (part) — OOD battery re-run on the deterministic CNN (best Bot 0.0576 < 0.08).
+
+**Not predicted by the itinerary.** 6.1 overturned part of the paper's mechanism: the tuned forest ranks
+Bot consistently (+0.923). `bot_mechanism_recheck.py` then widened the CNN's Bot-ranking figure from
+three runs to all 17: median +0.55 / +0.59, not −0.090. Retracted in the paper, STATUS, KNOWN_ISSUES
+and CLAUDE.md; absorption and the 0/8 overlap stand. Separately, four analysis scripts
+(`operational.py`, `best_config.py`, `field_gap.py`, `metric_divergence.py`) chose their populations from
+whatever was on disk and would no longer have reproduced their records; all pinned, all byte-identical.
+
+**Running.**
+* 5.1 / 5.2 — `paper_grouped` and `paper_chrono`, CNN + AE at seeds 42–44. ⚠️ 5.2 is implemented as a
+  **within-class chronological** split (earliest 80 % of each known class trains), not the legacy
+  Mon–Wed / Thu–Fri protocol: that protocol changes which families are zero-day, so it would not be
+  comparable with the headline. The grouped split had to move 42,500 known/benign flows that share a
+  5-tuple with a zero-day flow into test.
+* 7.4 — `run_all.py --run --keep-going` in a sandbox. Preprocess, split, timeline and the seed-42 CNN
+  reproduce the canonical artifacts byte for byte from the raw CSVs.
+
+**Not done.** 4.4: Mahalanobis on the deterministic CNN. 5.4, 6.4, 6.5 (optional). 8.1 waits on D3.

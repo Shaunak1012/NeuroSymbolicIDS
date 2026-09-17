@@ -135,7 +135,19 @@ has been shown to beat the neural baseline.** The CNN baseline itself is re-base
 👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
-**Next action (resume here — as of end of 2026-09-16):** read STATUS → "AUDIT + REMEDIATION" and
+**Next action (resume here — as of 2026-09-17):** read STATUS → "REMEDIATION, DAY 2" and
+`REMEDIATION_ITINERARY.md` §14. Branch `fix/audit-remediation` (not pushed).
+1. **Collect the D4 split variants** when `split_variants.sh` finishes (both lanes): run
+   `python scripts/split_variants.py`, then write the result into the paper's limitations / Appendix A,
+   STATUS, KNOWN_ISSUES (F-02/F-03), with `verify_draft.py` checks and a test. ⚠️ The grouped split
+   moved 42,500 flows into test, so its zero-day change is not purely leakage.
+2. **Collect the sandbox `run_all.py --run`** (`outputs/sandbox_e2e/.../run_all_report.json`): record
+   which stages fail and why, fix the stage declarations, and replace the "never executed end to end"
+   statement below with what was actually shown.
+3. Author decisions **D3** (notebook) and **D5** (push). Optional: Mahalanobis on the det CNN; whether
+   the tuned forest's features overlap Bot's (KNOWN_ISSUES 2026-09-17).
+
+~~**Next action (resume here — as of end of 2026-09-16):**~~ *(superseded 2026-09-17)* read STATUS → "AUDIT + REMEDIATION" and
 `REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).
 1. ~~Collect `audit_rebase.sh`~~ ✅ **done 2026-09-16**: seed-42 CNN byte-identical; CL-02 answered —
    the base paper's SAT term moves zero-day accuracy **+0.55 pp** (not direction-consistent) against a
