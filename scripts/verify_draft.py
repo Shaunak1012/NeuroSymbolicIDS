@@ -688,6 +688,41 @@ if rb:
             _cf["CNN + KG k=800 (causal)"]["capture_faithful_mean"], "{:.4f}")
     else:
         unbacked("capture-faithful PR-AUC", "rebase_deterministic.json has no capture_faithful_prevalence")
+# 2026-09-17: the Bot-ranking claim, widened from three runs to every CNN run.
+_bm = load("bot_mechanism_recheck")
+if _bm:
+    _ap = {k: v["all"]["Bot"] for k, v in _bm["all_pairs"].items()}
+    chk("Bot rank agreement, det CNN median", "bot_mechanism_recheck",
+        _ap["deterministic"]["median"], "+{:.2f}")
+    chk("Bot rank agreement, pre-flag CNN median", "bot_mechanism_recheck",
+        _ap["pre_flag"]["median"], "+{:.2f}")
+    chk("Bot rank agreement, det CNN lowest pair", "bot_mechanism_recheck",
+        _ap["deterministic"]["min"], "{:.2f}", alt=("%.2f" % _ap["deterministic"]["min"],))
+    chk("Bot rank agreement, det pairs below 0.3", "bot_mechanism_recheck",
+        "%d of %d" % (round(_ap["deterministic"]["frac_below_0.3"] * _ap["deterministic"]["n_pairs"]),
+                      _ap["deterministic"]["n_pairs"]), "{}",
+        alt=("%d of the %d" % (round(_ap["deterministic"]["frac_below_0.3"] * _ap["deterministic"]["n_pairs"]),
+                               _ap["deterministic"]["n_pairs"]),))
+    _rs = _bm["rank_stability"]
+    chk("tuned RF Bot rank agreement", "bot_mechanism_recheck",
+        _rs["RandomForest, tuned (max_features=0.3)"]["Bot"]["mean"], "+{:.3f}")
+    chk("det AE Bot rank agreement", "bot_mechanism_recheck",
+        _rs["Autoencoder, deterministic"]["Bot"]["mean"], "+{:.3f}")
+    _n = sum(len(v) for v in _bm["absorption"].values())
+    _all = all(r["Bot"]["frac_argmax_BENIGN"] == 1.0 for v in _bm["absorption"].values() for r in v.values())
+    chk("Bot absorbed as BENIGN in every CNN run", "bot_mechanism_recheck",
+        "all %d" % _n if _all else "NOT all %d" % _n, "{}")
+else:
+    unbacked("Bot ranking over all CNN runs", "bot_mechanism_recheck.json missing")
+_bt = load("baselines_tuned")
+if _bt:
+    chk("tuned RF Bot PR-AUC", "baselines_tuned",
+        _bt["models"]["random_forest"]["tuned_family_mean"]["Bot"])
+    chk("tuned RF Bot lift", "baselines_tuned",
+        _bt["models"]["random_forest"]["tuned_family_mean"]["Bot"] / (1956 / (1956 + 55237)),
+        "{:.1f}", alt=())
+else:
+    unbacked("tuned baselines", "baselines_tuned.json missing")
 _od = load("ood_scores_det")
 if _od:
     _b = _od["predictions"]["best_bot_scorer"]
@@ -749,6 +784,14 @@ STALE = [
      "stale verification count; the checker reports the live figure on each run"),
     (r"\bSix\s+claims\s+in\s+this\s+paper\s+have\s+no\s+machine-readable",
      "stale unbacked count; it is four, and two of the six named have since been backed"),
+    # Retracted 2026-09-17 (bot_mechanism_recheck.py): -0.090 was three runs; the
+    # median over all CNN run pairs is +0.55 / +0.59.
+    (r"ranking\s+(of\s+(that\s+class|Bot\s+flows)\s+)?is\s+(\*\*)?noise",
+     "Bot's ranking is not noise over all CNN runs (median rho +0.55 / +0.59)"),
+    (r"changes\s+arbitrarily\s+from\s+one\s+training\s+seed",
+     "same retracted claim, abstract wording"),
+    (r"(Random\s*Forest|random\s+forest)\s+(shows\s+the\s+same\s+pattern|behaves\s+(identically|the\s+same\s+way))",
+     "only the untuned forest does; the tuned forest gives +0.923"),
 ]
 import re as _re
 _LIVE = _re.sub(r"(?s)~~.*?~~", "", NORM)
