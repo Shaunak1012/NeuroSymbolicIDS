@@ -716,6 +716,7 @@ else:
     unbacked("Bot ranking over all CNN runs", "bot_mechanism_recheck.json missing")
 _bt = load("baselines_tuned")
 if _bt:
+    chk("tuned RF macro", "baselines_tuned", _bt["models"]["random_forest"]["tuned_macro_mean"])
     chk("tuned RF Bot PR-AUC", "baselines_tuned",
         _bt["models"]["random_forest"]["tuned_family_mean"]["Bot"])
     chk("tuned RF Bot lift", "baselines_tuned",

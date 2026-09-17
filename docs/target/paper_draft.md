@@ -811,7 +811,7 @@ report where we fail.
 | P3 | Data snooping | ✅ Selection on a held-out half with an rng fixed independently of any model seed. It caught a +0.007 result that is **−0.0008** on the reporting half. ⚠️ Residual: the cluster count was *first* swept on test, and we say so where we report it. |
 | P4 | Spurious correlations | ✅ This is §4 and the absorption analysis: the web families' 0.92–0.95 is **absorption into a known attack class**, not detection, and an earlier explanation of our own was falsified and withdrawn. |
 | P5 | Biased parameter selection | ✅ Noise floor measured before any delta is interpreted; every comparison paired on seed. |
-| P6 | Inappropriate baseline | ✅ Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. |
+| P6 | Inappropriate baseline | ✅ Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. XGBoost / RandomForest / IsolationForest re-run with hyperparameters selected on validation (`baselines_tuned.py`, 2026-09-17): the tuned forest (**0.6407**) is within seed noise of the deterministic CNN (0.6299). |
 | P7 | Inappropriate performance measures | 🔑 **This is the paper's subject**, not a box we tick — §3. |
 | P8 | Base rate fallacy | ✅ PR-AUC over ROC, prevalence and lift reported, families below 100 flows excluded from the macro, and cross-dataset comparison done **only** in lift because prevalence differs by orders of magnitude. |
 | P9 | Lab-only evaluation | ❌ **Not addressed.** Throughput is measured (7.95 µs/flow) but nothing is deployed. |
