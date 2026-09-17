@@ -62,6 +62,34 @@ The tuned forest **matches** the CNN; it does not beat it. Its **Bot PR-AUC is 0
 seed)** — above the autoencoder. ~~Whether its features overlap Bot's more than the CNN's is
 unmeasured.~~ Measured the same day: it does not (E4 above).
 
+### ✅ 7.4 DONE — the pipeline was executed end to end, from the raw CSVs
+
+`run_all.py --run --keep-going` into an empty directory (`NSIDS_WORKDIR`), 2026-09-17 20:18 →
+2026-09-18 02:51, **6.5 h**, **20 of 26 stages**. `repro_compare.py` against the canonical tree:
+
+| verdict | n | what |
+|---|---:|---|
+| **byte-identical** | **72** | preprocessed data, the split, corrected timestamps, all 3 CNN seeds (+ embeddings, histories), all 3 autoencoders, every KG seed, the classical **and** tuned baselines |
+| float-level | 4 | RandomForest 4.4e-16 (×3 seeds), `behaviour_thresholds.npy` 2.4e-14 relative (the stored file predates the lockfile) |
+| **different** | **0** | — |
+
+It also re-derived the comparative results from scratch: CNN **0.6299**, CNN + KG **0.5103** (the KG
+*costs* 0.12 — the withdrawal replicates), AE ahead of the CNN on Bot (**−0.1017**, p<0.001) and far
+behind on the web families (+0.81 / +0.89), RF ties the AE on Bot (−0.0027, **n.s.**). Records kept in
+`outputs/metadata/run_all_sandbox2/` (they are the **deterministic** counterparts of canonical records
+that exist only in pre-flag form — do not pool).
+
+**The 6 incomplete stages are the declared-external ones** (`baselines_tuned`, `bot_recheck`,
+`operational`, `field_gap`) plus `figures` and `paper_figures` downstream of them: they need the 11-run
+pre-flag CNN population, the field-gap method sweeps, `noise_postdet` and `protocol_variance`. `field_gap`
+**exited 2 rather than writing** a 14-of-42-method record.
+
+⚠️ **The first execution (old 19-stage list, `run_all_sandbox1_report.json`, 12/19) is what forced the
+rework**: it declared seed 42 only where later stages read 43–44, ran the LTN with default settings (a
+different tag from the control every later script reads), omitted the +Ax6 arm, and produced neither the
+log-odds scores nor the CNN + KG channel. Two scripts wrote **partial records and exited 0**
+(`significance.json` with 0 of 13 comparisons; `field_gap.json` with 9 of 42 methods) — both now refuse.
+
 ### ✅ D4 measured — the grouped and chronological splits (`split_variants.py`)
 
 Deterministic CNN and autoencoder, seeds 42–44 each:
@@ -109,9 +137,8 @@ Deterministic CNN and autoencoder, seeds 42–44 each:
   `cnn_chrono_s42` **0.6101** (canonical det s42: 0.6298).~~ ✅ **Done 14:48 UTC — results above.** ⚠️ The
   grouped split moved 42,500 known/benign flows that share a 5-tuple with a zero-day flow into test (DoS
   slowloris training 4,637 → 3,810), so a grouped-split zero-day change is not purely a leakage effect.
-- **Corrected `run_all.py --run --keep-going`** into `outputs/sandbox_e2e2` (26 stages, ~10–11 h CPU;
-  `outputs/run_all_sandbox2.log`), started 14:49 UTC after the first sandbox run showed the old list
-  could not reproduce past the CNN.
+- ~~**Corrected `run_all.py --run --keep-going`** into `outputs/sandbox_e2e2` (26 stages, ~10–11 h CPU),
+  started 14:49 UTC~~ ✅ **finished 2026-09-18 02:51 — results above.**
 - **`run_all.py --run --keep-going`** in the sandbox (`outputs/run_all_sandbox.log`). Expected failures:
   `ltn` and `autoencoder` declare artifacts their default settings do not write, and `fusion` /
   `fitted_fusion` / `significance` / `ablation` / `figures` need seed-43/44, log-odds and experiment

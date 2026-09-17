@@ -8,6 +8,17 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## ✅ 2026-09-18 — The pipeline runs end to end (7.4)
+
+### [FIXED 2026-09-18] 🟡 "`run_all.py` has never been executed end to end"
+
+Executed from the raw CSVs into an empty directory: 20 of 26 stages in 6.5 h, **72 artifacts
+byte-identical** to the canonical deterministic ones, 4 float-level, **0 different**
+(`repro_compare.py`, `repro_compare_sandbox_e2e2.json`). The claim in CLAUDE.md, the paper and
+`scripts_reference.md` is replaced by what was shown. The six incomplete stages have **declared external
+inputs** (the 11-run pre-flag CNN population, the field-gap sweeps, `noise_postdet`,
+`protocol_variance`) — a run from a clean checkout reproduces everything else.
+
 ## 🔴 2026-09-17 — Remediation, day 2: one more retraction, four latent re-run defects
 
 ### [FIXED 2026-09-17] 🔴 "The CNN's Bot ranking is noise (ρ = −0.090)" was three runs — retracted

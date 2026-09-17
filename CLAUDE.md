@@ -140,13 +140,9 @@ Do not restate it here — that is exactly what kept rotting.
 `REMEDIATION_ITINERARY.md` §14. Branch `fix/audit-remediation` (not pushed).
 1. ~~**Collect the D4 split variants**~~ ✅ done 2026-09-17 (grouped −0.071; chronological halves the
    AE; dissociation direction holds everywhere — STATUS).
-2. **Collect the second sandbox run** (`outputs/run_all_sandbox2.log`, report at
-   `outputs/sandbox_e2e2/outputs/metadata/run_all_report.json`, ~10–11 h from 14:49 UTC): expected to
-   pass every stage except those with declared external inputs (`baselines_tuned`, `bot_recheck`,
-   `operational`, `field_gap`, `figures`). Compare its outputs with canonical where the populations
-   match (the deterministic seed-42 CNN must be byte-identical), copy the report into
-   `outputs/metadata/run_all_sandbox_report.json`, and write the result into STATUS and the paper's
-   reproducibility section. The first sandbox run (old list) is in `outputs/run_all_sandbox.log`.
+2. ~~**Collect the second sandbox run**~~ ✅ done 2026-09-18: 20/26 stages, 6.5 h, **72 artifacts
+   byte-identical, 0 different** (`repro_compare.py`; records in `outputs/metadata/run_all_sandbox2/`).
+   Only the declared-external stages are incomplete.
 3. Author decisions **D3** (notebook) and **D5** (push). Optional: Mahalanobis on the det CNN; whether
    the tuned forest's features overlap Bot's (KNOWN_ISSUES 2026-09-17).
 
@@ -356,9 +352,9 @@ Run from the project root, in order, **using the venv interpreter**. Each step c
 with the environment of each run, what each needs and makes, and the **external** inputs only other
 experiments produce. `python scripts/run_all.py` checks (default); `--run` executes; `--run --from
 <stage>` resumes. ~~⚠️ The sequence has been **checked** end to end and **never executed** end to end
-in one pass~~ *(2026-09-17: first executed into a sandbox — preprocess → CNN reproduced byte for byte;
-the rest of the old 19-stage list could not run, which is why it was reworked. See STATUS.)* Do not
-imply a validated one-command reproduction: 7 inputs are external. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
+in one pass~~ *(2026-09-18: **executed end to end** from the raw CSVs — 20/26 stages, **72 artifacts byte-identical,
+0 different**; the 6 incomplete stages are the declared-external ones. See STATUS.)* It is a validated
+reproduction path for everything except those: 7 inputs are external. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
 is the one that is executable.**
 
 **Current pipeline (paper-aligned split — this is what all reported results use):**

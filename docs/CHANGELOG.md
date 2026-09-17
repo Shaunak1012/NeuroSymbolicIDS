@@ -2,6 +2,18 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-18 (The pipeline is executed end to end — 7.4 closed)
+
+`run_all.py --run --keep-going` from the raw CSVs into an empty directory (2026-09-17 20:18 →
+2026-09-18 02:51, 6.5 h): **20 of 26 stages**; `repro_compare.py` reports **72 byte-identical**
+artifacts against the canonical tree (data, split, timestamps, 3 CNN seeds with embeddings and
+histories, 3 autoencoders, every KG seed, classical and tuned baselines), 4 float-level, **0 different**.
+The run re-derived the comparative results as well (CNN 0.6299; CNN + KG 0.5103; AE − CNN on Bot
+−0.1017; RF ties AE on Bot, n.s.). The six incomplete stages are the declared-external ones plus the two
+figure stages downstream of them; `field_gap` exited 2 instead of writing a partial record. Records in
+`outputs/metadata/run_all_sandbox2/`; the paper's reproducibility appendix and the master draft now state
+this instead of "never executed end to end". New script `repro_compare.py`.
+
 ## 2026-09-17 (Remediation day 2 — Bot-ranking claim retracted; the pipeline reproduces from raw data)
 
 Branch `fix/audit-remediation`, not pushed. The author approved D1 (keep 1:1, report both), D4 (run the

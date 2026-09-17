@@ -252,7 +252,7 @@ STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 
                         [x] 4.10 [x] 4.11
 STAGE 5  protocol (D4)  [x] 5.1 [x] 5.2 [-] 5.3 [ ] 5.4
 STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
-STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [~] 7.4
+STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [x] 7.4
 STAGE 8  hygiene        [ ] 8.1 [x] 8.2
 ```
 
@@ -345,5 +345,9 @@ paper Appendix A). The pre-registered forest test E4 failed (overlap is now an a
 a law). `run_all.py` was reworked after its first execution (26 stages, runs / needs / external) and a
 second full execution started in `outputs/sandbox_e2e2`.
 
+**Update, 2026-09-18 02:51.** 7.4 done: the pipeline ran end to end from the raw CSVs — 20/26 stages in
+6.5 h, 72 artifacts byte-identical, 0 different (`repro_compare.py`). The six incomplete stages are the
+declared-external ones. The paper, CLAUDE.md and `scripts_reference.md` no longer say "never executed
+end to end".
+
 **Not done.** 4.4: Mahalanobis on the deterministic CNN. 5.4, 6.4, 6.5 (optional). 8.1 waits on D3.
-7.4 until the second sandbox run finishes.
