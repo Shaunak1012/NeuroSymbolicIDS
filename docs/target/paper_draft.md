@@ -83,9 +83,9 @@ headline families.
 <summary>Security-framed abstract (2026-09-14), retained for the record</summary>
 
 A closed-set discriminative model learns only the features that separate the classes it was trained
-on, so a novel class is reachable exactly to the extent its signature overlaps that basis. We show
+on, so a novel class is reachable exactly to the extent its signature overlaps that basis. ~~We show
 this is not a metaphor but a measurable property with a testable consequence, and that for one attack
-family the overlap is **empty**. For CIC-IDS2017's Bot family, **0 of 8** discriminative features are
+family the overlap is **empty**.~~ *(Corrected 2026-09-17: the 0-of-8 figure is one XGBoost proxy's importance ranking — both random forests trained on the same task have 2 of the 8 in their top eight — and a pre-registered test failed: the tuned forest, which reaches Bot, puts less importance on Bot's features (0.19 vs 0.21) and more on the known-class ones (0.39 vs 0.24). Overlap is an account of the CNN, not a law. `bot_mechanism_recheck.py`, E4.)* For CIC-IDS2017's Bot family, **0 of 8** discriminative features are
 shared with the known-class task, and **100 %** of Bot flows are classified BENIGN in all 17 CNN runs
 (mean p(BENIGN) ≥ 0.998; 0.9984 on the first three)~~, and the resulting ranking is **noise** —
 cross-seed Spearman **ρ = −0.090**, against 0.68–0.83 for every other family~~. Bot's ranking is the
@@ -128,12 +128,15 @@ already reads. Ours supplied an inductive bias; theirs supplied evidence.
 We state this as a precondition — **symbolic knowledge helps a neural detector to the extent it lies
 outside the model's learned feature basis** — and make three contributions around it.
 
-1. **A mechanism that unifies two failures.** The same property governs *novel attack families*: a
-   closed-set learner reaches a family it never saw only insofar as that family's signature overlaps
-   the features it learned. For the Bot family the overlap is empty (0 of 8 discriminative features),
-   every flow is classified benign in all 17 CNN runs~~, and the ranking is noise (cross-seed
-   ρ = −0.090)~~. Symbolic knowledge inside the basis adds nothing; a novel class outside it cannot be
-   reached. **One principle, two consequences** (§4).
+1. ~~**A mechanism that unifies two failures.**~~ **An account of a second failure, and its limit**
+   *(corrected 2026-09-17, see §4)*. The same property governs *novel attack families*: a closed-set
+   learner reaches a family it never saw only insofar as that family's signature overlaps the features
+   it learned. For the Bot family the overlap is empty (0 of 8 discriminative features, by one XGBoost
+   proxy's ranking), and every flow is classified benign in all 17 CNN runs~~, and the ranking is noise
+   (cross-seed ρ = −0.090)~~. Symbolic knowledge inside the basis adds nothing; a novel class outside it
+   ~~cannot be reached~~ is not reached by our CNN. ~~**One principle, two consequences** (§4).~~ A tuned
+   random forest reaches Bot in part without weighting Bot's features more, so this is an account of the
+   CNN, not a general law (§4).
 2. **A durability test.** That unreachability survives five attempts to break it: an independent
    capture where Bot is abundant rather than rare, corrected labels that discard attack flows which
    transmitted no payload, an explicitly trained reject class, cross-dataset augmentation, and a broad
@@ -352,17 +355,19 @@ The gap in §3 is not merely unmeasured; it is hard, and we can say why.
 
 **The synthesis.** A closed-set discriminative model learns only those features that separate the
 classes present in its training objective. A novel class is therefore reachable exactly to the extent
-that its signature overlaps that learned basis — and where the overlap is empty, the model's output on
-that class is not merely poor but **unstable**, because nothing in the objective constrains it.
+that its signature overlaps that learned basis — and where the overlap is empty, ~~the model's output on
+that class is not merely poor but **unstable**, because~~ nothing in the objective constrains it.
 
-We establish this on Bot, where the overlap is empty:
+We ~~establish~~ test this on Bot, where the overlap ~~is~~ appears empty *(corrected 2026-09-17)*:
 
-- **100 % of Bot flows are classified BENIGN**, mean p(BENIGN) = **0.9984**, on all three seeds. Bot
+- **100 % of Bot flows are classified BENIGN**, mean p(BENIGN) = **0.9984**, on ~~all three seeds~~
+  the first three runs and in **all 17** CNN runs (2026-09-17). Bot
   is not ambiguous to the model; it is **confidently asserted benign**. This is what kills every
   confidence-based remedy in §5 before it is tried.
 - The eight features that separate Bot from benign have **0 of 8 overlap** with the eight the
   known-class task selects. (Eight is the comparison-set size; for Web Brute Force the overlap is 1
-  of 8.)
+  of 8.) ⚠️ *(2026-09-17)* "The known-class task selects" means **one XGBoost proxy's** importance
+  ranking; two random forests trained on the same task each have **2 of the 8** in their top eight.
   🔴 **The gradient this sets up — zero overlap unreachable, one-of-eight reachable — is where the
   corrected labels cost us, and we state the damage here rather than in a footnote.** Web Brute
   Force's *reachability* was evidenced by PR-AUC 0.92–0.95. On labels that exclude attack flows
@@ -391,7 +396,10 @@ We establish this on Bot, where the overlap is empty:
   validation (`baselines_tuned.py`) it gives **+0.923** and Bot PR-AUC **0.2196** (6.4× chance, every
   seed above chance). The deterministic autoencoder gives **+0.754**. So the inconsistency is a
   property of this CNN and of the forest's default configuration, **not** of closed-set discriminative
-  learning, and whether the tuned forest's features overlap Bot's more than the CNN's is unmeasured.
+  learning. ~~whether the tuned forest's features overlap Bot's more than the CNN's is unmeasured.~~
+  🔴 **Tested the same day (pre-registered E4) — the account failed for the forest:** the tuned forest
+  puts **less** importance on Bot's eight features (**0.19** vs **0.21**, lower on every seed) and more on
+  the known-class eight (**0.39** vs **0.24**); refits reproduce the logged predictions exactly.
   What survives: 100 % of Bot flows are BENIGN in **all 17** CNN runs, 0/8 overlap, oracle 0.9988.
 - **The information is present.** An oracle given Bot labels reaches PR-AUC **0.9988** from the same
   68 flow features (Web BF 0.9999, XSS 0.9984). ⚠️ The oracle trains on zero-day labels; it is an
@@ -417,8 +425,8 @@ sample-size artefact rather than a representational one. **CSE-CIC-IDS2018 suppl
 there is abundant — and the CNN scores it at 0.83× chance, BELOW a random ranker**, against 1.31× on
 2017. Infilteration behaves the same way (0.96×). Meanwhile the same model reaches **20.1×** on
 Brute Force -Web and **47.3×** on Brute Force -XSS in that capture. Abundance does not buy
-reachability, and scarcity was never the explanation: **reachability tracks overlap with the learned
-basis**, which is what §4 claims. ⚠️ The 2018 arm is matched to 2017's training size (883,796 flows)
+reachability, and scarcity was never the explanation~~: **reachability tracks overlap with the learned
+basis**, which is what §4 claims~~ *(overlap was not measured on 2018; corrected 2026-09-17)*. ⚠️ The 2018 arm is matched to 2017's training size (883,796 flows)
 so nothing here is confounded with four times the data.
 
 **No standard out-of-distribution score rescues it.** We ran nine scorers — MSP, max-logit, energy at

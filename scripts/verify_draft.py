@@ -712,6 +712,24 @@ if _bm:
     _all = all(r["Bot"]["frac_argmax_BENIGN"] == 1.0 for v in _bm["absorption"].values() for r in v.values())
     chk("Bot absorbed as BENIGN in every CNN run", "bot_mechanism_recheck",
         "all %d" % _n if _all else "NOT all %d" % _n, "{}")
+    _fo = _bm.get("forest_overlap")
+    if _fo:
+        # E4, pre-registered: the tuned forest reaches Bot, so the overlap account
+        # predicts it weights Bot's features MORE. It weights them less.
+        import numpy as _np
+        _t, _d = _fo["tuned"], _fo["default"]
+        _kt = _np.mean([r["share_on_known_top8"] for r in _t["per_seed"]])
+        _kd = _np.mean([r["share_on_known_top8"] for r in _d["per_seed"]])
+
+        def _pair(a, b):
+            return "%.2f against %.2f" % (a, b), ("%.2f** vs **%.2f" % (a, b),)
+        _w, _alt = _pair(_t["mean_share_on_bot_top8"], _d["mean_share_on_bot_top8"])
+        chk("E4: share on Bot's 8, tuned vs default", "bot_mechanism_recheck", _w, "{}", alt=_alt)
+        _w, _alt = _pair(_kt, _kd)
+        chk("E4: share on known 8, tuned vs default", "bot_mechanism_recheck", _w, "{}", alt=_alt)
+        _ov = {len(r["top8_overlap_with_bot"]) for c in ("tuned", "default") for r in _fo[c]["per_seed"]}
+        chk("forests' top-8 overlap with Bot's 8", "bot_mechanism_recheck",
+            "2 of the 8" if _ov == {2} else "overlap varies %s" % sorted(_ov), "{}")
 else:
     unbacked("Bot ranking over all CNN runs", "bot_mechanism_recheck.json missing")
 _bt = load("baselines_tuned")
@@ -793,6 +811,11 @@ STALE = [
      "same retracted claim, abstract wording"),
     (r"(Random\s*Forest|random\s+forest)\s+(shows\s+the\s+same\s+pattern|behaves\s+(identically|the\s+same\s+way))",
      "only the untuned forest does; the tuned forest gives +0.923"),
+    # E4 failed (2026-09-17): overlap does not decide which models reach Bot.
+    (r"[Rr]eachability\s+(follows|tracks)\s+overlap",
+     "overlap is an account of the CNN's failure; the pre-registered forest test (E4) failed"),
+    (r"[Tt]he\s+instability\s+(belongs\s+to|therefore\s+comes\s+from)\s+closed-set",
+     "retracted with the Bot-ranking claim"),
 ]
 import re as _re
 _LIVE = _re.sub(r"(?s)~~.*?~~", "", NORM)

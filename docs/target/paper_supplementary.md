@@ -222,14 +222,16 @@ achieve, and explains why.
 
 A closed-set discriminative model learns the features that separate the classes in its training
 objective. A novel class can then be reached only to the extent that its signature overlaps this learned
-basis. When there is no overlap, the model's output on that class is not only poor but unstable, because
-nothing in the objective constrains it. Bot is such a case.
+basis. When there is no overlap, nothing in the objective constrains the model's output on that class.
+Bot appears to be such a case for our CNN.
 
 - In all 17 CNN training runs (11 trained before determinism was enabled, 6 after), 100 % of Bot flows
   are classified as BENIGN, with a mean p(BENIGN) of at least 0.998 in every run. The model is confident that Bot traffic is benign, which is why the confidence-based remedies in Appendix D
   cannot work.
-- The eight features that best separate Bot from benign traffic share 0 of 8 with the eight features
-  selected by the known-class task. (We compare sets of eight; for Web Brute Force the overlap is 1 of 8.)
+- The eight features that best separate Bot from benign traffic share 0 of 8 with the eight features a
+  gradient-boosted model of the known-class task ranks highest. (We compare sets of eight; for Web Brute
+  Force the overlap is 1 of 8.) The ranking belongs to that model: two random forests trained on the same
+  task each have 2 of the 8 (`Destination Port`, `Init_Win_bytes_forward`) among their own top eight.
 - The step from no overlap (unreachable) to one shared feature (reachable) is where the corrected labels
   hurt our argument, and we describe the damage here. Web Brute Force appeared reachable because its
   PR-AUC was 0.92–0.95. With labels that exclude attack flows carrying no payload, this falls to 0.0072
@@ -249,8 +251,15 @@ nothing in the objective constrains it. Bot is such a case.
   same forest gives +0.923, its Bot PR-AUC rises from 0.1311 to 0.2196 (6.4× chance), and every seed
   ranks Bot above chance. The benign-only autoencoder gives +0.754 on its deterministic runs (+0.827 on
   the earlier ones). The inconsistency is therefore a property of this CNN, and of the forest's default
-  configuration, rather than of closed-set discriminative training. We did not measure whether the tuned
-  forest's features overlap Bot's more than the CNN's do.
+  configuration, rather than of closed-set discriminative training.
+- We tested the overlap account on the two forests, with a prediction written down before the run: the
+  tuned forest reaches Bot and the default forest barely does, so the tuned forest should put more of its
+  importance on Bot's eight features, on every seed. It does not. Its share on those features is 0.19
+  (0.193, 0.189, 0.184) against 0.21 for the default forest (0.213, 0.223, 0.204), and its share on the
+  eight known-class features is 0.39 against 0.24. Refitting each forest reproduced its logged predictions
+  exactly. Impurity-based importance is a coarse measure, but it is the measure the overlap figure above
+  uses, and on it the account fails for the forest. We therefore present overlap as an explanation of the
+  CNN's failure, not as a rule that predicts which models reach an unseen family.
 - The information needed to detect Bot is present. An oracle trained with Bot labels reaches a PR-AUC of
   0.9988 from the same 68 flow features (Web Brute Force 0.9999, XSS 0.9984). The oracle uses zero-day
   labels, so it is an upper bound and not a method, and we exclude it from every method comparison. It
@@ -271,8 +280,8 @@ that isolates it as their cause. We present these connections as an explanation,
 because Bot is plentiful there. The CNN nevertheless scores Bot at 0.83× chance on that capture, worse
 than a random ranker, compared with 1.31× on 2017. Infilteration (the 2018 label) behaves similarly
 (0.96×). On the same capture the model reaches 20.1× on Brute Force -Web and 47.3× on Brute Force -XSS.
-More samples do not make Bot reachable, and rarity was not the explanation. Reachability follows overlap
-with the learned basis. The 2018 experiment uses the same training size as 2017 (883,796 flows), so it is
+More samples do not make Bot reachable for the CNN, so rarity was not the explanation. We did not
+measure feature overlap on the 2018 capture. The 2018 experiment uses the same training size as 2017 (883,796 flows), so it is
 not confounded by having four times as much data.
 
 **Out-of-distribution scores.** We evaluated nine post-hoc scorers: maximum softmax probability,

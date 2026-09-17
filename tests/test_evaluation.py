@@ -226,6 +226,19 @@ class BotMechanism(unittest.TestCase):
             self.assertEqual(rf["selected"]["max_features"], "0.3")
             self.assertTrue(all(run["family"]["Bot"] > 0.0342 for run in rf["runs"]))
 
+    def test_overlap_account_fails_for_the_forest(self):
+        """E4 (pre-registered): the tuned forest reaches Bot, yet weights Bot's
+        features LESS than the default forest on every seed."""
+        fo = self.r.get("forest_overlap")
+        if fo is None:
+            self.skipTest("run with RECHECK_FOREST=1")
+        for t, d in zip(fo["tuned"]["per_seed"], fo["default"]["per_seed"]):
+            self.assertTrue(t["refit_reproduces_logged_predictions"])
+            self.assertTrue(d["refit_reproduces_logged_predictions"])
+            self.assertLess(t["share_on_bot_top8"], d["share_on_bot_top8"])
+            self.assertGreater(t["share_on_known_top8"], d["share_on_known_top8"])
+        self.assertFalse(self.r["expectations"]["E4_tuned_forest_weights_bot_features_more"])
+
 
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""
