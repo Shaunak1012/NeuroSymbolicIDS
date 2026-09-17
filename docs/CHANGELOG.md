@@ -20,6 +20,12 @@ more (0.39 vs 0.24); both forests share 2 of Bot's 8 features in their top eight
 feature overlap as an account of the CNN's failure, not a general law (abstract, contribution 1,
 Figure 1 caption, §4, Appendix C, master draft), and withdraws "reachability follows overlap" for 2018.
 
+**D4 measured** (`split_variants.py`): grouped split CNN 0.5589 (−0.071, every seed below every random
+seed; web families; not the moved benign flows; absorption unchanged), chronological CNN 0.6019 and AE
+0.0455 (halved; benign drift), double dissociation direction-consistent on every seed of all three
+splits. In Appendix A, §9, master draft; checked and pinned. A corrected 26-stage `run_all.py --run`
+started in a fresh sandbox.
+
 **F-12 closed** (`baselines_tuned.py`): validation-selected XGBoost 0.6180, RandomForest 0.6407 (≈ det CNN
 0.6299), IsolationForest 0.0564. Tuned forest Bot 0.2196 (6.4× chance). Reported under pitfall P6.
 

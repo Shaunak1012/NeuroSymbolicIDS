@@ -62,6 +62,27 @@ The tuned forest **matches** the CNN; it does not beat it. Its **Bot PR-AUC is 0
 seed)** — above the autoencoder. ~~Whether its features overlap Bot's more than the CNN's is
 unmeasured.~~ Measured the same day: it does not (E4 above).
 
+### ✅ D4 measured — the grouped and chronological splits (`split_variants.py`)
+
+Deterministic CNN and autoencoder, seeds 42–44 each:
+
+| split | CNN macro | Web BF | XSS | Bot | AE macro | AE known PR-AUC | Bot: AE − CNN |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| random (canonical) | 0.6299 | 0.9147 | 0.9430 | 0.0321 | 0.0985 | 0.9245 | +0.102 |
+| grouped (no shared 5-tuple) | **0.5589** | 0.8553 | **0.7947** | 0.0267 | 0.0900 | 0.9482 | +0.076 |
+| chronological (within class) | 0.6019 | 0.8770 | 0.8929 | 0.0359 | **0.0455** | **0.6640** | +0.019 |
+
+- **Grouping costs the CNN 0.071** (≈2.5× the 0.0285 absolute-number uncertainty; every grouped seed below
+  every random seed; grouped seed SD 0.0296). **Not** the 1,111 benign test flows that share a web
+  attack's 5-tuple (0.5602 without them), and absorption into `DoS slowloris` is unchanged (~90 %). So
+  part of the web families' score comes from **training flows of the same attacker and server**.
+  Known-class detection is unchanged (0.9999) — 17.6 % exact duplicates survive grouping.
+- **Chronological order** costs the CNN 0.028 (inside the uncertainty) but **halves the autoencoder**:
+  its benign test traffic is later in the week than its training traffic.
+- **The double dissociation keeps its direction on every seed of all three splits**; the AE's Bot
+  advantage shrinks to 0.076 / 0.019.
+- Written into Appendix A, §9 and the master draft; `verify_draft.py` checks; tests pin.
+
 ### ✅ Other results of the day
 
 - **D1 in the paper.** Appendix A / §2 / §9 / master draft state the 4.11× benign under-sampling and the
@@ -83,12 +104,14 @@ unmeasured.~~ Measured the same day: it does not (E4 above).
 
 ### ⏳ Running when this was written
 
-- **D4 split variants** (`split_variants.sh`, two lanes): CNN then AE at seeds 42–44 on `paper_grouped`
+- ~~**D4 split variants** (`split_variants.sh`, two lanes): CNN then AE at seeds 42–44 on `paper_grouped`
   and `paper_chrono`. First results, **n=1, provisional:** `cnn_grouped_s42` **0.5746**,
-  `cnn_chrono_s42` **0.6101** (canonical det s42: 0.6298). ⚠️ The grouped split moved 42,500 known/benign
-  flows that share a 5-tuple with a zero-day flow into test (DoS slowloris training 4,637 → 3,810), so a
-  grouped-split zero-day change is **not** purely a leakage effect. When done: `python
-  scripts/split_variants.py`.
+  `cnn_chrono_s42` **0.6101** (canonical det s42: 0.6298).~~ ✅ **Done 14:48 UTC — results above.** ⚠️ The
+  grouped split moved 42,500 known/benign flows that share a 5-tuple with a zero-day flow into test (DoS
+  slowloris training 4,637 → 3,810), so a grouped-split zero-day change is not purely a leakage effect.
+- **Corrected `run_all.py --run --keep-going`** into `outputs/sandbox_e2e2` (26 stages, ~10–11 h CPU;
+  `outputs/run_all_sandbox2.log`), started 14:49 UTC after the first sandbox run showed the old list
+  could not reproduce past the CNN.
 - **`run_all.py --run --keep-going`** in the sandbox (`outputs/run_all_sandbox.log`). Expected failures:
   `ltn` and `autoencoder` declare artifacts their default settings do not write, and `fusion` /
   `fitted_fusion` / `significance` / `ablation` / `figures` need seed-43/44, log-odds and experiment
@@ -3521,7 +3544,7 @@ ones: *a point-estimate gap is not a result in either direction.*
 | Component | Status | File | Notes |
 |-----------|--------|------|-------|
 | Preprocessing | ✅ Working | `scripts/preprocess.py` | 68 flow features + binary/multiclass labels. **Keeps** IP/port/timestamp in a row-aligned `meta_*.csv` side-table (since the 2026-06-18 dataset upgrade) — the old "drops IPs/ports" note was wrong. |
-| Paper-aligned split | ✅ Working — ⚠️ **not grouped, not chronological (2026-09-16)**; variants built 2026-09-17 | `scripts/preprocess_paper.py` | **D4 (2026-09-17):** `SPLIT_MODE=grouped` / `chronological` build `paper_grouped` / `paper_chrono` (random stays byte-identical); CNN + AE training on both. ⚠️ `split_integrity.json`: **54.88 %** of test flows share a 5-tuple with train (100 % for all Web Attack zero-day families), **100 %** of test lies inside the train time range, benign removed **4.11×**, 17.02 % exact duplicates. "Paper-inspired", not a replication of Bizzarri's balancing. 9 known classes stratified 80/10/10, benign under-sampled 1:1. Train 883,796 / val 110,475 / test 114,658. Leakage-verified. |
+| Paper-aligned split | ✅ Working — ⚠️ **not grouped, not chronological (2026-09-16)**; ✅ variants measured 2026-09-17 | `scripts/preprocess_paper.py`, `scripts/split_variants.py` | **D4 (2026-09-17):** grouped split costs the CNN **0.071** (0.5589; web families), chronological 0.028 but halves the AE (0.0455); double dissociation keeps its direction everywhere. `SPLIT_MODE=grouped` / `chronological` build `paper_grouped` / `paper_chrono` (random stays byte-identical). ⚠️ `split_integrity.json`: **54.88 %** of test flows share a 5-tuple with train (100 % for all Web Attack zero-day families), **100 %** of test lies inside the train time range, benign removed **4.11×**, 17.02 % exact duplicates. "Paper-inspired", not a replication of Bizzarri's balancing. 9 known classes stratified 80/10/10, benign under-sampled 1:1. Train 883,796 / val 110,475 / test 114,658. Leakage-verified. |
 | **CNN + embeddings (neural pillar)** | ✅ **Verified correct — re-based 2026-09-16** | `scripts/cnn_paper.py` | **Deterministic: macro 0.6299** (0.6298 / 0.6269 / 0.6330, `c4_log1p_s42-44`). ~~**macro 0.6399 [0.6353, 0.6446]**~~ is the pre-flag population and must not be pooled with it, log-odds scored. Multi-seed via `CNN_SEED`. Named `"embedding"` layer feeds novelty + KG. Minor: double class-weighting ([cnn_current.md](implementation/cnn_current.md)). |
 | Classical baselines | ✅ **n=3 (2026-08-03)**; ✅ **tuned on validation 2026-09-17** | `scripts/baselines.py`, `scripts/baselines_tuned.py` | **Tuned (F-12):** XGBoost 0.6180, RandomForest **0.6407** (≈ det CNN 0.6299; Bot 0.2196), IsolationForest 0.0564. XGBoost / RandomForest / IsolationForest. Multi-seed via `BASELINE_SEED`. Previously n=1 **and** on the pre-2026-07-27 metric schema (no macro logged) — both fixed; see "Last Measured Results". |
 | Novelty channels | ✅ **n=3** | `scripts/novelty.py`, `scripts/ood_scores.py` | **2026-09-17:** the OOD battery re-run on the deterministic CNN (`OOD_POPULATION=det`): MSP 0.5865, best Bot scorer 0.0576 (< 0.08 pre-set). Mahalanobis not yet re-derived on it. MSP macro 0.5884, Mahalanobis 0.3777. Post-hoc on a trained CNN, no retraining. ⚠️ "Mahalanobis 4.3× on Bot" is **retracted** (seed 42 only); n=3 mean **3.0×**, seed 44 at chance. |

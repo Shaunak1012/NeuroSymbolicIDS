@@ -77,7 +77,14 @@ relative to the *known attacks*, which a benign-only PR-AUC never measures and w
 runs of one configuration. `scripts/fusion_population.py`. **Open question:** whether any fusion rule
 is stable across CNN runs (not ensemble averaging — that fused worse, 2026-09-10).
 
-### [OPEN 2026-09-16] 🔴 The split is neither grouped nor chronological (F-02, F-03)
+### [MEASURED 2026-09-17] 🔴 The split is neither grouped nor chronological (F-02, F-03)
+
+> ✅ **Measured** (`split_variants.py`, three deterministic seeds per model and split). Grouping costs
+> the CNN **0.071** (0.6299 → 0.5589; XSS 0.9430 → 0.7947, Web BF 0.9147 → 0.8553), not through the
+> benign flows it moves into test (0.5602 without them); chronological order costs it 0.028 and
+> **halves the autoencoder** (0.0985 → 0.0455, known-class 0.92 → 0.66). The double dissociation keeps
+> its direction on every seed of every split. Stays open as a design fact: the headline is still the
+> random split, and the paper now reports all three.
 
 54.88 % of test flows share their 5-tuple with a training flow (100 % for four DoS families and all
 three Web Attack zero-day families); 100 % of test lies inside the training time range.

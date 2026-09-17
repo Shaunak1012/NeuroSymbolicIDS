@@ -118,7 +118,8 @@ started.**
 Three established results: **(1)** a **double dissociation** between the CNN (`cnn_paper.py`) and the
 autoencoder (`autoencoder_paper.py`) — 3.9–40 SD of the measured noise floor, the only comparative
 claim in the project with that margin, though it is a dissociation between *two models*, **not** two
-method families; **(2)** the CNN's Bot failure is **representational** — 100% of Bot flows are
+method families *(2026-09-17: its direction holds on every seed of the grouped and chronological
+splits too)*; **(2)** the CNN's Bot failure is **representational** — 100% of Bot flows are
 classified BENIGN (all **17** CNN runs), Bot's discriminative features have 0/8 overlap with the
 known-class task's~~, and the resulting Bot ranking is **noise** (cross-seed ρ = −0.090)~~ *(retracted
 2026-09-17: over all CNN run pairs Bot's median ρ is +0.55/+0.59 — least consistent family, not noise;
@@ -137,13 +138,15 @@ Do not restate it here — that is exactly what kept rotting.
 
 **Next action (resume here — as of 2026-09-17):** read STATUS → "REMEDIATION, DAY 2" and
 `REMEDIATION_ITINERARY.md` §14. Branch `fix/audit-remediation` (not pushed).
-1. **Collect the D4 split variants** when `split_variants.sh` finishes (both lanes): run
-   `python scripts/split_variants.py`, then write the result into the paper's limitations / Appendix A,
-   STATUS, KNOWN_ISSUES (F-02/F-03), with `verify_draft.py` checks and a test. ⚠️ The grouped split
-   moved 42,500 flows into test, so its zero-day change is not purely leakage.
-2. **Collect the sandbox `run_all.py --run`** (`outputs/sandbox_e2e/.../run_all_report.json`): record
-   which stages fail and why, fix the stage declarations, and replace the "never executed end to end"
-   statement below with what was actually shown.
+1. ~~**Collect the D4 split variants**~~ ✅ done 2026-09-17 (grouped −0.071; chronological halves the
+   AE; dissociation direction holds everywhere — STATUS).
+2. **Collect the second sandbox run** (`outputs/run_all_sandbox2.log`, report at
+   `outputs/sandbox_e2e2/outputs/metadata/run_all_report.json`, ~10–11 h from 14:49 UTC): expected to
+   pass every stage except those with declared external inputs (`baselines_tuned`, `bot_recheck`,
+   `operational`, `field_gap`, `figures`). Compare its outputs with canonical where the populations
+   match (the deterministic seed-42 CNN must be byte-identical), copy the report into
+   `outputs/metadata/run_all_sandbox_report.json`, and write the result into STATUS and the paper's
+   reproducibility section. The first sandbox run (old list) is in `outputs/run_all_sandbox.log`.
 3. Author decisions **D3** (notebook) and **D5** (push). Optional: Mahalanobis on the det CNN; whether
    the tuned forest's features overlap Bot's (KNOWN_ISSUES 2026-09-17).
 
