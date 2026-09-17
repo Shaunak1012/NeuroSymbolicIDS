@@ -142,6 +142,15 @@ def main():
         if m.get("saturated"):
             g["sat"] = True
 
+    # 2026-09-17 (audit item 7.4): the population is pinned, so an incomplete one
+    # is an error, not a smaller result. The first run_all execution produced a
+    # 9-method field_gap.json from a sandbox runs.jsonl and exited 0.
+    absent = sorted(METHODS - set(groups))
+    if absent:
+        print("REFUSING TO WRITE: %d of the %d pinned method groups have no rows in %s: %s"
+              % (len(absent), len(METHODS), p, ", ".join(absent)))
+        return 2
+
     table = []
     for name, g in groups.items():
         table.append({
@@ -381,4 +390,4 @@ def _figure(table):
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

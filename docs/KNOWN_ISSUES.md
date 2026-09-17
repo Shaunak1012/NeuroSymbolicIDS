@@ -54,6 +54,15 @@ written:
 shorter (114,657 vs 114,658). The split-variant runs also log to the shared `runs.jsonl`; any future
 consumer that aggregates by name must pin its population the same way.
 
+### [FIXED 2026-09-17] 🟡 Two scripts wrote partial records and exited 0
+
+The first `run_all.py --run` (sandbox, old stage list) ran `significance.py` and `field_gap.py` with most
+inputs absent. `significance.py` skipped all 13 comparisons and wrote a `significance.json` with **none**;
+`field_gap.py` wrote a 9-method record against its pinned 42. Both exited 0, so the runner counted them
+as passed, and in the canonical tree either would silently replace a good record. **Fix:** both refuse
+to write an incomplete result and exit 2. Re-run on the canonical tree: `significance.json`,
+`field_gap.json` and `field_gap.png` byte-identical.
+
 ### [OPEN 2026-09-17] ⚪ `behaviour_thresholds.npy` differs from a fresh run in the 14th digit
 
 The sandbox run (7.4) regenerates it with `burst` upper 666666.6666666666 vs 666666.666666667 and
