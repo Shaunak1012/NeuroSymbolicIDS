@@ -212,7 +212,7 @@ each attempt we wrote down, before running it, what result would count against t
 | Corrected labels [2], attack flows without payload removed | a labelling artefact | the remaining Bot flows (n = 738) give lifts of 0.57 / 0.64 / 8.99; two of three seeds are below chance |
 | Reject class: three known families merged into `UNKNOWN` | the model was never trained to reject | at best chance level (+0.068), with the sign changing between seeds |
 | Cross-dataset augmentation with the 2018 known classes | the basis was too narrow | −0.1461 macro against a seed-matched control; better on 0/3 seeds |
-| Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method reaches Bot; the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance |
+| Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method reaches Bot; the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance (0.0576 on deterministic re-runs) |
 
 The corrected-label experiment is the hardest test, and the way it fails deserves a comment. Our
 criterion was a lift above chance on every seed. The mean lift is 3.4×, which on its own would look like

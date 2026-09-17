@@ -410,7 +410,9 @@ four temperatures, entropy, ODIN at two settings, and margin — against a falsi
 0.08 macro-Bot **fixed in advance**. The best reaches **0.0783**. ⚠️ We say plainly that this *passed
 by two per cent* and do not round it to a clean pass; a threshold set slightly lower would have
 flipped the verdict. The one scorer that buys Bot anything (`energy_T1000`, 2.29× chance) does so by
-**destroying known-class discrimination**, collapsing macro to 0.0326.
+**destroying known-class discrimination**, collapsing macro to 0.0326. These are the three pre-flag
+reference CNN runs; on the three **deterministic** runs (`OOD_POPULATION=det`) the same scorer is best
+again at **0.0576** (1.68× chance, **28 %** under the threshold), macro 0.0257 — a clearer pass.
 
 ---
 

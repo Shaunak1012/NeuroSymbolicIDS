@@ -688,6 +688,18 @@ if rb:
             _cf["CNN + KG k=800 (causal)"]["capture_faithful_mean"], "{:.4f}")
     else:
         unbacked("capture-faithful PR-AUC", "rebase_deterministic.json has no capture_faithful_prevalence")
+_od = load("ood_scores_det")
+if _od:
+    _b = _od["predictions"]["best_bot_scorer"]
+    chk("OOD (det CNN): best Bot", "ood_scores_det", _od["predictions"]["best_bot_value"])
+    chk("OOD (det CNN): best-Bot scorer's lift", "ood_scores_det",
+        _od["scorers"][_b]["bot_lift"], "{:.2f}x")
+    chk("OOD (det CNN): best-Bot scorer's macro", "ood_scores_det", _od["scorers"][_b]["macro"])
+    chk("OOD (det CNN): margin under 0.08", "ood_scores_det",
+        100 * (0.08 - _od["predictions"]["best_bot_value"]) / 0.08, "{:.0f} %",
+        alt=("{:.0f} per cent".format(100 * (0.08 - _od["predictions"]["best_bot_value"]) / 0.08),))
+else:
+    unbacked("OOD battery on the deterministic CNN", "ood_scores_det.json missing")
 _si = load("split_integrity")
 if _si:
     chk("split: benign under-sampling factor", "split_integrity",

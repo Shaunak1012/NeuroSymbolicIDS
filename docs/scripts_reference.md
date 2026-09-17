@@ -1015,6 +1015,11 @@ T=10/100/1000, so real — just useless.
 **Writes** `outputs/metadata/ood_scores.json` + `y_prob_ood_<name>_test.npy` per scorer (so any of
 them can be fused or compared like any other channel), and logs each to `runs.jsonl`.
 
+`OOD_POPULATION=det` *(added 2026-09-17, audit item 4.4)* scores the deterministic CNN runs
+`c4_log1p_s42-44` instead of the pre-flag reference runs `cnn_paper`, `_s43`, `_s44`, which are the three
+runs that carried the withdrawn fusion gain. It writes `ood_scores_det.json`,
+`y_prob_ood_det_<name>_test.npy` and `ood_det_<name>` log entries; the default is unchanged.
+
 ## `scripts/paper_metrics.py`
 
 **Purpose**: **Our runs in the base paper's metric set (Accuracy + F1, five test-set views) and in

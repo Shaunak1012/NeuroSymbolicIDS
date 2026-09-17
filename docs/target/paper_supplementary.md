@@ -277,6 +277,9 @@ classes. The falsification threshold, fixed before running them, was 0.08 macro 
 scorer reaches 0.0783. This is only about two per cent below the threshold, and a slightly lower threshold
 would have given the opposite verdict. The only scorer that improves Bot at all (energy with T = 1000,
 2.29× chance) does so by destroying known-class discrimination, and its macro score falls to 0.0326.
+These scores were computed on the three CNN runs used before training was made deterministic. On the
+three deterministic runs the verdict is clearer: the same scorer is again the best on Bot, at 0.0576
+(1.68× chance, 28 per cent below the threshold), with a macro score of 0.0257.
 
 ---
 
