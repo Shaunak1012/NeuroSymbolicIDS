@@ -61,6 +61,24 @@ of other classes, mostly DoS Hulk and DDoS. The web and DoS attacks were launche
 5-tuples mark the same attacker and target rather than the same connection. This agrees with the
 absorption result in Appendix D: the CNN places most web-attack flows in a known DoS class.
 
+**Two other splits.** We rebuilt the split twice and retrained the CNN and the autoencoder with three
+seeds on each. In the grouped split no 5-tuple appears on both sides of the boundary, which means the
+42,500 known and benign flows that share a 5-tuple with a zero-day flow go to the test set. Grouping
+lowers the CNN's macro zero-day PR-AUC from 0.6299 to 0.5589, about 2.5 times the 0.0285 uncertainty we
+attach to an absolute number (Appendix E), and every grouped seed scores below every seed on the random
+split. Most of the loss is on XSS (0.9430 to 0.7947) and Web Brute Force (0.9147 to 0.8553). The 1,111
+benign test flows that share a 5-tuple with a web attack are not the cause, since without them the macro
+is 0.5602, and the CNN still assigns about 90 % of both web families to `DoS slowloris`. Part of the web
+families' score on the random split therefore comes from training flows of the same attacker and server.
+Known-class detection does not change (0.9999), and 17.6 % of grouped test rows still duplicate a
+training row, because grouping by connection does not remove identical feature vectors. In the
+chronological split each known class trains on its earliest 80 % of flows. The CNN's macro falls to
+0.6019, which is within the uncertainty above, but the benign-only autoencoder falls from 0.0985 to
+0.0455 and its known-class PR-AUC from 0.92 to 0.66: its benign test traffic now comes from later in the
+week than its training traffic. The double dissociation keeps its direction on every seed of all three
+splits, but its Bot half, the autoencoder's advantage, shrinks from 0.102 to 0.076 (grouped) and 0.019
+(chronological).
+
 **Feature transform.** We apply `log1p` to the features. On the main metric this gives 0.6299 ± 0.0031,
 against 0.1606 ± 0.0039 with raw features, over three seeds per setting (Welch t = 163). Our original
 reason for the choice relied on the contaminated overall binary metric, so we repeated the comparison on

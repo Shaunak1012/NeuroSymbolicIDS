@@ -257,6 +257,26 @@ classes (mostly DoS Hulk and DDoS): the web and DoS attacks come from the same a
 against the same server (192.168.10.50:80), and source ports repeat, so the shared 5-tuples mark the same
 attacker and target, not the same connection. This is consistent with the absorption result below.
 
+**Two other splits (D4, 2026-09-17; `split_variants.py`).** Deterministic CNN and autoencoder, three
+seeds each, on a **grouped** split (no 5-tuple on both sides; the 42,500 known/benign flows sharing a
+5-tuple with a zero-day flow go to test) and a **within-class chronological** split:
+
+| split | CNN macro | Web BF | XSS | Bot | AE macro | AE known-class PR-AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| random (this paper) | 0.6299 | 0.9147 | 0.9430 | 0.0321 | 0.0985 | 0.9245 |
+| grouped | **0.5589** | 0.8553 | **0.7947** | 0.0267 | 0.0900 | 0.9482 |
+| chronological | 0.6019 | 0.8770 | 0.8929 | 0.0359 | **0.0455** | **0.6640** |
+
+Grouping costs the CNN **0.071** (≈2.5× the 0.0285 absolute-number uncertainty; every grouped seed below
+every random seed), mostly on XSS and Web BF. It is **not** the 1,111 benign test flows that share a web
+attack's 5-tuple (0.5602 without them), and the CNN still sends ~90 % of both web families to
+`DoS slowloris`: part of the web score comes from training flows of the same attacker and server.
+Known-class detection is unchanged (0.9999; 17.6 % exact duplicates survive grouping). Chronological
+order costs the CNN 0.028 (inside the uncertainty) but **halves the autoencoder** (0.0985 → 0.0455;
+known-class 0.92 → 0.66) because its benign test traffic is later in the week than its training traffic.
+The double dissociation keeps its direction on every seed of all three splits; its Bot half shrinks
+from 0.102 to **0.076** (grouped) and **0.019** (chronological).
+
 **Feature transform.** We use `log1p`, justified **on the headline metric**: 0.6299 ± 0.0031 against
 0.1606 ± 0.0039 for raw features, over three seeds per arm (Welch t = 163). We note plainly that our
 *original* justification for this choice cited the contaminated overall-binary metric, and that the

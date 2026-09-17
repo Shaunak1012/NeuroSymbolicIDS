@@ -384,7 +384,8 @@ test are conventions. We do not evaluate against adaptive adversaries, and the s
 deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
 optimistic: at the capture's own benign proportion the CNN's macro zero-day PR-AUC is 0.5845, not
 0.6299. The split is stratified at random over a chronologically ordered capture and is not grouped by
-connection; Appendix A reports what crosses the boundary.
+connection. Grouping by connection lowers the CNN's macro zero-day PR-AUC from 0.6299 to 0.5589, and a
+chronological split halves the benign-only autoencoder's score (Appendix A).
 
 **Conclusion.** Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside
 the model's learned feature basis. The same condition makes an attack family with no overlap unreachable,
