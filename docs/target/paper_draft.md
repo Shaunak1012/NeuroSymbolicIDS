@@ -1177,16 +1177,32 @@ Pre- and post-flag runs are different populations and we never pool them. A read
 pipeline today should reproduce the post-flag figures and should **not** expect to reproduce the
 pre-flag ones exactly; where a number in this paper is pre-flag, §7's floor is the honest error bar.
 
-**One entry point.** `run_all.py` declares the 19 pipeline stages in order together with the
-artifacts each writes. Its **default mode verifies rather than executes** — it reports which stage
-outputs are present on disk — and `--run` executes the sequence, with `--from <stage>` to resume.
-Making a full CPU retrain the default behaviour of something called `run_all` would be a foot-gun.
+**One entry point.** `run_all.py` declares the **26** pipeline stages in order with, for each, the
+environment of every run it performs (seeds, LTN settings), what it **makes**, what it **needs** from
+earlier stages, and the **external** inputs only other experiments produce. Default mode **verifies**
+(artifacts present + every `needs` made by an earlier stage) and `--run` executes, `--from <stage>`
+resumes. Making a full CPU retrain the default behaviour of something called `run_all` would be a
+foot-gun.
 
-⚠️ **An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
+✅ **EXECUTED END TO END, 2026-09-17/18** (`repro_compare.py`, `run_all_sandbox2/`). From the raw CSVs
+into an empty directory: **20 of 26 stages, 6.5 h**, and **72 artifacts byte-identical** to the ones
+behind this paper (preprocessing, the split, corrected timestamps, all 3 CNN seeds + embeddings +
+histories, all 3 autoencoders, every KG seed, the baselines). **4 float-level** (RandomForest 4.4e-16;
+behaviour thresholds 2.4e-14 relative — that file predates the lockfile), **0 different**. It also
+re-derived the comparative results: CNN **0.6299**, CNN + KG **0.5103** (the KG costs 0.12), AE ahead on
+Bot (−0.1017, p<0.001) and far behind on the web families (+0.81 / +0.89), RF ties AE on Bot (−0.0027,
+n.s.). The 6 incomplete stages are exactly those with **external** inputs (the 11-run pre-flag CNN
+population, the field-gap method sweeps) plus the figure stage downstream of them.
+
+⚠️ ~~**An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
 never been *executed* end to end in one pass.** Every stage has run individually, most of them dozens
 of times, but *"each stage works"* and *"the sequence works from a clean checkout"* are different
 claims and only the first is evidenced. `--run` is offered as a convenience, not as a validated
-reproduction path.
+reproduction path.~~ *(Superseded 2026-09-18 by the run above. The **first** execution, on the old
+19-stage list, is why the list was reworked: it declared seed 42 only where later stages read seeds
+43–44, ran the LTN with default settings (a different tag from the control every later script reads),
+omitted the +Ax6 arm, and produced neither the log-odds scores nor the CNN + KG channel — and two
+scripts wrote **partial records and exited 0**, which is now refused.)*
 
 **Two mechanical checks ship with the artifact**, both of which exist because the corresponding
 mistake was actually made here:

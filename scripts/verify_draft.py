@@ -758,6 +758,37 @@ if _od:
         alt=("{:.0f} per cent".format(100 * (0.08 - _od["predictions"]["best_bot_value"]) / 0.08),))
 else:
     unbacked("OOD battery on the deterministic CNN", "ood_scores_det.json missing")
+# 7.4 (2026-09-18): the end-to-end run from the raw CSVs.
+_rc = load("repro_compare_sandbox_e2e2")
+_rr = None
+try:
+    _p = os.path.join(paths.METADATA, "run_all_sandbox2", "run_all_report.json")
+    with open(_p, encoding="utf-8") as _f:
+        _rr = json.load(_f)
+except OSError:
+    pass
+if _rc and _rr:
+    _n_ok = sum(1 for st in _rr["stages"] if st["ok"])
+    chk("end-to-end: stages completed", "run_all_sandbox2",
+        "%d of %d" % (_n_ok, len(_rr["stages"])), "{}",
+        alt=("%d of the %d" % (_n_ok, len(_rr["stages"])),
+             "**%d of %d**" % (_n_ok, len(_rr["stages"]))), ws=True)
+    chk("end-to-end: byte-identical artifacts", "repro_compare_sandbox_e2e2",
+        _rc["summary"].get("identical", 0), "{:d} files", 
+        alt=("**%d** artifacts" % _rc["summary"].get("identical", 0),
+             "%d artifacts" % _rc["summary"].get("identical", 0)), ws=True)
+    chk("end-to-end: float-level artifacts", "repro_compare_sandbox_e2e2",
+        _rc["summary"].get("float_level", 0), "{:d} differ only at float",
+        alt=("**%d float-level**" % _rc["summary"].get("float_level", 0),
+             "Four differ only at float"), ws=True)
+    chk("end-to-end: nothing differs", "repro_compare_sandbox_e2e2",
+        "0 different" if not _rc["summary"].get("different") else "SOME DIFFER", "{}",
+        alt=("Nothing differs otherwise.", "**0 different**"), ws=True)
+    _hrs = sum(st["seconds"] for st in _rr["stages"]) / 3600.0
+    chk("end-to-end: hours", "run_all_sandbox2", _hrs, "{:.1f} h",
+        alt=("%.1f hours" % _hrs, "**%.1f h**" % _hrs), ws=True)
+else:
+    unbacked("end-to-end run", "repro_compare_sandbox_e2e2.json / run_all_sandbox2 missing")
 # D4 (2026-09-17): the grouped and chronological split variants.
 _sv = load("split_variants")
 if _sv and all("per_seed" in _sv["splits"][k]["models"].get(m, {})

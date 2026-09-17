@@ -285,6 +285,41 @@ class SplitVariants(unittest.TestCase):
                     self.assertEqual(p["absorption"]["Web Attack XSS"]["modal_class"], "DoS slowloris")
 
 
+class EndToEndReproduction(unittest.TestCase):
+    """7.4 (2026-09-18): the run_all execution from the raw CSVs."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rc = _load("repro_compare_sandbox_e2e2")
+        p = os.path.join(paths.METADATA, "run_all_sandbox2", "run_all_report.json")
+        if cls.rc is None or not os.path.exists(p):
+            raise unittest.SkipTest("end-to-end records not present")
+        with open(p, encoding="utf-8") as f:
+            cls.rr = json.load(f)
+
+    def test_nothing_differed_from_canonical(self):
+        self.assertEqual(self.rc["summary"].get("different", 0), 0)
+        self.assertGreaterEqual(self.rc["summary"]["identical"], 72)
+
+    def test_the_trained_models_are_byte_identical(self):
+        want = {"y_prob_cnn_paper%s_test.npy" % ("" if s == 42 else "_s%d" % s) for s in (42, 43, 44)}
+        want |= {"y_prob_autoencoder_paper%s_test.npy" % ("" if s == 42 else "_s%d" % s)
+                 for s in (42, 43, 44)}
+        seen = {os.path.basename(r["sandbox"]): r["verdict"] for r in self.rc["files"]}
+        for f in sorted(want):
+            with self.subTest(file=f):
+                self.assertEqual(seen.get(f), "identical")
+
+    def test_only_the_external_input_stages_failed(self):
+        failed = {s["name"] for s in self.rr["stages"] if not s["ok"]}
+        self.assertEqual(failed, {"baselines_tuned", "bot_recheck", "operational",
+                                  "field_gap", "figures", "paper_figures"})
+        for s in self.rr["stages"]:
+            if s["name"] in failed and s["name"] != "paper_figures":
+                with self.subTest(stage=s["name"]):
+                    self.assertTrue(s["external_inputs"])
+
+
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""
 
