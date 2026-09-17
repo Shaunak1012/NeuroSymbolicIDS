@@ -2010,10 +2010,23 @@ python scripts/run_all.py --run --from kg  # resume from a named stage
 making that the default behaviour of something called `run_all` is a foot-gun. Exit 1 if any declared
 artifact is missing.
 
-⚠️ **Honest limit, stated in the paper too: the sequence has been CHECKED end to end and never
-EXECUTED end to end in one pass.** Every stage has run individually, most dozens of times, but *"each
-stage works"* and *"the sequence works from a clean checkout"* are different claims and only the
-first is evidenced.
+~~⚠️ **Honest limit, stated in the paper too: the sequence has been CHECKED end to end and never
+EXECUTED end to end in one pass.**~~ *(superseded 2026-09-17, below)* Every stage has run individually,
+most dozens of times, but *"each stage works"* and *"the sequence works from a clean checkout"* are
+different claims.
+
+🔴 **Reworked 2026-09-17 after its first execution (audit item 7.4).** `--run --keep-going` into a
+sandbox (`NSIDS_WORKDIR`) reproduced preprocess, split, timeline and the seed-42 CNN **byte for byte**
+from the raw CSVs, and showed the 19-stage list could not reproduce the rest: it declared seed-42
+artifacts only while fusion / significance / ablation / fitted fusion read seeds 43–44; the `ltn` stage
+ran default settings (a different tag from the LTN control everything reads) and the +Ax6 arm was
+missing; nothing produced the log-odds (`rescore_logits.py`) or the CNN + KG channel (`fusion_kg.py`).
+Each stage is now a dict with **`runs`** (one environment per execution — seeds, LTN settings),
+**`makes`**, **`needs`** and **`external`**. `--check` verifies statically that every `needs` entry is
+made by an **earlier** stage and lists the **external** inputs — records only an experiment outside
+this list produces (the 11-run pre-flag CNN population, the field_gap method sweeps, noise_postdet,
+protocol_variance, the deterministic CNN / AE populations). A stage fails at `--run` if any execution
+exits non-zero or its artifacts are not written fresh; outcomes go to `run_all_report.json`.
 
 🔑 **A stage that declares no artifact cannot fail the check**, so the summary line counts and warns
 about them — the same shape as the script-count regex that passed on a wrong count in 2026-08-05.
@@ -2025,7 +2038,8 @@ non-ASCII output raises `UnicodeEncodeError`. This script is meant to run direct
 `run_long.sh` (which forces UTF-8) — and the first version **crashed on its own warning banner**,
 which is the bug CLAUDE.md records being fixed three times as separate incidents.
 
-**Current state: 19 stages · 0 artifacts missing · 0 unchecked stages.**
+**Current state (2026-09-17): 26 stages · 0 artifacts missing · 0 unproduced needs · 7 external
+inputs.**
 
 ## `scripts/verify_draft.py`
 

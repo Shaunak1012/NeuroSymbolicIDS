@@ -346,11 +346,13 @@ A working virtualenv lives at **`.venv/`** (Python 3.11.9, TensorFlow 2.15.1 / K
 
 Run from the project root, in order, **using the venv interpreter**. Each step consumes the previous step's artifacts (organised under `data/processed/`, `models/`, `outputs/` — see `scripts/paths.py`).
 
-**The pipeline is now declared once, in [`scripts/run_all.py`](scripts/run_all.py)** — 19 stages
-with the artifacts each writes. `python scripts/run_all.py` checks what is on disk (default);
-`--run` executes; `--run --from <stage>` resumes. ⚠️ The sequence has been **checked** end to end and
-**never executed** end to end in one pass — say so rather than implying a validated one-command
-reproduction. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
+**The pipeline is now declared once, in [`scripts/run_all.py`](scripts/run_all.py)** — 26 stages
+with the environment of each run, what each needs and makes, and the **external** inputs only other
+experiments produce. `python scripts/run_all.py` checks (default); `--run` executes; `--run --from
+<stage>` resumes. ~~⚠️ The sequence has been **checked** end to end and **never executed** end to end
+in one pass~~ *(2026-09-17: first executed into a sandbox — preprocess → CNN reproduced byte for byte;
+the rest of the old 19-stage list could not run, which is why it was reworked. See STATUS.)* Do not
+imply a validated one-command reproduction: 7 inputs are external. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
 is the one that is executable.**
 
 **Current pipeline (paper-aligned split — this is what all reported results use):**
