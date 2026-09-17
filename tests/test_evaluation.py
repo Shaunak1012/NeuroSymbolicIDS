@@ -240,6 +240,51 @@ class BotMechanism(unittest.TestCase):
         self.assertFalse(self.r["expectations"]["E4_tuned_forest_weights_bot_features_more"])
 
 
+class SplitVariants(unittest.TestCase):
+    """D4 (2026-09-17): what the grouped and chronological splits change."""
+
+    @classmethod
+    def setUpClass(cls):
+        r = _load("split_variants")
+        if r is None or any("per_seed" not in r["splits"][k]["models"].get(m, {})
+                            for k in ("random", "grouped", "chronological") for m in ("cnn", "ae")):
+            raise unittest.SkipTest("split_variants.json missing or incomplete")
+        cls.s = r["splits"]
+
+    def _macros(self, split, model="cnn"):
+        return [p["macro"] for p in self.s[split]["models"][model]["per_seed"]]
+
+    def test_grouped_split_has_no_shared_5tuple(self):
+        self.assertEqual(self.s["grouped"]["boundary"]["flow_id_overlap"], 0.0)
+        self.assertGreater(self.s["grouped"]["boundary"]["exact_duplicates"], 0.15)
+
+    def test_grouping_lowers_the_cnn_on_every_seed(self):
+        self.assertLess(max(self._macros("grouped")), min(self._macros("random")))
+        g = self.s["grouped"]["models"]["cnn"]
+        # not the benign flows that had to move into test
+        self.assertLess(abs(g["macro_without_shared_5tuple_benign_mean"] - g["macro_mean"]), 0.005)
+
+    def test_chronological_split_breaks_the_autoencoder_not_the_cnn(self):
+        ae_r, ae_c = self.s["random"]["models"]["ae"], self.s["chronological"]["models"]["ae"]
+        self.assertLess(ae_c["macro_mean"], 0.6 * ae_r["macro_mean"])
+        self.assertLess(ae_c["known_only_pr_auc_mean"], 0.7)
+        self.assertGreater(self.s["chronological"]["models"]["cnn"]["known_only_pr_auc_mean"], 0.99)
+
+    def test_double_dissociation_keeps_direction_everywhere(self):
+        for split, row in self.s.items():
+            for fam, v in row["double_dissociation"].items():
+                with self.subTest(split=split, family=fam):
+                    self.assertTrue(v["direction_consistent"])
+                    self.assertEqual(v["cnn_minus_ae_mean"] < 0, fam == "Bot")
+
+    def test_web_families_absorbed_into_slowloris_on_every_split(self):
+        for split, row in self.s.items():
+            for p in row["models"]["cnn"]["per_seed"]:
+                with self.subTest(split=split, seed=p["seed"]):
+                    self.assertEqual(p["absorption"]["Bot"]["modal_class"], "BENIGN")
+                    self.assertEqual(p["absorption"]["Web Attack XSS"]["modal_class"], "DoS slowloris")
+
+
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""
 

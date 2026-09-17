@@ -96,7 +96,7 @@ OK, BAD, UNBACKED = [], [], []
 NOT_QUOTED = []
 
 
-def chk(label, source, value, fmt="{:.4f}", alt=(), quoted=True, note=""):
+def chk(label, source, value, fmt="{:.4f}", alt=(), quoted=True, note="", ws=False):
     """Assert the record's value, formatted as the draft should state it, is present.
 
     `alt` lists other renderings the draft is allowed to use for the SAME claim --
@@ -108,13 +108,17 @@ def chk(label, source, value, fmt="{:.4f}", alt=(), quoted=True, note=""):
     `quoted=False` marks a record value the draft deliberately does not state.
     Reported separately as informational -- never as a mismatch, because "the
     draft omits this" and "the draft gets this wrong" are different findings.
+
+    `ws=True` compares with all whitespace collapsed, for PHRASE checks that the
+    draft may wrap across lines (added 2026-09-17). Numbers keep exact matching.
     """
     if value is None:
         UNBACKED.append((label, note or "record missing"))
         return
     want = fmt.format(value) if "{" in fmt else fmt
     forms = [want] + list(alt)
-    hit = next((f for f in forms if f.replace("−", "-") in NORM), None)
+    hay = " ".join(NORM.split()) if ws else NORM
+    hit = next((f for f in forms if " ".join(f.replace("−", "-").split()) in hay), None)
     if hit:
         OK.append((label, hit if hit == want else f"{want} (as {hit!r})"))
     elif not quoted:
@@ -754,6 +758,39 @@ if _od:
         alt=("{:.0f} per cent".format(100 * (0.08 - _od["predictions"]["best_bot_value"]) / 0.08),))
 else:
     unbacked("OOD battery on the deterministic CNN", "ood_scores_det.json missing")
+# D4 (2026-09-17): the grouped and chronological split variants.
+_sv = load("split_variants")
+if _sv and all("per_seed" in _sv["splits"][k]["models"].get(m, {})
+              for k in ("grouped", "chronological") for m in ("cnn", "ae")):
+    _g, _c = _sv["splits"]["grouped"], _sv["splits"]["chronological"]
+    _gc, _cc = _g["models"]["cnn"], _c["models"]["cnn"]
+    chk("grouped split: CNN macro", "split_variants", _gc["macro_mean"])
+    chk("grouped split: CNN XSS", "split_variants", _gc["family_mean"]["Web Attack XSS"])
+    chk("grouped split: CNN Web BF", "split_variants", _gc["family_mean"]["Web Attack Brute Force"])
+    chk("grouped split: macro without shared-5-tuple benign", "split_variants",
+        _gc["macro_without_shared_5tuple_benign_mean"])
+    chk("grouped split: benign sharing a zero-day 5-tuple", "split_variants",
+        "{:,}".format(_g["benign_sharing_zero_day_5tuple"]), "{}")
+    chk("grouped split: duplicates survive", "split_variants",
+        100 * _g["boundary"]["exact_duplicates"], "{:.1f} %")
+    chk("chronological split: CNN macro", "split_variants", _cc["macro_mean"])
+    chk("chronological split: AE macro", "split_variants", _c["models"]["ae"]["macro_mean"])
+    chk("chronological split: AE known-class PR-AUC", "split_variants",
+        _c["models"]["ae"]["known_only_pr_auc_mean"], "{:.2f}")
+    for _k, _lab in (("grouped", "grouped"), ("chronological", "chronological")):
+        chk("%s split: AE advantage on Bot" % _lab, "split_variants",
+            -_sv["splits"][_k]["double_dissociation"]["Bot"]["cnn_minus_ae_mean"], "{:.3f}")
+    _dd_ok = all(v["direction_consistent"] for r in _sv["splits"].values()
+                 for v in r["double_dissociation"].values())
+    chk("double dissociation direction on every split and seed", "split_variants",
+        "every seed of all three splits" if _dd_ok else "NOT consistent", "{}", ws=True)
+    _gmax = max(p_["macro"] for p_ in _gc["per_seed"])
+    _rmin = min(p_["macro"] for p_ in _sv["splits"]["random"]["models"]["cnn"]["per_seed"])
+    chk("grouped seeds all below random seeds", "split_variants",
+        "every grouped seed scores below every seed" if _gmax < _rmin else "NOT all below", "{}",
+        alt=("every grouped seed below every random seed",) if _gmax < _rmin else (), ws=True)
+else:
+    unbacked("split variants", "split_variants.json missing or incomplete")
 _si = load("split_integrity")
 if _si:
     chk("split: benign under-sampling factor", "split_integrity",
