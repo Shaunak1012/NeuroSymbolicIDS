@@ -24,7 +24,14 @@ CLAUDE.md; `verify_draft.py` flags the retracted wording if it returns unstruck;
 **What stands:** 100 % of Bot flows are classified BENIGN in **all 17** CNN runs; 0/8 feature overlap;
 oracle 0.9988. **Sixth single-population trap**, and the second caught in the same three runs.
 
-### [OPEN 2026-09-17] 🟡 Does the tuned forest reach Bot because its features overlap Bot's?
+### [ANSWERED 2026-09-17 — NO] 🔴 Does the tuned forest reach Bot because its features overlap Bot's?
+
+> 🔴 **Pre-registered E4 failed.** The tuned forest puts **less** importance on Bot's eight features
+> (0.19 vs 0.21, every seed) and more on the known-class eight (0.39 vs 0.24); both forests have 2 of
+> Bot's 8 in their own top eight, so the paper's "0 of 8" is one XGBoost proxy's ranking. The overlap
+> account is now stated as an explanation of the CNN's failure, not a general law. Open successor:
+> what *does* let the tuned forest rank Bot (it still scores every Bot flow below 0.5)?
+
 
 The tuned forest ranks Bot at 6.4× chance and consistently (ρ +0.923) while still scoring every Bot
 flow below 0.5. The paper's mechanism predicts reach in proportion to feature overlap, but the 0/8

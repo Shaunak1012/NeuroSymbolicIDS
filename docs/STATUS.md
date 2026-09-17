@@ -31,6 +31,25 @@ The paper (abstract, §4, Figure 2, Appendix C, master draft struck in place) no
 single-population trap — and the **second found in the same three reference runs** (the first was the
 fusion gain).
 
+### 🔴 Pre-registered test E4 FAILED — overlap does not decide which models reach Bot
+
+`RECHECK_FOREST=1 bot_mechanism_recheck.py` (prediction committed before the run, commit "pre-register
+the forest feature-overlap test"): the tuned forest reaches Bot and the default one barely does, so the
+tuned forest should weight Bot's eight oracle features more. It weights them **less** on every seed:
+
+| forest | share of importance on Bot's 8 | on the known-class 8 | own top-8 ∩ Bot's 8 |
+|---|---:|---:|---:|
+| default (`sqrt`) | 0.213 / 0.223 / 0.204 (**0.21**) | **0.24** | 2 |
+| tuned (`0.3`) | 0.193 / 0.189 / 0.184 (**0.19**) | **0.39** | 2 |
+
+All six refits reproduce their logged predictions exactly. Two consequences, both now in the paper:
+**(1)** "0 of 8 features shared with the known-class task" is **one XGBoost proxy's** ranking — both
+forests have 2 of the 8 (`Destination Port`, `Init_Win_bytes_forward`) in their top eight; **(2)** the
+overlap account explains the **CNN's** failure but is **not a general law** — the abstract, contribution
+1, Figure 1's caption, §4, Appendix C and the master draft (struck in place) say so, and "reachability
+follows overlap" (asserted for 2018, where overlap was never measured) is withdrawn. Impurity importance
+is coarse, but it is the measure the overlap figure itself uses.
+
 ### ✅ Tuned baselines (F-12 closed) — `baselines_tuned.py`
 
 | model | untuned | tuned (validation-selected) | vs det CNN 0.6299 |
@@ -40,7 +59,8 @@ fusion gain).
 | IsolationForest (100 trees, 4096 samples), n=3 | 0.0653 | 0.0564 | — |
 
 The tuned forest **matches** the CNN; it does not beat it. Its **Bot PR-AUC is 0.2196 (6.4× chance, every
-seed)** — above the autoencoder. Whether its features overlap Bot's more than the CNN's is unmeasured.
+seed)** — above the autoencoder. ~~Whether its features overlap Bot's more than the CNN's is
+unmeasured.~~ Measured the same day: it does not (E4 above).
 
 ### ✅ Other results of the day
 

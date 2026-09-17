@@ -14,6 +14,12 @@ runs. The forest's 0.068 is its default `max_features`; tuned, +0.923. Absorptio
 BENIGN) holds in all 17 runs. Paper abstract, §4, Figure 2 (redrawn), Appendix C and master draft
 (struck in place) corrected; CLAUDE.md's "established result (2)" struck.
 
+**🔴 Pre-registered E4 failed** (`RECHECK_FOREST=1 bot_mechanism_recheck.py`): the tuned forest, which
+reaches Bot, weights Bot's features less than the default forest (0.19 vs 0.21) and the known-class ones
+more (0.39 vs 0.24); both forests share 2 of Bot's 8 features in their top eight. The paper now presents
+feature overlap as an account of the CNN's failure, not a general law (abstract, contribution 1,
+Figure 1 caption, §4, Appendix C, master draft), and withdraws "reachability follows overlap" for 2018.
+
 **F-12 closed** (`baselines_tuned.py`): validation-selected XGBoost 0.6180, RandomForest 0.6407 (≈ det CNN
 0.6299), IsolationForest 0.0564. Tuned forest Bot 0.2196 (6.4× chance). Reported under pitfall P6.
 

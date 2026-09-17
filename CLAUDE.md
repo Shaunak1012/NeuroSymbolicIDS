@@ -237,7 +237,10 @@ pre-registered before running). The failure is **representational, not informati
   11 pre-flag CNN runs, Bot's median ρ is **+0.55 / +0.59** (pairs −0.54 to +0.92) — the least
   consistent family, not noise. RF's 0.068 is its default `max_features="sqrt"`; tuned on validation
   (`baselines_tuned.py`, `max_features=0.3`) it gives **+0.923** and Bot PR-AUC **0.2196** (6.4×
-  chance). Sixth "three runs looked decisive" trap; the absorption (17/17 runs) and 0/8 overlap stand.
+  chance). Sixth "three runs looked decisive" trap; the absorption (17/17 runs) stands.
+  🔴 **And the overlap account failed its first direct test (E4, pre-registered, 2026-09-17):** the tuned
+  forest reaches Bot while weighting Bot's features *less* (0.19 vs 0.21). "0/8 overlap" is one XGBoost
+  proxy's ranking (both forests: 2/8). Write overlap as an account of the **CNN**, never as a law.
 - ~~**One cause, four symptoms** — this explains the Phase-4 purity lottery, the Mahalanobis Bot
   spread, and RF's Bot swing simultaneously.~~ RF's swing is a configuration effect, so only the CNN's
   failure is a measured symptom. Not an information limit (oracle PR-AUC 0.9988).
