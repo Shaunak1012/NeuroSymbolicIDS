@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (85 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py` and `split_variants.py` 2026-09-17, plus `tests/`).
+> Last verified against source: **2026-09-05** (86 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py` and `baselines_tuned.py` 2026-09-17, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** · **`baselines_tuned`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
@@ -1189,6 +1189,21 @@ reference `ae_det_s*`, since every earlier canonical AE run predates the determi
 `split_variants.py` compares the three splits: known-class detection (raw and deduplicated), macro and
 per-family zero-day PR-AUC for both models, and the double dissociation. **Writes**
 `split_variants.json`.
+
+## `scripts/baselines_tuned.py`
+
+*(added 2026-09-17, audit F-12.)* `baselines.py` uses fixed hyperparameters and never reads the
+validation split, while the CNN gets early stopping, learning-rate annealing and checkpoint selection on
+validation, so every CNN-vs-baseline statement was tuning-mismatched. This gives each baseline a small
+grid selected on the same zero-day-free validation split: **XGBoost** `max_depth` {4,6,8,10} ×
+`learning_rate` {0.05,0.1,0.3}, up to 1000 trees with early stopping on validation log-loss (no
+subsampling, so still seed-invariant: one run); **RandomForest** `max_depth` {10,20,30} × `max_features`
+{sqrt, 0.3}, 200 trees, selected on validation PR-AUC, then seeds 42/43/44; **IsolationForest**
+`n_estimators` {100,200,400} × `max_samples` {256, 4096, auto} on benign training flows only, same
+selection, seeds 42/43/44. Test data and zero-day labels are never used for selection. Logs
+`xgboost_tuned`, `random_forest_tuned_s*`, `isolation_forest_tuned_s*` and compares them with the
+untuned records and the deterministic CNN. **Writes** `baselines_tuned.json`. Long job — launch through
+`run_long.sh`.
 
 ## `scripts/audit_rebase.sh`
 
