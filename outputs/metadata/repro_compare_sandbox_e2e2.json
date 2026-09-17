@@ -1,0 +1,664 @@
+{
+ "sandbox": "outputs/sandbox_e2e2",
+ "summary": {
+  "identical": 72,
+  "no_counterpart": 33,
+  "float_level": 4
+ },
+ "files": [
+  {
+   "sandbox": "data/processed/constant_cols_dropped.npy",
+   "canonical": "data/processed/constant_cols_dropped.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/features_test.csv",
+   "canonical": "data/processed/features_test.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/features_train.csv",
+   "canonical": "data/processed/features_train.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/labels_test.npy",
+   "canonical": "data/processed/labels_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/labels_test_binary.npy",
+   "canonical": "data/processed/labels_test_binary.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/labels_test_multiclass.npy",
+   "canonical": "data/processed/labels_test_multiclass.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/labels_train.npy",
+   "canonical": "data/processed/labels_train.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/labels_train_binary.npy",
+   "canonical": "data/processed/labels_train_binary.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/labels_train_multiclass.npy",
+   "canonical": "data/processed/labels_train_multiclass.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/meta_test.csv",
+   "canonical": "data/processed/meta_test.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/meta_train.csv",
+   "canonical": "data/processed/meta_train.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/X_test.npy",
+   "canonical": "data/processed/paper/X_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/X_train.npy",
+   "canonical": "data/processed/paper/X_train.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/X_val.npy",
+   "canonical": "data/processed/paper/X_val.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/known_classes.npy",
+   "canonical": "data/processed/paper/known_classes.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/meta_test.csv",
+   "canonical": "data/processed/paper/meta_test.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/meta_train.csv",
+   "canonical": "data/processed/paper/meta_train.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/meta_val.csv",
+   "canonical": "data/processed/paper/meta_val.csv",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/split_report.txt",
+   "canonical": "data/processed/paper/split_report.txt",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/timestamp_test.npy",
+   "canonical": "data/processed/paper/timestamp_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/timestamp_train.npy",
+   "canonical": "data/processed/paper/timestamp_train.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/timestamp_val.npy",
+   "canonical": "data/processed/paper/timestamp_val.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/y_test_bin.npy",
+   "canonical": "data/processed/paper/y_test_bin.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/y_test_mc.npy",
+   "canonical": "data/processed/paper/y_test_mc.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/y_train_bin.npy",
+   "canonical": "data/processed/paper/y_train_bin.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/y_train_mc.npy",
+   "canonical": "data/processed/paper/y_train_mc.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/y_val_bin.npy",
+   "canonical": "data/processed/paper/y_val_bin.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/y_val_mc.npy",
+   "canonical": "data/processed/paper/y_val_mc.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "data/processed/paper/zero_day_classes.npy",
+   "canonical": "data/processed/paper/zero_day_classes.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_autoencoder_paper_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_ae_det_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_autoencoder_paper_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_ae_det_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_autoencoder_paper_test.npy",
+   "canonical": "outputs/predictions/y_prob_ae_det_s42_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_cnn_paper_logodds_test.npy",
+   "canonical": "outputs/predictions/y_prob_c4_log1p_s42_logodds_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_cnn_paper_s43_logodds_test.npy",
+   "canonical": "outputs/predictions/y_prob_c4_log1p_s43_logodds_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_cnn_paper_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_c4_log1p_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_cnn_paper_s44_logodds_test.npy",
+   "canonical": "outputs/predictions/y_prob_c4_log1p_s44_logodds_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_cnn_paper_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_c4_log1p_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_cnn_paper_test.npy",
+   "canonical": "outputs/predictions/y_prob_c4_log1p_s42_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_fusion_cnn_kg_s43_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_fusion_cnn_kg_s44_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_fusion_cnn_kg_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_isolation_forest_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_isolation_forest_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_isolation_forest_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_isolation_forest_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_isolation_forest_test.npy",
+   "canonical": "outputs/predictions/y_prob_isolation_forest_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_isolation_forest_tuned_s42_test.npy",
+   "canonical": "outputs/predictions/y_prob_isolation_forest_tuned_s42_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_isolation_forest_tuned_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_isolation_forest_tuned_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_isolation_forest_tuned_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_isolation_forest_tuned_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_kg_causal_test.npy",
+   "canonical": "outputs/predictions/y_prob_kg_causal_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_kg_s43_causal_test.npy",
+   "canonical": "outputs/predictions/y_prob_kg_s43_causal_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_kg_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_kg_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_kg_s44_causal_test.npy",
+   "canonical": "outputs/predictions/y_prob_kg_s44_causal_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_kg_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_kg_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_kg_test.npy",
+   "canonical": "outputs/predictions/y_prob_kg_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ax6_ratio_w1p0_s42_logodds_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ax6_ratio_w1p0_s42_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ax6_ratio_w1p0_s43_logodds_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ax6_ratio_w1p0_s43_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ax6_ratio_w1p0_s44_logodds_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ax6_ratio_w1p0_s44_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ctrl_w0_logodds_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ctrl_w0_s43_logodds_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ctrl_w0_s43_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ctrl_w0_s44_logodds_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ctrl_w0_s44_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_ltn_ctrl_w0_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_mahalanobis_s43_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_mahalanobis_s44_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_mahalanobis_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_msp_s43_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_msp_s44_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_msp_test.npy",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_random_forest_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_random_forest_s43_test.npy",
+   "verdict": "float_level",
+   "note": "max abs diff 4.44e-16"
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_random_forest_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_random_forest_s44_test.npy",
+   "verdict": "float_level",
+   "note": "max abs diff 3.33e-16"
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_random_forest_test.npy",
+   "canonical": "outputs/predictions/y_prob_random_forest_test.npy",
+   "verdict": "float_level",
+   "note": "max abs diff 3.33e-16"
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_random_forest_tuned_s42_test.npy",
+   "canonical": "outputs/predictions/y_prob_random_forest_tuned_s42_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_random_forest_tuned_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_random_forest_tuned_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_random_forest_tuned_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_random_forest_tuned_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_xgboost_s43_test.npy",
+   "canonical": "outputs/predictions/y_prob_xgboost_s43_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_xgboost_s44_test.npy",
+   "canonical": "outputs/predictions/y_prob_xgboost_s44_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_xgboost_test.npy",
+   "canonical": "outputs/predictions/y_prob_xgboost_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/predictions/y_prob_xgboost_tuned_test.npy",
+   "canonical": "outputs/predictions/y_prob_xgboost_tuned_test.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_test_cnn_paper_emb.npy",
+   "canonical": "outputs/embeddings/X_test_c4_log1p_s42_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_test_cnn_paper_s43_emb.npy",
+   "canonical": "outputs/embeddings/X_test_c4_log1p_s43_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_test_cnn_paper_s44_emb.npy",
+   "canonical": "outputs/embeddings/X_test_c4_log1p_s44_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_train_cnn_paper_emb.npy",
+   "canonical": "outputs/embeddings/X_train_c4_log1p_s42_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_train_cnn_paper_s43_emb.npy",
+   "canonical": "outputs/embeddings/X_train_c4_log1p_s43_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_train_cnn_paper_s44_emb.npy",
+   "canonical": "outputs/embeddings/X_train_c4_log1p_s44_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_val_cnn_paper_emb.npy",
+   "canonical": "outputs/embeddings/X_val_c4_log1p_s42_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_val_cnn_paper_s43_emb.npy",
+   "canonical": "outputs/embeddings/X_val_c4_log1p_s43_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/embeddings/X_val_cnn_paper_s44_emb.npy",
+   "canonical": "outputs/embeddings/X_val_c4_log1p_s44_emb.npy",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/ablation.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/autoencoder_paper_history.pkl",
+   "canonical": "outputs/metadata/ae_det_s42_history.pkl",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/autoencoder_paper_s43_history.pkl",
+   "canonical": "outputs/metadata/ae_det_s43_history.pkl",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/autoencoder_paper_s44_history.pkl",
+   "canonical": "outputs/metadata/ae_det_s44_history.pkl",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/behaviour_thresholds.npy",
+   "canonical": "outputs/metadata/behaviour_thresholds.npy",
+   "verdict": "float_level",
+   "note": "max rel diff 2.41e-14"
+  },
+  {
+   "sandbox": "outputs/metadata/bot_failure_analysis.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/cnn_paper_history.pkl",
+   "canonical": "outputs/metadata/c4_log1p_s42_history.pkl",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/cnn_paper_s43_history.pkl",
+   "canonical": "outputs/metadata/c4_log1p_s43_history.pkl",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/cnn_paper_s44_history.pkl",
+   "canonical": "outputs/metadata/c4_log1p_s44_history.pkl",
+   "verdict": "identical",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/explanations.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/fitted_fusion.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/fusion_multi.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/kg_report.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/kg_s43_report.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/kg_s44_report.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/latency_determinism_on.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/run_all_report.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/runs.jsonl",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  },
+  {
+   "sandbox": "outputs/metadata/significance.json",
+   "canonical": null,
+   "verdict": "no_counterpart",
+   "note": null
+  }
+ ]
+}

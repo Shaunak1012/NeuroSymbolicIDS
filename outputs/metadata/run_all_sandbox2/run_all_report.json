@@ -1,0 +1,330 @@
+{
+ "workdir": "C:/Users/shaun/Downloads/NeuroSymbolicIDS/outputs/sandbox_e2e2",
+ "started": "2026-09-17T20:18:03",
+ "keep_going": true,
+ "stages": [
+  {
+   "name": "preprocess",
+   "script": "preprocess.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 73.7,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "split",
+   "script": "preprocess_paper.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 16.6,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "timeline",
+   "script": "timeline.py --backfill",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 1.7,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "behaviour",
+   "script": "behavior.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 4.8,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "cnn",
+   "script": "cnn_paper.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 3387.0,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "baselines",
+   "script": "baselines.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 97.2,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "novelty",
+   "script": "novelty.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 24.0,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "ltn_ctrl",
+   "script": "ltn_paper.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 10318.2,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "ltn_ax6",
+   "script": "ltn_paper.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 7352.0,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "rescore",
+   "script": "rescore_logits.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 11.3,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "autoencoder",
+   "script": "autoencoder_paper.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 176.8,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "kg",
+   "script": "kg.py",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "seconds": 14.2,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "fusion_kg",
+   "script": "fusion_kg.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 1.3,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "explain",
+   "script": "explain.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 29.1,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "fusion",
+   "script": "fusion_multi.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 4.5,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "fitted_fusion",
+   "script": "fitted_fusion.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 11.6,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "significance",
+   "script": "significance.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 1029.4,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "ablation",
+   "script": "ablation.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 507.1,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "bot_failure",
+   "script": "bot_failure_analysis.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 7.1,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "baselines_tuned",
+   "script": "baselines_tuned.py",
+   "exit_codes": [
+    1
+   ],
+   "seconds": 484.4,
+   "declared_artifacts_missing": [
+    "outputs\\metadata\\baselines_tuned.json"
+   ],
+   "external_inputs": [
+    "the deterministic CNN runs c4_log1p_s42-44 (c4_transform_ab.sh), read for the comparison only"
+   ],
+   "ok": false
+  },
+  {
+   "name": "bot_recheck",
+   "script": "bot_mechanism_recheck.py",
+   "exit_codes": [
+    1
+   ],
+   "seconds": 4.5,
+   "declared_artifacts_missing": [
+    "outputs\\metadata\\bot_mechanism_recheck.json"
+   ],
+   "external_inputs": [
+    "the 11 pre-flag CNN runs (fusion_population.PRE_FLAG) and the 6 deterministic ones (c4_log1p_s42-44, postdet_s45-47: noise_postdet.sh)",
+    "ae_det_s42-44 (ae_seeds.sh)"
+   ],
+   "ok": false
+  },
+  {
+   "name": "operational",
+   "script": "operational.py",
+   "exit_codes": [
+    1
+   ],
+   "seconds": 0.6,
+   "declared_artifacts_missing": [
+    "outputs\\metadata\\operational.json"
+   ],
+   "external_inputs": [
+    "the 11-run pre-flag CNN population (fusion_population.PRE_FLAG): cnn_paper_s45-47 (rigor_n6.sh), cnn_repro_s42, cnn_noise_r1-4 (noise_floor.sh)"
+   ],
+   "ok": false
+  },
+  {
+   "name": "latency",
+   "script": "latency.py",
+   "exit_codes": [
+    0
+   ],
+   "seconds": 11.7,
+   "declared_artifacts_missing": [],
+   "external_inputs": [],
+   "ok": true
+  },
+  {
+   "name": "field_gap",
+   "script": "field_gap.py",
+   "exit_codes": [
+    2
+   ],
+   "seconds": 0.4,
+   "declared_artifacts_missing": [
+    "outputs\\metadata\\field_gap.json"
+   ],
+   "external_inputs": [
+    "runs.jsonl entries for the 42 pinned method groups (field_gap.METHODS), most of them from experiment scripts outside this list (deep_zoo.py, baselines_classic.py, anomaly_zoo.py, the LTN anatomy arms, c4_transform_ab.sh)"
+   ],
+   "ok": false
+  },
+  {
+   "name": "figures",
+   "script": "paper_figures.py",
+   "exit_codes": [
+    1
+   ],
+   "seconds": 0.4,
+   "declared_artifacts_missing": [],
+   "external_inputs": [
+    "noise_postdet.json (noise_postdet.sh)",
+    "protocol_variance.json (protocol_variance.py)"
+   ],
+   "ok": false
+  },
+  {
+   "name": "paper_figures",
+   "script": "paper_figures.py --nesy",
+   "exit_codes": [
+    1
+   ],
+   "seconds": 0.5,
+   "declared_artifacts_missing": [
+    "outputs\\figures\\nesy_fig2_mechanism.png"
+   ],
+   "external_inputs": [],
+   "ok": false
+  }
+ ],
+ "finished": "2026-09-18T02:50:53"
+}

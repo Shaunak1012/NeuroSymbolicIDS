@@ -1,0 +1,462 @@
+{
+ "n_alerts": 6,
+ "alerts": [
+  {
+   "true_class": "Bot",
+   "is_zero_day": true,
+   "verdict": "benign",
+   "confidence": 0.0003,
+   "neural": [
+    {
+     "feature": "Fwd Packet Length Max",
+     "attribution": -0.00066
+    },
+    {
+     "feature": "Total Length of Fwd Packets",
+     "attribution": 0.00059
+    },
+    {
+     "feature": "min_seg_size_forward",
+     "attribution": -0.00052
+    },
+    {
+     "feature": "Active Mean",
+     "attribution": 0.00033
+    },
+    {
+     "feature": "Total Fwd Packets",
+     "attribution": 0.00033
+    }
+   ],
+   "ig_completeness": {
+    "sum_attributions": 0.0003,
+    "f(x)-f(base)": 0.0002
+   },
+   "logic": [
+    {
+     "axiom": "Ax6 BeaconLike => attack",
+     "antecedent_strength": 1.0,
+     "satisfaction": 0.0003,
+     "status": "VIOLATED"
+    }
+   ],
+   "kg": {
+    "cluster": 163,
+    "burstiness": 15.84,
+    "emerging": true,
+    "exhibits": [
+     [
+      "BeaconLike",
+      0.841
+     ],
+     [
+      "HighVolume",
+      0.105
+     ],
+     [
+      "HighEntropy",
+      0.044
+     ]
+    ],
+    "associated_with": [
+     [
+      "BENIGN",
+      0.999
+     ],
+     [
+      "DoS slowloris",
+      0.001
+     ]
+    ]
+   }
+  },
+  {
+   "true_class": "Bot",
+   "is_zero_day": true,
+   "verdict": "benign",
+   "confidence": 0.0004,
+   "neural": [
+    {
+     "feature": "Total Length of Fwd Packets",
+     "attribution": 0.00101
+    },
+    {
+     "feature": "Fwd Packets/s",
+     "attribution": -0.00051
+    },
+    {
+     "feature": "Fwd Packet Length Mean",
+     "attribution": -0.00049
+    },
+    {
+     "feature": "Active Mean",
+     "attribution": -0.00042
+    },
+    {
+     "feature": "Fwd Packet Length Max",
+     "attribution": -0.0003
+    }
+   ],
+   "ig_completeness": {
+    "sum_attributions": 0.0003,
+    "f(x)-f(base)": 0.0003
+   },
+   "logic": [
+    {
+     "axiom": "Ax6 BeaconLike => attack",
+     "antecedent_strength": 1.0,
+     "satisfaction": 0.0004,
+     "status": "VIOLATED"
+    }
+   ],
+   "kg": {
+    "cluster": 166,
+    "burstiness": 9.17,
+    "emerging": true,
+    "exhibits": [
+     [
+      "BeaconLike",
+      0.946
+     ],
+     [
+      "HighVolume",
+      0.054
+     ],
+     [
+      "HighEntropy",
+      0.0
+     ]
+    ],
+    "associated_with": [
+     [
+      "BENIGN",
+      0.844
+     ],
+     [
+      "PortScan",
+      0.142
+     ],
+     [
+      "DoS Hulk",
+      0.014
+     ]
+    ]
+   }
+  },
+  {
+   "true_class": "Web Attack Brute Force",
+   "is_zero_day": true,
+   "verdict": "malicious",
+   "confidence": 0.9864,
+   "neural": [
+    {
+     "feature": "Flow Duration",
+     "attribution": 0.29613
+    },
+    {
+     "feature": "Destination Port",
+     "attribution": 0.28998
+    },
+    {
+     "feature": "Bwd IAT Min",
+     "attribution": 0.14612
+    },
+    {
+     "feature": "Init_Win_bytes_backward",
+     "attribution": 0.13235
+    },
+    {
+     "feature": "Packet Length Mean",
+     "attribution": 0.1309
+    }
+   ],
+   "ig_completeness": {
+    "sum_attributions": 0.9905,
+    "f(x)-f(base)": 0.9863
+   },
+   "logic": [],
+   "kg": {
+    "cluster": 119,
+    "burstiness": 8.47,
+    "emerging": true,
+    "exhibits": [
+     [
+      "BeaconLike",
+      0.981
+     ],
+     [
+      "HighVolume",
+      0.019
+     ],
+     [
+      "BurstTraffic",
+      0.0
+     ]
+    ],
+    "associated_with": [
+     [
+      "BENIGN",
+      0.995
+     ],
+     [
+      "PortScan",
+      0.002
+     ],
+     [
+      "DoS Hulk",
+      0.001
+     ]
+    ]
+   }
+  },
+  {
+   "true_class": "Web Attack Brute Force",
+   "is_zero_day": true,
+   "verdict": "malicious",
+   "confidence": 0.9852,
+   "neural": [
+    {
+     "feature": "Init_Win_bytes_backward",
+     "attribution": 0.27028
+    },
+    {
+     "feature": "Flow Duration",
+     "attribution": 0.2612
+    },
+    {
+     "feature": "Destination Port",
+     "attribution": 0.22461
+    },
+    {
+     "feature": "Total Length of Fwd Packets",
+     "attribution": 0.15437
+    },
+    {
+     "feature": "Fwd Packet Length Max",
+     "attribution": -0.14812
+    }
+   ],
+   "ig_completeness": {
+    "sum_attributions": 0.9815,
+    "f(x)-f(base)": 0.9851
+   },
+   "logic": [
+    {
+     "axiom": "Ax5 ScanProbe => attack",
+     "antecedent_strength": 0.939,
+     "satisfaction": 0.9852,
+     "status": "satisfied"
+    },
+    {
+     "axiom": "Ax4 BurstTraffic => attack",
+     "antecedent_strength": 0.047,
+     "satisfaction": 0.9852,
+     "status": "satisfied"
+    }
+   ],
+   "kg": {
+    "cluster": 95,
+    "burstiness": 11.28,
+    "emerging": true,
+    "exhibits": [
+     [
+      "ScanProbe",
+      0.934
+     ],
+     [
+      "BurstTraffic",
+      0.059
+     ],
+     [
+      "BeaconLike",
+      0.007
+     ]
+    ],
+    "associated_with": [
+     [
+      "SSH-Patator",
+      0.69
+     ],
+     [
+      "BENIGN",
+      0.307
+     ],
+     [
+      "DoS Slowhttptest",
+      0.001
+     ]
+    ]
+   }
+  },
+  {
+   "true_class": "BENIGN",
+   "is_zero_day": false,
+   "verdict": "benign",
+   "confidence": 0.0001,
+   "neural": [
+    {
+     "feature": "Flow Duration",
+     "attribution": 0.00572
+    },
+    {
+     "feature": "Destination Port",
+     "attribution": 0.00229
+    },
+    {
+     "feature": "Bwd IAT Std",
+     "attribution": 0.00203
+    },
+    {
+     "feature": "Fwd IAT Std",
+     "attribution": -0.00191
+    },
+    {
+     "feature": "Fwd Packet Length Mean",
+     "attribution": -0.00168
+    }
+   ],
+   "ig_completeness": {
+    "sum_attributions": 0.0,
+    "f(x)-f(base)": 0.0
+   },
+   "logic": [
+    {
+     "axiom": "Ax4 BurstTraffic => attack",
+     "antecedent_strength": 0.033,
+     "satisfaction": 0.0001,
+     "status": "VIOLATED"
+    }
+   ],
+   "kg": {
+    "cluster": 140,
+    "burstiness": 2.23,
+    "emerging": false,
+    "exhibits": [
+     [
+      "BurstTraffic",
+      0.574
+     ],
+     [
+      "ScanProbe",
+      0.243
+     ],
+     [
+      "BeaconLike",
+      0.134
+     ]
+    ],
+    "associated_with": [
+     [
+      "BENIGN",
+      1.0
+     ]
+    ]
+   }
+  },
+  {
+   "true_class": "BENIGN",
+   "is_zero_day": false,
+   "verdict": "benign",
+   "confidence": 0.0001,
+   "neural": [
+    {
+     "feature": "Flow Duration",
+     "attribution": 0.01607
+    },
+    {
+     "feature": "Total Length of Bwd Packets",
+     "attribution": 0.00592
+    },
+    {
+     "feature": "Total Backward Packets",
+     "attribution": -0.00561
+    },
+    {
+     "feature": "Bwd Header Length",
+     "attribution": -0.00426
+    },
+    {
+     "feature": "Bwd IAT Total",
+     "attribution": -0.00372
+    }
+   ],
+   "ig_completeness": {
+    "sum_attributions": 0.0006,
+    "f(x)-f(base)": -0.0
+   },
+   "logic": [
+    {
+     "axiom": "Ax4 BurstTraffic => attack",
+     "antecedent_strength": 1.0,
+     "satisfaction": 0.0001,
+     "status": "VIOLATED"
+    },
+    {
+     "axiom": "Ax5 ScanProbe => attack",
+     "antecedent_strength": 0.613,
+     "satisfaction": 0.0001,
+     "status": "VIOLATED"
+    }
+   ],
+   "kg": {
+    "cluster": 73,
+    "burstiness": 3.09,
+    "emerging": false,
+    "exhibits": [
+     [
+      "ScanProbe",
+      0.537
+     ],
+     [
+      "BurstTraffic",
+      0.428
+     ],
+     [
+      "BeaconLike",
+      0.035
+     ]
+    ],
+    "associated_with": [
+     [
+      "BENIGN",
+      0.999
+     ],
+     [
+      "DoS Hulk",
+      0.001
+     ]
+    ]
+   }
+  }
+ ],
+ "faithfulness": {
+  "k=3": {
+   "comprehensiveness_ig": 0.3489146828651428,
+   "comprehensiveness_random": 0.02717536874115467,
+   "comp_ratio": 12.839372528430228,
+   "sufficiency_gap_ig": 0.4733383059501648,
+   "sufficiency_gap_random": 0.5163066983222961
+  },
+  "k=5": {
+   "comprehensiveness_ig": 0.42525923252105713,
+   "comprehensiveness_random": 0.04993864893913269,
+   "comp_ratio": 8.515633513421255,
+   "sufficiency_gap_ig": 0.4375881254673004,
+   "sufficiency_gap_random": 0.5153511762619019
+  },
+  "k=10": {
+   "comprehensiveness_ig": 0.4564551115036011,
+   "comprehensiveness_random": 0.14529097080230713,
+   "comp_ratio": 3.141661928356754,
+   "sufficiency_gap_ig": 0.37314164638519287,
+   "sufficiency_gap_random": 0.5130243897438049
+  }
+ },
+ "faithfulness_n_flows": 1500,
+ "ig_steps": 32,
+ "notes": [
+  "Only behaviour-grounded axioms (Ax3-Ax6) appear: Ax1/Ax2 are label anchors that condition on ground truth and are unavailable (and circular) at inference.",
+  "IG baseline is the training mean, so attributions read as deviation from typical traffic.",
+  "Faithfulness is meaningless without the random-feature control; both are reported."
+ ]
+}

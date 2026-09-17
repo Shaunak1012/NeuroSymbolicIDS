@@ -1,0 +1,210 @@
+{
+ "predictions_preregistered": {
+  "H1_absorption": ">80% of Bot argmax=BENIGN and mean p(BENIGN|Bot)>0.8",
+  "H2_boundary": "Bot overlaps benign more; Bot cross-seed rank corr < web attacks'",
+  "H3_feature_neglect": "known-class top features vs Bot-oracle top features overlap <=2 of 8",
+  "H4_raw_overlap": "PREDICTED FALSE - Bot is easily separable in raw space given labels"
+ },
+ "results": {
+  "H2b_cross_seed_rank_corr": {
+   "cnn_paper": {
+    "Bot": 0.5091156269840453,
+    "Web Attack Brute Force": 0.8079967294324844,
+    "Web Attack XSS": 0.9211017617251379,
+    "BENIGN(ref)": 0.7227204248163432
+   },
+   "random_forest": {
+    "Bot": 0.06849440328857404,
+    "Web Attack Brute Force": 0.803385946376134,
+    "Web Attack XSS": 0.7568572059095583,
+    "BENIGN(ref)": 0.6528446265610305
+   },
+   "autoencoder": {
+    "Bot": 0.7542096055516362,
+    "Web Attack Brute Force": 0.9618033951146868,
+    "Web Attack XSS": 0.9515686916381968,
+    "BENIGN(ref)": 0.9726203418052993
+   }
+  },
+  "H4_raw_oracle_separability": {
+   "Bot": {
+    "oracle_pr_auc": 0.9988416448632039,
+    "oracle_roc_auc": 0.9999029141104294,
+    "top_features": [
+     "Bwd IAT Min",
+     "Bwd Packet Length Mean",
+     "Bwd Packet Length Max",
+     "Fwd Header Length",
+     "Destination Port",
+     "min_seg_size_forward",
+     "Init_Win_bytes_forward",
+     "Total Backward Packets"
+    ]
+   },
+   "Web Attack Brute Force": {
+    "oracle_pr_auc": 0.9998909398805719,
+    "oracle_roc_auc": 0.9999916445623342,
+    "top_features": [
+     "Init_Win_bytes_backward",
+     "Total Length of Fwd Packets",
+     "Destination Port",
+     "Fwd IAT Min",
+     "Init_Win_bytes_forward",
+     "min_seg_size_forward",
+     "Flow IAT Max",
+     "URG Flag Count"
+    ]
+   },
+   "Web Attack XSS": {
+    "oracle_pr_auc": 0.9983536064380004,
+    "oracle_roc_auc": 0.9999233128834356,
+    "top_features": [
+     "Init_Win_bytes_backward",
+     "Total Fwd Packets",
+     "act_data_pkt_fwd",
+     "Total Length of Fwd Packets",
+     "Fwd IAT Min",
+     "Init_Win_bytes_forward",
+     "Packet Length Mean",
+     "min_seg_size_forward"
+    ]
+   }
+  },
+  "H3_feature_neglect": {
+   "known_class_top8": [
+    "Bwd Packet Length Min",
+    "Total Fwd Packets",
+    "Average Packet Size",
+    "Bwd Packet Length Std",
+    "Bwd Header Length",
+    "PSH Flag Count",
+    "Fwd Packet Length Max",
+    "Init_Win_bytes_backward"
+   ],
+   "bot_oracle_top8": [
+    "Bwd IAT Min",
+    "Bwd Packet Length Mean",
+    "Bwd Packet Length Max",
+    "Fwd Header Length",
+    "Destination Port",
+    "min_seg_size_forward",
+    "Init_Win_bytes_forward",
+    "Total Backward Packets"
+   ],
+   "bot_overlap": [],
+   "bot_overlap_n": 0,
+   "webbf_oracle_top8": [
+    "Init_Win_bytes_backward",
+    "Total Length of Fwd Packets",
+    "Destination Port",
+    "Fwd IAT Min",
+    "Init_Win_bytes_forward",
+    "min_seg_size_forward",
+    "Flow IAT Max",
+    "URG Flag Count"
+   ],
+   "webbf_overlap": [
+    "Init_Win_bytes_backward"
+   ],
+   "webbf_overlap_n": 1
+  },
+  "H1_absorption": {
+   "42": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9994707107543945,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.11394815891981125,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.05674846625766871,
+     "mean_p_BENIGN": 0.0670347660779953,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    },
+    "BENIGN": {
+     "frac_argmax_BENIGN": 0.9968680413490957,
+     "mean_p_BENIGN": 0.996155321598053,
+     "modal_class": "BENIGN",
+     "modal_frac": 0.9968680413490957
+    }
+   },
+   "43": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9998705387115479,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.1120821163058281,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8978102189781022
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.046012269938650305,
+     "mean_p_BENIGN": 0.060039568692445755,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9355828220858896
+    },
+    "BENIGN": {
+     "frac_argmax_BENIGN": 0.996849937541865,
+     "mean_p_BENIGN": 0.9965489506721497,
+     "modal_class": "BENIGN",
+     "modal_frac": 0.996849937541865
+    }
+   },
+   "44": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9998224377632141,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.10525806248188019,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8998009289980093
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.05214723926380368,
+     "mean_p_BENIGN": 0.05285695940256119,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    },
+    "BENIGN": {
+     "frac_argmax_BENIGN": 0.9974111555660156,
+     "mean_p_BENIGN": 0.9962450265884399,
+     "modal_class": "BENIGN",
+     "modal_frac": 0.9974111555660156
+    }
+   }
+  },
+  "H2a_boundary": {
+   "Bot": {
+    "frac_below_benign_median": 0.028118609406952964,
+    "median_score": -7.844459056854248,
+    "auc_vs_benign": 0.6858843069349835
+   },
+   "Web Attack Brute Force": {
+    "frac_below_benign_median": 0.05308560053085601,
+    "median_score": 4.2671613693237305,
+    "auc_vs_benign": 0.9520215591717173
+   },
+   "Web Attack XSS": {
+    "frac_below_benign_median": 0.023006134969325152,
+    "median_score": 4.263576984405518,
+    "auc_vs_benign": 0.9849206392398799
+   },
+   "_benign_median": -8.448559761047363
+  }
+ }
+}
