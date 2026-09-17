@@ -66,7 +66,6 @@ Out:  outputs/metadata/operational.json
 import os
 import sys
 import json
-import glob
 import pickle
 
 import numpy as np
@@ -133,10 +132,21 @@ print("=" * 100)
 # silently answer a different question -- "does a heterogeneous ensemble help?" --
 # while being reported as the reproducibility fix for a single architecture.
 # Caught on first run: the glob returned 12 files, not the 11 STATUS reports.
-EXCLUDE = ("auxhead",)
-cnn_files = sorted(f for f in glob.glob(os.path.join(PR, "y_prob_cnn_*_test.npy"))
-                   if "logodds" not in os.path.basename(f)
-                   and not any(x in os.path.basename(f) for x in EXCLUDE))
+#
+# 🔴 FIXED 2026-09-17 (audit item 7.4): the run set used to come from a glob over
+# y_prob_cnn_*_test.npy. That was 11 files when this was written; by 2026-09-17 it
+# matched 27, with four different test-set lengths (the 2018 capture, the
+# relabelled variants) and same-length runs of other configurations (67 features,
+# augmentation), so a re-run would crash or silently change the ensemble. The set
+# is now the 11-run pre-flag population, named explicitly (the same list as
+# fusion_population.PRE_FLAG), in the order the glob returned it.
+RUNS = ["cnn_paper", "cnn_paper_s43", "cnn_paper_s44", "cnn_paper_s45", "cnn_paper_s46",
+        "cnn_paper_s47", "cnn_repro_s42", "cnn_noise_r1", "cnn_noise_r2", "cnn_noise_r3",
+        "cnn_noise_r4"]
+cnn_files = sorted(os.path.join(PR, "y_prob_%s_test.npy" % t) for t in RUNS)
+_missing = [f for f in cnn_files if not os.path.exists(f)]
+if _missing:
+    sys.exit("operational.py: missing CNN runs: %s" % ", ".join(map(os.path.basename, _missing)))
 print(f"found {len(cnn_files)} CNN runs with probability-scale predictions:")
 
 singles, stack = {}, []
