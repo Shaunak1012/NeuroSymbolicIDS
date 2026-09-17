@@ -147,7 +147,12 @@ with open(os.path.join(paths.METADATA, f"{TAG}_history.pkl"), "wb") as f:
     pickle.dump(hist.history, f)
 
 if SUBSET == 0:
+    # Determinism state travels with the numbers (audit F-01, 2026-09-17): the
+    # flags have been on here since Phase 7.5, but were never logged, so the
+    # record could not tell post-flag autoencoder runs from pre-flag ones.
     tracking.log_run(TAG, {"protocol": "paper", "transform": TFM, "seed": SEED,
-                           "epochs": EPOCHS, "benign_only": True}, metrics.flatten(res))
+                           "epochs": EPOCHS, "benign_only": True,
+                           "paper_subdir": os.path.basename(PAPER),
+                           **{f"det_{k}": v for k, v in DET.items()}}, metrics.flatten(res))
     print(f"\nlogged {TAG} to runs.jsonl")
 print(f"DONE ({TAG})")

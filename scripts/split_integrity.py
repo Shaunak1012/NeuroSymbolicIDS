@@ -43,7 +43,10 @@ def _norm(s):
 
 
 def main():
-    P = paths.PAPER
+    # PAPER_SUBDIR measures a variant split (grouped / chronological, audit D4)
+    # and writes split_integrity_<subdir>.json; unset, the canonical split.
+    sub = os.environ.get("PAPER_SUBDIR", "")
+    P = os.path.join(paths.PROCESSED, sub) if sub else paths.PAPER
     cfg = config.get()
     zero_day = set(cfg["zero_day_classes"])
     out = {}
@@ -87,8 +90,8 @@ def main():
     }
 
     # ---- F-03: temporal overlap (corrected timestamps only) -------------------
-    ts_tr = timeline.load_timestamps("train")
-    ts_te = timeline.load_timestamps("test")
+    ts_tr = timeline.load_timestamps("train", root=P)
+    ts_te = timeline.load_timestamps("test", root=P)
     inside = (ts_te >= ts_tr.min()) & (ts_te <= ts_tr.max())
     out["temporal"] = {
         "train_start": str(ts_tr.min()), "train_end": str(ts_tr.max()),
@@ -142,7 +145,8 @@ def main():
         cc.update({"checked_on_full_capture": True, "non_constant_on_full_capture": nonconst})
     out["constant_columns"] = cc
 
-    p = os.path.join(paths.METADATA, "split_integrity.json")
+    out["split_dir"] = os.path.relpath(P, paths.ROOT)
+    p = os.path.join(paths.METADATA, "split_integrity%s.json" % ("_" + sub if sub else ""))
     with open(p, "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1)
 

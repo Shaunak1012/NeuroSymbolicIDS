@@ -90,51 +90,55 @@ def parse(raw):
     return t
 
 
-def _artifact_path(split):
-    return os.path.join(paths.PAPER, ARTIFACT.format(split=split))
+# `root` (added 2026-09-17): the split directory to read or write. It defaults to
+# the canonical paper split. Before it existed, preprocess_paper.py writing a
+# VARIANT split (grouped / chronological, audit D4) would have overwritten the
+# canonical timestamp_*.npy with another split's row order, silently.
+def _artifact_path(split, root=None):
+    return os.path.join(root or paths.PAPER, ARTIFACT.format(split=split))
 
 
-def load_timestamps(split):
+def load_timestamps(split, root=None):
     """Row-aligned corrected timestamps for a paper split ('train'|'val'|'test').
 
     Prefers the precomputed `timestamp_<split>.npy` artifact; falls back to
     parsing the meta CSV (and says so) if it has not been generated yet.
     """
-    p = _artifact_path(split)
+    p = _artifact_path(split, root)
     if os.path.exists(p):
         return pd.Series(np.load(p))
     print(f"[timeline] {os.path.basename(p)} missing — parsing meta CSV. "
           f"Run `python scripts/timeline.py --backfill` to persist it.")
-    meta = pd.read_csv(os.path.join(paths.PAPER, f"meta_{split}.csv"),
+    meta = pd.read_csv(os.path.join(root or paths.PAPER, f"meta_{split}.csv"),
                        usecols=["Timestamp"])
     return parse(meta["Timestamp"])
 
 
-def time_order(split):
+def time_order(split, root=None):
     """Indices that sort this split's rows into true chronological order."""
-    return np.argsort(load_timestamps(split).to_numpy(), kind="stable")
+    return np.argsort(load_timestamps(split, root).to_numpy(), kind="stable")
 
 
-def write_corrected(split, series=None):
+def write_corrected(split, series=None, root=None):
     """Persist corrected timestamps as datetime64[s]. Called by preprocess_paper."""
     if series is None:
-        meta = pd.read_csv(os.path.join(paths.PAPER, f"meta_{split}.csv"),
+        meta = pd.read_csv(os.path.join(root or paths.PAPER, f"meta_{split}.csv"),
                            usecols=["Timestamp"])
         series = parse(meta["Timestamp"])
     arr = series.to_numpy().astype("datetime64[s]")
-    np.save(_artifact_path(split), arr)
+    np.save(_artifact_path(split, root), arr)
     return arr
 
 
-def selftest(split="test", verbose=True):
+def selftest(split="test", verbose=True, root=None):
     """Validate the reconstruction against the PUBLISHED capture schedule.
 
     External ground truth, not fitted. Raises on mismatch so a future data change
     (or a re-introduced parsing bug) fails loudly instead of silently reordering
     every temporal result.
     """
-    ts = pd.Series(pd.to_datetime(load_timestamps(split)))
-    y = np.load(os.path.join(paths.PAPER, f"y_{split}_mc.npy"), allow_pickle=True)
+    ts = pd.Series(pd.to_datetime(load_timestamps(split, root)))
+    y = np.load(os.path.join(root or paths.PAPER, f"y_{split}_mc.npy"), allow_pickle=True)
     hours = set(pd.Series(ts).dt.hour.unique().tolist())
     if not hours <= set(range(8, 18)):
         raise AssertionError(f"hours {sorted(hours)} outside the 08:00-17:00 capture window")

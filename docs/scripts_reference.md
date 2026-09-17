@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (84 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py` 2026-09-17, plus `tests/`).
+> Last verified against source: **2026-09-05** (85 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py` and `split_variants.py` 2026-09-17, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
@@ -1167,6 +1167,28 @@ fusion. ✅ **The axiom effect is robust:** axioms on vs off (same trainer, same
 with **every one of 17 CNN runs** — −0.0062 / −0.0068 alone, −0.0212 / −0.0324 with the KG. The
 deterministic base-axiom matched pair (`ltn_repro_det` vs `ltn_repro_ctrl`) is negative alone (10/11,
 5/6) and inconsistent with the KG. **Writes** `ablation_population.json`.
+
+## Split variants — `preprocess_paper.py` modes, `split_variants.sh`, `ae_seeds.sh`, `split_variants.py`
+
+*(added 2026-09-17, audit F-02 / F-03, decision D4.)* `preprocess_paper.py` takes `SPLIT_MODE`:
+`random` (default, **byte-identical** to before — verified by regenerating every canonical file into a
+scratch directory and hashing), `grouped` (no Flow ID on both sides; every group containing a zero-day
+flow goes to test — 42,500 known/benign flows), `chronological` (within each known class, earliest 80 %
+train / next 10 % val / latest 10 % test; timestamps are minute-resolution, so bursty classes split
+inside one minute). A variant **must** set `PAPER_SUBDIR`; overwriting the canonical split is refused.
+`timeline.py` functions take `root=` so a variant's timestamps land in its own directory (before this
+they would have overwritten the canonical ones). `split_integrity.py` honours `PAPER_SUBDIR`.
+
+```bash
+SPLIT_MODE=grouped PAPER_SUBDIR=paper_grouped python scripts/preprocess_paper.py
+```
+
+`split_variants.sh <subdir> <name>` trains the CNN and the autoencoder at seeds 42/43/44 on a variant;
+`ae_seeds.sh <subdir> <stem>` trains only the autoencoder (used for the deterministic canonical
+reference `ae_det_s*`, since every earlier canonical AE run predates the determinism flags).
+`split_variants.py` compares the three splits: known-class detection (raw and deduplicated), macro and
+per-family zero-day PR-AUC for both models, and the double dissociation. **Writes**
+`split_variants.json`.
 
 ## `scripts/audit_rebase.sh`
 

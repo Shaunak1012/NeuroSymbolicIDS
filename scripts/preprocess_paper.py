@@ -35,7 +35,23 @@ import config
 cfg = config.get()
 SEED = cfg["seed"]
 P = cfg["protocol"]
-OUT = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
+# SPLIT_MODE / PAPER_SUBDIR (added 2026-09-17, audit F-02/F-03, decision D4).
+#   random         the paper-inspired split every reported result uses (default;
+#                  byte-identical to the code before these variables existed)
+#   grouped        no Flow ID (5-tuple) on both sides of the boundary; every group
+#                  that contains a zero-day flow is a test group
+#   chronological  within each known class, the earliest 80 % of its flows train,
+#                  the next 10 % validate, the latest 10 % test
+# A variant MUST be written to its own PAPER_SUBDIR; writing one over the
+# canonical split is refused below.
+SPLIT_MODE = os.environ.get("SPLIT_MODE", "random")
+SUBDIR = os.environ.get("PAPER_SUBDIR", cfg["paths"]["paper_subdir"])
+if SPLIT_MODE not in ("random", "grouped", "chronological"):
+    raise SystemExit("unknown SPLIT_MODE %r" % SPLIT_MODE)
+if SPLIT_MODE != "random" and SUBDIR == cfg["paths"]["paper_subdir"]:
+    raise SystemExit("SPLIT_MODE=%s would overwrite the canonical split; set PAPER_SUBDIR"
+                     % SPLIT_MODE)
+OUT = os.path.join(paths.PROCESSED, SUBDIR)
 os.makedirs(OUT, exist_ok=True)
 np.random.seed(SEED)
 
@@ -92,12 +108,52 @@ print(f"\nknown-attack flows: {n_known_atk:,} | benign kept: {n_benign_keep:,} "
 
 # ---- split on INDICES so meta follows each row into train/val/test ----
 known_pool = np.concatenate([benign_keep, np.where(is_known)[0]])
-tr_idx, tmp_idx = train_test_split(
-    known_pool, test_size=P["val_frac"] + P["test_frac"], random_state=SEED, stratify=y[known_pool])
-rel = P["test_frac"] / (P["val_frac"] + P["test_frac"])
-val_idx, te_known_idx = train_test_split(
-    tmp_idx, test_size=rel, random_state=SEED, stratify=y[tmp_idx])
 zd_idx = np.where(is_zd)[0]
+SPLIT_NOTES = []
+if SPLIT_MODE == "random":
+    tr_idx, tmp_idx = train_test_split(
+        known_pool, test_size=P["val_frac"] + P["test_frac"], random_state=SEED,
+        stratify=y[known_pool])
+    rel = P["test_frac"] / (P["val_frac"] + P["test_frac"])
+    val_idx, te_known_idx = train_test_split(
+        tmp_idx, test_size=rel, random_state=SEED, stratify=y[tmp_idx])
+elif SPLIT_MODE == "grouped":
+    # Group = Flow ID. Groups are fine-grained (no group holds more than 0.16 % of
+    # any known class), so assigning whole groups at random keeps the class mix
+    # close to stratified without a stratified-group solver.
+    fid = meta["Flow ID"].astype(str).to_numpy()
+    zd_groups = set(fid[zd_idx].tolist())
+    forced = np.fromiter((f in zd_groups for f in fid[known_pool]), bool, len(known_pool))
+    free = known_pool[~forced]
+    ug, inv = np.unique(fid[free], return_inverse=True)
+    u = np.random.RandomState(SEED).rand(len(ug))[inv]
+    t, v = P["test_frac"], P["test_frac"] + P["val_frac"]
+    tr_idx = free[u >= v]
+    val_idx = free[(u >= t) & (u < v)]
+    te_known_idx = np.concatenate([free[u < t], known_pool[forced]])
+    SPLIT_NOTES.append("grouped by Flow ID; %d known/benign flows share a 5-tuple with a "
+                       "zero-day flow and were sent to test" % int(forced.sum()))
+    _tr = set(fid[tr_idx].tolist())
+    assert not (_tr & set(fid[val_idx].tolist())), "LEAK: Flow ID shared train/val"
+    assert not (_tr & set(fid[np.concatenate([te_known_idx, zd_idx])].tolist())), \
+        "LEAK: Flow ID shared train/test"
+    SPLIT_NOTES.append("[OK] no Flow ID appears in both train and val, or train and test")
+else:  # chronological, within each known class
+    import timeline
+    ts_all = timeline.parse(meta["Timestamp"]).to_numpy()
+    parts = {"train": [], "val": [], "test": []}
+    for c in sorted(set(y[known_pool].tolist())):
+        ii = known_pool[y[known_pool] == c]
+        ii = ii[np.argsort(ts_all[ii], kind="stable")]
+        a = int(round(len(ii) * (1 - P["val_frac"] - P["test_frac"])))
+        b = int(round(len(ii) * (1 - P["test_frac"])))
+        parts["train"].append(ii[:a]); parts["val"].append(ii[a:b]); parts["test"].append(ii[b:])
+        SPLIT_NOTES.append("%-18s train <= %s | val %s .. %s | test >= %s"
+                           % (c, ts_all[ii[a - 1]], ts_all[ii[a]], ts_all[ii[b - 1]],
+                              ts_all[ii[b]]))
+    tr_idx = np.concatenate(parts["train"])
+    val_idx = np.concatenate(parts["val"])
+    te_known_idx = np.concatenate(parts["test"])
 te_idx = np.concatenate([te_known_idx, zd_idx])  # zero-day appended to TEST only
 
 X_tr, y_tr = X[tr_idx], y[tr_idx]
@@ -132,7 +188,7 @@ np.save(os.path.join(OUT, "zero_day_classes.npy"), np.array(sorted(ZERO_DAY)))
 import timeline
 for _sp, _idx in (("train", tr_idx), ("val", val_idx), ("test", te_idx)):
     _ts = timeline.parse(meta.iloc[_idx]["Timestamp"])
-    timeline.write_corrected(_sp, _ts)
+    timeline.write_corrected(_sp, _ts, root=OUT)
 print(f"wrote corrected timestamp_{{train,val,test}}.npy -> {OUT}")
 
 # ---- report + leakage assertions ----
@@ -140,7 +196,9 @@ lines = []
 def log(s): print(s); lines.append(s)
 
 log("\n" + "=" * 60)
-log("PAPER-ALIGNED SPLIT REPORT")
+log("PAPER-ALIGNED SPLIT REPORT" + ("" if SPLIT_MODE == "random" else "  (SPLIT_MODE=%s)" % SPLIT_MODE))
+for _n in SPLIT_NOTES:
+    log(_n)
 log("=" * 60)
 for name, arr in [("TRAIN", y_tr), ("VAL", y_val), ("TEST", y_te)]:
     u, c = np.unique(arr, return_counts=True)
