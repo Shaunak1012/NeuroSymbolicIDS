@@ -118,7 +118,8 @@ started.**
 Three established results: **(1)** a **double dissociation** between the CNN (`cnn_paper.py`) and the
 autoencoder (`autoencoder_paper.py`) — 3.9–40 SD of the measured noise floor, the only comparative
 claim in the project with that margin, though it is a dissociation between *two models*, **not** two
-method families; **(2)** the CNN's Bot failure is **representational** — 100% of Bot flows are
+method families *(2026-09-17: its direction holds on every seed of the grouped and chronological
+splits too)*; **(2)** the CNN's Bot failure is **representational** — 100% of Bot flows are
 classified BENIGN (all **17** CNN runs), Bot's discriminative features have 0/8 overlap with the
 known-class task's~~, and the resulting Bot ranking is **noise** (cross-seed ρ = −0.090)~~ *(retracted
 2026-09-17: over all CNN run pairs Bot's median ρ is +0.55/+0.59 — least consistent family, not noise;
@@ -137,15 +138,17 @@ Do not restate it here — that is exactly what kept rotting.
 
 **Next action (resume here — as of 2026-09-17):** read STATUS → "REMEDIATION, DAY 2" and
 `REMEDIATION_ITINERARY.md` §14. Branch `fix/audit-remediation` (not pushed).
-1. **Collect the D4 split variants** when `split_variants.sh` finishes (both lanes): run
-   `python scripts/split_variants.py`, then write the result into the paper's limitations / Appendix A,
-   STATUS, KNOWN_ISSUES (F-02/F-03), with `verify_draft.py` checks and a test. ⚠️ The grouped split
-   moved 42,500 flows into test, so its zero-day change is not purely leakage.
-2. **Collect the sandbox `run_all.py --run`** (`outputs/sandbox_e2e/.../run_all_report.json`): record
-   which stages fail and why, fix the stage declarations, and replace the "never executed end to end"
-   statement below with what was actually shown.
-3. Author decisions **D3** (notebook) and **D5** (push). Optional: Mahalanobis on the det CNN; whether
-   the tuned forest's features overlap Bot's (KNOWN_ISSUES 2026-09-17).
+1. ~~**Collect the D4 split variants**~~ ✅ done 2026-09-17 (grouped −0.071; chronological halves the
+   AE; dissociation direction holds everywhere — STATUS).
+2. ~~**Collect the second sandbox run**~~ ✅ done 2026-09-18: 20/26 stages, 6.5 h, **72 artifacts
+   byte-identical, 0 different** (`repro_compare.py`; records in `outputs/metadata/run_all_sandbox2/`).
+   Only the declared-external stages are incomplete.
+3. ~~Author decisions **D3** and **D5**~~ ✅ 2026-09-18: D3 = the notebook is **not** the deliverable
+   (kept private, gitignored); D5 = push as five sequential PRs, each merged locally `--no-ff`.
+   ~~whether the tuned forest's features overlap Bot's~~ answered (E4 failed).
+4. **Next, and ask the author before starting each:** itinerary 5.4 (base-paper class balancing),
+   6.4 (evasion experiment), 6.5 (view 5 on the relabelled data), **then** 4.4 (Mahalanobis on the
+   deterministic CNN).
 
 ~~**Next action (resume here — as of end of 2026-09-16):**~~ *(superseded 2026-09-17)* read STATUS → "AUDIT + REMEDIATION" and
 `REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).
@@ -237,7 +240,10 @@ pre-registered before running). The failure is **representational, not informati
   11 pre-flag CNN runs, Bot's median ρ is **+0.55 / +0.59** (pairs −0.54 to +0.92) — the least
   consistent family, not noise. RF's 0.068 is its default `max_features="sqrt"`; tuned on validation
   (`baselines_tuned.py`, `max_features=0.3`) it gives **+0.923** and Bot PR-AUC **0.2196** (6.4×
-  chance). Sixth "three runs looked decisive" trap; the absorption (17/17 runs) and 0/8 overlap stand.
+  chance). Sixth "three runs looked decisive" trap; the absorption (17/17 runs) stands.
+  🔴 **And the overlap account failed its first direct test (E4, pre-registered, 2026-09-17):** the tuned
+  forest reaches Bot while weighting Bot's features *less* (0.19 vs 0.21). "0/8 overlap" is one XGBoost
+  proxy's ranking (both forests: 2/8). Write overlap as an account of the **CNN**, never as a law.
 - ~~**One cause, four symptoms** — this explains the Phase-4 purity lottery, the Mahalanobis Bot
   spread, and RF's Bot swing simultaneously.~~ RF's swing is a configuration effect, so only the CNN's
   failure is a measured symptom. Not an information limit (oracle PR-AUC 0.9988).
@@ -346,11 +352,13 @@ A working virtualenv lives at **`.venv/`** (Python 3.11.9, TensorFlow 2.15.1 / K
 
 Run from the project root, in order, **using the venv interpreter**. Each step consumes the previous step's artifacts (organised under `data/processed/`, `models/`, `outputs/` — see `scripts/paths.py`).
 
-**The pipeline is now declared once, in [`scripts/run_all.py`](scripts/run_all.py)** — 19 stages
-with the artifacts each writes. `python scripts/run_all.py` checks what is on disk (default);
-`--run` executes; `--run --from <stage>` resumes. ⚠️ The sequence has been **checked** end to end and
-**never executed** end to end in one pass — say so rather than implying a validated one-command
-reproduction. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
+**The pipeline is now declared once, in [`scripts/run_all.py`](scripts/run_all.py)** — 26 stages
+with the environment of each run, what each needs and makes, and the **external** inputs only other
+experiments produce. `python scripts/run_all.py` checks (default); `--run` executes; `--run --from
+<stage>` resumes. ~~⚠️ The sequence has been **checked** end to end and **never executed** end to end
+in one pass~~ *(2026-09-18: **executed end to end** from the raw CSVs — 20/26 stages, **72 artifacts byte-identical,
+0 different**; the 6 incomplete stages are the declared-external ones. See STATUS.)* It is a validated
+reproduction path for everything except those: 7 inputs are external. The list below is kept as the human-readable form; **if the two disagree, `run_all.py`
 is the one that is executable.**
 
 **Current pipeline (paper-aligned split — this is what all reported results use):**
@@ -375,7 +383,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 87 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **17 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `split_variants.sh`, `ae_seeds.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 88 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **17 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `split_variants.sh`, `ae_seeds.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -388,7 +396,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 87 Python scripts + 17 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 88 Python scripts + 17 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline

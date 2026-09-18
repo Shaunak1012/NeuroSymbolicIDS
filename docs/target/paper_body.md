@@ -15,18 +15,19 @@ external attack taxonomy, is information the neural network could not compute fr
 system did not have this property. Its Logic Tensor Network axioms are deterministic functions of the
 flow features the network already receives. On its own the symbolic component had no measurable effect
 (−0.0004, n.s.), and it was worse than the same trainer run without axioms in all 17 CNN training runs
-we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge can help a neural detector only to the extent that it lies
-outside the model's learned feature basis, and that the same condition explains a second failure. A
-closed-set classifier reaches an attack family it has never seen only in so far as that family's
-signature overlaps the features it learned. For Bot there is no overlap (0 of 8 discriminative features
-are shared), and every Bot flow is classified as benign in all 17 of our CNN training runs. The result
-held under five attempts to overturn it,
-among them an independent capture in which Bot is common and a relabelled release of the dataset. We
-then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not. Host-role
-predicates derived from metadata the network never sees can still be predicted from its features, with
-AUC 0.990–0.994. Knowledge aggregated from the capture itself is not exogenous, and a benchmark with no
-external knowledge source therefore cannot support the experiment that published neuro-symbolic gains
-rely on.
+we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge
+can help a neural detector only to the extent that it lies outside the model's learned feature basis,
+and we ask whether the same condition explains a second failure. None of the eight features that best
+separate Bot from benign traffic is among the eight that a model of the known-class task relies on most,
+and every Bot flow is classified as benign in all 17 of our CNN training runs. This failure held under
+five attempts to overturn it, among them an independent capture in which Bot is common and a relabelled
+release of the dataset. The overlap account is not complete, however: a random forest tuned on
+validation reaches Bot in part without relying more on Bot's features, as a test we specified in advance
+showed. We then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not.
+Host-role predicates derived from metadata the network never sees can still be predicted from its
+features, with AUC 0.990–0.994. Knowledge aggregated from the capture itself is not exogenous, and a
+benchmark with no external knowledge source therefore cannot support the experiment that published
+neuro-symbolic gains rely on.
 
 ---
 
@@ -56,10 +57,11 @@ could act as an inductive bias. It could not add evidence.
 We state this as a precondition: symbolic knowledge helps a neural detector to the extent that it lies
 outside the model's learned feature basis. The paper makes three contributions around it.
 
-1. **One principle with two consequences (§3–§4).** The same condition governs attack families that are
-   absent from training. A closed-set learner reaches such a family only as far as the family's
-   signature overlaps the features the learner selected. Knowledge that falls inside that basis adds
-   nothing, and a class that falls outside it is not reached.
+1. **One principle, and how far it reaches (§3–§4).** Knowledge that falls inside the learned basis adds
+   nothing. We ask whether the same condition explains attack families that are absent from training:
+   our CNN never reaches Bot, whose discriminative features are not among those the known-class task
+   relies on. A tuned random forest reaches Bot in part without relying more on those features, so
+   overlap is an account of the CNN's failure, not a general law.
 2. **A durability test (§5).** The unreachability survives five separate attempts to break it: a capture
    in which the family is plentiful, corrected labels, an explicitly trained reject class, cross-dataset
    augmentation, and a sweep over architectures and out-of-distribution scorers.
@@ -72,16 +74,18 @@ outside the model's learned feature basis. The paper makes three contributions a
 **Figure 1.** *One principle, two consequences.* Both panels show the same learned feature basis, that
 is, the features a closed-set objective selects. (a) Symbolic knowledge can only help from outside the
 basis. Our Logic Tensor Network axioms are functions of the flow features and add no evidence, while the
-knowledge used in published systems [14–16] cannot be computed from the input. (b) An unseen attack
-family can be reached only as far as it overlaps the basis. Web Brute Force shares 1 of 8 discriminative
-features and is reached only weakly once label artefacts are removed (§7). Bot shares none and is not
-reached. Note that inside and outside lead to opposite outcomes in the two panels.
+knowledge used in published systems [14–16] cannot be computed from the input. (b) Our account of unseen
+families: a family is reached as far as it overlaps the basis. Web Brute Force shares 1 of 8
+discriminative features and is reached only weakly once label artefacts are removed (§7). Bot shares none
+and is not reached by the CNN. A tuned random forest reaches Bot in part without relying more on its
+features (§4), so panel (b) describes our CNN rather than every model. Note that inside and outside lead
+to opposite outcomes in the two panels.
 
 Two measurement problems limit the magnitudes we can report (§7), and we show both on our own system.
 The metric most papers report cannot separate methods by zero-day ability. In addition, once the labels
 are corrected, two of our three main zero-day families turn out to have been measuring whether the
 dataset labels a failed connection attempt as an attack. These problems cap what we can claim about
-effect sizes, but they do not affect the mechanism.
+effect sizes, but they do not affect the CNN's failure on Bot.
 
 ---
 
@@ -164,13 +168,15 @@ reached only as far as that class's signature overlaps the learned basis. This i
 §3 again, with an unseen class in the place of an injected predicate. When the overlap is empty,
 nothing in the training objective constrains the model's output on the class.
 
-Bot is a case where the overlap is empty, and we use it to test this account:
+Bot is a case where the overlap appears to be empty, and we use it to test this account:
 
 - In all 17 CNN training runs, 100 % of Bot flows are classified as BENIGN, with a mean p(BENIGN) of at
   least 0.998 in every run. The model is not uncertain about Bot; it is confidently wrong, so
   confidence-based rejection methods have nothing to work with.
 - The eight features that best separate Bot from benign traffic have 0 of 8 in common with the eight
-  features most used for the known classes.
+  that a gradient-boosted model of the known-class task uses most. This belongs to that model's
+  importance ranking rather than to the task: two random forests trained on the same task each have 2 of
+  the 8 among their own top eight.
 - Bot is the family whose ranking agrees least between training runs (Figure 2). Over all 15 pairs of
   six deterministic CNN runs, the median Spearman correlation on Bot flows is +0.55, and single pairs
   range from −0.52 to +0.92; the web families have medians of +0.81 and +0.93. The 11 runs trained before
@@ -195,9 +201,13 @@ its feature sampling selected on validation is the most consistent model on Bot,
 depends on the model's configuration and not only on closed-set training.
 
 Taken together, knowledge that lies inside the basis (our axioms) adds no evidence, and a class that lies
-outside it (Bot) is not reached by the CNN. Both follow from what a closed-set objective does and does
-not constrain. A tuned random forest reaches Bot partially, and we have not measured whether its
-features overlap Bot's more than the CNN's do. The evidence is stronger for the unreachable case than for the reachable one (§7). Our
+outside it (Bot) is not reached by the CNN. Both are consistent with what a closed-set objective does
+and does not constrain. A tuned random forest reaches Bot partially, and the account predicts that it should rely on Bot's
+features more than the untuned forest does. We specified this test before running it, and it failed:
+the tuned forest puts less of its importance on Bot's eight features (0.19 against 0.21, lower on every
+seed) and more on the eight known-class features (0.39 against 0.24). Overlap as we measure it
+therefore does not decide which models reach Bot, and we offer the account as an explanation of the
+CNN's failure rather than as a general law. The evidence is stronger for the unreachable case than for the reachable one (§7). Our
 support for the claim that overlapping families are reached came from web-attack scores, and most of
 those scores disappear under corrected labels. The ordering between families holds; the sizes of the
 scores do not.
@@ -374,7 +384,8 @@ test are conventions. We do not evaluate against adaptive adversaries, and the s
 deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
 optimistic: at the capture's own benign proportion the CNN's macro zero-day PR-AUC is 0.5845, not
 0.6299. The split is stratified at random over a chronologically ordered capture and is not grouped by
-connection; Appendix A reports what crosses the boundary.
+connection. Grouping by connection lowers the CNN's macro zero-day PR-AUC from 0.6299 to 0.5589, and a
+chronological split halves the benign-only autoencoder's score (Appendix A).
 
 **Conclusion.** Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside
 the model's learned feature basis. The same condition makes an attack family with no overlap unreachable,

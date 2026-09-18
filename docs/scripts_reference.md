@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (87 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py` and `bot_mechanism_recheck.py` 2026-09-17, plus `tests/`).
+> Last verified against source: **2026-09-05** (88 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** · **`baselines_tuned`** · **`bot_mechanism_recheck`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** · **`baselines_tuned`** · **`bot_mechanism_recheck`** · **`repro_compare`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
@@ -1225,6 +1225,22 @@ holds in 17/17 runs; Bot's median ρ is **+0.55** (deterministic) / **+0.59** (p
 logged to `runs.jsonl`. **Writes** `bot_mechanism_recheck.json` and `y_prob_<run>_logodds_test.npy` for
 runs that had none. `paper_figures.py --nesy` builds Figure 2 from it.
 
+## `scripts/repro_compare.py`
+
+*(added 2026-09-17, audit item 7.4.)* Compares a `run_all.py --run` sandbox (`NSIDS_WORKDIR`) with the
+canonical tree, file by file. Processed data and the split are compared at the same path; the sandbox's
+seed-s CNN and autoencoder are compared with the **deterministic** canonical runs `c4_log1p_s<s>` and
+`ae_det_s<s>` (the canonical `cnn_paper*` / `autoencoder_paper*` files are pre-flag); baselines, KG and
+tuned baselines by name. Novelty and LTN scores and derived JSONs are listed as `no_counterpart`.
+Arrays are compared byte-for-byte, then numerically (`float_level`); histories by content; the
+behaviour-threshold dict by relative difference. Exit 1 if anything is `different`. **First sandbox:** 40
+identical, 2 float-level (random forest 4.4e-16, thresholds 2.4e-14), 0 different. **Writes**
+`repro_compare_<sandbox>.json`.
+
+```bash
+python scripts/repro_compare.py outputs/sandbox_e2e2
+```
+
 ## `scripts/audit_rebase.sh`
 
 *(added 2026-09-16, audit F-01 / CL-02.)* The training the audit's re-base needs, in two concurrent
@@ -2010,10 +2026,23 @@ python scripts/run_all.py --run --from kg  # resume from a named stage
 making that the default behaviour of something called `run_all` is a foot-gun. Exit 1 if any declared
 artifact is missing.
 
-⚠️ **Honest limit, stated in the paper too: the sequence has been CHECKED end to end and never
-EXECUTED end to end in one pass.** Every stage has run individually, most dozens of times, but *"each
-stage works"* and *"the sequence works from a clean checkout"* are different claims and only the
-first is evidenced.
+~~⚠️ **Honest limit, stated in the paper too: the sequence has been CHECKED end to end and never
+EXECUTED end to end in one pass.**~~ *(superseded 2026-09-17, below)* Every stage has run individually,
+most dozens of times, but *"each stage works"* and *"the sequence works from a clean checkout"* are
+different claims.
+
+🔴 **Reworked 2026-09-17 after its first execution (audit item 7.4).** `--run --keep-going` into a
+sandbox (`NSIDS_WORKDIR`) reproduced preprocess, split, timeline and the seed-42 CNN **byte for byte**
+from the raw CSVs, and showed the 19-stage list could not reproduce the rest: it declared seed-42
+artifacts only while fusion / significance / ablation / fitted fusion read seeds 43–44; the `ltn` stage
+ran default settings (a different tag from the LTN control everything reads) and the +Ax6 arm was
+missing; nothing produced the log-odds (`rescore_logits.py`) or the CNN + KG channel (`fusion_kg.py`).
+Each stage is now a dict with **`runs`** (one environment per execution — seeds, LTN settings),
+**`makes`**, **`needs`** and **`external`**. `--check` verifies statically that every `needs` entry is
+made by an **earlier** stage and lists the **external** inputs — records only an experiment outside
+this list produces (the 11-run pre-flag CNN population, the field_gap method sweeps, noise_postdet,
+protocol_variance, the deterministic CNN / AE populations). A stage fails at `--run` if any execution
+exits non-zero or its artifacts are not written fresh; outcomes go to `run_all_report.json`.
 
 🔑 **A stage that declares no artifact cannot fail the check**, so the summary line counts and warns
 about them — the same shape as the script-count regex that passed on a wrong count in 2026-08-05.
@@ -2025,7 +2054,8 @@ non-ASCII output raises `UnicodeEncodeError`. This script is meant to run direct
 `run_long.sh` (which forces UTF-8) — and the first version **crashed on its own warning banner**,
 which is the bug CLAUDE.md records being fixed three times as separate incidents.
 
-**Current state: 19 stages · 0 artifacts missing · 0 unchecked stages.**
+**Current state (2026-09-17): 26 stages · 0 artifacts missing · 0 unproduced needs · 7 external
+inputs.**
 
 ## `scripts/verify_draft.py`
 

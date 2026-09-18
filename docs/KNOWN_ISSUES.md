@@ -8,6 +8,17 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## ✅ 2026-09-18 — The pipeline runs end to end (7.4)
+
+### [FIXED 2026-09-18] 🟡 "`run_all.py` has never been executed end to end"
+
+Executed from the raw CSVs into an empty directory: 20 of 26 stages in 6.5 h, **72 artifacts
+byte-identical** to the canonical deterministic ones, 4 float-level, **0 different**
+(`repro_compare.py`, `repro_compare_sandbox_e2e2.json`). The claim in CLAUDE.md, the paper and
+`scripts_reference.md` is replaced by what was shown. The six incomplete stages have **declared external
+inputs** (the 11-run pre-flag CNN population, the field-gap sweeps, `noise_postdet`,
+`protocol_variance`) — a run from a clean checkout reproduces everything else.
+
 ## 🔴 2026-09-17 — Remediation, day 2: one more retraction, four latent re-run defects
 
 ### [FIXED 2026-09-17] 🔴 "The CNN's Bot ranking is noise (ρ = −0.090)" was three runs — retracted
@@ -24,7 +35,14 @@ CLAUDE.md; `verify_draft.py` flags the retracted wording if it returns unstruck;
 **What stands:** 100 % of Bot flows are classified BENIGN in **all 17** CNN runs; 0/8 feature overlap;
 oracle 0.9988. **Sixth single-population trap**, and the second caught in the same three runs.
 
-### [OPEN 2026-09-17] 🟡 Does the tuned forest reach Bot because its features overlap Bot's?
+### [ANSWERED 2026-09-17 — NO] 🔴 Does the tuned forest reach Bot because its features overlap Bot's?
+
+> 🔴 **Pre-registered E4 failed.** The tuned forest puts **less** importance on Bot's eight features
+> (0.19 vs 0.21, every seed) and more on the known-class eight (0.39 vs 0.24); both forests have 2 of
+> Bot's 8 in their own top eight, so the paper's "0 of 8" is one XGBoost proxy's ranking. The overlap
+> account is now stated as an explanation of the CNN's failure, not a general law. Open successor:
+> what *does* let the tuned forest rank Bot (it still scores every Bot flow below 0.5)?
+
 
 The tuned forest ranks Bot at 6.4× chance and consistently (ρ +0.923) while still scoring every Bot
 flow below 0.5. The paper's mechanism predicts reach in proportion to feature overlap, but the 0/8
@@ -46,6 +64,15 @@ written:
 `metric_divergence.py` excluded the chronological split's runs only because that test set is one row
 shorter (114,657 vs 114,658). The split-variant runs also log to the shared `runs.jsonl`; any future
 consumer that aggregates by name must pin its population the same way.
+
+### [FIXED 2026-09-17] 🟡 Two scripts wrote partial records and exited 0
+
+The first `run_all.py --run` (sandbox, old stage list) ran `significance.py` and `field_gap.py` with most
+inputs absent. `significance.py` skipped all 13 comparisons and wrote a `significance.json` with **none**;
+`field_gap.py` wrote a 9-method record against its pinned 42. Both exited 0, so the runner counted them
+as passed, and in the canonical tree either would silently replace a good record. **Fix:** both refuse
+to write an incomplete result and exit 2. Re-run on the canonical tree: `significance.json`,
+`field_gap.json` and `field_gap.png` byte-identical.
 
 ### [OPEN 2026-09-17] ⚪ `behaviour_thresholds.npy` differs from a fresh run in the 14th digit
 
@@ -70,7 +97,14 @@ relative to the *known attacks*, which a benign-only PR-AUC never measures and w
 runs of one configuration. `scripts/fusion_population.py`. **Open question:** whether any fusion rule
 is stable across CNN runs (not ensemble averaging — that fused worse, 2026-09-10).
 
-### [OPEN 2026-09-16] 🔴 The split is neither grouped nor chronological (F-02, F-03)
+### [MEASURED 2026-09-17] 🔴 The split is neither grouped nor chronological (F-02, F-03)
+
+> ✅ **Measured** (`split_variants.py`, three deterministic seeds per model and split). Grouping costs
+> the CNN **0.071** (0.6299 → 0.5589; XSS 0.9430 → 0.7947, Web BF 0.9147 → 0.8553), not through the
+> benign flows it moves into test (0.5602 without them); chronological order costs it 0.028 and
+> **halves the autoencoder** (0.0985 → 0.0455, known-class 0.92 → 0.66). The double dissociation keeps
+> its direction on every seed of every split. Stays open as a design fact: the headline is still the
+> random split, and the paper now reports all three.
 
 54.88 % of test flows share their 5-tuple with a training flow (100 % for four DoS families and all
 three Web Attack zero-day families); 100 % of test lies inside the training time range.
@@ -111,10 +145,15 @@ XGBoost / RF / IsolationForest never see the validation split. ~~Not yet re-run 
 Selected on Bot labels (commit 8c9e40f). Relabelled in `behavior.py` and the paper; no conclusion
 depends on it because the symbolic arms had no positive effect. Stays open as a design fact.
 
-### [OPEN 2026-09-16] 🟡 A second pipeline lives in an untracked notebook (F-13, F-14)
+### [CLOSED 2026-09-18 — D3: not the deliverable] 🟡 A second pipeline lives in an untracked notebook (F-13, F-14)
+
+> ✅ **D3 decided: the notebook is not the capstone deliverable.** It stays private: gitignored, not
+> archived in the public repository. Recorded here so the caveats survive: its "Heartbleed 0 → 100 %
+> recall" rests on **n=11** flows (one connection) at a **10.2 %** system FPR, and its zero-day set is
+> the **base paper's**, not `config.yaml`'s. None of its numbers is cited anywhere.
 
 `Capstone_final (4) (1).ipynb`: 70 features, the base paper's zero-day set, accuracy headline, all
-`execution_count` null, a Heartbleed rule "validated" on n=11. Decision **D3**.
+`execution_count` null, a Heartbleed rule "validated" on n=11. ~~Decision **D3**.~~
 
 ### [OPEN 2026-09-16] 🟡 No adversarial evaluation (F-16); one reporting split (F-17)
 

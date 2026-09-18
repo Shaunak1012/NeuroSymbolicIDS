@@ -2,6 +2,18 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-18 (The pipeline is executed end to end — 7.4 closed)
+
+`run_all.py --run --keep-going` from the raw CSVs into an empty directory (2026-09-17 20:18 →
+2026-09-18 02:51, 6.5 h): **20 of 26 stages**; `repro_compare.py` reports **72 byte-identical**
+artifacts against the canonical tree (data, split, timestamps, 3 CNN seeds with embeddings and
+histories, 3 autoencoders, every KG seed, classical and tuned baselines), 4 float-level, **0 different**.
+The run re-derived the comparative results as well (CNN 0.6299; CNN + KG 0.5103; AE − CNN on Bot
+−0.1017; RF ties AE on Bot, n.s.). The six incomplete stages are the declared-external ones plus the two
+figure stages downstream of them; `field_gap` exited 2 instead of writing a partial record. Records in
+`outputs/metadata/run_all_sandbox2/`; the paper's reproducibility appendix and the master draft now state
+this instead of "never executed end to end". New script `repro_compare.py`.
+
 ## 2026-09-17 (Remediation day 2 — Bot-ranking claim retracted; the pipeline reproduces from raw data)
 
 Branch `fix/audit-remediation`, not pushed. The author approved D1 (keep 1:1, report both), D4 (run the
@@ -13,6 +25,18 @@ Bot's median rank agreement is +0.55 / +0.59 (pairs −0.54 to +0.92); −0.090 
 runs. The forest's 0.068 is its default `max_features`; tuned, +0.923. Absorption (every Bot flow
 BENIGN) holds in all 17 runs. Paper abstract, §4, Figure 2 (redrawn), Appendix C and master draft
 (struck in place) corrected; CLAUDE.md's "established result (2)" struck.
+
+**🔴 Pre-registered E4 failed** (`RECHECK_FOREST=1 bot_mechanism_recheck.py`): the tuned forest, which
+reaches Bot, weights Bot's features less than the default forest (0.19 vs 0.21) and the known-class ones
+more (0.39 vs 0.24); both forests share 2 of Bot's 8 features in their top eight. The paper now presents
+feature overlap as an account of the CNN's failure, not a general law (abstract, contribution 1,
+Figure 1 caption, §4, Appendix C, master draft), and withdraws "reachability follows overlap" for 2018.
+
+**D4 measured** (`split_variants.py`): grouped split CNN 0.5589 (−0.071, every seed below every random
+seed; web families; not the moved benign flows; absorption unchanged), chronological CNN 0.6019 and AE
+0.0455 (halved; benign drift), double dissociation direction-consistent on every seed of all three
+splits. In Appendix A, §9, master draft; checked and pinned. A corrected 26-stage `run_all.py --run`
+started in a fresh sandbox.
 
 **F-12 closed** (`baselines_tuned.py`): validation-selected XGBoost 0.6180, RandomForest 0.6407 (≈ det CNN
 0.6299), IsolationForest 0.0564. Tuned forest Bot 0.2196 (6.4× chance). Reported under pitfall P6.

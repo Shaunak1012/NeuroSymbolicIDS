@@ -1,0 +1,226 @@
+{
+ "CNN": {
+  "components": [
+   "CNN"
+  ],
+  "per_seed_macro": [
+   0.6297617659609561,
+   0.6268735888676821,
+   0.6330331080781119
+  ],
+  "macro_mean": 0.6298894876355834,
+  "macro_min": 0.6268735888676821,
+  "macro_max": 0.6330331080781119,
+  "families": {
+   "Bot": 0.032050659325434265,
+   "Web Attack Brute Force": 0.914650207184546,
+   "Web Attack XSS": 0.9429675963967696
+  }
+ },
+ "CNN + LTN-ctrl": {
+  "components": [
+   "CNN",
+   "LTN-ctrl"
+  ],
+  "per_seed_macro": [
+   0.6278374771804113,
+   0.6259555969526743,
+   0.629226400197377
+  ],
+  "macro_mean": 0.6276731581101541,
+  "macro_min": 0.6259555969526743,
+  "macro_max": 0.629226400197377,
+  "families": {
+   "Bot": 0.03678167935297865,
+   "Web Attack Brute Force": 0.9117951608542296,
+   "Web Attack XSS": 0.9344426341232542
+  },
+  "paired_delta_per_seed": [
+   -0.0019242887805448472,
+   -0.0009179919150077431,
+   -0.003806707880734894
+  ],
+  "paired_delta_mean": -0.0022163295254291615,
+  "seeds_improved": 0
+ },
+ "CNN + LTN-Ax6": {
+  "components": [
+   "CNN",
+   "LTN-Ax6"
+  ],
+  "per_seed_macro": [
+   0.6309000933262056,
+   0.6270043256183744,
+   0.6315220093711355
+  ],
+  "macro_mean": 0.6298088094385718,
+  "macro_min": 0.6270043256183744,
+  "macro_max": 0.6315220093711355,
+  "families": {
+   "Bot": 0.03531431934042653,
+   "Web Attack Brute Force": 0.9139294337011652,
+   "Web Attack XSS": 0.9401826752741237
+  },
+  "paired_delta_per_seed": [
+   0.0011383273652494363,
+   0.00013073675069230628,
+   -0.0015110987069764104
+  ],
+  "paired_delta_mean": -8.067819701155592e-05,
+  "seeds_improved": 2
+ },
+ "CNN + KG": {
+  "components": [
+   "CNN",
+   "KG"
+  ],
+  "per_seed_macro": [
+   0.5420203297971954,
+   0.5154424291361229,
+   0.473536026348469
+  ],
+  "macro_mean": 0.5103329284272624,
+  "macro_min": 0.473536026348469,
+  "macro_max": 0.5420203297971954,
+  "families": {
+   "Bot": 0.2185636456552027,
+   "Web Attack Brute Force": 0.8653558072498444,
+   "Web Attack XSS": 0.4470793323767403
+  },
+  "paired_delta_per_seed": [
+   -0.08774143616376073,
+   -0.11143115973155915,
+   -0.1594970817296429
+  ],
+  "paired_delta_mean": -0.11955655920832092,
+  "seeds_improved": 0
+ },
+ "CNN + LTN-Ax6 + KG (FULL)": {
+  "components": [
+   "CNN",
+   "LTN-Ax6",
+   "KG"
+  ],
+  "per_seed_macro": [
+   0.6432927168781736,
+   0.5485028408046821,
+   0.5271563238396414
+  ],
+  "macro_mean": 0.5729839605074991,
+  "macro_min": 0.5271563238396414,
+  "macro_max": 0.6432927168781736,
+  "families": {
+   "Bot": 0.14789312564350685,
+   "Web Attack Brute Force": 0.8891905812775344,
+   "Web Attack XSS": 0.681868174601456
+  },
+  "paired_delta_per_seed": [
+   0.013530950917217455,
+   -0.07837074806299993,
+   -0.10587678423847047
+  ],
+  "paired_delta_mean": -0.05690552712808431,
+  "seeds_improved": 1
+ },
+ "CNN + LTN-ctrl + KG": {
+  "components": [
+   "CNN",
+   "LTN-ctrl",
+   "KG"
+  ],
+  "per_seed_macro": [
+   0.6199143154322885,
+   0.5750946166318787,
+   0.5931606307540188
+  ],
+  "macro_mean": 0.5960565209393954,
+  "macro_min": 0.5750946166318787,
+  "macro_max": 0.6199143154322885,
+  "families": {
+   "Bot": 0.15723149952869098,
+   "Web Attack Brute Force": 0.8903723649153771,
+   "Web Attack XSS": 0.7405656983741179
+  },
+  "paired_delta_per_seed": [
+   -0.009847450528667645,
+   -0.05177897223580341,
+   -0.03987247732409305
+  ],
+  "paired_delta_mean": -0.03383296669618804,
+  "seeds_improved": 0
+ },
+ "_bootstrap": [
+  {
+   "a": "CNN + KG",
+   "b": "CNN",
+   "diff": -0.11955655920832098,
+   "ci95": [
+    -0.13133562036447372,
+    -0.10667403258629253
+   ],
+   "p": 0.0,
+   "significant": true
+  },
+  {
+   "a": "CNN + LTN-ctrl",
+   "b": "CNN",
+   "diff": -0.0022163295254292725,
+   "ci95": [
+    -0.008869275755651449,
+    0.0020206064266654663
+   ],
+   "p": 0.582,
+   "significant": false
+  },
+  {
+   "a": "CNN + LTN-Ax6",
+   "b": "CNN",
+   "diff": -8.067819701162993e-05,
+   "ci95": [
+    -0.004810613777929354,
+    0.003516340641866313
+   ],
+   "p": 0.933,
+   "significant": false
+  },
+  {
+   "a": "CNN + LTN-Ax6 + KG (FULL)",
+   "b": "CNN + KG",
+   "diff": 0.0626510320802367,
+   "ci95": [
+    0.05449246264071951,
+    0.07086912607399334
+   ],
+   "p": 0.0,
+   "significant": true
+  },
+  {
+   "a": "CNN + LTN-Ax6 + KG (FULL)",
+   "b": "CNN",
+   "diff": -0.05690552712808428,
+   "ci95": [
+    -0.0696018014854034,
+    -0.043420051728468176
+   ],
+   "p": 0.0,
+   "significant": true
+  }
+ ],
+ "_predictions": {
+  "A1": false,
+  "A2": true,
+  "A3": true,
+  "A4": false
+ },
+ "_meta": {
+  "seeds": [
+   42,
+   43,
+   44
+  ],
+  "noise_floor_sd": 0.0222,
+  "bootstrap_B": 2000,
+  "fusion": "equal-weight rank mean, nothing fitted",
+  "reference": "paired per-seed delta (rungs share the CNN run)"
+ }
+}

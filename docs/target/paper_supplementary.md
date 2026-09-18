@@ -61,6 +61,24 @@ of other classes, mostly DoS Hulk and DDoS. The web and DoS attacks were launche
 5-tuples mark the same attacker and target rather than the same connection. This agrees with the
 absorption result in Appendix D: the CNN places most web-attack flows in a known DoS class.
 
+**Two other splits.** We rebuilt the split twice and retrained the CNN and the autoencoder with three
+seeds on each. In the grouped split no 5-tuple appears on both sides of the boundary, which means the
+42,500 known and benign flows that share a 5-tuple with a zero-day flow go to the test set. Grouping
+lowers the CNN's macro zero-day PR-AUC from 0.6299 to 0.5589, about 2.5 times the 0.0285 uncertainty we
+attach to an absolute number (Appendix E), and every grouped seed scores below every seed on the random
+split. Most of the loss is on XSS (0.9430 to 0.7947) and Web Brute Force (0.9147 to 0.8553). The 1,111
+benign test flows that share a 5-tuple with a web attack are not the cause, since without them the macro
+is 0.5602, and the CNN still assigns about 90 % of both web families to `DoS slowloris`. Part of the web
+families' score on the random split therefore comes from training flows of the same attacker and server.
+Known-class detection does not change (0.9999), and 17.6 % of grouped test rows still duplicate a
+training row, because grouping by connection does not remove identical feature vectors. In the
+chronological split each known class trains on its earliest 80 % of flows. The CNN's macro falls to
+0.6019, which is within the uncertainty above, but the benign-only autoencoder falls from 0.0985 to
+0.0455 and its known-class PR-AUC from 0.92 to 0.66: its benign test traffic now comes from later in the
+week than its training traffic. The double dissociation keeps its direction on every seed of all three
+splits, but its Bot half, the autoencoder's advantage, shrinks from 0.102 to 0.076 (grouped) and 0.019
+(chronological).
+
 **Feature transform.** We apply `log1p` to the features. On the main metric this gives 0.6299 ± 0.0031,
 against 0.1606 ± 0.0039 with raw features, over three seeds per setting (Welch t = 163). Our original
 reason for the choice relied on the contaminated overall binary metric, so we repeated the comparison on
@@ -222,14 +240,16 @@ achieve, and explains why.
 
 A closed-set discriminative model learns the features that separate the classes in its training
 objective. A novel class can then be reached only to the extent that its signature overlaps this learned
-basis. When there is no overlap, the model's output on that class is not only poor but unstable, because
-nothing in the objective constrains it. Bot is such a case.
+basis. When there is no overlap, nothing in the objective constrains the model's output on that class.
+Bot appears to be such a case for our CNN.
 
 - In all 17 CNN training runs (11 trained before determinism was enabled, 6 after), 100 % of Bot flows
   are classified as BENIGN, with a mean p(BENIGN) of at least 0.998 in every run. The model is confident that Bot traffic is benign, which is why the confidence-based remedies in Appendix D
   cannot work.
-- The eight features that best separate Bot from benign traffic share 0 of 8 with the eight features
-  selected by the known-class task. (We compare sets of eight; for Web Brute Force the overlap is 1 of 8.)
+- The eight features that best separate Bot from benign traffic share 0 of 8 with the eight features a
+  gradient-boosted model of the known-class task ranks highest. (We compare sets of eight; for Web Brute
+  Force the overlap is 1 of 8.) The ranking belongs to that model: two random forests trained on the same
+  task each have 2 of the 8 (`Destination Port`, `Init_Win_bytes_forward`) among their own top eight.
 - The step from no overlap (unreachable) to one shared feature (reachable) is where the corrected labels
   hurt our argument, and we describe the damage here. Web Brute Force appeared reachable because its
   PR-AUC was 0.92–0.95. With labels that exclude attack flows carrying no payload, this falls to 0.0072
@@ -249,8 +269,15 @@ nothing in the objective constrains it. Bot is such a case.
   same forest gives +0.923, its Bot PR-AUC rises from 0.1311 to 0.2196 (6.4× chance), and every seed
   ranks Bot above chance. The benign-only autoencoder gives +0.754 on its deterministic runs (+0.827 on
   the earlier ones). The inconsistency is therefore a property of this CNN, and of the forest's default
-  configuration, rather than of closed-set discriminative training. We did not measure whether the tuned
-  forest's features overlap Bot's more than the CNN's do.
+  configuration, rather than of closed-set discriminative training.
+- We tested the overlap account on the two forests, with a prediction written down before the run: the
+  tuned forest reaches Bot and the default forest barely does, so the tuned forest should put more of its
+  importance on Bot's eight features, on every seed. It does not. Its share on those features is 0.19
+  (0.193, 0.189, 0.184) against 0.21 for the default forest (0.213, 0.223, 0.204), and its share on the
+  eight known-class features is 0.39 against 0.24. Refitting each forest reproduced its logged predictions
+  exactly. Impurity-based importance is a coarse measure, but it is the measure the overlap figure above
+  uses, and on it the account fails for the forest. We therefore present overlap as an explanation of the
+  CNN's failure, not as a rule that predicts which models reach an unseen family.
 - The information needed to detect Bot is present. An oracle trained with Bot labels reaches a PR-AUC of
   0.9988 from the same 68 flow features (Web Brute Force 0.9999, XSS 0.9984). The oracle uses zero-day
   labels, so it is an upper bound and not a method, and we exclude it from every method comparison. It
@@ -271,8 +298,8 @@ that isolates it as their cause. We present these connections as an explanation,
 because Bot is plentiful there. The CNN nevertheless scores Bot at 0.83× chance on that capture, worse
 than a random ranker, compared with 1.31× on 2017. Infilteration (the 2018 label) behaves similarly
 (0.96×). On the same capture the model reaches 20.1× on Brute Force -Web and 47.3× on Brute Force -XSS.
-More samples do not make Bot reachable, and rarity was not the explanation. Reachability follows overlap
-with the learned basis. The 2018 experiment uses the same training size as 2017 (883,796 flows), so it is
+More samples do not make Bot reachable for the CNN, so rarity was not the explanation. We did not
+measure feature overlap on the 2018 capture. The 2018 experiment uses the same training size as 2017 (883,796 flows), so it is
 not confounded by having four times as much data.
 
 **Out-of-distribution scores.** We evaluated nine post-hoc scorers: maximum softmax probability,
@@ -852,15 +879,39 @@ from before and after this change as different populations and do not pool them.
 pipeline today should be able to reproduce the later results but not the earlier ones exactly; for those,
 the noise floor in Appendix E is the appropriate error bar.
 
-**Entry point.** A single driver script lists the 19 pipeline stages in order, together with the files each
-stage writes. By default it only checks which outputs are present on disk. A flag runs the stages, and a
-further option resumes from a given stage. We chose checking as the default because a full CPU retrain is
-too expensive to trigger by accident.
+**Entry point.** A single driver script lists the 26 pipeline stages in order, with the environment of
+each run it performs (seeds, symbolic settings), the files it writes, the files it needs from earlier
+stages, and the inputs that only experiments outside the pipeline produce. By default it checks which
+outputs are present and verifies that every declared input is produced by an earlier stage. A flag runs
+the stages, and a further option resumes from a given stage. We chose checking as the default because a
+full CPU retrain is too expensive to trigger by accident.
 
-The stage sequence has been checked end to end but never run end to end in a single pass. Every stage has
+**What a run from the raw data reproduces.** We ran the pipeline from the raw CSVs into an empty
+directory. It completed 20 of the 26 stages in 6.5 hours on the machine above. Comparing what it wrote
+with the artifacts behind this paper: 72 files are byte-identical, including the preprocessed data, the
+split, the corrected timestamps, all three CNN seeds with their embeddings and training histories, all
+three autoencoders, every knowledge-graph seed, and the classical baselines. Four differ only at float
+level: the random forest's scores by 4.4e-16 and the behaviour thresholds by 2.4e-14 in relative terms,
+the latter because the stored file predates our dependency lockfile. Nothing differs otherwise. The run
+also reproduced this paper's comparative results end to end: the CNN at 0.6299, the knowledge-graph
+channel costing 0.12 when fused with it, the autoencoder ahead of the CNN on Bot and far behind on the
+web families, and the random forest tying the autoencoder on Bot.
+
+The six stages that did not complete are the ones whose inputs no single pipeline run produces, and the
+driver names them as such: the tuned baselines and the operational profile need the eleven-run
+CNN population measured for the noise floor, the resolution figure needs the method sweeps, and the two
+figure stages need those records in turn. A first execution, before this rework, exposed the problem the
+rework fixes: the stage list then declared one seed where later stages read three, ran the symbolic
+pillar with settings that write a different model than every later stage reads, and never produced the
+log-odds scores or the fused channel. Two scripts also wrote partial records and reported success, which
+is why they now refuse to write when an input is missing.
+
+~~The stage sequence has been checked end to end but never run end to end in a single pass. Every stage has
 been run on its own, most of them many times, but "each stage works" and "the whole sequence works from a
 clean checkout" are different claims, and only the first is supported. The run option is provided for
-convenience and is not a validated reproduction path.
+convenience and is not a validated reproduction path.~~ *(Superseded: the sequence has now been executed
+from the raw data, with the result above. It is a validated reproduction path for everything except the
+six stages named, which need experiments outside it.)*
 
 **Automated checks.** Two checks are included, each added after the corresponding mistake had actually
 occurred:

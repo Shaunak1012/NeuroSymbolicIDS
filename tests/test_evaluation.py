@@ -226,6 +226,99 @@ class BotMechanism(unittest.TestCase):
             self.assertEqual(rf["selected"]["max_features"], "0.3")
             self.assertTrue(all(run["family"]["Bot"] > 0.0342 for run in rf["runs"]))
 
+    def test_overlap_account_fails_for_the_forest(self):
+        """E4 (pre-registered): the tuned forest reaches Bot, yet weights Bot's
+        features LESS than the default forest on every seed."""
+        fo = self.r.get("forest_overlap")
+        if fo is None:
+            self.skipTest("run with RECHECK_FOREST=1")
+        for t, d in zip(fo["tuned"]["per_seed"], fo["default"]["per_seed"]):
+            self.assertTrue(t["refit_reproduces_logged_predictions"])
+            self.assertTrue(d["refit_reproduces_logged_predictions"])
+            self.assertLess(t["share_on_bot_top8"], d["share_on_bot_top8"])
+            self.assertGreater(t["share_on_known_top8"], d["share_on_known_top8"])
+        self.assertFalse(self.r["expectations"]["E4_tuned_forest_weights_bot_features_more"])
+
+
+class SplitVariants(unittest.TestCase):
+    """D4 (2026-09-17): what the grouped and chronological splits change."""
+
+    @classmethod
+    def setUpClass(cls):
+        r = _load("split_variants")
+        if r is None or any("per_seed" not in r["splits"][k]["models"].get(m, {})
+                            for k in ("random", "grouped", "chronological") for m in ("cnn", "ae")):
+            raise unittest.SkipTest("split_variants.json missing or incomplete")
+        cls.s = r["splits"]
+
+    def _macros(self, split, model="cnn"):
+        return [p["macro"] for p in self.s[split]["models"][model]["per_seed"]]
+
+    def test_grouped_split_has_no_shared_5tuple(self):
+        self.assertEqual(self.s["grouped"]["boundary"]["flow_id_overlap"], 0.0)
+        self.assertGreater(self.s["grouped"]["boundary"]["exact_duplicates"], 0.15)
+
+    def test_grouping_lowers_the_cnn_on_every_seed(self):
+        self.assertLess(max(self._macros("grouped")), min(self._macros("random")))
+        g = self.s["grouped"]["models"]["cnn"]
+        # not the benign flows that had to move into test
+        self.assertLess(abs(g["macro_without_shared_5tuple_benign_mean"] - g["macro_mean"]), 0.005)
+
+    def test_chronological_split_breaks_the_autoencoder_not_the_cnn(self):
+        ae_r, ae_c = self.s["random"]["models"]["ae"], self.s["chronological"]["models"]["ae"]
+        self.assertLess(ae_c["macro_mean"], 0.6 * ae_r["macro_mean"])
+        self.assertLess(ae_c["known_only_pr_auc_mean"], 0.7)
+        self.assertGreater(self.s["chronological"]["models"]["cnn"]["known_only_pr_auc_mean"], 0.99)
+
+    def test_double_dissociation_keeps_direction_everywhere(self):
+        for split, row in self.s.items():
+            for fam, v in row["double_dissociation"].items():
+                with self.subTest(split=split, family=fam):
+                    self.assertTrue(v["direction_consistent"])
+                    self.assertEqual(v["cnn_minus_ae_mean"] < 0, fam == "Bot")
+
+    def test_web_families_absorbed_into_slowloris_on_every_split(self):
+        for split, row in self.s.items():
+            for p in row["models"]["cnn"]["per_seed"]:
+                with self.subTest(split=split, seed=p["seed"]):
+                    self.assertEqual(p["absorption"]["Bot"]["modal_class"], "BENIGN")
+                    self.assertEqual(p["absorption"]["Web Attack XSS"]["modal_class"], "DoS slowloris")
+
+
+class EndToEndReproduction(unittest.TestCase):
+    """7.4 (2026-09-18): the run_all execution from the raw CSVs."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rc = _load("repro_compare_sandbox_e2e2")
+        p = os.path.join(paths.METADATA, "run_all_sandbox2", "run_all_report.json")
+        if cls.rc is None or not os.path.exists(p):
+            raise unittest.SkipTest("end-to-end records not present")
+        with open(p, encoding="utf-8") as f:
+            cls.rr = json.load(f)
+
+    def test_nothing_differed_from_canonical(self):
+        self.assertEqual(self.rc["summary"].get("different", 0), 0)
+        self.assertGreaterEqual(self.rc["summary"]["identical"], 72)
+
+    def test_the_trained_models_are_byte_identical(self):
+        want = {"y_prob_cnn_paper%s_test.npy" % ("" if s == 42 else "_s%d" % s) for s in (42, 43, 44)}
+        want |= {"y_prob_autoencoder_paper%s_test.npy" % ("" if s == 42 else "_s%d" % s)
+                 for s in (42, 43, 44)}
+        seen = {os.path.basename(r["sandbox"]): r["verdict"] for r in self.rc["files"]}
+        for f in sorted(want):
+            with self.subTest(file=f):
+                self.assertEqual(seen.get(f), "identical")
+
+    def test_only_the_external_input_stages_failed(self):
+        failed = {s["name"] for s in self.rr["stages"] if not s["ok"]}
+        self.assertEqual(failed, {"baselines_tuned", "bot_recheck", "operational",
+                                  "field_gap", "figures", "paper_figures"})
+        for s in self.rr["stages"]:
+            if s["name"] in failed and s["name"] != "paper_figures":
+                with self.subTest(stage=s["name"]):
+                    self.assertTrue(s["external_inputs"])
+
 
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""

@@ -83,9 +83,9 @@ headline families.
 <summary>Security-framed abstract (2026-09-14), retained for the record</summary>
 
 A closed-set discriminative model learns only the features that separate the classes it was trained
-on, so a novel class is reachable exactly to the extent its signature overlaps that basis. We show
+on, so a novel class is reachable exactly to the extent its signature overlaps that basis. ~~We show
 this is not a metaphor but a measurable property with a testable consequence, and that for one attack
-family the overlap is **empty**. For CIC-IDS2017's Bot family, **0 of 8** discriminative features are
+family the overlap is **empty**.~~ *(Corrected 2026-09-17: the 0-of-8 figure is one XGBoost proxy's importance ranking — both random forests trained on the same task have 2 of the 8 in their top eight — and a pre-registered test failed: the tuned forest, which reaches Bot, puts less importance on Bot's features (0.19 vs 0.21) and more on the known-class ones (0.39 vs 0.24). Overlap is an account of the CNN, not a law. `bot_mechanism_recheck.py`, E4.)* For CIC-IDS2017's Bot family, **0 of 8** discriminative features are
 shared with the known-class task, and **100 %** of Bot flows are classified BENIGN in all 17 CNN runs
 (mean p(BENIGN) ≥ 0.998; 0.9984 on the first three)~~, and the resulting ranking is **noise** —
 cross-seed Spearman **ρ = −0.090**, against 0.68–0.83 for every other family~~. Bot's ranking is the
@@ -128,12 +128,15 @@ already reads. Ours supplied an inductive bias; theirs supplied evidence.
 We state this as a precondition — **symbolic knowledge helps a neural detector to the extent it lies
 outside the model's learned feature basis** — and make three contributions around it.
 
-1. **A mechanism that unifies two failures.** The same property governs *novel attack families*: a
-   closed-set learner reaches a family it never saw only insofar as that family's signature overlaps
-   the features it learned. For the Bot family the overlap is empty (0 of 8 discriminative features),
-   every flow is classified benign in all 17 CNN runs~~, and the ranking is noise (cross-seed
-   ρ = −0.090)~~. Symbolic knowledge inside the basis adds nothing; a novel class outside it cannot be
-   reached. **One principle, two consequences** (§4).
+1. ~~**A mechanism that unifies two failures.**~~ **An account of a second failure, and its limit**
+   *(corrected 2026-09-17, see §4)*. The same property governs *novel attack families*: a closed-set
+   learner reaches a family it never saw only insofar as that family's signature overlaps the features
+   it learned. For the Bot family the overlap is empty (0 of 8 discriminative features, by one XGBoost
+   proxy's ranking), and every flow is classified benign in all 17 CNN runs~~, and the ranking is noise
+   (cross-seed ρ = −0.090)~~. Symbolic knowledge inside the basis adds nothing; a novel class outside it
+   ~~cannot be reached~~ is not reached by our CNN. ~~**One principle, two consequences** (§4).~~ A tuned
+   random forest reaches Bot in part without weighting Bot's features more, so this is an account of the
+   CNN, not a general law (§4).
 2. **A durability test.** That unreachability survives five attempts to break it: an independent
    capture where Bot is abundant rather than rare, corrected labels that discard attack flows which
    transmitted no payload, an explicitly trained reject class, cross-dataset augmentation, and a broad
@@ -254,6 +257,26 @@ classes (mostly DoS Hulk and DDoS): the web and DoS attacks come from the same a
 against the same server (192.168.10.50:80), and source ports repeat, so the shared 5-tuples mark the same
 attacker and target, not the same connection. This is consistent with the absorption result below.
 
+**Two other splits (D4, 2026-09-17; `split_variants.py`).** Deterministic CNN and autoencoder, three
+seeds each, on a **grouped** split (no 5-tuple on both sides; the 42,500 known/benign flows sharing a
+5-tuple with a zero-day flow go to test) and a **within-class chronological** split:
+
+| split | CNN macro | Web BF | XSS | Bot | AE macro | AE known-class PR-AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| random (this paper) | 0.6299 | 0.9147 | 0.9430 | 0.0321 | 0.0985 | 0.9245 |
+| grouped | **0.5589** | 0.8553 | **0.7947** | 0.0267 | 0.0900 | 0.9482 |
+| chronological | 0.6019 | 0.8770 | 0.8929 | 0.0359 | **0.0455** | **0.6640** |
+
+Grouping costs the CNN **0.071** (≈2.5× the 0.0285 absolute-number uncertainty; every grouped seed below
+every random seed), mostly on XSS and Web BF. It is **not** the 1,111 benign test flows that share a web
+attack's 5-tuple (0.5602 without them), and the CNN still sends ~90 % of both web families to
+`DoS slowloris`: part of the web score comes from training flows of the same attacker and server.
+Known-class detection is unchanged (0.9999; 17.6 % exact duplicates survive grouping). Chronological
+order costs the CNN 0.028 (inside the uncertainty) but **halves the autoencoder** (0.0985 → 0.0455;
+known-class 0.92 → 0.66) because its benign test traffic is later in the week than its training traffic.
+The double dissociation keeps its direction on every seed of all three splits; its Bot half shrinks
+from 0.102 to **0.076** (grouped) and **0.019** (chronological).
+
 **Feature transform.** We use `log1p`, justified **on the headline metric**: 0.6299 ± 0.0031 against
 0.1606 ± 0.0039 for raw features, over three seeds per arm (Welch t = 163). We note plainly that our
 *original* justification for this choice cited the contaminated overall-binary metric, and that the
@@ -352,17 +375,19 @@ The gap in §3 is not merely unmeasured; it is hard, and we can say why.
 
 **The synthesis.** A closed-set discriminative model learns only those features that separate the
 classes present in its training objective. A novel class is therefore reachable exactly to the extent
-that its signature overlaps that learned basis — and where the overlap is empty, the model's output on
-that class is not merely poor but **unstable**, because nothing in the objective constrains it.
+that its signature overlaps that learned basis — and where the overlap is empty, ~~the model's output on
+that class is not merely poor but **unstable**, because~~ nothing in the objective constrains it.
 
-We establish this on Bot, where the overlap is empty:
+We ~~establish~~ test this on Bot, where the overlap ~~is~~ appears empty *(corrected 2026-09-17)*:
 
-- **100 % of Bot flows are classified BENIGN**, mean p(BENIGN) = **0.9984**, on all three seeds. Bot
+- **100 % of Bot flows are classified BENIGN**, mean p(BENIGN) = **0.9984**, on ~~all three seeds~~
+  the first three runs and in **all 17** CNN runs (2026-09-17). Bot
   is not ambiguous to the model; it is **confidently asserted benign**. This is what kills every
   confidence-based remedy in §5 before it is tried.
 - The eight features that separate Bot from benign have **0 of 8 overlap** with the eight the
   known-class task selects. (Eight is the comparison-set size; for Web Brute Force the overlap is 1
-  of 8.)
+  of 8.) ⚠️ *(2026-09-17)* "The known-class task selects" means **one XGBoost proxy's** importance
+  ranking; two random forests trained on the same task each have **2 of the 8** in their top eight.
   🔴 **The gradient this sets up — zero overlap unreachable, one-of-eight reachable — is where the
   corrected labels cost us, and we state the damage here rather than in a footnote.** Web Brute
   Force's *reachability* was evidenced by PR-AUC 0.92–0.95. On labels that exclude attack flows
@@ -391,7 +416,10 @@ We establish this on Bot, where the overlap is empty:
   validation (`baselines_tuned.py`) it gives **+0.923** and Bot PR-AUC **0.2196** (6.4× chance, every
   seed above chance). The deterministic autoencoder gives **+0.754**. So the inconsistency is a
   property of this CNN and of the forest's default configuration, **not** of closed-set discriminative
-  learning, and whether the tuned forest's features overlap Bot's more than the CNN's is unmeasured.
+  learning. ~~whether the tuned forest's features overlap Bot's more than the CNN's is unmeasured.~~
+  🔴 **Tested the same day (pre-registered E4) — the account failed for the forest:** the tuned forest
+  puts **less** importance on Bot's eight features (**0.19** vs **0.21**, lower on every seed) and more on
+  the known-class eight (**0.39** vs **0.24**); refits reproduce the logged predictions exactly.
   What survives: 100 % of Bot flows are BENIGN in **all 17** CNN runs, 0/8 overlap, oracle 0.9988.
 - **The information is present.** An oracle given Bot labels reaches PR-AUC **0.9988** from the same
   68 flow features (Web BF 0.9999, XSS 0.9984). ⚠️ The oracle trains on zero-day labels; it is an
@@ -417,8 +445,8 @@ sample-size artefact rather than a representational one. **CSE-CIC-IDS2018 suppl
 there is abundant — and the CNN scores it at 0.83× chance, BELOW a random ranker**, against 1.31× on
 2017. Infilteration behaves the same way (0.96×). Meanwhile the same model reaches **20.1×** on
 Brute Force -Web and **47.3×** on Brute Force -XSS in that capture. Abundance does not buy
-reachability, and scarcity was never the explanation: **reachability tracks overlap with the learned
-basis**, which is what §4 claims. ⚠️ The 2018 arm is matched to 2017's training size (883,796 flows)
+reachability, and scarcity was never the explanation~~: **reachability tracks overlap with the learned
+basis**, which is what §4 claims~~ *(overlap was not measured on 2018; corrected 2026-09-17)*. ⚠️ The 2018 arm is matched to 2017's training size (883,796 flows)
 so nothing here is confounded with four times the data.
 
 **No standard out-of-distribution score rescues it.** We ran nine scorers — MSP, max-logit, energy at
@@ -1149,16 +1177,32 @@ Pre- and post-flag runs are different populations and we never pool them. A read
 pipeline today should reproduce the post-flag figures and should **not** expect to reproduce the
 pre-flag ones exactly; where a number in this paper is pre-flag, §7's floor is the honest error bar.
 
-**One entry point.** `run_all.py` declares the 19 pipeline stages in order together with the
-artifacts each writes. Its **default mode verifies rather than executes** — it reports which stage
-outputs are present on disk — and `--run` executes the sequence, with `--from <stage>` to resume.
-Making a full CPU retrain the default behaviour of something called `run_all` would be a foot-gun.
+**One entry point.** `run_all.py` declares the **26** pipeline stages in order with, for each, the
+environment of every run it performs (seeds, LTN settings), what it **makes**, what it **needs** from
+earlier stages, and the **external** inputs only other experiments produce. Default mode **verifies**
+(artifacts present + every `needs` made by an earlier stage) and `--run` executes, `--from <stage>`
+resumes. Making a full CPU retrain the default behaviour of something called `run_all` would be a
+foot-gun.
 
-⚠️ **An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
+✅ **EXECUTED END TO END, 2026-09-17/18** (`repro_compare.py`, `run_all_sandbox2/`). From the raw CSVs
+into an empty directory: **20 of 26 stages, 6.5 h**, and **72 artifacts byte-identical** to the ones
+behind this paper (preprocessing, the split, corrected timestamps, all 3 CNN seeds + embeddings +
+histories, all 3 autoencoders, every KG seed, the baselines). **4 float-level** (RandomForest 4.4e-16;
+behaviour thresholds 2.4e-14 relative — that file predates the lockfile), **0 different**. It also
+re-derived the comparative results: CNN **0.6299**, CNN + KG **0.5103** (the KG costs 0.12), AE ahead on
+Bot (−0.1017, p<0.001) and far behind on the web families (+0.81 / +0.89), RF ties AE on Bot (−0.0027,
+n.s.). The 6 incomplete stages are exactly those with **external** inputs (the 11-run pre-flag CNN
+population, the field-gap method sweeps) plus the figure stage downstream of them.
+
+⚠️ ~~**An honest limit we do not smooth over: the stage sequence has been *checked* end to end and has
 never been *executed* end to end in one pass.** Every stage has run individually, most of them dozens
 of times, but *"each stage works"* and *"the sequence works from a clean checkout"* are different
 claims and only the first is evidenced. `--run` is offered as a convenience, not as a validated
-reproduction path.
+reproduction path.~~ *(Superseded 2026-09-18 by the run above. The **first** execution, on the old
+19-stage list, is why the list was reworked: it declared seed 42 only where later stages read seeds
+43–44, ran the LTN with default settings (a different tag from the control every later script reads),
+omitted the +Ax6 arm, and produced neither the log-odds scores nor the CNN + KG channel — and two
+scripts wrote **partial records and exited 0**, which is now refused.)*
 
 **Two mechanical checks ship with the artifact**, both of which exist because the corresponding
 mistake was actually made here:

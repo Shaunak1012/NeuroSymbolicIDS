@@ -1,0 +1,652 @@
+{
+ "splits": {
+  "random": {
+   "subdir": "paper",
+   "n_test": 114658,
+   "n_benign_test": 55237,
+   "train_counts": {
+    "BENIGN": 441898,
+    "DDoS": 102420,
+    "DoS GoldenEye": 8234,
+    "DoS Hulk": 184099,
+    "DoS Slowhttptest": 4399,
+    "DoS slowloris": 4637,
+    "FTP-Patator": 6348,
+    "PortScan": 127043,
+    "SSH-Patator": 4718
+   },
+   "models": {
+    "cnn": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.629768308212828,
+       "family": {
+        "Bot": 0.04825033825565475,
+        "Web Attack Brute Force": 0.9028072998737224,
+        "Web Attack XSS": 0.938247286509107
+       },
+       "known_only_pr_auc": 0.9998238743961023,
+       "known_only_pr_auc_dedup": 0.9998490245706029,
+       "known_only_f1": 0.9949921639976221,
+       "unknown_recall_1pct": 0.6268565372501604,
+       "macro_without_shared_5tuple_benign": 0.6298095581180281,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8984737889847378,
+         "frac_BENIGN": 0.10086264100862641
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.9340490797546013,
+         "frac_BENIGN": 0.05674846625766871
+        }
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6268946812643791,
+       "family": {
+        "Bot": 0.024126904884934446,
+        "Web Attack Brute Force": 0.9119929345618719,
+        "Web Attack XSS": 0.9445642043463308
+       },
+       "known_only_pr_auc": 0.9998654030194928,
+       "known_only_pr_auc_dedup": 0.9998937347497239,
+       "known_only_f1": 0.9949921639976221,
+       "unknown_recall_1pct": 0.6268565372501604,
+       "macro_without_shared_5tuple_benign": 0.6269272648199659,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8978102189781022,
+         "frac_BENIGN": 0.10086264100862641
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.9355828220858896,
+         "frac_BENIGN": 0.046012269938650305
+        }
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6330470967531493,
+       "family": {
+        "Bot": 0.023895055688950347,
+        "Web Attack Brute Force": 0.929149802230336,
+        "Web Attack XSS": 0.9460964323401614
+       },
+       "known_only_pr_auc": 0.9998815712988139,
+       "known_only_pr_auc_dedup": 0.9999072233951366,
+       "known_only_f1": 0.9949921639976221,
+       "unknown_recall_1pct": 0.6264141572457367,
+       "macro_without_shared_5tuple_benign": 0.6331092629518987,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8998009289980093,
+         "frac_BENIGN": 0.10019907100199071
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.9340490797546013,
+         "frac_BENIGN": 0.05214723926380368
+        }
+       }
+      }
+     ],
+     "macro_mean": 0.6299033620767855,
+     "macro_sd": 0.003078430403020715,
+     "family_mean": {
+      "Bot": 0.03209076627651319,
+      "Web Attack Brute Force": 0.9146500122219768,
+      "Web Attack XSS": 0.9429693077318664
+     },
+     "known_only_pr_auc_mean": 0.9998569495714696,
+     "known_only_pr_auc_dedup_mean": 0.9998833275718212,
+     "macro_without_shared_5tuple_benign_mean": 0.6299486952966308
+    },
+    "ae": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.07586216368131869,
+       "family": {
+        "Bot": 0.10872041851856576,
+        "Web Attack Brute Force": 0.07922474272560556,
+        "Web Attack XSS": 0.03964132979978476
+       },
+       "known_only_pr_auc": 0.9249649850646702,
+       "known_only_pr_auc_dedup": 0.9618541600328966,
+       "known_only_f1": 0.5935692047846528,
+       "unknown_recall_1pct": 0.00034083162917518747,
+       "macro_without_shared_5tuple_benign": 0.07621954980950406
+      },
+      {
+       "seed": 43,
+       "macro": 0.13138545814690392,
+       "family": {
+        "Bot": 0.17748803198273888,
+        "Web Attack Brute Force": 0.13924942640227717,
+        "Web Attack XSS": 0.07741891605569573
+       },
+       "known_only_pr_auc": 0.9297804257530216,
+       "known_only_pr_auc_dedup": 0.9658669976591365,
+       "known_only_f1": 0.6045272636318159,
+       "unknown_recall_1pct": 0.00034083162917518747,
+       "macro_without_shared_5tuple_benign": 0.13192509414964723
+      },
+      {
+       "seed": 44,
+       "macro": 0.08813757007682767,
+       "family": {
+        "Bot": 0.11517119510598128,
+        "Web Attack Brute Force": 0.09778577051558085,
+        "Web Attack XSS": 0.05145574460892089
+       },
+       "known_only_pr_auc": 0.9187612690548921,
+       "known_only_pr_auc_dedup": 0.9559482391789791,
+       "known_only_f1": 0.5433729749487618,
+       "unknown_recall_1pct": 0.002044989775051125,
+       "macro_without_shared_5tuple_benign": 0.08858561928466609
+      }
+     ],
+     "macro_mean": 0.09846173063501674,
+     "macro_sd": 0.02916590947495847,
+     "family_mean": {
+      "Bot": 0.13379321520242862,
+      "Web Attack Brute Force": 0.10541997988115452,
+      "Web Attack XSS": 0.056171996821467125
+     },
+     "known_only_pr_auc_mean": 0.9245022266241946,
+     "known_only_pr_auc_dedup_mean": 0.9612231322903374,
+     "macro_without_shared_5tuple_benign_mean": 0.09891008774793912
+    }
+   },
+   "benign_sharing_zero_day_5tuple": 96,
+   "double_dissociation": {
+    "Bot": {
+     "cnn_minus_ae_mean": -0.10170244892591547,
+     "per_seed": [
+      -0.0605,
+      -0.1534,
+      -0.0913
+     ],
+     "direction_consistent": true
+    },
+    "Web Attack Brute Force": {
+     "cnn_minus_ae_mean": 0.8092300323408222,
+     "per_seed": [
+      0.8236,
+      0.7727,
+      0.8314
+     ],
+     "direction_consistent": true
+    },
+    "Web Attack XSS": {
+     "cnn_minus_ae_mean": 0.8867973109103993,
+     "per_seed": [
+      0.8986,
+      0.8671,
+      0.8946
+     ],
+     "direction_consistent": true
+    }
+   },
+   "boundary": {
+    "exact_duplicates": 0.17018437440039072,
+    "flow_id_overlap": 0.5487885712292209,
+    "test_inside_train_time_range": 1.0
+   }
+  },
+  "grouped": {
+   "subdir": "paper_grouped",
+   "n_test": 151324,
+   "n_benign_test": 55393,
+   "train_counts": {
+    "BENIGN": 441616,
+    "DDoS": 97903,
+    "DoS GoldenEye": 7299,
+    "DoS Hulk": 158294,
+    "DoS Slowhttptest": 3821,
+    "DoS slowloris": 3810,
+    "FTP-Patator": 6457,
+    "PortScan": 126949,
+    "SSH-Patator": 4728
+   },
+   "models": {
+    "cnn": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.5746387721631526,
+       "family": {
+        "Bot": 0.025189071311079978,
+        "Web Attack Brute Force": 0.8682200236352999,
+        "Web Attack XSS": 0.8305072215430781
+       },
+       "known_only_pr_auc": 0.9999123775118771,
+       "known_only_pr_auc_dedup": 0.9999299332325353,
+       "known_only_f1": 0.9969790817712578,
+       "unknown_recall_1pct": 0.6261929672435248,
+       "macro_without_shared_5tuple_benign": 0.5749566157599496,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8978102189781022,
+         "frac_BENIGN": 0.10086264100862641
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.9294478527607362,
+         "frac_BENIGN": 0.03680981595092025
+        }
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.5247301101767871,
+       "family": {
+        "Bot": 0.022496643823506825,
+        "Web Attack Brute Force": 0.8235171882724921,
+        "Web Attack XSS": 0.728176498434362
+       },
+       "known_only_pr_auc": 0.9998675137108978,
+       "known_only_pr_auc_dedup": 0.9998817030228377,
+       "known_only_f1": 0.9969844986932828,
+       "unknown_recall_1pct": 0.6259717772413129,
+       "macro_without_shared_5tuple_benign": 0.52610513819762,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8978102189781022,
+         "frac_BENIGN": 0.10218978102189781
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.9141104294478528,
+         "frac_BENIGN": 0.05521472392638037
+        }
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.5773941011813482,
+       "family": {
+        "Bot": 0.03233540069950186,
+        "Web Attack Brute Force": 0.8742862761864447,
+        "Web Attack XSS": 0.8255606266580979
+       },
+       "known_only_pr_auc": 0.9998665123594754,
+       "known_only_pr_auc_dedup": 0.9999030156432531,
+       "known_only_f1": 0.9969844986932828,
+       "unknown_recall_1pct": 0.6264141572457367,
+       "macro_without_shared_5tuple_benign": 0.5794644936587284,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8984737889847378,
+         "frac_BENIGN": 0.10152621101526212
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.9340490797546013,
+         "frac_BENIGN": 0.032208588957055216
+        }
+       }
+      }
+     ],
+     "macro_mean": 0.558920994507096,
+     "macro_sd": 0.029642206192624206,
+     "family_mean": {
+      "Bot": 0.026673705278029553,
+      "Web Attack Brute Force": 0.8553411626980788,
+      "Web Attack XSS": 0.7947481155451793
+     },
+     "known_only_pr_auc_mean": 0.9998821345274168,
+     "known_only_pr_auc_dedup_mean": 0.9999048839662087,
+     "macro_without_shared_5tuple_benign_mean": 0.5601754158720994
+    },
+    "ae": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.07549171984490645,
+       "family": {
+        "Bot": 0.08407130683642354,
+        "Web Attack Brute Force": 0.09385535565889327,
+        "Web Attack XSS": 0.04854849703940255
+       },
+       "known_only_pr_auc": 0.9464646929490902,
+       "known_only_pr_auc_dedup": 0.9794137262484454,
+       "known_only_f1": 0.6619020005798782,
+       "unknown_recall_1pct": 0.00034083162917518747,
+       "macro_without_shared_5tuple_benign": 0.07943282776785658
+      },
+      {
+       "seed": 43,
+       "macro": 0.12318405342807397,
+       "family": {
+        "Bot": 0.15452689746569584,
+        "Web Attack Brute Force": 0.1379712661505047,
+        "Web Attack XSS": 0.07705399666802136
+       },
+       "known_only_pr_auc": 0.953455526581874,
+       "known_only_pr_auc_dedup": 0.9831226394403506,
+       "known_only_f1": 0.626703564839612,
+       "unknown_recall_1pct": 0.004942058623040218,
+       "macro_without_shared_5tuple_benign": 0.12828721936144258
+      },
+      {
+       "seed": 44,
+       "macro": 0.07135603669845039,
+       "family": {
+        "Bot": 0.06810038375071363,
+        "Web Attack Brute Force": 0.09663210105438022,
+        "Web Attack XSS": 0.04933562529025734
+       },
+       "known_only_pr_auc": 0.9447672508485854,
+       "known_only_pr_auc_dedup": 0.9798669768213051,
+       "known_only_f1": 0.6899341432951062,
+       "unknown_recall_1pct": 0.00017041581458759374,
+       "macro_without_shared_5tuple_benign": 0.07435062961471679
+      }
+     ],
+     "macro_mean": 0.09001060332381028,
+     "macro_sd": 0.028803373285728618,
+     "family_mean": {
+      "Bot": 0.10223286268427767,
+      "Web Attack Brute Force": 0.10948624095459274,
+      "Web Attack XSS": 0.058312706332560416
+     },
+     "known_only_pr_auc_mean": 0.9482291567931833,
+     "known_only_pr_auc_dedup_mean": 0.9808011141700336,
+     "macro_without_shared_5tuple_benign_mean": 0.09402355891467197
+    }
+   },
+   "benign_sharing_zero_day_5tuple": 1111,
+   "double_dissociation": {
+    "Bot": {
+     "cnn_minus_ae_mean": -0.07555915740624812,
+     "per_seed": [
+      -0.0589,
+      -0.132,
+      -0.0358
+     ],
+     "direction_consistent": true
+    },
+    "Web Attack Brute Force": {
+     "cnn_minus_ae_mean": 0.7458549217434861,
+     "per_seed": [
+      0.7744,
+      0.6855,
+      0.7777
+     ],
+     "direction_consistent": true
+    },
+    "Web Attack XSS": {
+     "cnn_minus_ae_mean": 0.736435409212619,
+     "per_seed": [
+      0.782,
+      0.6511,
+      0.7762
+     ],
+     "direction_consistent": true
+    }
+   },
+   "boundary": {
+    "exact_duplicates": 0.1755042161190558,
+    "flow_id_overlap": 0.0,
+    "test_inside_train_time_range": 1.0
+   }
+  },
+  "chronological": {
+   "subdir": "paper_chrono",
+   "n_test": 114657,
+   "n_benign_test": 55237,
+   "train_counts": {
+    "BENIGN": 441898,
+    "DDoS": 102420,
+    "DoS GoldenEye": 8234,
+    "DoS Hulk": 184099,
+    "DoS Slowhttptest": 4399,
+    "DoS slowloris": 4637,
+    "FTP-Patator": 6348,
+    "PortScan": 127043,
+    "SSH-Patator": 4718
+   },
+   "models": {
+    "cnn": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6101394534015405,
+       "family": {
+        "Bot": 0.02748473283478772,
+        "Web Attack Brute Force": 0.8929780107230801,
+        "Web Attack XSS": 0.9099556166467536
+       },
+       "known_only_pr_auc": 0.9974416025083788,
+       "known_only_pr_auc_dedup": 0.9957680687233057,
+       "known_only_f1": 0.9712620893761006,
+       "unknown_recall_1pct": 0.607109901577234,
+       "macro_without_shared_5tuple_benign": 0.6103703374210933,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8029197080291971,
+         "frac_BENIGN": 0.10086264100862641
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.911042944785276,
+         "frac_BENIGN": 0.0598159509202454
+        }
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6073172151314883,
+       "family": {
+        "Bot": 0.04356404968563679,
+        "Web Attack Brute Force": 0.8857441295381986,
+        "Web Attack XSS": 0.8926434661706295
+       },
+       "known_only_pr_auc": 0.9980648605263874,
+       "known_only_pr_auc_dedup": 0.9965417787998156,
+       "known_only_f1": 0.9817577864775828,
+       "unknown_recall_1pct": 0.6106197662442345,
+       "macro_without_shared_5tuple_benign": 0.607668694909992,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.7996018579960186,
+         "frac_BENIGN": 0.10218978102189781
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8941717791411042,
+         "frac_BENIGN": 0.06288343558282208
+        }
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.5883828724824965,
+       "family": {
+        "Bot": 0.036743836693405175,
+        "Web Attack Brute Force": 0.8523848961778279,
+        "Web Attack XSS": 0.8760198845762563
+       },
+       "known_only_pr_auc": 0.9955634375150926,
+       "known_only_pr_auc_dedup": 0.9924923280298777,
+       "known_only_f1": 0.9367662753468516,
+       "unknown_recall_1pct": 0.5791751648408314,
+       "macro_without_shared_5tuple_benign": 0.5889823717287065,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.769741207697412,
+         "frac_BENIGN": 0.10152621101526212
+        },
+        "Web Attack XSS": {
+         "modal_class": "DoS slowloris",
+         "modal_frac": 0.8711656441717791,
+         "frac_BENIGN": 0.06134969325153374
+        }
+       }
+      }
+     ],
+     "macro_mean": 0.6019465136718418,
+     "macro_sd": 0.011830914121411495,
+     "family_mean": {
+      "Bot": 0.03593087307127656,
+      "Web Attack Brute Force": 0.8770356788130355,
+      "Web Attack XSS": 0.892872989131213
+     },
+     "known_only_pr_auc_mean": 0.9970233001832863,
+     "known_only_pr_auc_dedup_mean": 0.9949340585176664,
+     "macro_without_shared_5tuple_benign_mean": 0.6023404680199306
+    },
+    "ae": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.04653613447667788,
+       "family": {
+        "Bot": 0.0566434446761742,
+        "Web Attack Brute Force": 0.05576511964894676,
+        "Web Attack XSS": 0.027199839104912686
+       },
+       "known_only_pr_auc": 0.6764531354779993,
+       "known_only_pr_auc_dedup": 0.6592583736390951,
+       "known_only_f1": 0.03407509205912927,
+       "unknown_recall_1pct": 0.0,
+       "macro_without_shared_5tuple_benign": 0.04797137750847705
+      },
+      {
+       "seed": 43,
+       "macro": 0.04613798026628407,
+       "family": {
+        "Bot": 0.052357197366302816,
+        "Web Attack Brute Force": 0.05724241355040405,
+        "Web Attack XSS": 0.02881432988214536
+       },
+       "known_only_pr_auc": 0.6596666306259109,
+       "known_only_pr_auc_dedup": 0.6245101064509064,
+       "known_only_f1": 0.007926872812968649,
+       "unknown_recall_1pct": 0.0,
+       "macro_without_shared_5tuple_benign": 0.04757992710276284
+      },
+      {
+       "seed": 44,
+       "macro": 0.04381921825888981,
+       "family": {
+        "Bot": 0.05496515114668209,
+        "Web Attack Brute Force": 0.051429523518299686,
+        "Web Attack XSS": 0.02506298011168765
+       },
+       "known_only_pr_auc": 0.6559300763367764,
+       "known_only_pr_auc_dedup": 0.627719427904628,
+       "known_only_f1": 0.010555218771172842,
+       "unknown_recall_1pct": 0.0,
+       "macro_without_shared_5tuple_benign": 0.04509579106756573
+      }
+     ],
+     "macro_mean": 0.04549777766728392,
+     "macro_sd": 0.001467243319781986,
+     "family_mean": {
+      "Bot": 0.05465526439638637,
+      "Web Attack Brute Force": 0.05481235223921683,
+      "Web Attack XSS": 0.027025716366248564
+     },
+     "known_only_pr_auc_mean": 0.6640166141468955,
+     "known_only_pr_auc_dedup_mean": 0.6371626359982098,
+     "macro_without_shared_5tuple_benign_mean": 0.04688236522626854
+    }
+   },
+   "benign_sharing_zero_day_5tuple": 355,
+   "double_dissociation": {
+    "Bot": {
+     "cnn_minus_ae_mean": -0.018724391325109804,
+     "per_seed": [
+      -0.0292,
+      -0.0088,
+      -0.0182
+     ],
+     "direction_consistent": true
+    },
+    "Web Attack Brute Force": {
+     "cnn_minus_ae_mean": 0.8222233265738188,
+     "per_seed": [
+      0.8372,
+      0.8285,
+      0.801
+     ],
+     "direction_consistent": true
+    },
+    "Web Attack XSS": {
+     "cnn_minus_ae_mean": 0.8658472727649645,
+     "per_seed": [
+      0.8828,
+      0.8638,
+      0.851
+     ],
+     "direction_consistent": true
+    }
+   },
+   "boundary": {
+    "exact_duplicates": 0.1674036474005076,
+    "flow_id_overlap": 0.5058217117140689,
+    "test_inside_train_time_range": 0.807626224303793
+   }
+  }
+ }
+}

@@ -31,9 +31,12 @@ Out:  outputs/metadata/split_variants.json
 import os
 import sys
 import json
+import pickle
 import hashlib
+from collections import Counter
 
 import numpy as np
+import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import paths                                        # noqa: E402
@@ -64,7 +67,31 @@ def load_json(name):
         return json.load(f)
 
 
+def absorption(tag, P, y):
+    """Where the CNN's argmax sends each zero-day family (bot_failure_analysis H1)."""
+    import tensorflow as tf
+    import config
+    import features
+    sfx_ = tag.split("cnn_paper_", 1)[-1]
+    with open(os.path.join(paths.MODELS, "scaler_paper_%s.pkl" % sfx_), "rb") as f:
+        sc = pickle.load(f)
+    with open(os.path.join(paths.MODELS, "label_encoder_paper_%s.pkl" % sfx_), "rb") as f:
+        classes = list(pickle.load(f).classes_)
+    tfm = config.get()["protocol"]["feature_transform"]
+    X = sc.transform(features.transform(np.load(os.path.join(P, "X_test.npy")), tfm))
+    m = tf.keras.models.load_model(os.path.join(paths.MODELS, tag + ".keras"), compile=False)
+    am = m.predict(X.reshape(-1, X.shape[1], 1).astype(np.float32), batch_size=4096, verbose=0).argmax(1)
+    out = {}
+    for fam in FAMS:
+        c = Counter(classes[i] for i in am[y == fam])
+        top, n = c.most_common(1)[0]
+        out[fam] = {"modal_class": top, "modal_frac": n / float((y == fam).sum()),
+                    "frac_BENIGN": c.get("BENIGN", 0) / float((y == fam).sum())}
+    return out
+
+
 def main():
+    os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
     out = {"splits": {}}
     for name, cfg in SPLITS.items():
         P = os.path.join(paths.PROCESSED, cfg["subdir"])
@@ -74,8 +101,18 @@ def main():
         tr = set(H(np.load(os.path.join(P, "X_train.npy"))))
         dup = np.fromiter((h in tr for h in H(np.load(os.path.join(P, "X_test.npy")))),
                           bool, len(y))
+        ytr = np.load(os.path.join(P, "y_train_mc.npy"), allow_pickle=True)
         row = {"subdir": cfg["subdir"], "n_test": int(len(y)),
-               "n_benign_test": int((y == "BENIGN").sum()), "models": {}}
+               "n_benign_test": int((y == "BENIGN").sum()),
+               "train_counts": {k: int(v) for k, v in sorted(Counter(ytr.tolist()).items())},
+               "models": {}}
+        # Benign test flows that share a 5-tuple with a zero-day flow. The grouped
+        # split has to put them in test; they are candidate hard negatives, so the
+        # zero-day metric is also reported without them.
+        fid = pd.read_csv(os.path.join(P, "meta_test.csv"), usecols=["Flow ID"])["Flow ID"].astype(str).values
+        zf = set(fid[np.isin(y, sorted(zd))])
+        hard = (y == "BENIGN") & np.isin(fid, sorted(zf))
+        row["benign_sharing_zero_day_5tuple"] = int(hard.sum())
         for model in ("cnn", "ae"):
             runs = {s: pred(cfg[model] % s) for s in SEEDS}
             if any(v is None for v in runs.values()):
@@ -95,7 +132,11 @@ def main():
                     "known_only_f1": r["views"]["known_only"]["f1"],
                     "unknown_recall_1pct": float(np.mean(
                         [r["zeroday_family"][f]["recall"] for f in FAMS])),
+                    "macro_without_shared_5tuple_benign":
+                        metrics.evaluate(y[~hard], runs[s][~hard], zd, fpr=0.01)["macro"]["pr_auc"],
                 })
+                if model == "cnn":
+                    per[-1]["absorption"] = absorption(cfg[model] % s, P, y)
             mean = lambda k: float(np.mean([p[k] for p in per]))  # noqa: E731
             row["models"][model] = {
                 "per_seed": per,
@@ -103,6 +144,7 @@ def main():
                 "family_mean": {f: float(np.mean([p["family"][f] for p in per])) for f in FAMS},
                 "known_only_pr_auc_mean": mean("known_only_pr_auc"),
                 "known_only_pr_auc_dedup_mean": mean("known_only_pr_auc_dedup"),
+                "macro_without_shared_5tuple_benign_mean": mean("macro_without_shared_5tuple_benign"),
             }
         c, a = row["models"].get("cnn", {}), row["models"].get("ae", {})
         if "per_seed" in c and "per_seed" in a:
@@ -148,6 +190,21 @@ def main():
                 "%s %+.3f%s" % (f.replace("Web Attack ", ""), v["cnn_minus_ae_mean"],
                                 "" if v["direction_consistent"] else " (inconsistent)")
                 for f, v in row["double_dissociation"].items())))
+
+    print("\nCNN absorption (mean over seeds): family -> modal class (fraction)")
+    for name, row in out["splits"].items():
+        c = row["models"].get("cnn", {})
+        if "per_seed" not in c:
+            continue
+        parts = []
+        for f in FAMS:
+            ab = [p_["absorption"][f] for p_ in c["per_seed"]]
+            modes = sorted({a["modal_class"] for a in ab})
+            parts.append("%s -> %s %.0f%%" % (f.replace("Web Attack ", ""), "/".join(modes),
+                                              100 * np.mean([a["modal_frac"] for a in ab])))
+        print("  %-14s %s | macro without the %d benign flows sharing a zero-day 5-tuple: %.4f"
+              % (name, "  ".join(parts), row["benign_sharing_zero_day_5tuple"],
+                 c["macro_without_shared_5tuple_benign_mean"]))
 
     p = os.path.join(paths.METADATA, "split_variants.json")
     with open(p, "w", encoding="utf-8") as f:

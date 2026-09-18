@@ -836,9 +836,166 @@
    }
   }
  },
+ "forest_overlap": {
+  "bot_oracle_top8": [
+   "Bwd IAT Min",
+   "Bwd Packet Length Mean",
+   "Bwd Packet Length Max",
+   "Fwd Header Length",
+   "Destination Port",
+   "min_seg_size_forward",
+   "Init_Win_bytes_forward",
+   "Total Backward Packets"
+  ],
+  "known_class_top8": [
+   "Bwd Packet Length Min",
+   "Total Fwd Packets",
+   "Average Packet Size",
+   "Bwd Packet Length Std",
+   "Bwd Header Length",
+   "PSH Flag Count",
+   "Fwd Packet Length Max",
+   "Init_Win_bytes_backward"
+  ],
+  "default": {
+   "max_features": "sqrt",
+   "per_seed": [
+    {
+     "seed": 42,
+     "refit_reproduces_logged_predictions": true,
+     "top8": [
+      "Average Packet Size",
+      "Destination Port",
+      "Packet Length Variance",
+      "Init_Win_bytes_forward",
+      "Init_Win_bytes_backward",
+      "Packet Length Std",
+      "Fwd Packet Length Max",
+      "Bwd Packet Length Min"
+     ],
+     "top8_overlap_with_bot": [
+      "Destination Port",
+      "Init_Win_bytes_forward"
+     ],
+     "share_on_bot_top8": 0.21296528650047647,
+     "share_on_known_top8": 0.25307888038118076
+    },
+    {
+     "seed": 43,
+     "refit_reproduces_logged_predictions": true,
+     "top8": [
+      "Destination Port",
+      "Packet Length Std",
+      "Average Packet Size",
+      "Init_Win_bytes_forward",
+      "Init_Win_bytes_backward",
+      "Packet Length Variance",
+      "Bwd Packet Length Min",
+      "Avg Bwd Segment Size"
+     ],
+     "top8_overlap_with_bot": [
+      "Destination Port",
+      "Init_Win_bytes_forward"
+     ],
+     "share_on_bot_top8": 0.22296175972895885,
+     "share_on_known_top8": 0.23156080201602883
+    },
+    {
+     "seed": 44,
+     "refit_reproduces_logged_predictions": true,
+     "top8": [
+      "Destination Port",
+      "Init_Win_bytes_forward",
+      "Bwd Packet Length Min",
+      "Average Packet Size",
+      "Packet Length Std",
+      "Init_Win_bytes_backward",
+      "Packet Length Variance",
+      "Avg Bwd Segment Size"
+     ],
+     "top8_overlap_with_bot": [
+      "Destination Port",
+      "Init_Win_bytes_forward"
+     ],
+     "share_on_bot_top8": 0.2044987365656839,
+     "share_on_known_top8": 0.23071893668608823
+    }
+   ],
+   "mean_share_on_bot_top8": 0.2134752609317064,
+   "mean_top8_overlap_with_bot": 2.0
+  },
+  "tuned": {
+   "max_features": "0.3",
+   "per_seed": [
+    {
+     "seed": 42,
+     "refit_reproduces_logged_predictions": true,
+     "top8": [
+      "Init_Win_bytes_backward",
+      "Destination Port",
+      "Bwd Packet Length Min",
+      "Fwd Packet Length Min",
+      "Average Packet Size",
+      "Init_Win_bytes_forward",
+      "Bwd Packet Length Std",
+      "Packet Length Variance"
+     ],
+     "top8_overlap_with_bot": [
+      "Destination Port",
+      "Init_Win_bytes_forward"
+     ],
+     "share_on_bot_top8": 0.19255679871835366,
+     "share_on_known_top8": 0.37603598144150424
+    },
+    {
+     "seed": 43,
+     "refit_reproduces_logged_predictions": true,
+     "top8": [
+      "Init_Win_bytes_backward",
+      "Bwd Packet Length Min",
+      "Destination Port",
+      "Average Packet Size",
+      "Fwd Packet Length Min",
+      "Bwd Packet Length Std",
+      "Min Packet Length",
+      "Init_Win_bytes_forward"
+     ],
+     "top8_overlap_with_bot": [
+      "Destination Port",
+      "Init_Win_bytes_forward"
+     ],
+     "share_on_bot_top8": 0.18853580896019906,
+     "share_on_known_top8": 0.39566276708202675
+    },
+    {
+     "seed": 44,
+     "refit_reproduces_logged_predictions": true,
+     "top8": [
+      "Bwd Packet Length Min",
+      "Init_Win_bytes_backward",
+      "Destination Port",
+      "Average Packet Size",
+      "Fwd Packet Length Min",
+      "Min Packet Length",
+      "Init_Win_bytes_forward",
+      "Packet Length Variance"
+     ],
+     "top8_overlap_with_bot": [
+      "Destination Port",
+      "Init_Win_bytes_forward"
+     ],
+     "share_on_bot_top8": 0.18443311243955185,
+     "share_on_known_top8": 0.39111001802072254
+    }
+   ],
+   "mean_share_on_bot_top8": 0.18850857337270152,
+   "mean_top8_overlap_with_bot": 2.0
+  }
+ },
  "expectations": {
   "E1_det_cnn_bot_rho_near_zero": false,
   "E2_det_cnn_absorbs_bot": true,
-  "E3_tuned_rf_bot_rho_high": true
+  "E3_tuned_rf_bot_rho_high": true,
+  "E4_tuned_forest_weights_bot_features_more": false
  }
 }

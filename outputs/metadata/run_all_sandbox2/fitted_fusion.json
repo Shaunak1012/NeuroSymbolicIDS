@@ -1,0 +1,223 @@
+{
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "channels": [
+    "cnn",
+    "autoencoder"
+  ],
+  "kg_excluded_reason": "kg.py's burstiness score is defined over TEST windows; there is no validation-side KG score by construction, so a fitted combiner cannot weight the one channel that helps",
+  "n_zero_day_in_val": 0,
+  "per_seed": {
+    "42": {
+      "cnn": {
+        "macro": 0.629768308212828,
+        "bot": 0.04825033825565475,
+        "webbf": 0.9028072998737224,
+        "xss": 0.938247286509107,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "autoencoder": {
+        "macro": 0.07586215973782388,
+        "bot": 0.10872039449777149,
+        "webbf": 0.07922475491591542,
+        "xss": 0.03964132979978476,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "fitted": {
+        "macro": 0.6398041561069995,
+        "bot": 0.08384540127787536,
+        "webbf": 0.9048937374206454,
+        "xss": 0.9306733296224775,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "rank_equal": {
+        "macro": 0.26832956848166284,
+        "bot": 0.10975349894495373,
+        "webbf": 0.4124883233752353,
+        "xss": 0.2827468831247994,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "coefficients": {
+        "cnn": 11.498923633631486,
+        "autoencoder": 3.163408554973031,
+        "intercept": -4.241936541461598,
+        "ae_share_of_abs_weight": 0.215750708296707
+      }
+    },
+    "43": {
+      "cnn": {
+        "macro": 0.6268946812643791,
+        "bot": 0.024126904884934446,
+        "webbf": 0.9119929345618719,
+        "xss": 0.9445642043463308,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "autoencoder": {
+        "macro": 0.13138548069387304,
+        "bot": 0.17748809962364623,
+        "webbf": 0.13924942640227717,
+        "xss": 0.07741891605569572,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "fitted": {
+        "macro": 0.661113167318791,
+        "bot": 0.13602239832416108,
+        "webbf": 0.9106918591878217,
+        "xss": 0.93662524444439,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "rank_equal": {
+        "macro": 0.41419281202629127,
+        "bot": 0.06720015883565215,
+        "webbf": 0.645216944787772,
+        "xss": 0.5301613324554496,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "coefficients": {
+        "cnn": 11.332522716331002,
+        "autoencoder": 3.529272542058797,
+        "intercept": -3.8652640972018855,
+        "ae_share_of_abs_weight": 0.2374728275217254
+      }
+    },
+    "44": {
+      "cnn": {
+        "macro": 0.6330470967531493,
+        "bot": 0.023895055688950347,
+        "webbf": 0.929149802230336,
+        "xss": 0.9460964323401614,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "autoencoder": {
+        "macro": 0.0881376058545054,
+        "bot": 0.11517120650943306,
+        "webbf": 0.09778586644516227,
+        "xss": 0.05145574460892089,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "fitted": {
+        "macro": 0.6471446455172026,
+        "bot": 0.09105100062786808,
+        "webbf": 0.9141010895587819,
+        "xss": 0.9362818463649578,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "rank_equal": {
+        "macro": 0.3942803666340137,
+        "bot": 0.047633382218685696,
+        "webbf": 0.6244863631512543,
+        "xss": 0.5107213545321012,
+        "achieved_fpr": 0.010011405398555316
+      },
+      "coefficients": {
+        "cnn": 9.50812246801091,
+        "autoencoder": 2.748265685897912,
+        "intercept": -2.3883864234612817,
+        "ae_share_of_abs_weight": 0.2242312866879491
+      }
+    }
+  },
+  "mean_over_seeds": {
+    "cnn": {
+      "macro": 0.6299033620767855,
+      "macro_min": 0.6268946812643791,
+      "macro_max": 0.6330470967531493,
+      "bot": 0.03209076627651319,
+      "webbf": 0.9146500122219768,
+      "xss": 0.9429693077318664
+    },
+    "autoencoder": {
+      "macro": 0.09846174876206744,
+      "macro_min": 0.07586215973782388,
+      "macro_max": 0.13138548069387304,
+      "bot": 0.1337932335436169,
+      "webbf": 0.10542001592111827,
+      "xss": 0.05617199682146712
+    },
+    "fitted": {
+      "macro": 0.6493539896476643,
+      "macro_min": 0.6398041561069995,
+      "macro_max": 0.661113167318791,
+      "bot": 0.10363960007663485,
+      "webbf": 0.9098955620557496,
+      "xss": 0.9345268068106085
+    },
+    "rank_equal": {
+      "macro": 0.35893424904732263,
+      "macro_min": 0.26832956848166284,
+      "macro_max": 0.41419281202629127,
+      "bot": 0.07486234666643053,
+      "webbf": 0.5607305437714205,
+      "xss": 0.4412098567041167
+    }
+  },
+  "paired_deltas": {
+    "fitted_minus_rank_equal": {
+      "per_seed": [
+        0.37147458762533664,
+        0.24692035529249973,
+        0.2528642788831889
+      ],
+      "mean": 0.29041974060034176,
+      "sd": 0.07025844238664118,
+      "seeds_negative": 0
+    },
+    "fitted_minus_cnn": {
+      "per_seed": [
+        0.010035847894171446,
+        0.03421848605441191,
+        0.014097548764053336
+      ],
+      "mean": 0.019450627570878898,
+      "seeds_positive": 3
+    },
+    "rank_equal_minus_cnn": {
+      "per_seed": [
+        -0.3614387397311652,
+        -0.21270186923808782,
+        -0.23876673011913557
+      ],
+      "mean": -0.27096911302946286,
+      "seeds_positive": 0
+    }
+  },
+  "predictions": {
+    "F1_fitted_ignores_the_anomaly_channel": {
+      "mean_ae_share_of_abs_weight": 0.22581827416879385,
+      "threshold": 0.15,
+      "coefficients_per_seed": [
+        [
+          11.498923633631486,
+          3.163408554973031
+        ],
+        [
+          11.332522716331002,
+          3.529272542058797
+        ],
+        [
+          9.50812246801091,
+          2.748265685897912
+        ]
+      ],
+      "confirmed": false
+    },
+    "F2_fitted_loses_to_parameter_free": {
+      "mean_delta": 0.29041974060034176,
+      "seeds_negative": 0,
+      "confirmed": false
+    },
+    "F3_gap_concentrated_on_bot": {
+      "fitted_bot": 0.10363960007663485,
+      "rank_equal_bot": 0.07486234666643053,
+      "cnn_bot": 0.03209076627651319,
+      "confirmed": false
+    },
+    "F4_falsifier_fitted_wins": {
+      "triggered": true,
+      "note": "if triggered, the fusion wall as written is wrong and paper_outline.md 5's 'structurally impossible' row must be retracted"
+    }
+  }
+}

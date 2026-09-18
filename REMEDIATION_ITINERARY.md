@@ -244,16 +244,16 @@ Everything that moves, and why. ~~**Directions of every comparative conclusion s
 ```
 STATUS 2026-09-17                 [x] done   [~] partial / running   [ ] not started   [-] not needed
 
-STAGE 0  decisions      [x] D1  [x] D2  [ ] D3  [x] D4  [ ] D5
+STAGE 0  decisions      [x] D1  [x] D2  [x] D3  [x] D4  [x] D5
 STAGE 1  no compute     [x] 1.1 [x] 1.2 [x] 1.3 [x] 1.4 [x] 1.5 [x] 1.6 [x] 1.7 [x] 1.8 [x] 1.9
 STAGE 2  write-up       [x] 2.1 [x] 2.2 [x] 2.3 [x] 2.4 [x] 2.5 [x] 2.6 [x] 2.7 [x] 2.8 [x] 2.9
 STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
 STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
                         [x] 4.10 [x] 4.11
-STAGE 5  protocol (D4)  [~] 5.1 [~] 5.2 [-] 5.3 [ ] 5.4
+STAGE 5  protocol (D4)  [x] 5.1 [x] 5.2 [-] 5.3 [ ] 5.4
 STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
-STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [~] 7.4
-STAGE 8  hygiene        [ ] 8.1 [x] 8.2
+STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [x] 7.4
+STAGE 8  hygiene        [x] 8.1 [x] 8.2
 ```
 
 **Minimum set before the paper is shared with anyone:** 1.1, 1.3, 1.5, 2.1, 2.2, 3.1, 4.2, 4.3, 4.4,
@@ -338,5 +338,16 @@ whatever was on disk and would no longer have reproduced their records; all pinn
   5-tuple with a zero-day flow into test.
 * 7.4 — `run_all.py --run --keep-going` in a sandbox. Preprocess, split, timeline and the seed-42 CNN
   reproduce the canonical artifacts byte for byte from the raw CSVs.
+
+**Update, 14:50 UTC.** 5.1 / 5.2 done: grouped CNN 0.5589 (−0.071), chronological CNN 0.6019 and
+autoencoder 0.0455 (halved); double dissociation direction-consistent everywhere (`split_variants.json`,
+paper Appendix A). The pre-registered forest test E4 failed (overlap is now an account of the CNN, not
+a law). `run_all.py` was reworked after its first execution (26 stages, runs / needs / external) and a
+second full execution started in `outputs/sandbox_e2e2`.
+
+**Update, 2026-09-18 02:51.** 7.4 done: the pipeline ran end to end from the raw CSVs — 20/26 stages in
+6.5 h, 72 artifacts byte-identical, 0 different (`repro_compare.py`). The six incomplete stages are the
+declared-external ones. The paper, CLAUDE.md and `scripts_reference.md` no longer say "never executed
+end to end".
 
 **Not done.** 4.4: Mahalanobis on the deterministic CNN. 5.4, 6.4, 6.5 (optional). 8.1 waits on D3.

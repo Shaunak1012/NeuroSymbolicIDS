@@ -47,6 +47,7 @@ Run:  python scripts/significance.py
 Writes: outputs/metadata/significance.json
 """
 import os
+import sys
 import json
 import itertools
 import numpy as np
@@ -216,9 +217,11 @@ TESTS = [
 print("\n" + "=" * 100)
 print(f"PAIRED STRATIFIED BOOTSTRAP  (B={B} replicates, 95% CI on the paired difference)")
 print("=" * 100)
+SKIPPED = []
 for a, b, metric, fam, why in TESTS:
     if a not in scores or b not in scores:
         print(f"  skip {a} vs {b} (missing channel)")
+        SKIPPED.append(f"{a} vs {b}")
         continue
     r = compare(a, b, metric, fam)
     r["why"] = why
@@ -276,6 +279,15 @@ RESULTS["seed_power_note"] = (
     "p<0.05 regardless of effect size. The bootstrap above quantifies FLOW-sampling "
     "uncertainty only. To make a seed-level claim at alpha=0.05 you need n>=6 seeds.")
 print("\n  " + RESULTS["seed_power_note"].replace(". ", ".\n  "))
+
+# 2026-09-17 (audit item 7.4): refuse to write a partial record. The first
+# run_all execution ran this with most channels missing; it skipped all 13
+# comparisons, wrote a significance.json with none, and exited 0 -- in the
+# canonical tree that would silently replace the real record.
+if SKIPPED:
+    print(f"\nREFUSING TO WRITE: {len(SKIPPED)} of {len(TESTS)} comparisons had a missing channel "
+          f"({', '.join(SKIPPED)}). significance.json left untouched.")
+    sys.exit(2)
 
 out = os.path.join(paths.METADATA, "significance.json")
 with open(out, "w", encoding="utf-8") as f:
