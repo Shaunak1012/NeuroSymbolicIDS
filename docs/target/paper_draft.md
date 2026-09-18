@@ -859,7 +859,7 @@ report where we fail.
 | P7 | Inappropriate performance measures | 🔑 **This is the paper's subject**, not a box we tick — §3. |
 | P8 | Base rate fallacy | ✅ PR-AUC over ROC, prevalence and lift reported, families below 100 flows excluded from the macro, and cross-dataset comparison done **only** in lift because prevalence differs by orders of magnitude. |
 | P9 | Lab-only evaluation | ❌ **Not addressed.** Throughput is measured (7.95 µs/flow) but nothing is deployed. |
-| P10 | Inappropriate threat model | ❌ **Not addressed.** No adversarial evaluation; named as future work. |
+| P10 | Inappropriate threat model | 🟡 **Partly addressed** — a bounded, non-adaptive evasion test (limitation 7); no adaptive adversary. |
 
 🔴 **P2 deserves its own paragraph, because it caught us.** Engelen et al. (WTMC 2021) re-ran
 CIC-IDS2017 through a corrected CICFlowMeter and relabelled it, reconstructing or relabelling **more
@@ -988,7 +988,22 @@ which beats the mean and *not* the maximum — because the maximum was never a t
    leakage and not a scoring error — it is ordinary practice for a rank-based metric — but a streaming
    deployment could not compute it without a frozen reference distribution, which is a different
    estimator. **We have not measured that variant** and make no claim about its direction.
-7. **No adversarial evaluation.** Named as future work rather than implied.
+7. ~~**No adversarial evaluation.** Named as future work rather than implied.~~ **A bounded evasion
+   test, not an adaptive one** (itinerary 6.4, `evasion.py`, pre-registered, 2026-09-18). Padding
+   (32 / 256 B per data-carrying forward packet), time dilation (×2 / ×10) and timing jitter (10 / 100 ms)
+   applied to the zero-day test flows, derived features recomputed, models not retrained, seeds 42–44:
+
+   | perturbation | CNN | autoencoder | tuned forest |
+   |---|---:|---:|---:|
+   | pad 32 / 256 B | +0.000 / −0.001 | +0.062 / +0.083 | +0.029 / +0.042 |
+   | slow ×2 / ×10 | −0.000 / **−0.032** | +0.018 / +0.122 | +0.039 / **+0.077** |
+   | jitter 10 / 100 ms | **−0.068 / −0.067** | +0.340 / **+0.378** | +0.024 / +0.020 |
+
+   V1 ✅ Bot stays unreachable for the CNN (≤ 0.0355). V2 ✅ for the CNN (jitter: 0.6299 → **0.5620**, every
+   seed, mostly XSS) but 🔴 **falsified for the forest**, which no perturbation lowers. V3 ✅ and broader
+   than predicted: **every** perturbation raises the autoencoder and the forest — it moves the attack
+   flows *away* from benign. Not adaptive: mimicry of benign traffic was not modelled; perturbations are
+   in feature space, not on packets.
 
 ---
 

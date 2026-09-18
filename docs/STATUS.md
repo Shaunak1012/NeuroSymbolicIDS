@@ -62,6 +62,22 @@ The tuned forest **matches** the CNN; it does not beat it. Its **Bot PR-AUC is 0
 seed)** — above the autoencoder. ~~Whether its features overlap Bot's more than the CNN's is
 unmeasured.~~ Measured the same day: it does not (E4 above).
 
+### ✅ 6.4 — a bounded evasion test (pre-registered, `evasion.py`)
+
+Forward-traffic perturbations of the zero-day test flows, derived features recomputed, models not
+retrained, seeds 42–44; change in macro zero-day PR-AUC:
+
+| perturbation | CNN | autoencoder | tuned forest |
+|---|---:|---:|---:|
+| pad 32 / 256 B | +0.000 / −0.001 | +0.062 / +0.083 | +0.029 / +0.042 |
+| slow ×2 / ×10 | −0.000 / −0.032 | +0.018 / +0.122 | +0.039 / +0.077 |
+| jitter 10 / 100 ms | **−0.068 / −0.067** | +0.340 / +0.378 | +0.024 / +0.020 |
+
+V1 ✅ Bot stays unreachable for the CNN (≤ 0.0355). V2 ✅ CNN (jitter → 0.5620, every seed, mostly XSS),
+🔴 **falsified for the forest**. V3 ✅, broader than predicted: every perturbation raises the AE and the
+forest (it moves attack flows away from benign). **Not adaptive** — mimicry was not modelled. In the paper
+(§9, Appendix F item 7, P10 now "partly addressed"); checked and pinned.
+
 ### ✅ 5.4 — the base paper's class balancing, with a size-matched control
 
 `SPLIT_MODE=balanced` (every known attack class cut to the smallest, 4,399 training flows each; benign

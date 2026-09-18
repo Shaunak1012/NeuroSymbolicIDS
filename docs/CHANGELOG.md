@@ -2,6 +2,15 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-18 (Itinerary 6.4 — a bounded, pre-registered evasion test)
+
+`evasion.py` (committed with predictions V1–V3 before its first run): payload padding, time dilation and
+timing jitter on the zero-day test flows, derived features recomputed, deterministic CNN / autoencoder
+and refit tuned forest, seeds 42–44, every baseline checked to reproduce its stored scores. Jitter lowers
+the CNN from 0.6299 to 0.5620 on every seed; nothing makes Bot reachable; **every** perturbation raises the
+autoencoder (up to +0.378) and the forest (up to +0.077), falsifying V2 for the forest. The paper's
+limitations and pitfall P10 now report it; an adaptive adversary remains unevaluated.
+
 ## 2026-09-18 (Itinerary 5.4 — the base paper's class balancing, with a size-matched control)
 
 `preprocess_paper.py` gains `SPLIT_MODE=balanced` (every known attack class cut to the smallest, the

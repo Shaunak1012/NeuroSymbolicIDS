@@ -664,7 +664,7 @@ pitfalls. We checked this work against their list.
 | P7 | Inappropriate performance measures | This is a central topic of the work (Appendix B). |
 | P8 | Base rate fallacy | PR-AUC rather than ROC, prevalence and lift reported, families below 100 flows excluded from the macro average, and cross-dataset comparisons made only in lift because prevalence differs by orders of magnitude. |
 | P9 | Lab-only evaluation | Not addressed. Throughput is measured (7.95 µs/flow), but nothing has been deployed. |
-| P10 | Inappropriate threat model | Not addressed. There is no adversarial evaluation; we list it as future work. |
+| P10 | Inappropriate threat model | Partly addressed. A bounded, non-adaptive evasion test (Appendix F, item 7); an adaptive adversary is not evaluated. |
 
 **Label inaccuracy (P2).** Engelen et al. [2] reprocessed CIC-IDS2017 with a corrected version of
 CICFlowMeter and relabelled it. More than 20 % of traces were reconstructed or relabelled, and a new
@@ -790,9 +790,22 @@ but below the maximum, as expected given that the maximum was never a typical ru
    scoring error, and it is normal for a rank-based metric, but a streaming deployment could not compute
    it without a fixed reference distribution, which would be a different estimator. We have not measured
    that variant and make no claim about how it would perform.
-7. **No adversarial evaluation**, which we leave to future work. A flow-feature detector is exposed to
+7. ~~**No adversarial evaluation**, which we leave to future work. A flow-feature detector is exposed to
    padding, rate shaping and timing jitter, all of which an attacker controls, and nothing here measures
-   them.
+   them.~~ **A bounded evasion test, not an adaptive one.** We applied three perturbations an attacker
+   controls on its own traffic to the zero-day test flows, recomputing every flow feature derived from
+   what changed, and re-scored the trained models with three seeds each: padding every data-carrying
+   forward packet by 32 or 256 bytes, stretching the flow in time by a factor of 2 or 10, and delaying
+   each forward packet by up to 10 or 100 ms. We wrote down three predictions before running it. No
+   perturbation makes Bot reachable for the CNN (its Bot PR-AUC stays at or below 0.0355). Timing jitter
+   is the one that works against the CNN, lowering its macro zero-day PR-AUC from 0.6299 to 0.5620 on
+   every seed, mostly through XSS, and a tenfold slow-down costs it 0.032. We predicted that the tuned
+   forest would also lose to at least one perturbation, and it did not. Every perturbation raised both its
+   score and the autoencoder's, by up to 0.077 and 0.378, because the perturbed attack flows sit further
+   from benign traffic than the originals do. For a detector that scores distance from benign traffic,
+   perturbing one's own flows is counterproductive. The test is not adaptive: an attacker who shaped
+   their traffic to imitate benign flows, rather than perturbing it, was not modelled, and the
+   perturbations are applied in feature space, not to packets.
 8. **One reporting split.** Every experiment in this paper was reported on the same test split. The
    selection-sensitive results were re-selected on one half of it and reported on the other (Appendix D),
    but the split as a whole has been examined many times.
