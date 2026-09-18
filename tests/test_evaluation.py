@@ -293,6 +293,17 @@ class SplitVariants(unittest.TestCase):
         for p in u["models"]["cnn"]["per_seed"]:
             self.assertGreater(p["absorption"]["Web Attack XSS"]["frac_BENIGN"], 0.9)
 
+    def test_view5_collapses_when_attempted_flows_are_excluded(self):
+        """6.5: the 47.85 / 48.34 agreement with the base paper does not survive
+        the closest analogue of their payload filtering."""
+        ie = self.s.get("improved_exclude", {}).get("models", {}).get("cnn", {})
+        if "per_seed" not in ie:
+            self.skipTest("improved_exclude runs not present")
+        for p in ie["per_seed"]:
+            self.assertLess(p["absorption"]["_views"]["view5_zero_day_acc"], 5.0)
+        for p in self.s["random"]["models"]["cnn"]["per_seed"]:
+            self.assertGreater(p["absorption"]["_views"]["view5_zero_day_acc"], 45.0)
+
     def test_web_families_absorbed_into_slowloris_on_every_split(self):
         for split, row in ((k, self.s[k]) for k in ("random", "grouped", "chronological")):
             for p in row["models"]["cnn"]["per_seed"]:

@@ -1374,6 +1374,201 @@
      "direction_consistent": true
     }
    }
+  },
+  "improved_exclude": {
+   "subdir": "paper_improved_exclude",
+   "n_test": 87547,
+   "n_benign_test": 43288,
+   "train_counts": {
+    "BENIGN": 346302,
+    "DDoS": 76098,
+    "DoS GoldenEye": 6054,
+    "DoS Hulk": 126775,
+    "DoS Slowhttptest": 1394,
+    "DoS slowloris": 3201,
+    "FTP-Patator": 3178,
+    "PortScan": 127218,
+    "SSH-Patator": 2384
+   },
+   "models": {
+    "cnn": {
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.00864180496480231,
+       "family": {
+        "Bot": 0.009586463152788962,
+        "Web Attack Brute Force": 0.007697146776815661,
+        "Web Attack XSS": 0.0058208423087110096
+       },
+       "known_only_pr_auc": 0.9997716196884892,
+       "known_only_pr_auc_dedup": 0.999913565333409,
+       "known_only_f1": 0.995023503315749,
+       "unknown_recall_1pct": 0.09524977516147494,
+       "macro_without_shared_5tuple_benign": 0.00864319332179501,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "BENIGN",
+         "modal_frac": 0.9867549668874173,
+         "frac_BENIGN": 0.9867549668874173
+        },
+        "Web Attack XSS": {
+         "modal_class": "BENIGN",
+         "modal_frac": 0.8518518518518519,
+         "frac_BENIGN": 0.8518518518518519
+        },
+        "_views": {
+         "view1_multiclass_known_acc": 99.54259841064498,
+         "view1_balanced_acc": 99.89613778833832,
+         "view2_binary_known_acc": 99.54721862871928,
+         "view5_zero_day_acc": 0.8238928939237898,
+         "false_alarm_rate": 0.9032526335243023,
+         "per_class_recall": {
+          "BENIGN": 99.0967473664757,
+          "DDoS": 100.0,
+          "DoS GoldenEye": 100.0,
+          "DoS Hulk": 99.98106897204518,
+          "DoS Slowhttptest": 100.0,
+          "DoS slowloris": 100.0,
+          "FTP-Patator": 100.0,
+          "PortScan": 99.98742375652392,
+          "SSH-Patator": 100.0
+         }
+        }
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.007913705589240249,
+       "family": {
+        "Bot": 0.01079775989224803,
+        "Web Attack Brute Force": 0.005029651286232469,
+        "Web Attack XSS": 0.007089034460452512
+       },
+       "known_only_pr_auc": 0.9997781572153328,
+       "known_only_pr_auc_dedup": 0.9999160685381565,
+       "known_only_f1": 0.995023503315749,
+       "unknown_recall_1pct": 0.09745728068023873,
+       "macro_without_shared_5tuple_benign": 0.007914386281470082,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "BENIGN",
+         "modal_frac": 0.9933774834437086,
+         "frac_BENIGN": 0.9933774834437086
+        },
+        "Web Attack XSS": {
+         "modal_class": "BENIGN",
+         "modal_frac": 0.8148148148148148,
+         "frac_BENIGN": 0.8148148148148148
+        },
+        "_views": {
+         "view1_multiclass_known_acc": 99.54259841064498,
+         "view1_balanced_acc": 99.8961353193479,
+         "view2_binary_known_acc": 99.54837368323784,
+         "view5_zero_day_acc": 0.8238928939237898,
+         "false_alarm_rate": 0.9032526335243023,
+         "per_class_recall": {
+          "BENIGN": 99.0967473664757,
+          "DDoS": 100.0,
+          "DoS GoldenEye": 100.0,
+          "DoS Hulk": 99.97475862939358,
+          "DoS Slowhttptest": 100.0,
+          "DoS slowloris": 100.0,
+          "FTP-Patator": 100.0,
+          "PortScan": 99.99371187826196,
+          "SSH-Patator": 100.0
+         }
+        }
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.0797496755563245,
+       "family": {
+        "Bot": 0.1506319399703009,
+        "Web Attack Brute Force": 0.00886741114234813,
+        "Web Attack XSS": 0.0078147729816427
+       },
+       "known_only_pr_auc": 0.9997841137141715,
+       "known_only_pr_auc_dedup": 0.9999206669531209,
+       "known_only_f1": 0.995023503315749,
+       "unknown_recall_1pct": 0.09745728068023873,
+       "macro_without_shared_5tuple_benign": 0.07978954108100568,
+       "absorption": {
+        "Bot": {
+         "modal_class": "BENIGN",
+         "modal_frac": 1.0,
+         "frac_BENIGN": 1.0
+        },
+        "Web Attack Brute Force": {
+         "modal_class": "BENIGN",
+         "modal_frac": 0.9933774834437086,
+         "frac_BENIGN": 0.9933774834437086
+        },
+        "Web Attack XSS": {
+         "modal_class": "BENIGN",
+         "modal_frac": 0.9259259259259259,
+         "frac_BENIGN": 0.9259259259259259
+        },
+        "_views": {
+         "view1_multiclass_known_acc": 99.54837368323784,
+         "view1_balanced_acc": 99.89830765406063,
+         "view2_binary_known_acc": 99.55183884679357,
+         "view5_zero_day_acc": 0.4119464469618949,
+         "false_alarm_rate": 0.8963223064128627,
+         "per_class_recall": {
+          "BENIGN": 99.10367769358713,
+          "DDoS": 100.0,
+          "DoS GoldenEye": 100.0,
+          "DoS Hulk": 99.9873793146968,
+          "DoS Slowhttptest": 100.0,
+          "DoS slowloris": 100.0,
+          "FTP-Patator": 100.0,
+          "PortScan": 99.99371187826196,
+          "SSH-Patator": 100.0
+         }
+        }
+       }
+      }
+     ],
+     "macro_mean": 0.032101728703455686,
+     "macro_sd": 0.04126593827414484,
+     "family_mean": {
+      "Bot": 0.05700538767177929,
+      "Web Attack Brute Force": 0.007198069735132086,
+      "Web Attack XSS": 0.006908216583602074
+     },
+     "known_only_pr_auc_mean": 0.9997779635393312,
+     "known_only_pr_auc_dedup_mean": 0.9999167669415622,
+     "macro_without_shared_5tuple_benign_mean": 0.03211570689475692,
+     "views_mean": {
+      "view1_multiclass_known_acc": 99.54452350150927,
+      "view1_balanced_acc": 99.89686025391563,
+      "view2_binary_known_acc": 99.54914371958357,
+      "view5_zero_day_acc": 0.6865774116031581,
+      "false_alarm_rate": 0.9009425244871557
+     }
+    },
+    "ae": {
+     "status": "not trained yet",
+     "missing": [
+      "ae_fixed_exclude_s42",
+      "ae_fixed_exclude_s43",
+      "ae_fixed_exclude_s44"
+     ]
+    }
+   },
+   "benign_sharing_zero_day_5tuple": 1
   }
  }
 }
