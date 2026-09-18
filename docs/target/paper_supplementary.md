@@ -185,6 +185,17 @@ so the agreement at 47.85 % and 48.34 % is between two differently filtered popu
 the model fixed and changing only the family mix moves their headline from 48.32 % to 44.38 %, so the
 composition of the zero-day set accounts for roughly 4 of the 12 missing points.
 
+**Their class balancing.** We also trained our CNN under their balancing rule, with three seeds and our
+test set unchanged. Every known attack class is cut to the size of the smallest (4,399 training flows
+each, where their 31,843 is the size of their smallest class), and benign traffic is matched to the attack
+total. This leaves 70,384 training flows, and the macro zero-day PR-AUC falls from 0.6299 to 0.4699. A
+training set of the same size with the natural class mix scores 0.2118, below the balanced one on every
+seed, so at equal size balancing helps. The reason is absorption. With the natural mix at this size, the
+two slow-rate DoS classes keep only 350 and 369 training flows, and 90–100 % of web-attack flows are then
+classified as benign; balancing restores those classes, and the web attacks are absorbed into them again.
+Balancing does not account for their zero-day accuracy either: on view 5 our balanced CNN scores 45.10 %,
+against 47.56 % on our own split and their 48.34 %.
+
 ### Problems in the base paper's evaluation
 
 We found four problems. Each can be checked against the base paper's own Table I, Table II and the

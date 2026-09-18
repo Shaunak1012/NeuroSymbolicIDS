@@ -42,11 +42,20 @@ P = cfg["protocol"]
 #                  that contains a zero-day flow is a test group
 #   chronological  within each known class, the earliest 80 % of its flows train,
 #                  the next 10 % validate, the latest 10 % test
+#   balanced       (itinerary 5.4, FD-01, 2026-09-18) the random split, then train and
+#                  val each cut down so every known attack class has as many flows as
+#                  the SMALLEST one -- the base paper's rule (their 31,843 is the size of
+#                  their smallest class, FTP-Patator) -- with benign at benign_ratio x
+#                  the attack total. TEST IS THE CANONICAL TEST SET, unchanged.
+#   subsampled     the matched control for `balanced`: train and val cut to exactly the
+#                  same sizes, but with the natural class mix (stratified). Balanced vs
+#                  subsampled isolates class balance; subsampled vs random isolates the
+#                  smaller training set. Test unchanged.
 # A variant MUST be written to its own PAPER_SUBDIR; writing one over the
 # canonical split is refused below.
 SPLIT_MODE = os.environ.get("SPLIT_MODE", "random")
 SUBDIR = os.environ.get("PAPER_SUBDIR", cfg["paths"]["paper_subdir"])
-if SPLIT_MODE not in ("random", "grouped", "chronological"):
+if SPLIT_MODE not in ("random", "grouped", "chronological", "balanced", "subsampled"):
     raise SystemExit("unknown SPLIT_MODE %r" % SPLIT_MODE)
 if SPLIT_MODE != "random" and SUBDIR == cfg["paths"]["paper_subdir"]:
     raise SystemExit("SPLIT_MODE=%s would overwrite the canonical split; set PAPER_SUBDIR"
@@ -110,13 +119,39 @@ print(f"\nknown-attack flows: {n_known_atk:,} | benign kept: {n_benign_keep:,} "
 known_pool = np.concatenate([benign_keep, np.where(is_known)[0]])
 zd_idx = np.where(is_zd)[0]
 SPLIT_NOTES = []
-if SPLIT_MODE == "random":
+if SPLIT_MODE in ("random", "balanced", "subsampled"):
     tr_idx, tmp_idx = train_test_split(
         known_pool, test_size=P["val_frac"] + P["test_frac"], random_state=SEED,
         stratify=y[known_pool])
     rel = P["test_frac"] / (P["val_frac"] + P["test_frac"])
     val_idx, te_known_idx = train_test_split(
         tmp_idx, test_size=rel, random_state=SEED, stratify=y[tmp_idx])
+    if SPLIT_MODE != "random":
+        _rs = np.random.RandomState(SEED)
+
+        def _balanced(idx, name):
+            atk = sorted(c for c in set(y[idx].tolist()) if c != "BENIGN")
+            n_min = min(int((y[idx] == c).sum()) for c in atk)
+            keep = [_rs.choice(idx[y[idx] == c], n_min, replace=False) for c in atk]
+            n_ben = min(int(round(P["benign_ratio"] * n_min * len(atk))),
+                        int((y[idx] == "BENIGN").sum()))
+            keep.append(_rs.choice(idx[y[idx] == "BENIGN"], n_ben, replace=False))
+            SPLIT_NOTES.append("balanced %s: %d per known attack class (the smallest), "
+                               "%d benign" % (name, n_min, n_ben))
+            return idx[np.isin(idx, np.concatenate(keep))]
+
+        def _subsampled(idx, n, name):
+            keep, _ = train_test_split(idx, train_size=n, random_state=SEED, stratify=y[idx])
+            SPLIT_NOTES.append("subsampled %s: %d flows, natural class mix" % (name, n))
+            return idx[np.isin(idx, keep)]
+
+        _btr, _bval = _balanced(tr_idx, "train"), _balanced(val_idx, "val")
+        if SPLIT_MODE == "balanced":
+            tr_idx, val_idx = _btr, _bval
+        else:
+            tr_idx = _subsampled(tr_idx, len(_btr), "train")
+            val_idx = _subsampled(val_idx, len(_bval), "val")
+        SPLIT_NOTES.append("test is the canonical test set, unchanged")
 elif SPLIT_MODE == "grouped":
     # Group = Flow ID. Groups are fine-grained (no group holds more than 0.16 % of
     # any known class), so assigning whole groups at random keeps the class mix

@@ -1183,7 +1183,13 @@ deterministic base-axiom matched pair (`ltn_repro_det` vs `ltn_repro_ctrl`) is n
 scratch directory and hashing), `grouped` (no Flow ID on both sides; every group containing a zero-day
 flow goes to test — 42,500 known/benign flows), `chronological` (within each known class, earliest 80 %
 train / next 10 % val / latest 10 % test; timestamps are minute-resolution, so bursty classes split
-inside one minute). A variant **must** set `PAPER_SUBDIR`; overwriting the canonical split is refused.
+inside one minute). *(2026-09-18, itinerary 5.4 / FD-01)* two more: `balanced` cuts train and val so every known attack class
+has as many flows as the smallest (the base paper's rule: their 31,843 is their smallest class), benign
+matched to the attack total; `subsampled` is its control, the same sizes with the natural class mix. Both
+keep the **canonical test set byte-identical**, so they compare with `random` directly and pair by seed.
+`split_variants.py` now also reports the base paper's views (known multi-class and balanced accuracy,
+known binary accuracy, view 5, false-alarm rate) from each run's own model and scaler.
+A variant **must** set `PAPER_SUBDIR`; overwriting the canonical split is refused.
 `timeline.py` functions take `root=` so a variant's timestamps land in its own directory (before this
 they would have overwritten the canonical ones). `split_integrity.py` honours `PAPER_SUBDIR`.
 

@@ -146,9 +146,10 @@ Do not restate it here — that is exactly what kept rotting.
 3. ~~Author decisions **D3** and **D5**~~ ✅ 2026-09-18: D3 = the notebook is **not** the deliverable
    (kept private, gitignored); D5 = push as five sequential PRs, each merged locally `--no-ff`.
    ~~whether the tuned forest's features overlap Bot's~~ answered (E4 failed).
-4. **Next, and ask the author before starting each:** itinerary 5.4 (base-paper class balancing),
-   6.4 (evasion experiment), 6.5 (view 5 on the relabelled data), **then** 4.4 (Mahalanobis on the
-   deterministic CNN).
+4. **Next, and ask the author before starting each:** ~~itinerary 5.4 (base-paper class balancing)~~
+   ✅ done 2026-09-18 (balanced 0.4699 vs size-matched 0.2118 vs ours 0.6299 — STATUS), 6.4 (evasion
+   experiment), 6.5 (view 5 on the relabelled data), **then** 4.4 (Mahalanobis on the deterministic
+   CNN).
 
 ~~**Next action (resume here — as of end of 2026-09-16):**~~ *(superseded 2026-09-17)* read STATUS → "AUDIT + REMEDIATION" and
 `REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).

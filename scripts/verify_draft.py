@@ -822,6 +822,30 @@ if _sv and all("per_seed" in _sv["splits"][k]["models"].get(m, {})
         alt=("every grouped seed below every random seed",) if _gmax < _rmin else (), ws=True)
 else:
     unbacked("split variants", "split_variants.json missing or incomplete")
+# 5.4 (2026-09-18): the base paper's class balancing, and its size-matched control.
+if _sv and all("per_seed" in _sv["splits"].get(k, {}).get("models", {}).get("cnn", {})
+              for k in ("balanced", "subsampled")):
+    _b, _u = _sv["splits"]["balanced"], _sv["splits"]["subsampled"]
+    chk("balanced: CNN macro", "split_variants", _b["models"]["cnn"]["macro_mean"])
+    chk("subsampled: CNN macro", "split_variants", _u["models"]["cnn"]["macro_mean"])
+    chk("balanced: training flows", "split_variants",
+        "{:,}".format(sum(_b["train_counts"].values())), "{}")
+    chk("balanced: flows per attack class", "split_variants",
+        "{:,}".format(_b["train_counts"]["DoS Slowhttptest"]), "{}")
+    chk("subsampled: slow-DoS training flows", "split_variants", "%d and %d" % (
+        _u["train_counts"]["DoS Slowhttptest"], _u["train_counts"]["DoS slowloris"]), "{}",
+        alt=("%d / %d" % (_u["train_counts"]["DoS Slowhttptest"], _u["train_counts"]["DoS slowloris"]),
+             "**%d / %d**" % (_u["train_counts"]["DoS Slowhttptest"], _u["train_counts"]["DoS slowloris"])))
+    chk("balanced: view 5", "split_variants",
+        _b["models"]["cnn"]["views_mean"]["view5_zero_day_acc"], "{:.2f} %")
+    chk("random: view 5", "split_variants",
+        _sv["splits"]["random"]["models"]["cnn"]["views_mean"]["view5_zero_day_acc"], "{:.2f} %")
+    _bmin = min(q["macro"] for q in _b["models"]["cnn"]["per_seed"])
+    _umax = max(q["macro"] for q in _u["models"]["cnn"]["per_seed"])
+    chk("balanced beats subsampled on every seed", "split_variants",
+        "on every seed" if _bmin > _umax else "NOT on every seed", "{}", ws=True)
+else:
+    unbacked("class balancing (5.4)", "split_variants.json has no balanced/subsampled runs")
 _si = load("split_integrity")
 if _si:
     chk("split: benign under-sampling factor", "split_integrity",

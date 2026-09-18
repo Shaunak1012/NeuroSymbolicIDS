@@ -62,6 +62,24 @@ The tuned forest **matches** the CNN; it does not beat it. Its **Bot PR-AUC is 0
 seed)** — above the autoencoder. ~~Whether its features overlap Bot's more than the CNN's is
 unmeasured.~~ Measured the same day: it does not (E4 above).
 
+### ✅ 5.4 — the base paper's class balancing, with a size-matched control
+
+`SPLIT_MODE=balanced` (every known attack class cut to the smallest, 4,399 training flows each; benign
+matched) and `subsampled` (same 70,384 flows, natural mix); **canonical test set unchanged**; CNN + AE,
+deterministic seeds 42–44 (`split_variants.py`):
+
+| training set | CNN macro | Web BF | XSS | view 5 | web → BENIGN |
+|---|---:|---:|---:|---:|---:|
+| ours (883,796) | 0.6299 | 0.9147 | 0.9430 | 47.56 % | 5–10 % |
+| balanced (70,384) | **0.4699** (0.5120 / 0.4119 / 0.4856) | 0.7329 | 0.6364 | 45.10 % | 4–20 % |
+| subsampled (70,384) | 0.2118 (0.2272 / 0.2090 / 0.1992) | 0.3649 | 0.2122 | 3.01 % | **90–100 %** |
+
+At equal size balancing helps on **every seed**: with the natural mix the slow-rate DoS classes keep
+only 350 / 369 training flows, so the web attacks fall to BENIGN instead of being absorbed into them —
+an independent confirmation of the absorption account. The drop from 0.63 is training size. Balancing
+does **not** explain the base paper's view-5 48.34 %. The double dissociation keeps its direction in
+both arms. Paper: Appendix B and master draft §3b; `verify_draft.py` checks it, a test pins it.
+
 ### ✅ 7.4 DONE — the pipeline was executed end to end, from the raw CSVs
 
 `run_all.py --run --keep-going` into an empty directory (`NSIDS_WORKDIR`), 2026-09-17 20:18 →

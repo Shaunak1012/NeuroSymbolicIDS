@@ -2,6 +2,17 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-18 (Itinerary 5.4 — the base paper's class balancing, with a size-matched control)
+
+`preprocess_paper.py` gains `SPLIT_MODE=balanced` (every known attack class cut to the smallest, the
+base paper's rule) and `subsampled` (the same 70,384 training flows with the natural mix); both keep the
+canonical test set byte-identical, and the random split stays byte-identical. Three deterministic seeds
+each: balanced CNN **0.4699**, subsampled **0.2118**, ours 0.6299. At equal size balancing helps on every
+seed, because the natural mix leaves 350 / 369 slow-rate DoS training flows and the web attacks then go
+to BENIGN (90–100 %) instead of being absorbed. Balancing does not explain the base paper's view-5 number
+(45.10 % vs their 48.34 %). `split_variants.py` now reports the base paper's views per run. In the paper
+(Appendix B, master draft), checked and pinned.
+
 ## 2026-09-18 (The pipeline is executed end to end — 7.4 closed)
 
 `run_all.py --run --keep-going` from the raw CSVs into an empty directory (2026-09-17 20:18 →
