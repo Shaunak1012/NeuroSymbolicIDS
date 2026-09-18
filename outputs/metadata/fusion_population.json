@@ -1,0 +1,2969 @@
+{
+ "populations": {
+  "pre_flag": [
+   "cnn_paper",
+   "cnn_paper_s43",
+   "cnn_paper_s44",
+   "cnn_paper_s45",
+   "cnn_paper_s46",
+   "cnn_paper_s47",
+   "cnn_repro_s42",
+   "cnn_noise_r1",
+   "cnn_noise_r2",
+   "cnn_noise_r3",
+   "cnn_noise_r4"
+  ],
+  "deterministic": [
+   "c4_log1p_s42",
+   "c4_log1p_s43",
+   "c4_log1p_s44",
+   "postdet_s45",
+   "postdet_s46",
+   "postdet_s47",
+   "det_verify_a",
+   "det_verify_b"
+  ]
+ },
+ "duplicates": {
+  "det_verify_a": "c4_log1p_s42",
+  "det_verify_b": "c4_log1p_s42"
+ },
+ "cnn": {
+  "cnn_paper": {
+   "macro": 0.6446410986724089,
+   "family": {
+    "Bot": 0.05909034686604705,
+    "Web Attack Brute Force": 0.919439599607742,
+    "Web Attack XSS": 0.9553933495434377
+   },
+   "xss_median_rank": 0.8794305674266079,
+   "known_attack_median_rank": 0.742412217202463
+  },
+  "cnn_paper_s43": {
+   "macro": 0.635472837110676,
+   "family": {
+    "Bot": 0.024482920037225783,
+    "Web Attack Brute Force": 0.9287715718392162,
+    "Web Attack XSS": 0.9531640194555862
+   },
+   "xss_median_rank": 0.8470276823248268,
+   "known_attack_median_rank": 0.7429485949519441
+  },
+  "cnn_paper_s44": {
+   "macro": 0.6395842991633727,
+   "family": {
+    "Bot": 0.05068698613064222,
+    "Web Attack Brute Force": 0.9195616922411831,
+    "Web Attack XSS": 0.9485042191182926
+   },
+   "xss_median_rank": 0.8500104659073069,
+   "known_attack_median_rank": 0.7431448307139493
+  },
+  "cnn_paper_s45": {
+   "macro": 0.6250128297966606,
+   "family": {
+    "Bot": 0.029715883371924424,
+    "Web Attack Brute Force": 0.9008773413161426,
+    "Web Attack XSS": 0.9444452647019149
+   },
+   "xss_median_rank": 0.8227162518097297,
+   "known_attack_median_rank": 0.7440605976033072
+  },
+  "cnn_paper_s46": {
+   "macro": 0.6086785034327425,
+   "family": {
+    "Bot": 0.023224472143503472,
+    "Web Attack Brute Force": 0.8904628411657621,
+    "Web Attack XSS": 0.912348196988962
+   },
+   "xss_median_rank": 0.6003113607423817,
+   "known_attack_median_rank": 0.759079174588777
+  },
+  "cnn_paper_s47": {
+   "macro": 0.5965626496697188,
+   "family": {
+    "Bot": 0.03568798809365334,
+    "Web Attack Brute Force": 0.8944975821912597,
+    "Web Attack XSS": 0.8595023787242435
+   },
+   "xss_median_rank": 0.5227764307767447,
+   "known_attack_median_rank": 0.7585798635943415
+  },
+  "cnn_repro_s42": {
+   "macro": 0.6295329411122418,
+   "family": {
+    "Bot": 0.028204824028950474,
+    "Web Attack Brute Force": 0.9091301034887099,
+    "Web Attack XSS": 0.9512638958190648
+   },
+   "xss_median_rank": 0.8531894852517923,
+   "known_attack_median_rank": 0.7419129062080274
+  },
+  "cnn_noise_r1": {
+   "macro": 0.636574791648498,
+   "family": {
+    "Bot": 0.027754023844799487,
+    "Web Attack Brute Force": 0.9283606292074462,
+    "Web Attack XSS": 0.9536097218932483
+   },
+   "xss_median_rank": 0.7726150813724293,
+   "known_attack_median_rank": 0.7449894468767988
+  },
+  "cnn_noise_r2": {
+   "macro": 0.6124421413215041,
+   "family": {
+    "Bot": 0.027213012451996883,
+    "Web Attack Brute Force": 0.8868702504270901,
+    "Web Attack XSS": 0.9232431610854255
+   },
+   "xss_median_rank": 0.6448001883863315,
+   "known_attack_median_rank": 0.7583203963090234
+  },
+  "cnn_noise_r3": {
+   "macro": 0.5824525501942541,
+   "family": {
+    "Bot": 0.03505140919590384,
+    "Web Attack Brute Force": 0.8555941349542826,
+    "Web Attack XSS": 0.856712106432576
+   },
+   "xss_median_rank": 0.5295574665527045,
+   "known_attack_median_rank": 0.7590987981649775
+  },
+  "cnn_noise_r4": {
+   "macro": 0.6280212401475717,
+   "family": {
+    "Bot": 0.027796296884756263,
+    "Web Attack Brute Force": 0.9107655322938162,
+    "Web Attack XSS": 0.9455018912641427
+   },
+   "xss_median_rank": 0.8212030560449336,
+   "known_attack_median_rank": 0.7425255978649549
+  },
+  "c4_log1p_s42": {
+   "macro": 0.629768308212828,
+   "family": {
+    "Bot": 0.04825033825565475,
+    "Web Attack Brute Force": 0.9028072998737224,
+    "Web Attack XSS": 0.938247286509107
+   },
+   "xss_median_rank": 0.7183449911911947,
+   "known_attack_median_rank": 0.7586343735282318
+  },
+  "c4_log1p_s43": {
+   "macro": 0.6268946812643791,
+   "family": {
+    "Bot": 0.024126904884934446,
+    "Web Attack Brute Force": 0.9119929345618719,
+    "Web Attack XSS": 0.9445642043463308
+   },
+   "xss_median_rank": 0.7113110293219836,
+   "known_attack_median_rank": 0.7577992813410316
+  },
+  "c4_log1p_s44": {
+   "macro": 0.6330470967531493,
+   "family": {
+    "Bot": 0.023895055688950347,
+    "Web Attack Brute Force": 0.929149802230336,
+    "Web Attack XSS": 0.9460964323401614
+   },
+   "xss_median_rank": 0.7217333286818189,
+   "known_attack_median_rank": 0.7590966177676219
+  },
+  "postdet_s45": {
+   "macro": 0.5881819085280586,
+   "family": {
+    "Bot": 0.027610455374603785,
+    "Web Attack Brute Force": 0.870977387425113,
+    "Web Attack XSS": 0.8659578827844592
+   },
+   "xss_median_rank": 0.5744169617471089,
+   "known_attack_median_rank": 0.7591053393570444
+  },
+  "postdet_s46": {
+   "macro": 0.621167533792367,
+   "family": {
+    "Bot": 0.025102243003558494,
+    "Web Attack Brute Force": 0.9083569152463383,
+    "Web Attack XSS": 0.9300434431272043
+   },
+   "xss_median_rank": 0.6641970032618745,
+   "known_attack_median_rank": 0.7584337769715153
+  },
+  "postdet_s47": {
+   "macro": 0.6327564081028388,
+   "family": {
+    "Bot": 0.08075188810417586,
+    "Web Attack Brute Force": 0.8909007978703706,
+    "Web Attack XSS": 0.9266165383339703
+   },
+   "xss_median_rank": 0.7198102182141674,
+   "known_attack_median_rank": 0.759068272601999
+  },
+  "det_verify_a": {
+   "macro": 0.629768308212828,
+   "family": {
+    "Bot": 0.04825033825565475,
+    "Web Attack Brute Force": 0.9028072998737224,
+    "Web Attack XSS": 0.938247286509107
+   },
+   "xss_median_rank": 0.7183449911911947,
+   "known_attack_median_rank": 0.7586343735282318
+  },
+  "det_verify_b": {
+   "macro": 0.629768308212828,
+   "family": {
+    "Bot": 0.04825033825565475,
+    "Web Attack Brute Force": 0.9028072998737224,
+    "Web Attack XSS": 0.938247286509107
+   },
+   "xss_median_rank": 0.7183449911911947,
+   "known_attack_median_rank": 0.7586343735282318
+  }
+ },
+ "fusion": {
+  "k=200 causal": {
+   "pairs": {
+    "cnn_paper|kg42": {
+     "cnn": "cnn_paper",
+     "kg_seed": 42,
+     "fused_macro": 0.7327822968141257,
+     "delta": 0.08814119814171673,
+     "family": {
+      "Bot": 0.34532495386742085,
+      "Web Attack Brute Force": 0.9333093642161645,
+      "Web Attack XSS": 0.9197125723587917
+     }
+    },
+    "cnn_paper|kg43": {
+     "cnn": "cnn_paper",
+     "kg_seed": 43,
+     "fused_macro": 0.72812783254511,
+     "delta": 0.08348673387270111,
+     "family": {
+      "Bot": 0.3416321102164985,
+      "Web Attack Brute Force": 0.9263977023793739,
+      "Web Attack XSS": 0.9163536850394577
+     }
+    },
+    "cnn_paper|kg44": {
+     "cnn": "cnn_paper",
+     "kg_seed": 44,
+     "fused_macro": 0.7204410618563263,
+     "delta": 0.07579996318391735,
+     "family": {
+      "Bot": 0.3175987256518405,
+      "Web Attack Brute Force": 0.9270222649913746,
+      "Web Attack XSS": 0.9167021949257638
+     }
+    },
+    "cnn_paper_s43|kg42": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.6646652022516092,
+     "delta": 0.029192365140933152,
+     "family": {
+      "Bot": 0.17898416569624398,
+      "Web Attack Brute Force": 0.9394408548533938,
+      "Web Attack XSS": 0.87557058620519
+     }
+    },
+    "cnn_paper_s43|kg43": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.6637266780758747,
+     "delta": 0.028253840965198673,
+     "family": {
+      "Bot": 0.17232430180633568,
+      "Web Attack Brute Force": 0.9297135905381244,
+      "Web Attack XSS": 0.8891421418831641
+     }
+    },
+    "cnn_paper_s43|kg44": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.6549331651600213,
+     "delta": 0.019460328049345277,
+     "family": {
+      "Bot": 0.16506888802135036,
+      "Web Attack Brute Force": 0.9294019770506885,
+      "Web Attack XSS": 0.8703286304080249
+     }
+    },
+    "cnn_paper_s44|kg42": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.6870795107227529,
+     "delta": 0.04749521155938019,
+     "family": {
+      "Bot": 0.254331627003523,
+      "Web Attack Brute Force": 0.9314447572523707,
+      "Web Attack XSS": 0.8754621479123651
+     }
+    },
+    "cnn_paper_s44|kg43": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.6867841027913638,
+     "delta": 0.047199803627991144,
+     "family": {
+      "Bot": 0.2504660643466866,
+      "Web Attack Brute Force": 0.9245172073368176,
+      "Web Attack XSS": 0.8853690366905875
+     }
+    },
+    "cnn_paper_s44|kg44": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.6824743740122772,
+     "delta": 0.0428900748489045,
+     "family": {
+      "Bot": 0.24135527405358836,
+      "Web Attack Brute Force": 0.9220062020106174,
+      "Web Attack XSS": 0.8840616459726256
+     }
+    },
+    "cnn_paper_s45|kg42": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.6507606077455058,
+     "delta": 0.025747777948845196,
+     "family": {
+      "Bot": 0.21384476672769398,
+      "Web Attack Brute Force": 0.8971165356207453,
+      "Web Attack XSS": 0.8413205208880782
+     }
+    },
+    "cnn_paper_s45|kg43": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.6506665933349688,
+     "delta": 0.025653763538308172,
+     "family": {
+      "Bot": 0.2093692682088637,
+      "Web Attack Brute Force": 0.8981578947383366,
+      "Web Attack XSS": 0.8444726170577058
+     }
+    },
+    "cnn_paper_s45|kg44": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.6371497806161818,
+     "delta": 0.012136950819521153,
+     "family": {
+      "Bot": 0.20319940411005116,
+      "Web Attack Brute Force": 0.8867101739002753,
+      "Web Attack XSS": 0.8215397638382188
+     }
+    },
+    "cnn_paper_s46|kg42": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.3400635998723307,
+     "delta": -0.26861490356041184,
+     "family": {
+      "Bot": 0.17465458793397254,
+      "Web Attack Brute Force": 0.6139264644021334,
+      "Web Attack XSS": 0.2316097472808863
+     }
+    },
+    "cnn_paper_s46|kg43": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.34427633248452105,
+     "delta": -0.2644021709482215,
+     "family": {
+      "Bot": 0.1653553559667709,
+      "Web Attack Brute Force": 0.631844638753983,
+      "Web Attack XSS": 0.2356290027328092
+     }
+    },
+    "cnn_paper_s46|kg44": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.3220830406291677,
+     "delta": -0.28659546280357484,
+     "family": {
+      "Bot": 0.16201213462005754,
+      "Web Attack Brute Force": 0.56557425605355,
+      "Web Attack XSS": 0.23866273121389558
+     }
+    },
+    "cnn_paper_s47|kg42": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.34446479846213335,
+     "delta": -0.2520978512075855,
+     "family": {
+      "Bot": 0.2424698479008291,
+      "Web Attack Brute Force": 0.5687080353525333,
+      "Web Attack XSS": 0.22221651213303742
+     }
+    },
+    "cnn_paper_s47|kg43": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.34516963252518007,
+     "delta": -0.25139301714453877,
+     "family": {
+      "Bot": 0.23656220003605138,
+      "Web Attack Brute Force": 0.5780946174325297,
+      "Web Attack XSS": 0.22085208010695917
+     }
+    },
+    "cnn_paper_s47|kg44": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.3339851240835075,
+     "delta": -0.26257752558621134,
+     "family": {
+      "Bot": 0.22749750751311743,
+      "Web Attack Brute Force": 0.5475439288534294,
+      "Web Attack XSS": 0.22691393588397574
+     }
+    },
+    "cnn_repro_s42|kg42": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.669760053287494,
+     "delta": 0.04022711217525221,
+     "family": {
+      "Bot": 0.21652731684757848,
+      "Web Attack Brute Force": 0.9201528252934074,
+      "Web Attack XSS": 0.8726000177214963
+     }
+    },
+    "cnn_repro_s42|kg43": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.6713519548161443,
+     "delta": 0.04181901370390251,
+     "family": {
+      "Bot": 0.21644047215956538,
+      "Web Attack Brute Force": 0.9217838809974649,
+      "Web Attack XSS": 0.8758315112914024
+     }
+    },
+    "cnn_repro_s42|kg44": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.6683169963324204,
+     "delta": 0.03878405522017858,
+     "family": {
+      "Bot": 0.2022267385961834,
+      "Web Attack Brute Force": 0.9223761540354781,
+      "Web Attack XSS": 0.8803480963655994
+     }
+    },
+    "cnn_noise_r1|kg42": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 42,
+     "fused_macro": 0.6438647759146529,
+     "delta": 0.007289984266154903,
+     "family": {
+      "Bot": 0.22350877247682321,
+      "Web Attack Brute Force": 0.9264757055995547,
+      "Web Attack XSS": 0.7816098496675807
+     }
+    },
+    "cnn_noise_r1|kg43": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 43,
+     "fused_macro": 0.6419780100856103,
+     "delta": 0.005403218437112334,
+     "family": {
+      "Bot": 0.2204479554541506,
+      "Web Attack Brute Force": 0.9180910339554633,
+      "Web Attack XSS": 0.787395040847217
+     }
+    },
+    "cnn_noise_r1|kg44": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 44,
+     "fused_macro": 0.5787135078877852,
+     "delta": -0.057861283760712756,
+     "family": {
+      "Bot": 0.20789977651673083,
+      "Web Attack Brute Force": 0.9069097364614541,
+      "Web Attack XSS": 0.6213310106851707
+     }
+    },
+    "cnn_noise_r2|kg42": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 42,
+     "fused_macro": 0.4405718250499539,
+     "delta": -0.1718703162715502,
+     "family": {
+      "Bot": 0.1813823239651155,
+      "Web Attack Brute Force": 0.7732833384013874,
+      "Web Attack XSS": 0.3670498127833588
+     }
+    },
+    "cnn_noise_r2|kg43": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 43,
+     "fused_macro": 0.4454932999914078,
+     "delta": -0.1669488413300963,
+     "family": {
+      "Bot": 0.17617114384752858,
+      "Web Attack Brute Force": 0.7840465808761844,
+      "Web Attack XSS": 0.3762621752505104
+     }
+    },
+    "cnn_noise_r2|kg44": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 44,
+     "fused_macro": 0.420687748074259,
+     "delta": -0.19175439324724508,
+     "family": {
+      "Bot": 0.17098846839624277,
+      "Web Attack Brute Force": 0.7245324316418769,
+      "Web Attack XSS": 0.3665423441846573
+     }
+    },
+    "cnn_noise_r3|kg42": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 42,
+     "fused_macro": 0.27825888813905125,
+     "delta": -0.3041936620552029,
+     "family": {
+      "Bot": 0.24292833714877943,
+      "Web Attack Brute Force": 0.4071386242764791,
+      "Web Attack XSS": 0.18470970299189515
+     }
+    },
+    "cnn_noise_r3|kg43": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 43,
+     "fused_macro": 0.28108534538658375,
+     "delta": -0.3013672048076704,
+     "family": {
+      "Bot": 0.24328119860428687,
+      "Web Attack Brute Force": 0.4144755215596602,
+      "Web Attack XSS": 0.18549931599580408
+     }
+    },
+    "cnn_noise_r3|kg44": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 44,
+     "fused_macro": 0.2725765489526049,
+     "delta": -0.3098760012416492,
+     "family": {
+      "Bot": 0.22935944265983016,
+      "Web Attack Brute Force": 0.4030526591508125,
+      "Web Attack XSS": 0.18531754504717213
+     }
+    },
+    "cnn_noise_r4|kg42": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 42,
+     "fused_macro": 0.6579499183929137,
+     "delta": 0.029928678245342066,
+     "family": {
+      "Bot": 0.2013348674790717,
+      "Web Attack Brute Force": 0.9317056386834958,
+      "Web Attack XSS": 0.8408092490161736
+     }
+    },
+    "cnn_noise_r4|kg43": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 43,
+     "fused_macro": 0.6551188909802764,
+     "delta": 0.027097650832704767,
+     "family": {
+      "Bot": 0.1980395335053861,
+      "Web Attack Brute Force": 0.9234359051262538,
+      "Web Attack XSS": 0.8438812343091894
+     }
+    },
+    "cnn_noise_r4|kg44": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 44,
+     "fused_macro": 0.6422271303198221,
+     "delta": 0.01420589017225049,
+     "family": {
+      "Bot": 0.1903534094925081,
+      "Web Attack Brute Force": 0.9218350975087347,
+      "Web Attack XSS": 0.8144928839582238
+     }
+    },
+    "c4_log1p_s42|kg42": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.5420480185803666,
+     "delta": -0.08772028963246148,
+     "family": {
+      "Bot": 0.3125848572854571,
+      "Web Attack Brute Force": 0.8557340314719685,
+      "Web Attack XSS": 0.4578251669836742
+     }
+    },
+    "c4_log1p_s42|kg43": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.5620187353665332,
+     "delta": -0.06774957284629479,
+     "family": {
+      "Bot": 0.3098786641875083,
+      "Web Attack Brute Force": 0.8679914524613391,
+      "Web Attack XSS": 0.5081860894507524
+     }
+    },
+    "c4_log1p_s42|kg44": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.509426602673823,
+     "delta": -0.12034170553900503,
+     "family": {
+      "Bot": 0.29905017322499794,
+      "Web Attack Brute Force": 0.8434314599940677,
+      "Web Attack XSS": 0.3857981748024033
+     }
+    },
+    "c4_log1p_s43|kg42": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.5017302334679524,
+     "delta": -0.12516444779642666,
+     "family": {
+      "Bot": 0.18386013295328185,
+      "Web Attack Brute Force": 0.8806153481401475,
+      "Web Attack XSS": 0.44071521931042795
+     }
+    },
+    "c4_log1p_s43|kg43": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.5155796863325101,
+     "delta": -0.11131499493186903,
+     "family": {
+      "Bot": 0.18075100869226085,
+      "Web Attack Brute Force": 0.881852488062372,
+      "Web Attack XSS": 0.4841355622428971
+     }
+    },
+    "c4_log1p_s43|kg44": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.473837338935295,
+     "delta": -0.15305734232908408,
+     "family": {
+      "Bot": 0.16978629648064247,
+      "Web Attack Brute Force": 0.8636622690893098,
+      "Web Attack XSS": 0.3880634512359329
+     }
+    },
+    "c4_log1p_s44|kg42": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.4975136004523262,
+     "delta": -0.13553349630082312,
+     "family": {
+      "Bot": 0.17526437791369698,
+      "Web Attack Brute Force": 0.8672371735610984,
+      "Web Attack XSS": 0.45003924988218336
+     }
+    },
+    "c4_log1p_s44|kg43": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.50799997134025,
+     "delta": -0.1250471254128993,
+     "family": {
+      "Bot": 0.16826619893832073,
+      "Web Attack Brute Force": 0.8761632648249417,
+      "Web Attack XSS": 0.4795704502574875
+     }
+    },
+    "c4_log1p_s44|kg44": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.4736461528173912,
+     "delta": -0.1594009439357581,
+     "family": {
+      "Bot": 0.16315692919023164,
+      "Web Attack Brute Force": 0.8584848913620722,
+      "Web Attack XSS": 0.3992966378998696
+     }
+    },
+    "postdet_s45|kg42": {
+     "cnn": "postdet_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.3401089964384975,
+     "delta": -0.24807291208956112,
+     "family": {
+      "Bot": 0.21712917074750016,
+      "Web Attack Brute Force": 0.5501627203921235,
+      "Web Attack XSS": 0.2530350981758687
+     }
+    },
+    "postdet_s45|kg43": {
+     "cnn": "postdet_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.3449642317965586,
+     "delta": -0.24321767673150002,
+     "family": {
+      "Bot": 0.2163082952425529,
+      "Web Attack Brute Force": 0.5614531175263723,
+      "Web Attack XSS": 0.2571312826207507
+     }
+    },
+    "postdet_s45|kg44": {
+     "cnn": "postdet_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.3284636630504683,
+     "delta": -0.2597182454775903,
+     "family": {
+      "Bot": 0.20393664131311365,
+      "Web Attack Brute Force": 0.5231604037092208,
+      "Web Attack XSS": 0.25829394412907064
+     }
+    },
+    "postdet_s46|kg42": {
+     "cnn": "postdet_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.4699552376766742,
+     "delta": -0.1512122961156928,
+     "family": {
+      "Bot": 0.18922164917090417,
+      "Web Attack Brute Force": 0.8411404582115585,
+      "Web Attack XSS": 0.3795036056475599
+     }
+    },
+    "postdet_s46|kg43": {
+     "cnn": "postdet_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.4807619882332155,
+     "delta": -0.14040554555915152,
+     "family": {
+      "Bot": 0.1881538438680857,
+      "Web Attack Brute Force": 0.8503076815597683,
+      "Web Attack XSS": 0.40382443927179257
+     }
+    },
+    "postdet_s46|kg44": {
+     "cnn": "postdet_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.4340506208494504,
+     "delta": -0.1871169129429166,
+     "family": {
+      "Bot": 0.17795462255077768,
+      "Web Attack Brute Force": 0.7537662552925072,
+      "Web Attack XSS": 0.37043098470506636
+     }
+    },
+    "postdet_s47|kg42": {
+     "cnn": "postdet_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.5232491465480419,
+     "delta": -0.10950726155479695,
+     "family": {
+      "Bot": 0.3633318796481455,
+      "Web Attack Brute Force": 0.8178282941355177,
+      "Web Attack XSS": 0.38858726586046255
+     }
+    },
+    "postdet_s47|kg43": {
+     "cnn": "postdet_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.5357580871484666,
+     "delta": -0.09699832095437222,
+     "family": {
+      "Bot": 0.3579104939752362,
+      "Web Attack Brute Force": 0.8336327727624391,
+      "Web Attack XSS": 0.4157309947077245
+     }
+    },
+    "postdet_s47|kg44": {
+     "cnn": "postdet_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.4918561183707801,
+     "delta": -0.14090028973205876,
+     "family": {
+      "Bot": 0.3306986076579523,
+      "Web Attack Brute Force": 0.8034730567743313,
+      "Web Attack XSS": 0.3413966906800565
+     }
+    },
+    "det_verify_a|kg42": {
+     "cnn": "det_verify_a",
+     "kg_seed": 42,
+     "fused_macro": 0.5420480185803666,
+     "delta": -0.08772028963246148,
+     "family": {
+      "Bot": 0.3125848572854571,
+      "Web Attack Brute Force": 0.8557340314719685,
+      "Web Attack XSS": 0.4578251669836742
+     }
+    },
+    "det_verify_a|kg43": {
+     "cnn": "det_verify_a",
+     "kg_seed": 43,
+     "fused_macro": 0.5620187353665332,
+     "delta": -0.06774957284629479,
+     "family": {
+      "Bot": 0.3098786641875083,
+      "Web Attack Brute Force": 0.8679914524613391,
+      "Web Attack XSS": 0.5081860894507524
+     }
+    },
+    "det_verify_a|kg44": {
+     "cnn": "det_verify_a",
+     "kg_seed": 44,
+     "fused_macro": 0.509426602673823,
+     "delta": -0.12034170553900503,
+     "family": {
+      "Bot": 0.29905017322499794,
+      "Web Attack Brute Force": 0.8434314599940677,
+      "Web Attack XSS": 0.3857981748024033
+     }
+    },
+    "det_verify_b|kg42": {
+     "cnn": "det_verify_b",
+     "kg_seed": 42,
+     "fused_macro": 0.5420480185803666,
+     "delta": -0.08772028963246148,
+     "family": {
+      "Bot": 0.3125848572854571,
+      "Web Attack Brute Force": 0.8557340314719685,
+      "Web Attack XSS": 0.4578251669836742
+     }
+    },
+    "det_verify_b|kg43": {
+     "cnn": "det_verify_b",
+     "kg_seed": 43,
+     "fused_macro": 0.5620187353665332,
+     "delta": -0.06774957284629479,
+     "family": {
+      "Bot": 0.3098786641875083,
+      "Web Attack Brute Force": 0.8679914524613391,
+      "Web Attack XSS": 0.5081860894507524
+     }
+    },
+    "det_verify_b|kg44": {
+     "cnn": "det_verify_b",
+     "kg_seed": 44,
+     "fused_macro": 0.509426602673823,
+     "delta": -0.12034170553900503,
+     "family": {
+      "Bot": 0.29905017322499794,
+      "Web Attack Brute Force": 0.8434314599940677,
+      "Web Attack XSS": 0.3857981748024033
+     }
+    }
+   },
+   "summary": {
+    "pre_flag": {
+     "n_pairs": 33,
+     "n_cnn_runs": 11,
+     "delta_mean": -0.07149512179439424,
+     "delta_sd": 0.14418041161692915,
+     "delta_min": -0.3098760012416492,
+     "delta_max": 0.08814119814171673,
+     "frac_positive": 0.6060606060606061,
+     "fused_xss_mean": 0.6333211922014238,
+     "per_run_delta": {
+      "cnn_paper": 0.08247596506611173,
+      "cnn_paper_s43": 0.025635511385159033,
+      "cnn_paper_s44": 0.04586169667875861,
+      "cnn_paper_s45": 0.021179497435558175,
+      "cnn_paper_s46": -0.2732041791040694,
+      "cnn_paper_s47": -0.2553561313127785,
+      "cnn_repro_s42": 0.0402767270331111,
+      "cnn_noise_r1": -0.015056027019148507,
+      "cnn_noise_r2": -0.17685785028296386,
+      "cnn_noise_r3": -0.30514562270150747,
+      "cnn_noise_r4": 0.023744073083432442
+     },
+     "runs_positive": 6,
+     "per_run_mean": -0.07149512179439425,
+     "reference_three_mean": 0.051324391043343125,
+     "other_eight_mean": -0.11755243910854575,
+     "xss_rank_vs_delta_spearman": 0.9545454545454546
+    },
+    "deterministic": {
+     "n_pairs": 18,
+     "n_cnn_runs": 6,
+     "delta_mean": -0.1479155211045701,
+     "delta_sd": 0.054684679739790805,
+     "delta_min": -0.2597182454775903,
+     "delta_max": -0.06774957284629479,
+     "frac_positive": 0.0,
+     "fused_xss_mean": 0.39230912821466557,
+     "per_run_delta": {
+      "c4_log1p_s42": -0.09193718933925377,
+      "c4_log1p_s43": -0.1298455950191266,
+      "c4_log1p_s44": -0.13999385521649352,
+      "postdet_s45": -0.25033627809955045,
+      "postdet_s46": -0.15957825153925365,
+      "postdet_s47": -0.11580195741374265
+     },
+     "runs_positive": 0,
+     "per_run_mean": -0.1479155211045701
+    },
+    "population_difference": {
+     "mean_diff": 0.07642039931017586,
+     "mannwhitney_p": 0.06534016104610824,
+     "note": "pairs share KG seeds, so this p is indicative, not exact"
+    }
+   }
+  },
+  "k=200 s_kg": {
+   "pairs": {
+    "cnn_paper|kg42": {
+     "cnn": "cnn_paper",
+     "kg_seed": 42,
+     "fused_macro": 0.7214350062247713,
+     "delta": 0.07679390755236237,
+     "family": {
+      "Bot": 0.31218576489104377,
+      "Web Attack Brute Force": 0.9237658056020724,
+      "Web Attack XSS": 0.9283534481811975
+     }
+    },
+    "cnn_paper|kg43": {
+     "cnn": "cnn_paper",
+     "kg_seed": 43,
+     "fused_macro": 0.7028876183317448,
+     "delta": 0.058246519659335916,
+     "family": {
+      "Bot": 0.28653537957947484,
+      "Web Attack Brute Force": 0.9063010630435971,
+      "Web Attack XSS": 0.9158264123721626
+     }
+    },
+    "cnn_paper|kg44": {
+     "cnn": "cnn_paper",
+     "kg_seed": 44,
+     "fused_macro": 0.7051285148963377,
+     "delta": 0.060487416223928725,
+     "family": {
+      "Bot": 0.2891115821904986,
+      "Web Attack Brute Force": 0.9081375725328956,
+      "Web Attack XSS": 0.9181363899656185
+     }
+    },
+    "cnn_paper_s43|kg42": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.6650757306798044,
+     "delta": 0.029602893569128375,
+     "family": {
+      "Bot": 0.1530565892581522,
+      "Web Attack Brute Force": 0.9265786831817746,
+      "Web Attack XSS": 0.9155919195994865
+     }
+    },
+    "cnn_paper_s43|kg43": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.6511798518787834,
+     "delta": 0.01570701476810732,
+     "family": {
+      "Bot": 0.1381612903061416,
+      "Web Attack Brute Force": 0.9070349645019302,
+      "Web Attack XSS": 0.9083433008282781
+     }
+    },
+    "cnn_paper_s43|kg44": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.6527724287765143,
+     "delta": 0.017299591665838276,
+     "family": {
+      "Bot": 0.1397148974578648,
+      "Web Attack Brute Force": 0.9078670440300403,
+      "Web Attack XSS": 0.9107353448416379
+     }
+    },
+    "cnn_paper_s44|kg42": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.6826066055462153,
+     "delta": 0.04302230638284266,
+     "family": {
+      "Bot": 0.20833437048325712,
+      "Web Attack Brute Force": 0.9239830470646265,
+      "Web Attack XSS": 0.9155023990907625
+     }
+    },
+    "cnn_paper_s44|kg43": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.6664526365543636,
+     "delta": 0.026868337390990926,
+     "family": {
+      "Bot": 0.19268480602889174,
+      "Web Attack Brute Force": 0.9033794932367376,
+      "Web Attack XSS": 0.9032936103974616
+     }
+    },
+    "cnn_paper_s44|kg44": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.664845176834051,
+     "delta": 0.025260877670678306,
+     "family": {
+      "Bot": 0.18548212685959392,
+      "Web Attack Brute Force": 0.9047204690037957,
+      "Web Attack XSS": 0.9043329346387633
+     }
+    },
+    "cnn_paper_s45|kg42": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.6599906807070431,
+     "delta": 0.034977850910382524,
+     "family": {
+      "Bot": 0.17102049513092038,
+      "Web Attack Brute Force": 0.9046780210777922,
+      "Web Attack XSS": 0.9042735259124169
+     }
+    },
+    "cnn_paper_s45|kg43": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.6529154908700588,
+     "delta": 0.027902661073398227,
+     "family": {
+      "Bot": 0.16061353552858493,
+      "Web Attack Brute Force": 0.8981876579872203,
+      "Web Attack XSS": 0.8999452790943713
+     }
+    },
+    "cnn_paper_s45|kg44": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.6518511184864014,
+     "delta": 0.026838288689740808,
+     "family": {
+      "Bot": 0.1570036865920687,
+      "Web Attack Brute Force": 0.8980267173875861,
+      "Web Attack XSS": 0.9005229514795497
+     }
+    },
+    "cnn_paper_s46|kg42": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.3166193068405054,
+     "delta": -0.29205919659223717,
+     "family": {
+      "Bot": 0.15510964743435834,
+      "Web Attack Brute Force": 0.49037308253390166,
+      "Web Attack XSS": 0.3043751905532561
+     }
+    },
+    "cnn_paper_s46|kg43": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.36496114309822286,
+     "delta": -0.24371736033451968,
+     "family": {
+      "Bot": 0.14312045701287482,
+      "Web Attack Brute Force": 0.5673304423629132,
+      "Web Attack XSS": 0.38443252991888055
+     }
+    },
+    "cnn_paper_s46|kg44": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.35260611906435685,
+     "delta": -0.2560723843683857,
+     "family": {
+      "Bot": 0.14058645621922375,
+      "Web Attack Brute Force": 0.5479753642835066,
+      "Web Attack XSS": 0.3692565366903403
+     }
+    },
+    "cnn_paper_s47|kg42": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.3255815237372576,
+     "delta": -0.2709811259324612,
+     "family": {
+      "Bot": 0.19491777507979452,
+      "Web Attack Brute Force": 0.5067385351265875,
+      "Web Attack XSS": 0.27508826100539086
+     }
+    },
+    "cnn_paper_s47|kg43": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.31781239883270945,
+     "delta": -0.2787502508370094,
+     "family": {
+      "Bot": 0.17342750585677713,
+      "Web Attack Brute Force": 0.502357805471686,
+      "Web Attack XSS": 0.27765188516966516
+     }
+    },
+    "cnn_paper_s47|kg44": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.313235221631381,
+     "delta": -0.2833274280383378,
+     "family": {
+      "Bot": 0.17277231355902478,
+      "Web Attack Brute Force": 0.4952544253934929,
+      "Web Attack XSS": 0.2716789259416254
+     }
+    },
+    "cnn_repro_s42|kg42": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.6713016788120724,
+     "delta": 0.04176873769983058,
+     "family": {
+      "Bot": 0.18515920042033934,
+      "Web Attack Brute Force": 0.9097322597741657,
+      "Web Attack XSS": 0.9190135762417121
+     }
+    },
+    "cnn_repro_s42|kg43": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.6697703479786005,
+     "delta": 0.04023740686635868,
+     "family": {
+      "Bot": 0.1840139336868421,
+      "Web Attack Brute Force": 0.9061225055841425,
+      "Web Attack XSS": 0.9191746046648168
+     }
+    },
+    "cnn_repro_s42|kg44": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.6624698888500523,
+     "delta": 0.03293694773781053,
+     "family": {
+      "Bot": 0.16625984670832317,
+      "Web Attack Brute Force": 0.9055768896391378,
+      "Web Attack XSS": 0.9155729302026958
+     }
+    },
+    "cnn_noise_r1|kg42": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 42,
+     "fused_macro": 0.6696895228850549,
+     "delta": 0.03311473123655695,
+     "family": {
+      "Bot": 0.1647620076554028,
+      "Web Attack Brute Force": 0.9205294652164179,
+      "Web Attack XSS": 0.9237770957833444
+     }
+    },
+    "cnn_noise_r1|kg43": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 43,
+     "fused_macro": 0.6609080170366399,
+     "delta": 0.024333225388141977,
+     "family": {
+      "Bot": 0.1559303974368973,
+      "Web Attack Brute Force": 0.9072252094113791,
+      "Web Attack XSS": 0.9195684442616434
+     }
+    },
+    "cnn_noise_r1|kg44": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 44,
+     "fused_macro": 0.6617013761480278,
+     "delta": 0.02512658449952987,
+     "family": {
+      "Bot": 0.15348833115267552,
+      "Web Attack Brute Force": 0.9088890954828472,
+      "Web Attack XSS": 0.9227267018085609
+     }
+    },
+    "cnn_noise_r2|kg42": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 42,
+     "fused_macro": 0.414081807534281,
+     "delta": -0.19836033378722312,
+     "family": {
+      "Bot": 0.15613749720464165,
+      "Web Attack Brute Force": 0.6518539274108063,
+      "Web Attack XSS": 0.434253997987395
+     }
+    },
+    "cnn_noise_r2|kg43": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 43,
+     "fused_macro": 0.46731009347301145,
+     "delta": -0.14513204784849265,
+     "family": {
+      "Bot": 0.1426230150558493,
+      "Web Attack Brute Force": 0.7261767194552567,
+      "Web Attack XSS": 0.5331305459079282
+     }
+    },
+    "cnn_noise_r2|kg44": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 44,
+     "fused_macro": 0.45408831723083365,
+     "delta": -0.15835382409067045,
+     "family": {
+      "Bot": 0.14334134038152097,
+      "Web Attack Brute Force": 0.709357998616883,
+      "Web Attack XSS": 0.5095656126940972
+     }
+    },
+    "cnn_noise_r3|kg42": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 42,
+     "fused_macro": 0.26707738755787297,
+     "delta": -0.31537516263638116,
+     "family": {
+      "Bot": 0.18656885429498749,
+      "Web Attack Brute Force": 0.3840885089218699,
+      "Web Attack XSS": 0.23057479945676154
+     }
+    },
+    "cnn_noise_r3|kg43": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 43,
+     "fused_macro": 0.2628794830306878,
+     "delta": -0.3195730671635663,
+     "family": {
+      "Bot": 0.17109749321471568,
+      "Web Attack Brute Force": 0.38363730163110926,
+      "Web Attack XSS": 0.2339036542462385
+     }
+    },
+    "cnn_noise_r3|kg44": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 44,
+     "fused_macro": 0.2615858114610838,
+     "delta": -0.32086673873317034,
+     "family": {
+      "Bot": 0.16728392532556302,
+      "Web Attack Brute Force": 0.3837595165236599,
+      "Web Attack XSS": 0.2337139925340285
+     }
+    },
+    "cnn_noise_r4|kg42": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 42,
+     "fused_macro": 0.6686165698816126,
+     "delta": 0.0405953297340409,
+     "family": {
+      "Bot": 0.16360458681939563,
+      "Web Attack Brute Force": 0.9217089778821324,
+      "Web Attack XSS": 0.9205361449433094
+     }
+    },
+    "cnn_noise_r4|kg43": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 43,
+     "fused_macro": 0.6587682395378387,
+     "delta": 0.030746999390267038,
+     "family": {
+      "Bot": 0.15222339651559638,
+      "Web Attack Brute Force": 0.9066195146205601,
+      "Web Attack XSS": 0.9174618074773596
+     }
+    },
+    "cnn_noise_r4|kg44": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 44,
+     "fused_macro": 0.659316139132376,
+     "delta": 0.03129489898480431,
+     "family": {
+      "Bot": 0.15033079974473346,
+      "Web Attack Brute Force": 0.9079612287230738,
+      "Web Attack XSS": 0.9196563889293208
+     }
+    },
+    "c4_log1p_s42|kg42": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.6342969239768053,
+     "delta": 0.004528615763977228,
+     "family": {
+      "Bot": 0.2501643100552563,
+      "Web Attack Brute Force": 0.8600789627286322,
+      "Web Attack XSS": 0.7926474991465273
+     }
+    },
+    "c4_log1p_s42|kg43": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.6644763848934847,
+     "delta": 0.034708076680656674,
+     "family": {
+      "Bot": 0.22245522429157316,
+      "Web Attack Brute Force": 0.8882769112814064,
+      "Web Attack XSS": 0.8826970191074744
+     }
+    },
+    "c4_log1p_s42|kg44": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.659838128428784,
+     "delta": 0.030069820215955945,
+     "family": {
+      "Bot": 0.22105638210845271,
+      "Web Attack Brute Force": 0.8848062749585852,
+      "Web Attack XSS": 0.8736517282193139
+     }
+    },
+    "c4_log1p_s43|kg42": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.5856941943408692,
+     "delta": -0.04120048692350986,
+     "family": {
+      "Bot": 0.14793565688138693,
+      "Web Attack Brute Force": 0.8541531990412836,
+      "Web Attack XSS": 0.7549937270999368
+     }
+    },
+    "c4_log1p_s43|kg43": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.6345287013272701,
+     "delta": 0.007634020062891045,
+     "family": {
+      "Bot": 0.14207695506551404,
+      "Web Attack Brute Force": 0.887314074032962,
+      "Web Attack XSS": 0.8741950748833345
+     }
+    },
+    "c4_log1p_s43|kg44": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.6243682697364935,
+     "delta": -0.0025264115278855748,
+     "family": {
+      "Bot": 0.13278930014507478,
+      "Web Attack Brute Force": 0.881593430650264,
+      "Web Attack XSS": 0.8587220784141416
+     }
+    },
+    "c4_log1p_s44|kg42": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.6099033399980697,
+     "delta": -0.023143756755079625,
+     "family": {
+      "Bot": 0.14627347936471335,
+      "Web Attack Brute Force": 0.8723022987246509,
+      "Web Attack XSS": 0.8111342419048448
+     }
+    },
+    "c4_log1p_s44|kg43": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.6368407351029011,
+     "delta": 0.003793638349751771,
+     "family": {
+      "Bot": 0.14059467289329183,
+      "Web Attack Brute Force": 0.8893877243428606,
+      "Web Attack XSS": 0.880539808072551
+     }
+    },
+    "c4_log1p_s44|kg44": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.6310295511434969,
+     "delta": -0.0020175456096523936,
+     "family": {
+      "Bot": 0.13435975553704135,
+      "Web Attack Brute Force": 0.886296688860517,
+      "Web Attack XSS": 0.8724322090329325
+     }
+    },
+    "postdet_s45|kg42": {
+     "cnn": "postdet_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.33450794456307004,
+     "delta": -0.2536739639649886,
+     "family": {
+      "Bot": 0.16737712715163403,
+      "Web Attack Brute Force": 0.5142832901138871,
+      "Web Attack XSS": 0.321863416423689
+     }
+    },
+    "postdet_s45|kg43": {
+     "cnn": "postdet_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.3469873166830923,
+     "delta": -0.24119459184496633,
+     "family": {
+      "Bot": 0.15757633410611158,
+      "Web Attack Brute Force": 0.5356272236571905,
+      "Web Attack XSS": 0.34775839228597466
+     }
+    },
+    "postdet_s45|kg44": {
+     "cnn": "postdet_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.3362451409250915,
+     "delta": -0.2519367676029671,
+     "family": {
+      "Bot": 0.15382511961071169,
+      "Web Attack Brute Force": 0.5227539075872834,
+      "Web Attack XSS": 0.3321563955772794
+     }
+    },
+    "postdet_s46|kg42": {
+     "cnn": "postdet_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.45520512817158343,
+     "delta": -0.16596240562078357,
+     "family": {
+      "Bot": 0.15623007615697315,
+      "Web Attack Brute Force": 0.7064432226263879,
+      "Web Attack XSS": 0.5029420857313893
+     }
+    },
+    "postdet_s46|kg43": {
+     "cnn": "postdet_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.5145408869624327,
+     "delta": -0.10662664682993428,
+     "family": {
+      "Bot": 0.147600531247895,
+      "Web Attack Brute Force": 0.7796223046398761,
+      "Web Attack XSS": 0.6163998249995273
+     }
+    },
+    "postdet_s46|kg44": {
+     "cnn": "postdet_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.5072899842836024,
+     "delta": -0.11387754950876461,
+     "family": {
+      "Bot": 0.1458807332171449,
+      "Web Attack Brute Force": 0.7731083059984224,
+      "Web Attack XSS": 0.6028809136352398
+     }
+    },
+    "postdet_s47|kg42": {
+     "cnn": "postdet_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.6292167865347242,
+     "delta": -0.0035396215681146037,
+     "family": {
+      "Bot": 0.32130116554141996,
+      "Web Attack Brute Force": 0.8351038065528811,
+      "Web Attack XSS": 0.7312453875098717
+     }
+    },
+    "postdet_s47|kg43": {
+     "cnn": "postdet_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.6752927718230245,
+     "delta": 0.042536363720185655,
+     "family": {
+      "Bot": 0.3035809879293576,
+      "Web Attack Brute Force": 0.8742977051992472,
+      "Web Attack XSS": 0.8479996223404684
+     }
+    },
+    "postdet_s47|kg44": {
+     "cnn": "postdet_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.6681669263512937,
+     "delta": 0.03541051824845487,
+     "family": {
+      "Bot": 0.3051463763880339,
+      "Web Attack Brute Force": 0.8668119011093876,
+      "Web Attack XSS": 0.8325425015564597
+     }
+    },
+    "det_verify_a|kg42": {
+     "cnn": "det_verify_a",
+     "kg_seed": 42,
+     "fused_macro": 0.6342969239768053,
+     "delta": 0.004528615763977228,
+     "family": {
+      "Bot": 0.2501643100552563,
+      "Web Attack Brute Force": 0.8600789627286322,
+      "Web Attack XSS": 0.7926474991465273
+     }
+    },
+    "det_verify_a|kg43": {
+     "cnn": "det_verify_a",
+     "kg_seed": 43,
+     "fused_macro": 0.6644763848934847,
+     "delta": 0.034708076680656674,
+     "family": {
+      "Bot": 0.22245522429157316,
+      "Web Attack Brute Force": 0.8882769112814064,
+      "Web Attack XSS": 0.8826970191074744
+     }
+    },
+    "det_verify_a|kg44": {
+     "cnn": "det_verify_a",
+     "kg_seed": 44,
+     "fused_macro": 0.659838128428784,
+     "delta": 0.030069820215955945,
+     "family": {
+      "Bot": 0.22105638210845271,
+      "Web Attack Brute Force": 0.8848062749585852,
+      "Web Attack XSS": 0.8736517282193139
+     }
+    },
+    "det_verify_b|kg42": {
+     "cnn": "det_verify_b",
+     "kg_seed": 42,
+     "fused_macro": 0.6342969239768053,
+     "delta": 0.004528615763977228,
+     "family": {
+      "Bot": 0.2501643100552563,
+      "Web Attack Brute Force": 0.8600789627286322,
+      "Web Attack XSS": 0.7926474991465273
+     }
+    },
+    "det_verify_b|kg43": {
+     "cnn": "det_verify_b",
+     "kg_seed": 43,
+     "fused_macro": 0.6644763848934847,
+     "delta": 0.034708076680656674,
+     "family": {
+      "Bot": 0.22245522429157316,
+      "Web Attack Brute Force": 0.8882769112814064,
+      "Web Attack XSS": 0.8826970191074744
+     }
+    },
+    "det_verify_b|kg44": {
+     "cnn": "det_verify_b",
+     "kg_seed": 44,
+     "fused_macro": 0.659838128428784,
+     "delta": 0.030069820215955945,
+     "family": {
+      "Bot": 0.22105638210845271,
+      "Web Attack Brute Force": 0.8848062749585852,
+      "Web Attack XSS": 0.8736517282193139
+     }
+    }
+   },
+   "summary": {
+    "pre_flag": {
+     "n_pairs": 33,
+     "n_cnn_runs": 11,
+     "delta_mean": -0.07089110282631453,
+     "delta_sd": 0.147532739860254,
+     "delta_min": -0.32086673873317034,
+     "delta_max": 0.07679390755236237,
+     "frac_positive": 0.6363636363636364,
+     "fused_xss_mean": 0.7048476103884873,
+     "per_run_delta": {
+      "cnn_paper": 0.06517594781187568,
+      "cnn_paper_s43": 0.02086983333435799,
+      "cnn_paper_s44": 0.031717173814837296,
+      "cnn_paper_s45": 0.029906266891173854,
+      "cnn_paper_s46": -0.26394964709838087,
+      "cnn_paper_s47": -0.2776862682692695,
+      "cnn_repro_s42": 0.038314364101333265,
+      "cnn_noise_r1": 0.0275248470414096,
+      "cnn_noise_r2": -0.16728206857546205,
+      "cnn_noise_r3": -0.31860498951103927,
+      "cnn_noise_r4": 0.03421240936970408
+     },
+     "runs_positive": 7,
+     "per_run_mean": -0.07089110282631456,
+     "reference_three_mean": 0.03925431832035699,
+     "other_eight_mean": -0.11219563575631636,
+     "xss_rank_vs_delta_spearman": 0.9
+    },
+    "deterministic": {
+     "n_pairs": 18,
+     "n_cnn_runs": 6,
+     "delta_mean": -0.05816770526193185,
+     "delta_sd": 0.10417660207373683,
+     "delta_min": -0.2536739639649886,
+     "delta_max": 0.042536363720185655,
+     "frac_positive": 0.3888888888888889,
+     "fused_xss_mean": 0.7076001069967198,
+     "per_run_delta": {
+      "c4_log1p_s42": 0.023102170886863282,
+      "c4_log1p_s43": -0.012030959462834797,
+      "c4_log1p_s44": -0.007122554671660082,
+      "postdet_s45": -0.24893510780430736,
+      "postdet_s46": -0.12882220065316083,
+      "postdet_s47": 0.02480242013350864
+     },
+     "runs_positive": 2,
+     "per_run_mean": -0.05816770526193186
+    },
+    "population_difference": {
+     "mean_diff": -0.012723397564382677,
+     "mannwhitney_p": 0.4247128169941643,
+     "note": "pairs share KG seeds, so this p is indicative, not exact"
+    }
+   }
+  },
+  "k=800 causal": {
+   "pairs": {
+    "cnn_paper|kg42": {
+     "cnn": "cnn_paper",
+     "kg_seed": 42,
+     "fused_macro": 0.7476076640140891,
+     "delta": 0.10296656534168014,
+     "family": {
+      "Bot": 0.37941438580761916,
+      "Web Attack Brute Force": 0.9394899364870822,
+      "Web Attack XSS": 0.9239186697475659
+     }
+    },
+    "cnn_paper|kg43": {
+     "cnn": "cnn_paper",
+     "kg_seed": 43,
+     "fused_macro": 0.7501628280178482,
+     "delta": 0.10552172934543924,
+     "family": {
+      "Bot": 0.3793083799331752,
+      "Web Attack Brute Force": 0.9447946962705374,
+      "Web Attack XSS": 0.9263854078498324
+     }
+    },
+    "cnn_paper|kg44": {
+     "cnn": "cnn_paper",
+     "kg_seed": 44,
+     "fused_macro": 0.7421888781733057,
+     "delta": 0.09754777950089677,
+     "family": {
+      "Bot": 0.35646317549812645,
+      "Web Attack Brute Force": 0.9395918264988108,
+      "Web Attack XSS": 0.9305116325229799
+     }
+    },
+    "cnn_paper_s43|kg42": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.6671147946369308,
+     "delta": 0.03164195752625476,
+     "family": {
+      "Bot": 0.19259673955104772,
+      "Web Attack Brute Force": 0.9458723608351935,
+      "Web Attack XSS": 0.8628752835245513
+     }
+    },
+    "cnn_paper_s43|kg43": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.6643190228593217,
+     "delta": 0.028846185748645614,
+     "family": {
+      "Bot": 0.2014173861631146,
+      "Web Attack Brute Force": 0.9503238167889638,
+      "Web Attack XSS": 0.8412158656258866
+     }
+    },
+    "cnn_paper_s43|kg44": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.6554232606571314,
+     "delta": 0.019950423546455376,
+     "family": {
+      "Bot": 0.18813488042635268,
+      "Web Attack Brute Force": 0.9465631243087838,
+      "Web Attack XSS": 0.8315717772362579
+     }
+    },
+    "cnn_paper_s44|kg42": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.7020598118685152,
+     "delta": 0.06247551270514251,
+     "family": {
+      "Bot": 0.2899288049535892,
+      "Web Attack Brute Force": 0.9356656208638818,
+      "Web Attack XSS": 0.8805850097880744
+     }
+    },
+    "cnn_paper_s44|kg43": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.6860961876253243,
+     "delta": 0.046511888461951645,
+     "family": {
+      "Bot": 0.29568661710802047,
+      "Web Attack Brute Force": 0.9420774035311892,
+      "Web Attack XSS": 0.8205245422367634
+     }
+    },
+    "cnn_paper_s44|kg44": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.6976300239147492,
+     "delta": 0.05804572475137648,
+     "family": {
+      "Bot": 0.2782663183409812,
+      "Web Attack Brute Force": 0.9386266908905169,
+      "Web Attack XSS": 0.8759970625127498
+     }
+    },
+    "cnn_paper_s45|kg42": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.6111993923642184,
+     "delta": -0.013813437432442233,
+     "family": {
+      "Bot": 0.23814455399950482,
+      "Web Attack Brute Force": 0.8939712333535966,
+      "Web Attack XSS": 0.7014823897395538
+     }
+    },
+    "cnn_paper_s45|kg43": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.6243074837336474,
+     "delta": -0.0007053460630132014,
+     "family": {
+      "Bot": 0.2407593260405451,
+      "Web Attack Brute Force": 0.9009866108237627,
+      "Web Attack XSS": 0.7311765143366342
+     }
+    },
+    "cnn_paper_s45|kg44": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.5929985862033943,
+     "delta": -0.03201424359326632,
+     "family": {
+      "Bot": 0.23390868421754363,
+      "Web Attack Brute Force": 0.8934837546578024,
+      "Web Attack XSS": 0.6516033197348367
+     }
+    },
+    "cnn_paper_s46|kg42": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.355986581267773,
+     "delta": -0.25269192216496955,
+     "family": {
+      "Bot": 0.177491700476697,
+      "Web Attack Brute Force": 0.6682762804476456,
+      "Web Attack XSS": 0.22219176287897652
+     }
+    },
+    "cnn_paper_s46|kg43": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.34840528031663415,
+     "delta": -0.2602732231161084,
+     "family": {
+      "Bot": 0.18374611945203828,
+      "Web Attack Brute Force": 0.6437021218476324,
+      "Web Attack XSS": 0.21776759965023185
+     }
+    },
+    "cnn_paper_s46|kg44": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.3571739418431205,
+     "delta": -0.25150456158962203,
+     "family": {
+      "Bot": 0.17332861486605983,
+      "Web Attack Brute Force": 0.6656034967476958,
+      "Web Attack XSS": 0.23258971391560587
+     }
+    },
+    "cnn_paper_s47|kg42": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.36583477962654376,
+     "delta": -0.23072787004317508,
+     "family": {
+      "Bot": 0.2826284235111211,
+      "Web Attack Brute Force": 0.594943054552266,
+      "Web Attack XSS": 0.21993286081624397
+     }
+    },
+    "cnn_paper_s47|kg43": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.3634923137573958,
+     "delta": -0.233070335912323,
+     "family": {
+      "Bot": 0.2912514236922891,
+      "Web Attack Brute Force": 0.5870061971926345,
+      "Web Attack XSS": 0.21221932038726402
+     }
+    },
+    "cnn_paper_s47|kg44": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.37217151486008254,
+     "delta": -0.2243911348096363,
+     "family": {
+      "Bot": 0.2712308376384351,
+      "Web Attack Brute Force": 0.6096369045497514,
+      "Web Attack XSS": 0.2356468023920611
+     }
+    },
+    "cnn_repro_s42|kg42": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.6788636351882227,
+     "delta": 0.049330694075980897,
+     "family": {
+      "Bot": 0.22874349617109332,
+      "Web Attack Brute Force": 0.9252505136167668,
+      "Web Attack XSS": 0.8825968957768079
+     }
+    },
+    "cnn_repro_s42|kg43": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.6892698653081754,
+     "delta": 0.05973692419593357,
+     "family": {
+      "Bot": 0.23328630398124336,
+      "Web Attack Brute Force": 0.9320774948169124,
+      "Web Attack XSS": 0.9024457971263702
+     }
+    },
+    "cnn_repro_s42|kg44": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.6821531103067038,
+     "delta": 0.052620169194461996,
+     "family": {
+      "Bot": 0.22326374193073042,
+      "Web Attack Brute Force": 0.9291154486331947,
+      "Web Attack XSS": 0.894080140356186
+     }
+    },
+    "cnn_noise_r1|kg42": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 42,
+     "fused_macro": 0.5993409434512401,
+     "delta": -0.037233848197257835,
+     "family": {
+      "Bot": 0.25360680859593254,
+      "Web Attack Brute Force": 0.9229094764983717,
+      "Web Attack XSS": 0.6215065452594162
+     }
+    },
+    "cnn_noise_r1|kg43": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 43,
+     "fused_macro": 0.5903800650547774,
+     "delta": -0.04619472659372059,
+     "family": {
+      "Bot": 0.2696740687260238,
+      "Web Attack Brute Force": 0.92392459291889,
+      "Web Attack XSS": 0.5775415335194186
+     }
+    },
+    "cnn_noise_r1|kg44": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 44,
+     "fused_macro": 0.5987015934148051,
+     "delta": -0.03787319823369284,
+     "family": {
+      "Bot": 0.25028468829898043,
+      "Web Attack Brute Force": 0.9237054251562007,
+      "Web Attack XSS": 0.6221146667892344
+     }
+    },
+    "cnn_noise_r2|kg42": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 42,
+     "fused_macro": 0.43728798138694785,
+     "delta": -0.17515415993455624,
+     "family": {
+      "Bot": 0.20484327661071736,
+      "Web Attack Brute Force": 0.7555194889345223,
+      "Web Attack XSS": 0.35150117861560387
+     }
+    },
+    "cnn_noise_r2|kg43": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 43,
+     "fused_macro": 0.42432745001925,
+     "delta": -0.1881146913022541,
+     "family": {
+      "Bot": 0.21033567018634922,
+      "Web Attack Brute Force": 0.7373050316224112,
+      "Web Attack XSS": 0.32534164824898953
+     }
+    },
+    "cnn_noise_r2|kg44": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 44,
+     "fused_macro": 0.4299496719102463,
+     "delta": -0.1824924694112578,
+     "family": {
+      "Bot": 0.20109236852999338,
+      "Web Attack Brute Force": 0.7349600467461619,
+      "Web Attack XSS": 0.3537966004545837
+     }
+    },
+    "cnn_noise_r3|kg42": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 42,
+     "fused_macro": 0.2985281482567453,
+     "delta": -0.28392440193750884,
+     "family": {
+      "Bot": 0.2663826185751238,
+      "Web Attack Brute Force": 0.4522995988962002,
+      "Web Attack XSS": 0.17690222729891186
+     }
+    },
+    "cnn_noise_r3|kg43": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 43,
+     "fused_macro": 0.2867549055041681,
+     "delta": -0.295697644690086,
+     "family": {
+      "Bot": 0.27054470192100666,
+      "Web Attack Brute Force": 0.42395310135085235,
+      "Web Attack XSS": 0.16576691324064538
+     }
+    },
+    "cnn_noise_r3|kg44": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 44,
+     "fused_macro": 0.2983106639657705,
+     "delta": -0.28414188622848363,
+     "family": {
+      "Bot": 0.260597432358552,
+      "Web Attack Brute Force": 0.45745810808528903,
+      "Web Attack XSS": 0.17687645145347058
+     }
+    },
+    "cnn_noise_r4|kg42": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 42,
+     "fused_macro": 0.6333105791354078,
+     "delta": 0.005289338987836123,
+     "family": {
+      "Bot": 0.22541419247290462,
+      "Web Attack Brute Force": 0.9361054618433607,
+      "Web Attack XSS": 0.7384120830899579
+     }
+    },
+    "cnn_noise_r4|kg43": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 43,
+     "fused_macro": 0.6478598563098666,
+     "delta": 0.019838616162294986,
+     "family": {
+      "Bot": 0.23632997115332866,
+      "Web Attack Brute Force": 0.9453222578211827,
+      "Web Attack XSS": 0.7619273399550883
+     }
+    },
+    "cnn_noise_r4|kg44": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 44,
+     "fused_macro": 0.6148640958525289,
+     "delta": -0.013157144295042777,
+     "family": {
+      "Bot": 0.22484819192044694,
+      "Web Attack Brute Force": 0.9347482895761609,
+      "Web Attack XSS": 0.684995806060979
+     }
+    },
+    "c4_log1p_s42|kg42": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.5271533911756948,
+     "delta": -0.10261491703713321,
+     "family": {
+      "Bot": 0.330552393011868,
+      "Web Attack Brute Force": 0.8580530977930471,
+      "Web Attack XSS": 0.39285468272216933
+     }
+    },
+    "c4_log1p_s42|kg43": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.5308804524948402,
+     "delta": -0.09888785571798786,
+     "family": {
+      "Bot": 0.337324713554723,
+      "Web Attack Brute Force": 0.8645022268587967,
+      "Web Attack XSS": 0.39081441707100073
+     }
+    },
+    "c4_log1p_s42|kg44": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.5327944801590521,
+     "delta": -0.09697382805377597,
+     "family": {
+      "Bot": 0.3271966425748603,
+      "Web Attack Brute Force": 0.8598304665277134,
+      "Web Attack XSS": 0.4113563313745826
+     }
+    },
+    "c4_log1p_s43|kg42": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.4975091376738683,
+     "delta": -0.1293855435905108,
+     "family": {
+      "Bot": 0.19717653962141946,
+      "Web Attack Brute Force": 0.8892453986052784,
+      "Web Attack XSS": 0.4061054747949071
+     }
+    },
+    "c4_log1p_s43|kg43": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.4985726073784529,
+     "delta": -0.1283220738859262,
+     "family": {
+      "Bot": 0.20646839477854195,
+      "Web Attack Brute Force": 0.8933010852115628,
+      "Web Attack XSS": 0.3959483421452538
+     }
+    },
+    "c4_log1p_s43|kg44": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.5007508153154815,
+     "delta": -0.1261438659488976,
+     "family": {
+      "Bot": 0.19424730741759877,
+      "Web Attack Brute Force": 0.8928697853335766,
+      "Web Attack XSS": 0.4151353531952694
+     }
+    },
+    "c4_log1p_s44|kg42": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.4784351362712127,
+     "delta": -0.1546119604819366,
+     "family": {
+      "Bot": 0.179293964966748,
+      "Web Attack Brute Force": 0.8727563621119753,
+      "Web Attack XSS": 0.38325508173491507
+     }
+    },
+    "c4_log1p_s44|kg43": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.4872345709164896,
+     "delta": -0.1458125258366597,
+     "family": {
+      "Bot": 0.19042882475478276,
+      "Web Attack Brute Force": 0.8790469117097323,
+      "Web Attack XSS": 0.39222797628495376
+     }
+    },
+    "c4_log1p_s44|kg44": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.4832554719128133,
+     "delta": -0.14979162484033598,
+     "family": {
+      "Bot": 0.17590212265548072,
+      "Web Attack Brute Force": 0.8752750190695094,
+      "Web Attack XSS": 0.3985892740134499
+     }
+    },
+    "postdet_s45|kg42": {
+     "cnn": "postdet_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.36182582894100834,
+     "delta": -0.22635607958705029,
+     "family": {
+      "Bot": 0.24343102908687633,
+      "Web Attack Brute Force": 0.589072155490587,
+      "Web Attack XSS": 0.25297430224556183
+     }
+    },
+    "postdet_s45|kg43": {
+     "cnn": "postdet_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.3563254005900595,
+     "delta": -0.2318565079379991,
+     "family": {
+      "Bot": 0.25261308367515445,
+      "Web Attack Brute Force": 0.5720548019521432,
+      "Web Attack XSS": 0.24430831614288087
+     }
+    },
+    "postdet_s45|kg44": {
+     "cnn": "postdet_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.3633793417404123,
+     "delta": -0.22480256678764632,
+     "family": {
+      "Bot": 0.23836063937215327,
+      "Web Attack Brute Force": 0.5889803344236066,
+      "Web Attack XSS": 0.26279705142547705
+     }
+    },
+    "postdet_s46|kg42": {
+     "cnn": "postdet_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.4768948634463319,
+     "delta": -0.14427267034603508,
+     "family": {
+      "Bot": 0.21633189777119463,
+      "Web Attack Brute Force": 0.8137954368650604,
+      "Web Attack XSS": 0.4005572557027409
+     }
+    },
+    "postdet_s46|kg43": {
+     "cnn": "postdet_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.4753573266124366,
+     "delta": -0.14581020717993037,
+     "family": {
+      "Bot": 0.22626798644099683,
+      "Web Attack Brute Force": 0.8348150664673862,
+      "Web Attack XSS": 0.3649889269289269
+     }
+    },
+    "postdet_s46|kg44": {
+     "cnn": "postdet_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.45813987019001096,
+     "delta": -0.16302766360235604,
+     "family": {
+      "Bot": 0.21038350145336918,
+      "Web Attack Brute Force": 0.7702823207835036,
+      "Web Attack XSS": 0.39375378833316016
+     }
+    },
+    "postdet_s47|kg42": {
+     "cnn": "postdet_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.5264367121644521,
+     "delta": -0.10631969593838675,
+     "family": {
+      "Bot": 0.38713005608955264,
+      "Web Attack Brute Force": 0.8303074056337452,
+      "Web Attack XSS": 0.3618726747700587
+     }
+    },
+    "postdet_s47|kg43": {
+     "cnn": "postdet_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.5207341099057878,
+     "delta": -0.112022298197051,
+     "family": {
+      "Bot": 0.3884781793581147,
+      "Web Attack Brute Force": 0.8307030798586,
+      "Web Attack XSS": 0.34302107050064895
+     }
+    },
+    "postdet_s47|kg44": {
+     "cnn": "postdet_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.5149475364019779,
+     "delta": -0.11780887170086096,
+     "family": {
+      "Bot": 0.3609559658608258,
+      "Web Attack Brute Force": 0.8294058316088314,
+      "Web Attack XSS": 0.35448081173627655
+     }
+    },
+    "det_verify_a|kg42": {
+     "cnn": "det_verify_a",
+     "kg_seed": 42,
+     "fused_macro": 0.5271533911756948,
+     "delta": -0.10261491703713321,
+     "family": {
+      "Bot": 0.330552393011868,
+      "Web Attack Brute Force": 0.8580530977930471,
+      "Web Attack XSS": 0.39285468272216933
+     }
+    },
+    "det_verify_a|kg43": {
+     "cnn": "det_verify_a",
+     "kg_seed": 43,
+     "fused_macro": 0.5308804524948402,
+     "delta": -0.09888785571798786,
+     "family": {
+      "Bot": 0.337324713554723,
+      "Web Attack Brute Force": 0.8645022268587967,
+      "Web Attack XSS": 0.39081441707100073
+     }
+    },
+    "det_verify_a|kg44": {
+     "cnn": "det_verify_a",
+     "kg_seed": 44,
+     "fused_macro": 0.5327944801590521,
+     "delta": -0.09697382805377597,
+     "family": {
+      "Bot": 0.3271966425748603,
+      "Web Attack Brute Force": 0.8598304665277134,
+      "Web Attack XSS": 0.4113563313745826
+     }
+    },
+    "det_verify_b|kg42": {
+     "cnn": "det_verify_b",
+     "kg_seed": 42,
+     "fused_macro": 0.5271533911756948,
+     "delta": -0.10261491703713321,
+     "family": {
+      "Bot": 0.330552393011868,
+      "Web Attack Brute Force": 0.8580530977930471,
+      "Web Attack XSS": 0.39285468272216933
+     }
+    },
+    "det_verify_b|kg43": {
+     "cnn": "det_verify_b",
+     "kg_seed": 43,
+     "fused_macro": 0.5308804524948402,
+     "delta": -0.09888785571798786,
+     "family": {
+      "Bot": 0.337324713554723,
+      "Web Attack Brute Force": 0.8645022268587967,
+      "Web Attack XSS": 0.39081441707100073
+     }
+    },
+    "det_verify_b|kg44": {
+     "cnn": "det_verify_b",
+     "kg_seed": 44,
+     "fused_macro": 0.5327944801590521,
+     "delta": -0.09697382805377597,
+     "family": {
+      "Bot": 0.3271966425748603,
+      "Web Attack Brute Force": 0.8598304665277134,
+      "Web Attack XSS": 0.4113563313745826
+     }
+    }
+   },
+   "summary": {
+    "pre_flag": {
+     "n_pairs": 33,
+     "n_cnn_runs": 11,
+     "delta_mean": -0.06978341624254747,
+     "delta_sd": 0.13677879634979623,
+     "delta_min": -0.295697644690086,
+     "delta_max": 0.10552172934543924,
+     "frac_positive": 0.42424242424242425,
+     "fused_xss_mean": 0.5925454958224767,
+     "per_run_delta": {
+      "cnn_paper": 0.10201202472933872,
+      "cnn_paper_s43": 0.026812855607118585,
+      "cnn_paper_s44": 0.05567770863949021,
+      "cnn_paper_s45": -0.015511009029573919,
+      "cnn_paper_s46": -0.2548232356235667,
+      "cnn_paper_s47": -0.22939644692171146,
+      "cnn_repro_s42": 0.05389592915545882,
+      "cnn_noise_r1": -0.04043392434155709,
+      "cnn_noise_r2": -0.18192044021602272,
+      "cnn_noise_r3": -0.28792131095202617,
+      "cnn_noise_r4": 0.003990270285029444
+     },
+     "runs_positive": 5,
+     "per_run_mean": -0.06978341624254748,
+     "reference_three_mean": 0.061500862991982506,
+     "other_eight_mean": -0.11901502095549622,
+     "xss_rank_vs_delta_spearman": 0.9545454545454546
+    },
+    "deterministic": {
+     "n_pairs": 18,
+     "n_cnn_runs": 6,
+     "delta_mean": -0.1447122642594711,
+     "delta_sd": 0.04297873932401046,
+     "delta_min": -0.2318565079379991,
+     "delta_max": -0.09697382805377597,
+     "frac_positive": 0.0,
+     "fused_xss_mean": 0.36472450728456857,
+     "per_run_delta": {
+      "c4_log1p_s42": -0.09949220026963235,
+      "c4_log1p_s43": -0.12795049447511153,
+      "c4_log1p_s44": -0.15007203705297742,
+      "postdet_s45": -0.2276717181042319,
+      "postdet_s46": -0.15103684704277384,
+      "postdet_s47": -0.11205028861209958
+     },
+     "runs_positive": 0,
+     "per_run_mean": -0.14471226425947112
+    },
+    "population_difference": {
+     "mean_diff": 0.07492884801692362,
+     "mannwhitney_p": 0.06534016104610824,
+     "note": "pairs share KG seeds, so this p is indicative, not exact"
+    }
+   }
+  },
+  "k=800 s_kg": {
+   "pairs": {
+    "cnn_paper|kg42": {
+     "cnn": "cnn_paper",
+     "kg_seed": 42,
+     "fused_macro": 0.7402326458404658,
+     "delta": 0.09559154716805685,
+     "family": {
+      "Bot": 0.35889359428536305,
+      "Web Attack Brute Force": 0.9318590700838001,
+      "Web Attack XSS": 0.9299452731522342
+     }
+    },
+    "cnn_paper|kg43": {
+     "cnn": "cnn_paper",
+     "kg_seed": 43,
+     "fused_macro": 0.7532793160954973,
+     "delta": 0.10863821742308832,
+     "family": {
+      "Bot": 0.38149466117880876,
+      "Web Attack Brute Force": 0.9447056281613248,
+      "Web Attack XSS": 0.9336376589463583
+     }
+    },
+    "cnn_paper|kg44": {
+     "cnn": "cnn_paper",
+     "kg_seed": 44,
+     "fused_macro": 0.7412395926980908,
+     "delta": 0.09659849402568188,
+     "family": {
+      "Bot": 0.3623432414838858,
+      "Web Attack Brute Force": 0.9262792571071019,
+      "Web Attack XSS": 0.9350962795032844
+     }
+    },
+    "cnn_paper_s43|kg42": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.6760896399988034,
+     "delta": 0.04061680288812741,
+     "family": {
+      "Bot": 0.1767346389621624,
+      "Web Attack Brute Force": 0.9353546391812592,
+      "Web Attack XSS": 0.9161796418529891
+     }
+    },
+    "cnn_paper_s43|kg43": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.6878128470020717,
+     "delta": 0.052340009891395645,
+     "family": {
+      "Bot": 0.18691348377720363,
+      "Web Attack Brute Force": 0.9530358426078273,
+      "Web Attack XSS": 0.923489214621184
+     }
+    },
+    "cnn_paper_s43|kg44": {
+     "cnn": "cnn_paper_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.6803193517528049,
+     "delta": 0.044846514642128854,
+     "family": {
+      "Bot": 0.17761332922091913,
+      "Web Attack Brute Force": 0.9342543898690236,
+      "Web Attack XSS": 0.9290903361684719
+     }
+    },
+    "cnn_paper_s44|kg42": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.7041595496196016,
+     "delta": 0.06457525045622892,
+     "family": {
+      "Bot": 0.25747321843847837,
+      "Web Attack Brute Force": 0.9347769817367139,
+      "Web Attack XSS": 0.9202284486836125
+     }
+    },
+    "cnn_paper_s44|kg43": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.7076444226731696,
+     "delta": 0.06806012350979695,
+     "family": {
+      "Bot": 0.2543876764101928,
+      "Web Attack Brute Force": 0.9468443859731103,
+      "Web Attack XSS": 0.9217012056362058
+     }
+    },
+    "cnn_paper_s44|kg44": {
+     "cnn": "cnn_paper_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.7088163625128704,
+     "delta": 0.06923206334949772,
+     "family": {
+      "Bot": 0.2723435295850332,
+      "Web Attack Brute Force": 0.9280737001854068,
+      "Web Attack XSS": 0.9260318577681711
+     }
+    },
+    "cnn_paper_s45|kg42": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.6764511806467484,
+     "delta": 0.051438350850087744,
+     "family": {
+      "Bot": 0.20467714076817006,
+      "Web Attack Brute Force": 0.9139165965108801,
+      "Web Attack XSS": 0.9107598046611951
+     }
+    },
+    "cnn_paper_s45|kg43": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.6873099753936865,
+     "delta": 0.06229714559702593,
+     "family": {
+      "Bot": 0.22221533258825749,
+      "Web Attack Brute Force": 0.9261617654925755,
+      "Web Attack XSS": 0.9135528281002265
+     }
+    },
+    "cnn_paper_s45|kg44": {
+     "cnn": "cnn_paper_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.6737752842741548,
+     "delta": 0.048762454477494166,
+     "family": {
+      "Bot": 0.20368177031718515,
+      "Web Attack Brute Force": 0.9023884043418977,
+      "Web Attack XSS": 0.9152556781633815
+     }
+    },
+    "cnn_paper_s46|kg42": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.37988351462926834,
+     "delta": -0.2287949888034742,
+     "family": {
+      "Bot": 0.16265880691852153,
+      "Web Attack Brute Force": 0.5823760702409637,
+      "Web Attack XSS": 0.39461566672831994
+     }
+    },
+    "cnn_paper_s46|kg43": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.36485259784072704,
+     "delta": -0.2438259055920155,
+     "family": {
+      "Bot": 0.17207151710092233,
+      "Web Attack Brute Force": 0.5603445748160193,
+      "Web Attack XSS": 0.36214170160523956
+     }
+    },
+    "cnn_paper_s46|kg44": {
+     "cnn": "cnn_paper_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.39366172761178664,
+     "delta": -0.2150167758209559,
+     "family": {
+      "Bot": 0.16807260588927092,
+      "Web Attack Brute Force": 0.5972336578164433,
+      "Web Attack XSS": 0.4156789191296457
+     }
+    },
+    "cnn_paper_s47|kg42": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.37669185881562234,
+     "delta": -0.2198707908540965,
+     "family": {
+      "Bot": 0.24596758712232497,
+      "Web Attack Brute Force": 0.5637992791765282,
+      "Web Attack XSS": 0.320308710148014
+     }
+    },
+    "cnn_paper_s47|kg43": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.34475613997105814,
+     "delta": -0.2518065096986607,
+     "family": {
+      "Bot": 0.24001690628932326,
+      "Web Attack Brute Force": 0.5280352521023172,
+      "Web Attack XSS": 0.266216261521534
+     }
+    },
+    "cnn_paper_s47|kg44": {
+     "cnn": "cnn_paper_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.3956929927640882,
+     "delta": -0.20086965690563063,
+     "family": {
+      "Bot": 0.25357345230124057,
+      "Web Attack Brute Force": 0.5765494994077448,
+      "Web Attack XSS": 0.35695602658327924
+     }
+    },
+    "cnn_repro_s42|kg42": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.6811905771731886,
+     "delta": 0.051657636060946865,
+     "family": {
+      "Bot": 0.20454165488519488,
+      "Web Attack Brute Force": 0.9176697878512071,
+      "Web Attack XSS": 0.9213602887831638
+     }
+    },
+    "cnn_repro_s42|kg43": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.6916113661859781,
+     "delta": 0.06207842507373629,
+     "family": {
+      "Bot": 0.21350297201711285,
+      "Web Attack Brute Force": 0.9299045269710375,
+      "Web Attack XSS": 0.9314265995697838
+     }
+    },
+    "cnn_repro_s42|kg44": {
+     "cnn": "cnn_repro_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.6848307460274662,
+     "delta": 0.0552978049152244,
+     "family": {
+      "Bot": 0.21110707878908427,
+      "Web Attack Brute Force": 0.9179555045775833,
+      "Web Attack XSS": 0.9254296547157307
+     }
+    },
+    "cnn_noise_r1|kg42": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 42,
+     "fused_macro": 0.6840265790305976,
+     "delta": 0.04745178738209965,
+     "family": {
+      "Bot": 0.19634290118647024,
+      "Web Attack Brute Force": 0.9283845288026951,
+      "Web Attack XSS": 0.9273523071026277
+     }
+    },
+    "cnn_noise_r1|kg43": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 43,
+     "fused_macro": 0.7000601596087943,
+     "delta": 0.06348536796029636,
+     "family": {
+      "Bot": 0.2144882440309589,
+      "Web Attack Brute Force": 0.9491931856932723,
+      "Web Attack XSS": 0.9364990491021518
+     }
+    },
+    "cnn_noise_r1|kg44": {
+     "cnn": "cnn_noise_r1",
+     "kg_seed": 44,
+     "fused_macro": 0.6878505124880413,
+     "delta": 0.05127572083954335,
+     "family": {
+      "Bot": 0.2071668880475355,
+      "Web Attack Brute Force": 0.9251812210846131,
+      "Web Attack XSS": 0.9312034283319751
+     }
+    },
+    "cnn_noise_r2|kg42": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 42,
+     "fused_macro": 0.48381509230645675,
+     "delta": -0.12862704901504735,
+     "family": {
+      "Bot": 0.18424945820186556,
+      "Web Attack Brute Force": 0.7335424594780485,
+      "Web Attack XSS": 0.533653359239456
+     }
+    },
+    "cnn_noise_r2|kg43": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 43,
+     "fused_macro": 0.457257306320739,
+     "delta": -0.15518483500076508,
+     "family": {
+      "Bot": 0.1995285479874879,
+      "Web Attack Brute Force": 0.7009900009400558,
+      "Web Attack XSS": 0.4712533700346733
+     }
+    },
+    "cnn_noise_r2|kg44": {
+     "cnn": "cnn_noise_r2",
+     "kg_seed": 44,
+     "fused_macro": 0.4980173168091522,
+     "delta": -0.11442482451235192,
+     "family": {
+      "Bot": 0.18883224383818786,
+      "Web Attack Brute Force": 0.7389012509778718,
+      "Web Attack XSS": 0.5663184556113969
+     }
+    },
+    "cnn_noise_r3|kg42": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 42,
+     "fused_macro": 0.2811385595750114,
+     "delta": -0.30131399061924274,
+     "family": {
+      "Bot": 0.2134893185939162,
+      "Web Attack Brute Force": 0.3941136766692949,
+      "Web Attack XSS": 0.23581268346182307
+     }
+    },
+    "cnn_noise_r3|kg43": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 43,
+     "fused_macro": 0.2554174400390916,
+     "delta": -0.3270351101551625,
+     "family": {
+      "Bot": 0.22814828515113786,
+      "Web Attack Brute Force": 0.3479195127785183,
+      "Web Attack XSS": 0.19018452218761867
+     }
+    },
+    "cnn_noise_r3|kg44": {
+     "cnn": "cnn_noise_r3",
+     "kg_seed": 44,
+     "fused_macro": 0.2841210382831838,
+     "delta": -0.2983315119110703,
+     "family": {
+      "Bot": 0.2171051326628218,
+      "Web Attack Brute Force": 0.3921161444956547,
+      "Web Attack XSS": 0.24314183769107495
+     }
+    },
+    "cnn_noise_r4|kg42": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 42,
+     "fused_macro": 0.6834940412249852,
+     "delta": 0.05547280107741359,
+     "family": {
+      "Bot": 0.19145234555698398,
+      "Web Attack Brute Force": 0.9330878143124496,
+      "Web Attack XSS": 0.9259419638055221
+     }
+    },
+    "cnn_noise_r4|kg43": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 43,
+     "fused_macro": 0.6956485540087649,
+     "delta": 0.06762731386119325,
+     "family": {
+      "Bot": 0.20411166554206037,
+      "Web Attack Brute Force": 0.9472691714774677,
+      "Web Attack XSS": 0.9355648250067666
+     }
+    },
+    "cnn_noise_r4|kg44": {
+     "cnn": "cnn_noise_r4",
+     "kg_seed": 44,
+     "fused_macro": 0.6876701008560818,
+     "delta": 0.059648860708510165,
+     "family": {
+      "Bot": 0.19611878658885917,
+      "Web Attack Brute Force": 0.9309259483434236,
+      "Web Attack XSS": 0.9359655676359627
+     }
+    },
+    "c4_log1p_s42|kg42": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 42,
+     "fused_macro": 0.6804662109437603,
+     "delta": 0.05069790273093222,
+     "family": {
+      "Bot": 0.2590216369185287,
+      "Web Attack Brute Force": 0.8978037067720667,
+      "Web Attack XSS": 0.8845732891406854
+     }
+    },
+    "c4_log1p_s42|kg43": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 43,
+     "fused_macro": 0.6857024052510076,
+     "delta": 0.05593409703817953,
+     "family": {
+      "Bot": 0.27564650267223034,
+      "Web Attack Brute Force": 0.9054733001503584,
+      "Web Attack XSS": 0.8759874129304341
+     }
+    },
+    "c4_log1p_s42|kg44": {
+     "cnn": "c4_log1p_s42",
+     "kg_seed": 44,
+     "fused_macro": 0.6779348545932508,
+     "delta": 0.048166546380422726,
+     "family": {
+      "Bot": 0.2593230764880096,
+      "Web Attack Brute Force": 0.8896423388586066,
+      "Web Attack XSS": 0.884839148433136
+     }
+    },
+    "c4_log1p_s43|kg42": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 42,
+     "fused_macro": 0.6553439150375404,
+     "delta": 0.02844923377316133,
+     "family": {
+      "Bot": 0.17591698440859915,
+      "Web Attack Brute Force": 0.9090397443332857,
+      "Web Attack XSS": 0.8810750163707364
+     }
+    },
+    "c4_log1p_s43|kg43": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 43,
+     "fused_macro": 0.657893740813047,
+     "delta": 0.030999059548667884,
+     "family": {
+      "Bot": 0.1911802581103156,
+      "Web Attack Brute Force": 0.9157259706548825,
+      "Web Attack XSS": 0.8667749936739427
+     }
+    },
+    "c4_log1p_s43|kg44": {
+     "cnn": "c4_log1p_s43",
+     "kg_seed": 44,
+     "fused_macro": 0.6538322958895443,
+     "delta": 0.026937614625165196,
+     "family": {
+      "Bot": 0.1772061214863629,
+      "Web Attack Brute Force": 0.9057916181575877,
+      "Web Attack XSS": 0.8784991480246824
+     }
+    },
+    "c4_log1p_s44|kg42": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 42,
+     "fused_macro": 0.6583134710456715,
+     "delta": 0.02526637429252221,
+     "family": {
+      "Bot": 0.16376568497201932,
+      "Web Attack Brute Force": 0.9156487322330491,
+      "Web Attack XSS": 0.895525995931946
+     }
+    },
+    "c4_log1p_s44|kg43": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 43,
+     "fused_macro": 0.657054681105051,
+     "delta": 0.024007584351901756,
+     "family": {
+      "Bot": 0.17500761030510958,
+      "Web Attack Brute Force": 0.915939608767736,
+      "Web Attack XSS": 0.8802168242423077
+     }
+    },
+    "c4_log1p_s44|kg44": {
+     "cnn": "c4_log1p_s44",
+     "kg_seed": 44,
+     "fused_macro": 0.6534026676760011,
+     "delta": 0.020355570922851784,
+     "family": {
+      "Bot": 0.1694746020055332,
+      "Web Attack Brute Force": 0.8964093745405901,
+      "Web Attack XSS": 0.8943240264818799
+     }
+    },
+    "postdet_s45|kg42": {
+     "cnn": "postdet_s45",
+     "kg_seed": 42,
+     "fused_macro": 0.36912987335133396,
+     "delta": -0.21905203517672467,
+     "family": {
+      "Bot": 0.19900525867400548,
+      "Web Attack Brute Force": 0.5561082660223403,
+      "Web Attack XSS": 0.352276095357656
+     }
+    },
+    "postdet_s45|kg43": {
+     "cnn": "postdet_s45",
+     "kg_seed": 43,
+     "fused_macro": 0.34427419946593824,
+     "delta": -0.2439077090621204,
+     "family": {
+      "Bot": 0.20930539910041357,
+      "Web Attack Brute Force": 0.5182841697574426,
+      "Web Attack XSS": 0.30523302953995846
+     }
+    },
+    "postdet_s45|kg44": {
+     "cnn": "postdet_s45",
+     "kg_seed": 44,
+     "fused_macro": 0.39609990564188785,
+     "delta": -0.19208200288617078,
+     "family": {
+      "Bot": 0.2021012121619341,
+      "Web Attack Brute Force": 0.5821851341704736,
+      "Web Attack XSS": 0.4040133705932559
+     }
+    },
+    "postdet_s46|kg42": {
+     "cnn": "postdet_s46",
+     "kg_seed": 42,
+     "fused_macro": 0.5299417542572659,
+     "delta": -0.09122577953510114,
+     "family": {
+      "Bot": 0.17693997594332345,
+      "Web Attack Brute Force": 0.791980856321785,
+      "Web Attack XSS": 0.6209044305066889
+     }
+    },
+    "postdet_s46|kg43": {
+     "cnn": "postdet_s46",
+     "kg_seed": 43,
+     "fused_macro": 0.5176104762835586,
+     "delta": -0.10355705750880839,
+     "family": {
+      "Bot": 0.18485070362320927,
+      "Web Attack Brute Force": 0.7850308698745863,
+      "Web Attack XSS": 0.5829498553528802
+     }
+    },
+    "postdet_s46|kg44": {
+     "cnn": "postdet_s46",
+     "kg_seed": 44,
+     "fused_macro": 0.5319709252844788,
+     "delta": -0.08919660850788824,
+     "family": {
+      "Bot": 0.18205287125644587,
+      "Web Attack Brute Force": 0.7801137895402492,
+      "Web Attack XSS": 0.633746115056741
+     }
+    },
+    "postdet_s47|kg42": {
+     "cnn": "postdet_s47",
+     "kg_seed": 42,
+     "fused_macro": 0.703647630703629,
+     "delta": 0.07089122260079017,
+     "family": {
+      "Bot": 0.3740899975270046,
+      "Web Attack Brute Force": 0.8847707176000175,
+      "Web Attack XSS": 0.8520821769838649
+     }
+    },
+    "postdet_s47|kg43": {
+     "cnn": "postdet_s47",
+     "kg_seed": 43,
+     "fused_macro": 0.7091434891900791,
+     "delta": 0.07638708108724024,
+     "family": {
+      "Bot": 0.3941054280452071,
+      "Web Attack Brute Force": 0.8901516001947936,
+      "Web Attack XSS": 0.8431734393302365
+     }
+    },
+    "postdet_s47|kg44": {
+     "cnn": "postdet_s47",
+     "kg_seed": 44,
+     "fused_macro": 0.6989528883619931,
+     "delta": 0.06619648025915426,
+     "family": {
+      "Bot": 0.37480802295027993,
+      "Web Attack Brute Force": 0.8687139326822372,
+      "Web Attack XSS": 0.8533367094534623
+     }
+    },
+    "det_verify_a|kg42": {
+     "cnn": "det_verify_a",
+     "kg_seed": 42,
+     "fused_macro": 0.6804662109437603,
+     "delta": 0.05069790273093222,
+     "family": {
+      "Bot": 0.2590216369185287,
+      "Web Attack Brute Force": 0.8978037067720667,
+      "Web Attack XSS": 0.8845732891406854
+     }
+    },
+    "det_verify_a|kg43": {
+     "cnn": "det_verify_a",
+     "kg_seed": 43,
+     "fused_macro": 0.6857024052510076,
+     "delta": 0.05593409703817953,
+     "family": {
+      "Bot": 0.27564650267223034,
+      "Web Attack Brute Force": 0.9054733001503584,
+      "Web Attack XSS": 0.8759874129304341
+     }
+    },
+    "det_verify_a|kg44": {
+     "cnn": "det_verify_a",
+     "kg_seed": 44,
+     "fused_macro": 0.6779348545932508,
+     "delta": 0.048166546380422726,
+     "family": {
+      "Bot": 0.2593230764880096,
+      "Web Attack Brute Force": 0.8896423388586066,
+      "Web Attack XSS": 0.884839148433136
+     }
+    },
+    "det_verify_b|kg42": {
+     "cnn": "det_verify_b",
+     "kg_seed": 42,
+     "fused_macro": 0.6804662109437603,
+     "delta": 0.05069790273093222,
+     "family": {
+      "Bot": 0.2590216369185287,
+      "Web Attack Brute Force": 0.8978037067720667,
+      "Web Attack XSS": 0.8845732891406854
+     }
+    },
+    "det_verify_b|kg43": {
+     "cnn": "det_verify_b",
+     "kg_seed": 43,
+     "fused_macro": 0.6857024052510076,
+     "delta": 0.05593409703817953,
+     "family": {
+      "Bot": 0.27564650267223034,
+      "Web Attack Brute Force": 0.9054733001503584,
+      "Web Attack XSS": 0.8759874129304341
+     }
+    },
+    "det_verify_b|kg44": {
+     "cnn": "det_verify_b",
+     "kg_seed": 44,
+     "fused_macro": 0.6779348545932508,
+     "delta": 0.048166546380422726,
+     "family": {
+      "Bot": 0.2593230764880096,
+      "Web Attack Brute Force": 0.8896423388586066,
+      "Web Attack XSS": 0.884839148433136
+     }
+    }
+   },
+   "summary": {
+    "pre_flag": {
+     "n_pairs": 33,
+     "n_cnn_runs": 11,
+     "delta_mean": -0.0414578562645727,
+     "delta_sd": 0.14606777890950953,
+     "delta_min": -0.3270351101551625,
+     "delta_max": 0.10863821742308832,
+     "frac_positive": 0.6363636363636364,
+     "fused_xss_mean": 0.721272528037972,
+     "per_run_delta": {
+      "cnn_paper": 0.10027608620560902,
+      "cnn_paper_s43": 0.04593444247388397,
+      "cnn_paper_s44": 0.0672891457718412,
+      "cnn_paper_s45": 0.05416598364153594,
+      "cnn_paper_s46": -0.22921255673881522,
+      "cnn_paper_s47": -0.22418231915279593,
+      "cnn_repro_s42": 0.05634462201663585,
+      "cnn_noise_r1": 0.05407095872731312,
+      "cnn_noise_r2": -0.13274556950938812,
+      "cnn_noise_r3": -0.3088935375618252,
+      "cnn_noise_r4": 0.06091632521570567
+     },
+     "runs_positive": 7,
+     "per_run_mean": -0.0414578562645727,
+     "reference_three_mean": 0.07116655815044473,
+     "other_eight_mean": -0.08369201167020424,
+     "xss_rank_vs_delta_spearman": 0.8636363636363636
+    },
+    "deterministic": {
+     "n_pairs": 18,
+     "n_cnn_runs": 6,
+     "delta_mean": -0.023040690281434684,
+     "delta_sd": 0.10549693672008748,
+     "delta_min": -0.2439077090621204,
+     "delta_max": 0.07638708108724024,
+     "frac_positive": 0.6666666666666666,
+     "fused_xss_mean": 0.7438628376335831,
+     "per_run_delta": {
+      "c4_log1p_s42": 0.05159951538317816,
+      "c4_log1p_s43": 0.02879530264899814,
+      "c4_log1p_s44": 0.023209843189091917,
+      "postdet_s45": -0.21834724904167194,
+      "postdet_s46": -0.09465981518393259,
+      "postdet_s47": 0.07115826131572822
+     },
+     "runs_positive": 4,
+     "per_run_mean": -0.023040690281434684
+    },
+    "population_difference": {
+     "mean_diff": -0.018417165983138015,
+     "mannwhitney_p": 0.5742885595278,
+     "note": "pairs share KG seeds, so this p is indicative, not exact"
+    }
+   }
+  }
+ }
+}

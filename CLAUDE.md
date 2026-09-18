@@ -70,6 +70,13 @@ actually lapsed, and names the incident behind each one:
 python scripts/lint_conventions.py
 ```
 
+**And run the tests** (added 2026-09-16 — the project had none). They assert the leakage boundary and
+pin the measured split defects so they cannot drift silently:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 **If you touched [docs/target/paper_draft.md](docs/target/paper_draft.md), also run the draft check.**
 It compares every quantitative claim in the draft against `outputs/metadata/*.json` and exits 1 on a
 mismatch. It exists because the first draft quoted a throughput figure that disagreed with the record
@@ -117,10 +124,25 @@ the resulting Bot ranking is **noise** (cross-seed ρ = −0.090); **(3)** **tra
 reproducible at fixed seed** (SD 0.0222 — see the noise floor below), which retracted C2 and demotes
 every within-tier comparison this project spent months on.
 
+🔴 **Withdrawn 2026-09-16: the CNN + KG fusion gain** — the project's only positive result. It was
+measured with the same three CNN runs; across 11 CNN runs of that configuration the online fusion
+gains in 5, and in 0 of 6 deterministic runs (`fusion_population.py`). **Nothing in the architecture
+has been shown to beat the neural baseline.** The CNN baseline itself is re-based **0.6399 → 0.6299**
+(deterministic population, `rebase_deterministic.py`); never pool the two populations.
+
 👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
-**Next action (resume here — as of end of 2026-08-10):**
+**Next action (resume here — as of end of 2026-09-16):** read STATUS → "AUDIT + REMEDIATION" and
+`REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).
+1. ~~Collect `audit_rebase.sh`~~ ✅ **done 2026-09-16**: seed-42 CNN byte-identical; CL-02 answered —
+   the base paper's SAT term moves zero-day accuracy **+0.55 pp** (not direction-consistent) against a
+   matched control, where they report +12.13. The paper says so.
+2. **Author decisions D1, D3, D4, D5** and how to reframe the paper without its positive result.
+3. Remaining itinerary items: 6.1 tuning-matched baselines, 5.1/5.2 split variants (if D4), 7.4 the
+   first real end-to-end `run_all.py --run`, re-run `significance.py` (Holm now in code).
+
+~~**Next action (resume here — as of end of 2026-08-10):**~~ *(superseded 2026-09-16; kept for the record)*
 1. **Write.** Spine decided: **field-metric gap leads, mechanism is the body**, double dissociation
    demoted to support. ⚠️ Write the **resolution** claim (67/204 method pairs indistinguishable on the
    published metric while ≥2× apart on zero-day), **not** the *information* claim — ρ=+0.568 refutes
@@ -333,7 +355,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 78 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **13 shell launchers** (`run_long.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 83 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **15 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -346,7 +368,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 78 Python scripts + 14 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 83 Python scripts + 15 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline

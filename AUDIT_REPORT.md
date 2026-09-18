@@ -19,7 +19,10 @@ Three things matter.
 1. **The reported CNN baseline cannot be reproduced by the code in the repository.** `cnn_paper =
    0.6446` and the 3-seed mean `0.6399` were produced before `determinism.py` existed. Re-running
    today's code at the same seeds gives **0.6298 / 0.6269 / 0.6330 (mean 0.6299)**. Every improvement
-   in the project is quoted against the 0.6399 anchor. Directions survive; the numbers do not.
+   in the project is quoted against the 0.6399 anchor. ~~Directions survive; the numbers do not.~~
+   **Corrected 2026-09-16 (remediation):** one direction did *not* survive. The CNN + KG fusion gain
+   reverses on the deterministic CNN (−0.1269, 0/3) and holds in only 5 of 11 pre-flag CNN runs
+   (`fusion_population.py`); it is withdrawn.
 2. **The split is random over a chronologically ordered capture and is not grouped by session or
    host.** 54.9 % of test flows share an exact 5-tuple with a training flow — 100 % for four known
    families *and for all three Web Attack zero-day families*. 17.0 % of test rows are exact
@@ -47,7 +50,7 @@ Sorted by severity, then by impact within severity.
 | **F-03** | HIGH | Leakage (temporal) | `scripts/preprocess_paper.py:90-94` | Stratified random split over a temporally ordered 5-day capture; 100 % of test flows fall inside the train time range | Future traffic trains a model evaluated on the past; no claim about detecting *later* traffic is supported | CONFIRMED |
 | **F-04** | HIGH | Evaluation validity | `scripts/preprocess_paper.py:82-84` | Benign under-sampled 4.11× **before** the split, so the test set is not a sample of the capture | Every PR-AUC / lift / precision figure is measured at an inflated attack base rate. Macro 0.6446 → 0.6015 at capture prevalence; Bot 0.0591 → 0.0152 | CONFIRMED |
 | **F-05** | HIGH | IDS realism | `scripts/kg.py:243-283`; `outputs/metadata/operational_best.json` | The quoted best (0.7123; 57.6 % @1 % FPR) uses the transductive KG score; the causal/online variant gives 0.7032 / 54.6 % | The project's flagship operational claim is not computable online | CONFIRMED |
-| **F-06** | HIGH | Reproducibility | `outputs/metadata/ksweep_heldout.json` | The held-out re-selection of k=800 — the sole defence against the test-set tuning bias `ksweep_fusion.py:22-27` admits — has **no generating script** | The evidence that the flagship +0.0724 is not a tuning artefact cannot be regenerated | CONFIRMED |
+| **F-06** | HIGH | Reproducibility | `outputs/metadata/ksweep_heldout.json` | The held-out re-selection of k=800 — the sole defence against the test-set tuning bias `ksweep_fusion.py:22-27` admits — has **no generating script** | The evidence that the flagship +0.0724 is not a tuning artefact cannot be regenerated. *Update 2026-09-16: `scripts/ksweep_heldout.py` now regenerates the record **identically** using `fusion_weight.py`'s split — the "figures do not regenerate" part of this entry was my own split implementation's fault. The same protocol on the **online** KG gives only +0.0077 at 1.10σ, 2/3 seeds* | CONFIRMED |
 | **F-07** | HIGH | Evaluation validity | `scripts/metrics.py:79`; `operational.py:390`; `operational_best.py:110`; `fusion_weight.py:107`; `metric_divergence.py:109`; `aug_analyse.py:186` | The 1 %-FPR decision threshold is taken as a quantile of the **test** set's benign scores | Every threshold metric (recall@FPR, F1, precision) is reported at an operating point fitted to the data it is reported on | CONFIRMED |
 | **F-08** | HIGH | Feature leakage | `scripts/behavior.py:144-157, 283` | `BeaconLike` = "destination port ∉ well-known set". 8080 excluded, 8443 included; selected by measuring ROC against **Bot**, a test-only zero-day class | Fires on 99.95 % of Bot vs 22.65 % of benign purely because this capture's C2 listens on 8080. A capture artefact selected with held-out labels | CONFIRMED |
 | **F-09** | HIGH | Engineering | repository-wide | No test suite: 0 test files across 77 scripts / 18,010 lines | Nothing mechanically asserts the leakage boundary, split integrity, or feature construction | CONFIRMED |
@@ -108,9 +111,13 @@ byte-deterministic at 0.6298. The two are not the same estimand.
 
 **Impact.** The single most-quoted number in the project, the anchor of every reported improvement,
 and the value `verify_draft.py` treats as ground truth, cannot be produced by running the repository.
-The 3-seed deterministic baseline is **0.6299**, i.e. −0.0100 from the quoted 0.6399. Directions of
+The 3-seed deterministic baseline is **0.6299**, i.e. −0.0100 from the quoted 0.6399. ~~Directions of
 every comparison survive (the KG fusion still improves; the AE still loses macro and wins Bot); the
-magnitudes are all re-based.
+magnitudes are all re-based.~~
+
+> 🔴 **Wrong, corrected 2026-09-16.** The fusion direction did not survive: on the deterministic CNN the
+> online k=800 CNN + KG fusion is −0.1269 (0/3), and across 11 pre-flag CNN runs it gains in only 5 — the
+> three reference runs are the ones that gain. See `fusion_population.py` and STATUS.
 
 **Fix.** Re-run `cnn_paper.py` at seeds 42/43/44 with determinism on, re-derive every fusion channel
 from those predictions, and re-state the baseline as 0.6299. Then mark the pre-flag runs in
@@ -311,9 +318,16 @@ is a hand-produced artefact.
 | my re-derivation (`s_kg`) | 0.7199 / 0.6889 | 0.7063 / 0.6717 | **+0.0346** | **2.38** | 3/3 |
 | my re-derivation (`causal`) | 0.7076 / 0.7003 | 0.7002 / 0.6875 | +0.0127 | 2.11 | 3/3 |
 
-**Impact.** The *conclusion* survives — k=800 beats k=200 on held-out data, 3/3 seeds, in both
+> 🔴 **Corrected 2026-09-16, same day.** The re-derivation above used `sklearn.train_test_split`.
+> `fusion_weight.py` uses a per-class shuffle with the same rng 9001, and with **that** split, the raw
+> CNN arrays and the transductive KG, `scripts/ksweep_heldout.py` regenerates the committed record
+> **identically** (+0.0305, 2.86σ, 3/3). ~~The cited figures do not regenerate~~ — they do; only the
+> script was missing. The same protocol on the **causal** KG gives **+0.0077 at 1.10σ, 2/3 seeds**
+> (my sklearn-split figure of +0.0127 is superseded): not established. k = 800 is supported for the offline variant only.
+
+**Impact.** ~~The *conclusion* survives — k=800 beats k=200 on held-out data, 3/3 seeds, in both
 variants. The *cited figures* do not regenerate: my σ is 2.38, not 2.86, and the causal variant's
-held-out gain is +0.0127, less than half the quoted value. `verify_draft.py` "verifies" the draft
+held-out gain is +0.0127, less than half the quoted value.~~ *(superseded by the correction above)* `verify_draft.py` "verifies" the draft
 against this file, so the project's own verification treats an unreproducible artefact as ground
 truth. By the repository's own standard (CLAUDE.md: "a number quoted in a doc with no logged run
 behind it is a defect") this is a defect, and it sits on the flagship result.

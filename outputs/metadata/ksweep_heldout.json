@@ -1,6 +1,5 @@
 {
   "selected_k": 800,
-  "rng": 9001,
   "half_a_means": {
     "100": 0.6516342656366415,
     "200": 0.6804859909112492,
@@ -16,5 +15,27 @@
   "held_out_delta_vs_k200": 0.030520932553336988,
   "held_out_sigma": 2.8567052056294835,
   "held_out_seeds_better": 3,
-  "note": "k selected on half A, reported on half B; removes the test-set selection bias in ksweep_fusion.json"
+  "rng": 9001,
+  "cnn_channel": "cnn_paper",
+  "cnn_scoring": "raw",
+  "note": "k selected on half A, reported on half B; removes the test-set selection bias in ksweep_fusion.json. Top-level values are the transductive s_kg variant; `causal` is the online one.",
+  "causal": {
+    "selected_k": 800,
+    "half_a_means": {
+      "100": 0.6621391806213235,
+      "200": 0.6906096583034028,
+      "400": 0.698069178358326,
+      "800": 0.702940371213117
+    },
+    "half_b_means": {
+      "100": 0.6631708087444076,
+      "200": 0.6964326142801349,
+      "400": 0.6960449293523312,
+      "800": 0.7041704160436888
+    },
+    "held_out_delta_vs_k200": 0.007737801763553875,
+    "held_out_sigma": 1.1010165291478653,
+    "held_out_seeds_better": 2
+  },
+  "generated_by": "scripts/ksweep_heldout.py"
 }

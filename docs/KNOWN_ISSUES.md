@@ -8,6 +8,88 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🔴🔴 2026-09-16 — Audit issues (`AUDIT_REPORT.md`, `BASEPAPER_COMPARISON.md`)
+
+Full detail, evidence and fixes are in those two files and `REMEDIATION_ITINERARY.md`. Summary of
+state at the end of 2026-09-16 (branch `fix/audit-remediation`):
+
+### [OPEN 2026-09-16] 🔴 The CNN + KG fusion gain does not hold across CNN runs (withdrawn)
+
+The project's one positive result was measured with the same three reference CNN runs. Across all 11
+pre-flag CNN runs the online k=800 fusion gains in 5 (reference three +0.0615, other eight −0.1190);
+across 6 deterministic runs in 0. The gain tracks each run's median XSS rank among all test flows
+(0.52–0.88; Spearman +0.95). **Mechanism:** the whole-set rank normalisation described in the
+2026-09-05 transductive issue below — a zero-day flow's fused score depends on where the CNN places it
+relative to the *known attacks*, which a benign-only PR-AUC never measures and which varies between
+runs of one configuration. `scripts/fusion_population.py`. **Open question:** whether any fusion rule
+is stable across CNN runs (not ensemble averaging — that fused worse, 2026-09-10).
+
+### [OPEN 2026-09-16] 🔴 The split is neither grouped nor chronological (F-02, F-03)
+
+54.88 % of test flows share their 5-tuple with a training flow (100 % for four DoS families and all
+three Web Attack zero-day families); 100 % of test lies inside the training time range.
+`split_integrity.json`, pinned by `tests/test_split_integrity.py`. Measuring grouped and chronological
+variants is decision **D4** (STATUS).
+
+### [OPEN 2026-09-16] 🟡 Absolute PR-AUC is measured at a 4.11× inflated attack base rate (F-04)
+
+Benign is under-sampled before the split. At capture-faithful prevalence the det CNN's macro is
+0.5845, not 0.6299; online fusions fall to ~0.325. Recall and FPR are unaffected. Decision **D1**.
+
+### [FIXED 2026-09-16] 🟡 The base-paper reproduction still lacks its result (CL-02)
+
+> ✅ **Fixed the same day.** Matched control run at three deterministic seeds: the SAT term changes
+> zero-day accuracy by +0.55 pp (+0.60 / −0.84 / +1.89) against the base paper's +12.13, and macro by
+> −0.0090 (1/3); neither direction-consistent. Paper sentences rewritten; `verify_draft.py` checks them.
+
+`ltn_repro` (CE + ω=1) was compared only against focal-loss arms, so "their +12 pp gain does not
+appear" crossed loss functions. The matched control (CE + ω=0) and a 3-seed deterministic `ltn_repro`
+were launched 2026-09-16 (`audit_rebase.sh`). Close when `rebase_deterministic.py` reports
+`ltn_matched`, and rewrite the paper sentence to match.
+
+### [OPEN 2026-09-16] 🟡 Tuning is not matched between the CNN and the classical baselines (F-12)
+
+XGBoost / RF / IsolationForest never see the validation split. Not yet re-run (itinerary 6.1).
+
+### [OPEN 2026-09-16] 🟡 `BeaconLike` is oracle-informed (F-08)
+
+Selected on Bot labels (commit 8c9e40f). Relabelled in `behavior.py` and the paper; no conclusion
+depends on it because the symbolic arms had no positive effect. Stays open as a design fact.
+
+### [OPEN 2026-09-16] 🟡 A second pipeline lives in an untracked notebook (F-13, F-14)
+
+`Capstone_final (4) (1).ipynb`: 70 features, the base paper's zero-day set, accuracy headline, all
+`execution_count` null, a Heartbleed rule "validated" on n=11. Decision **D3**.
+
+### [OPEN 2026-09-16] 🟡 No adversarial evaluation (F-16); one reporting split (F-17)
+
+Both are now stated in the paper's limitations. No experiment has been run.
+
+### [FIXED 2026-09-16] Findings closed on the day
+
+| ID | Issue | Fix |
+|---|---|---|
+| CL-01 | "18–29 pp on all four known-class views" was false (+18.82 / +0.42 / +28.72 / +7.07) | Corrected in 10 places; `verify_draft.py` now recomputes the deltas and fails if the phrase returns |
+| F-01 | Headline CNN baseline from a code state that no longer exists | Re-based to 0.6299 (`rebase_deterministic.py`); byte-identity re-check running |
+| F-05 | The quoted "operational" number was the transductive score | `operational_best.json` names `operational_config` (causal) and marks rows `online` |
+| F-06 | `ksweep_heldout.json` had no generating script | `ksweep_heldout.py` regenerates it exactly, and adds the online variant (+0.0077, 1.10σ, 2/3) |
+| F-07 | Thresholds fitted on test | `metrics.evaluate(thr=...)`; effect on the CNN: achieved test FPR 1.06 % |
+| F-09 | No tests | `tests/`, 30 tests, stdlib `unittest` |
+| F-10 | Field-gap argument led with non-dedup 0.9928 | Paper now gives 0.9884 / 0.9901 beside it |
+| F-11 | 13 tests, no correction | Holm–Bonferroni in `significance.py`; changes no verdict |
+| F-15 | Constant columns chosen on Mon–Wed only | Measured: 2 of 10 vary (315 benign rows, redundant with `URG Flag Count`); documented, feature set kept at 68 |
+| F-18 | "70 features" in live docs | Fixed where no frozen banner covered it |
+| F-19 | `PYTHONHASHSEED` set too late | Exported by `run_long.sh`; `hash_seed` recorded |
+| F-20 | Raw vs log-odds arrays unrecorded | `tracking` records `scoring` |
+| F-21 | Dashboard HTML unescaped | `esc()` at every data-derived site |
+| F-22 | `exec(compile(...))` import | `kg_graph.py`, class moved verbatim (AST identical) |
+| F-23 | Tracked pid file | Untracked |
+| F-24 | No lockfile | `requirements.lock.txt` |
+| F-25 | Two checkpoints per run, unchecked | Checked: identical weights — not a defect |
+| BP-01..08, FD-01..05 | Base-paper comparison gaps | `basepaper_audit.py` record; paper §3b / Appendix B rewritten; roadmap deviation table extended |
+
+---
+
 ## 🟡 2026-09-12 — [INTERMITTENT, was BLOCKING] Windows Smart App Control blocked TensorFlow
 
 **Every training run now fails at `import tensorflow`.** Windows Smart App Control flipped from
@@ -112,6 +194,12 @@ already forbids as a headline.
 ## Critical — measurement integrity
 
 ### [OPEN 2026-09-05] 🔴 The fusion gain is a TRANSDUCTIVE estimate — rank fusion cannot be streamed
+
+> 🔴 **2026-09-16: this issue turned out to be the mechanism behind a withdrawal.** Because the rank is
+> taken over the whole test set, the fused score of a zero-day flow depends on where the CNN places it
+> relative to the known attacks — and that varies between CNN runs of one configuration. Across 11
+> pre-flag CNN runs the CNN + KG gain holds in only 5 (`fusion_population.py`); the "only positive
+> result" below is withdrawn. See the 2026-09-16 block at the top.
 
 **Raised while measuring latency (`latency.py`), not by a failed run.** `fusion_multi.py` /
 `fusion_kg.py` fuse channels with `rankdata(score) / n` and then average. **`rankdata` is a global

@@ -114,8 +114,8 @@ that a paired bootstrap had reported as significant (p = 0.001; supplementary §
 **Architecture.** The system has three parts: a 1D CNN over the flow features, a Logic Tensor Network [7]
 layer that grounds fuzzy axioms in network behaviours, and a knowledge-graph channel that scores how
 quickly clusters of flows grow over time. The axioms (Ax3–Ax6) tie the network's attack output to
-behaviour predicates such as large packets with high size variance, bursts, scan-like probing and
-beacon-like periodicity.
+behaviour predicates such as large packets with high size variance, bursts, scan-like probing and a
+destination port outside a list of standard service ports (`BeaconLike`).
 
 **Results.** We tried injecting the axioms at the loss, at the representation and at inference. In every
 case the symbolic component either lowered macro zero-day PR-AUC or left it unchanged. On its own it
@@ -136,7 +136,10 @@ Comparing our system with published ones that report gains suggests why:
 
 All seven of our behaviour predicates are deterministic functions of features the network already
 consumes. `HighEntropy`, for example, is the standard deviation of packet length rather than Shannon
-entropy, and `BeaconLike` depends on the destination port. A predicate that the network can compute
+entropy, and `BeaconLike` depends on the destination port. `BeaconLike` was also selected by testing candidate
+encodings against Bot flows, which belong to a zero-day family, so it is not a clean test of transfer to
+unseen attacks. The axioms made no positive difference, so this weakens nothing we conclude, but a
+positive result from it would not have counted. A predicate that the network can compute
 for itself carries no new information. The most it can do is reshape the hypothesis space, which is a
 form of regularisation. In short, the knowledge we injected was endogenous.
 
@@ -296,12 +299,16 @@ apart on zero-day performance. The metric is neither noisy nor unrelated to zero
 (ρ = +0.582); it is simply too coarse in the range where results are reported. Supplementary §B gives the
 full analysis.
 
-**The one component that helps.** The knowledge-graph channel, which scores cluster growth over time,
-does improve macro zero-day PR-AUC. Its number of clusters was chosen on the test set, so we report the
-improvement on a held-out half that was never used for selection: +0.0305 at 2.86σ. Much of this signal
-depends on the fixed attack windows scripted into CIC-IDS2017, and detecting bursts in raw-feature
-clusters does not require a knowledge graph. We therefore do not count it as evidence for the
-neuro-symbolic approach (supplementary §D).
+**A component that appeared to help, withdrawn.** Fused with our three reference CNN runs, the
+knowledge-graph channel, which scores cluster growth over time, raised macro zero-day PR-AUC, and the gain
+held when its number of clusters was selected on one half of the test set and reported on the other
+(+0.0305 at 2.86σ). It does not hold across a wider set of CNN runs. Fused with each of 11 training runs
+of the same CNN configuration, the online variant improves on its own CNN run in 5 of the 11, and in 0 of
+the 6 deterministic re-runs. The gain follows where each CNN run happens to rank one web-attack family
+among all test flows (Spearman +0.95), a property that varies between runs of one configuration and that
+no per-family score reveals. The gain belonged to three runs rather than to the method, and we withdraw
+it (supplementary §D). With it withdrawn, no component of our architecture has been shown to improve on
+the neural baseline.
 
 ---
 
@@ -311,8 +318,11 @@ neuro-symbolic approach (supplementary §D).
 logic into a loss. Bizzarri et al. [8] applied it to CIC-IDS2017 with a combined cross-entropy and
 satisfiability loss and reported better accuracy on unknown attacks. Our work started from that paper,
 and a survey by the same group [9] places it within a growing body of work. We reproduced its CNN but not
-its symbolic gain. On its own metric we obtain 47.85 % for the CNN against the reported 48.34 %, and our
-closest reproduction of the hybrid model scores 47.24 %. The comparison is indicative rather than exact,
+its symbolic gain. On its own metric we obtain 47.85 % for the CNN against the reported 48.34 %. To test
+the gain we trained its loss (cross-entropy plus the satisfiability term) and the same loss without that
+term, otherwise identical, three deterministic seeds each: the term changes zero-day accuracy by
++0.55 percentage points, not consistently in direction, against the +12.13 reported (Appendix B). The
+comparison is indicative rather than exact,
 because the input modality, the set of zero-day classes, the class balancing and the cleaning all
 differ. In particular they delete duplicate and payload-less records and we do not, so the two CNN
 figures are measured on differently filtered populations. The reported gain is also confined to the

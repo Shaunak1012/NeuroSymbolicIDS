@@ -4,7 +4,7 @@
 [BASEPAPER_COMPARISON.md](BASEPAPER_COMPARISON.md) (CL-01/02, BP-01 … BP-08, FD-01 … FD-05).
 **40 findings, all carried.** §11 is a coverage map — every finding ID appears in exactly one item.
 
-**Opened:** 2026-09-16. **Status:** nothing started; the Phase-1 gate has not been lifted.
+**Opened:** 2026-09-16. **Status:** ~~nothing started~~ **worked the same day** on branch `fix/audit-remediation` — see §13 and the checklist in §12.
 **Repo state at audit:** branch `docs/paper-revision`, HEAD `2406bc3`.
 
 > **How to work this.** Stages run in order; items inside a stage are independent unless a
@@ -83,7 +83,7 @@ value lands. Item 2.1 is the single highest-value piece of writing in the whole 
 | # | Finding | Action | Effort | Depends on |
 |---|---|---|---|---|
 | **3.1** | **CL-01** guard | Add a `verify_draft.py` check that recomputes the four base-paper deltas from `paper_metrics.json` and fails on a mismatch. The current checker could not catch CL-01 because it was a derived range, with the base-paper side on the UNBACKED list | 20 min | 1.1 |
-| **3.2** | **F-06** | Write `scripts/ksweep_heldout.py` implementing the split-half protocol that `ksweep_heldout.json` records but no code produces. Reuse `fusion_weight.py:100-140`. My independent re-derivation gives **+0.0346 at 2.38σ** (s_kg) against the recorded +0.0305 at 2.86σ — expect the regenerated σ to be lower | 1 h | — |
+| **3.2** | **F-06** | Write `scripts/ksweep_heldout.py` implementing the split-half protocol that `ksweep_heldout.json` records but no code produces. Reuse `fusion_weight.py:100-140`. ~~My independent re-derivation gives **+0.0346 at 2.38σ** (s_kg) against the recorded +0.0305 at 2.86σ — expect the regenerated σ to be lower~~ *Done 2026-09-16: with `fusion_weight.py`'s split the record regenerates **identically**; the online variant gives +0.0077 at 1.10σ, 2/3* | 1 h | — |
 | **3.3** | **F-09** (first tranche) | `tests/` with the leakage-boundary assertions, so Stage 5's protocol work is guarded: `test_no_zero_day_in_train_val`, `test_scaler_fitted_on_train_only`, `test_cross_split_exact_duplicates` (assert the **measured** 17.02 % so a regression is visible), `test_flow_id_group_overlap` (assert 54.88 %), `test_feature_count_is_68`, `test_behaviour_indices_match_check_py`, `test_threshold_not_derived_from_test` | 1 day | — |
 | **3.4** | **F-15** | Move constant-column selection inside the paper split, or assert the 10 columns are constant on train alone. Practical effect is nil (all ten are all-zero across the capture) but the boundary is crossed | 30 min | 3.3 |
 | **3.5** | **F-07** (code half) | `metrics.evaluate` accepts an optional `thr`; callers pass a threshold derived from **validation** benign scores. Report the *achieved* test FPR as a measurement rather than pinning it at 1.00 % | 1 h | — |
@@ -175,7 +175,7 @@ unsplittable. Report that rather than forcing it.
 
 ## 9. Consolidated expected impact on the headline numbers
 
-Everything that moves, and why. **Directions of every comparative conclusion survive; magnitudes do not.**
+Everything that moves, and why. ~~**Directions of every comparative conclusion survive; magnitudes do not.**~~ **Wrong — the CNN + KG fusion direction reversed (§13).**
 
 | number | today | after | moved by |
 |---|---:|---:|---|
@@ -242,16 +242,18 @@ Everything that moves, and why. **Directions of every comparative conclusion sur
 ## 12. Tracking
 
 ```
-STAGE 0  decisions      [ ] D1  [ ] D2  [ ] D3  [ ] D4  [ ] D5
-STAGE 1  no compute     [ ] 1.1 [ ] 1.2 [ ] 1.3 [ ] 1.4 [ ] 1.5 [ ] 1.6 [ ] 1.7 [ ] 1.8 [ ] 1.9
-STAGE 2  write-up       [ ] 2.1 [ ] 2.2 [ ] 2.3 [ ] 2.4 [ ] 2.5 [ ] 2.6 [ ] 2.7 [ ] 2.8 [ ] 2.9
-STAGE 3  code           [ ] 3.1 [ ] 3.2 [ ] 3.3 [ ] 3.4 [ ] 3.5 [ ] 3.6 [ ] 3.7
-STAGE 4  RE-BASE        [ ] 4.1 [ ] 4.2 [ ] 4.3 [ ] 4.4 [ ] 4.5 [ ] 4.6 [ ] 4.7 [ ] 4.8 [ ] 4.9
-                        [ ] 4.10 [ ] 4.11
+STATUS 2026-09-16 end of day      [x] done   [~] partial / running   [ ] not started
+
+STAGE 0  decisions      [ ] D1  [x] D2  [ ] D3  [ ] D4  [ ] D5
+STAGE 1  no compute     [x] 1.1 [x] 1.2 [x] 1.3 [x] 1.4 [x] 1.5 [x] 1.6 [x] 1.7 [x] 1.8 [x] 1.9
+STAGE 2  write-up       [x] 2.1 [x] 2.2 [x] 2.3 [x] 2.4 [x] 2.5 [x] 2.6 [x] 2.7 [x] 2.8 [x] 2.9
+STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
+STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
+                        [x] 4.10 [x] 4.11
 STAGE 5  protocol (D4)  [ ] 5.1 [ ] 5.2 [ ] 5.3 [ ] 5.4
-STAGE 6  modelling      [ ] 6.1 [ ] 6.2 [ ] 6.3 [ ] 6.4 [ ] 6.5
-STAGE 7  engineering    [ ] 7.1 [ ] 7.2 [ ] 7.3 [ ] 7.4
-STAGE 8  hygiene        [ ] 8.1 [ ] 8.2
+STAGE 6  modelling      [ ] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
+STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [ ] 7.4
+STAGE 8  hygiene        [ ] 8.1 [x] 8.2
 ```
 
 **Minimum set before the paper is shared with anyone:** 1.1, 1.3, 1.5, 2.1, 2.2, 3.1, 4.2, 4.3, 4.4,
@@ -265,3 +267,44 @@ STAGE 8  hygiene        [ ] 8.1 [ ] 8.2
 
 *Read-only planning document. Companion to [AUDIT_REPORT.md](AUDIT_REPORT.md) and
 [BASEPAPER_COMPARISON.md](BASEPAPER_COMPARISON.md). No other repository file was created or modified.*
+
+---
+
+## 13. Progress, 2026-09-16
+
+**Done:** Stages 1–3 in full; Stage 4 except the training-dependent items; 6.2 (code), 6.3, 7.1–7.3,
+8.2. 30 tests; `verify_draft.py` 207 verified / 0 mismatched; lint passes; the paper compiles.
+
+**Partial or running.**
+* 4.2 — the deterministic CNN population (`c4_log1p_s42-44`) already existed and is used; the seed-42
+  byte-identity re-check (`cnn_det_verify_s42`) is running in `audit_rebase.sh` lane A.
+* 4.3 — CL-02's matched control and the 3-seed deterministic `ltn_repro` are running (both lanes).
+* 4.4 — re-derived on the deterministic CNN: fusion, operating profile, held-out k, base-paper views.
+  **Not** re-derived: novelty (MSP / Mahalanobis), significance, ablation, field_gap, figures.
+* 4.10 — deduplicated values are in the paper; the composition-neutral accuracy (99.78 %) is in
+  `config.yaml` and BASEPAPER_COMPARISON but has no record of its own.
+* 6.2 — Holm is in `significance.py`; the record has not been regenerated (CPU kept for training).
+  Previewed: no verdict changes.
+
+**What Stage 4 found that the itinerary did not predict.** §9 expected the re-base to move magnitudes
+only. It reversed a direction. The online CNN + KG fusion is −0.1269 against the deterministic CNN, and
+`fusion_population.py` showed why: across 11 pre-flag CNN runs the fusion gains in 5, the three
+reference runs are the ones that gain, and the gain tracks where each run ranks XSS among all test
+flows (Spearman +0.95). The result is withdrawn in STATUS, KNOWN_ISSUES and the paper.
+
+**Corrections to this audit's own statements**, all made in place: F-06's figures do regenerate (the
+audit had used a different split); F-15's ten columns are not all constant; BP-03 is 159,160 rows
+(35.0 %); BP-04 is three cells, not one; BP-02's Heartbleed is one connection and is never split; F-18
+overstated how many docs lacked a banner; F-13's notebook uses the base paper's zero-day set; F-01 and
+§9 said directions survive.
+
+**Not done, and why.** D1, D3, D4, D5 and the paper reframe need the author. 5.x waits on D4. 6.1
+(tuning-matched baselines) and 7.4 (end-to-end run) were deferred to keep the CPU for the training
+lanes. 6.4 and 6.5 are optional. 8.1 waits on D3.
+
+**Update, 16:04 UTC.** `audit_rebase.sh` finished. 4.2: the seed-42 re-run is byte-identical to
+`c4_log1p_s42`. 4.3 / CL-02: against a matched control the base paper's SAT term changes zero-day
+accuracy by +0.55 pp (+0.60 / −0.84 / +1.89; not direction-consistent) where they report +12.13, and
+macro by −0.0090 (1/3); the paper now says so. 4.10: balanced known-class accuracy is recorded
+(deterministic CNN 99.73 %). 6.2: `significance.json` regenerated with Holm, no verdict changes.
+4.4 stays partial: novelty, ablation, field_gap and the figures still use the pre-flag CNN.

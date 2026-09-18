@@ -1,0 +1,977 @@
+{
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "old_population": {
+  "42": "cnn_paper",
+  "43": "cnn_paper_s43",
+  "44": "cnn_paper_s44"
+ },
+ "new_population": {
+  "42": "c4_log1p_s42",
+  "43": "c4_log1p_s43",
+  "44": "c4_log1p_s44"
+ },
+ "note": "old = pre-determinism runs every existing record uses; new = deterministic runs of the same code (determinism.py).",
+ "cnn_new_score_health": {
+  "42": {
+   "achieved_fpr": 0.010011405398555316,
+   "score_resolution": 0.4955171030368574,
+   "largest_tie_frac": 0.0078319873013658,
+   "saturated": false
+  },
+  "43": {
+   "achieved_fpr": 0.010011405398555316,
+   "score_resolution": 0.41973521254513424,
+   "largest_tie_frac": 0.0078319873013658,
+   "saturated": false
+  },
+  "44": {
+   "achieved_fpr": 0.010011405398555316,
+   "score_resolution": 0.4200230249960753,
+   "largest_tie_frac": 0.008084913394617034,
+   "saturated": false
+  }
+ },
+ "cnn_alone": {
+  "old_per_seed": [
+   0.6446,
+   0.6355,
+   0.6396
+  ],
+  "old_mean": 0.6398994116488191,
+  "new_per_seed": [
+   0.6298,
+   0.6269,
+   0.633
+  ],
+  "new_mean": 0.6299033620767855,
+  "new_sd": 0.003078430403020715,
+  "shift": -0.009996049572033594
+ },
+ "fusion": {
+  "CNN + KG k=200 (causal)": {
+   "online": true,
+   "old_per_seed": [
+    0.7328,
+    0.6637,
+    0.6825
+   ],
+   "old_mean": 0.6929944496340926,
+   "new_per_seed": [
+    0.542,
+    0.5156,
+    0.4736
+   ],
+   "new_mean": 0.5104246192434226,
+   "old_vs_old_cnn": {
+    "mean_delta": 0.0530950379852733,
+    "paired_sd": 0.031220663699831026,
+    "sigma": 1.700637708914582,
+    "seeds_better": 3,
+    "direction_consistent": true
+   },
+   "new_vs_new_cnn": {
+    "mean_delta": -0.11947874283336286,
+    "paired_sd": 0.036531002384092036,
+    "sigma": 3.2706122207418993,
+    "seeds_better": 0,
+    "direction_consistent": true
+   }
+  },
+  "CNN + KG k=200 (s_kg)": {
+   "online": false,
+   "old_per_seed": [
+    0.7214,
+    0.6512,
+    0.6648
+   ],
+   "old_mean": 0.6791533449792019,
+   "new_per_seed": [
+    0.6343,
+    0.6345,
+    0.631
+   ],
+   "new_mean": 0.6332850588158574,
+   "old_vs_old_cnn": {
+    "mean_delta": 0.03925393333038266,
+    "paired_sd": 0.03285964580652775,
+    "sigma": 1.1945939271988335,
+    "seeds_better": 3,
+    "direction_consistent": true
+   },
+   "new_vs_new_cnn": {
+    "mean_delta": 0.00338169673907196,
+    "paired_sd": 0.004926940979971442,
+    "sigma": 0.6863684287713065,
+    "seeds_better": 2,
+    "direction_consistent": false
+   }
+  },
+  "CNN + KG k=800 (causal)": {
+   "online": true,
+   "old_per_seed": [
+    0.7476,
+    0.6643,
+    0.6976
+   ],
+   "old_mean": 0.70318557026272,
+   "new_per_seed": [
+    0.5272,
+    0.4986,
+    0.4833
+   ],
+   "new_mean": 0.502993823488987,
+   "old_vs_old_cnn": {
+    "mean_delta": 0.06328615861390074,
+    "paired_sd": 0.03733703627839923,
+    "sigma": 1.6949968428670912,
+    "seeds_better": 3,
+    "direction_consistent": true
+   },
+   "new_vs_new_cnn": {
+    "mean_delta": -0.12690953858779846,
+    "paired_sd": 0.023620052535156137,
+    "sigma": 5.372957507139581,
+    "seeds_better": 0,
+    "direction_consistent": true
+   }
+  },
+  "CNN + KG k=800 (s_kg)": {
+   "online": false,
+   "old_per_seed": [
+    0.7402,
+    0.6878,
+    0.7088
+   ],
+   "old_mean": 0.7122872851184693,
+   "new_per_seed": [
+    0.6805,
+    0.6579,
+    0.6534
+   ],
+   "new_mean": 0.6639208731442694,
+   "old_vs_old_cnn": {
+    "mean_delta": 0.07238787346965007,
+    "paired_sd": 0.021797780215756957,
+    "sigma": 3.320882803347245,
+    "seeds_better": 3,
+    "direction_consistent": true
+   },
+   "new_vs_new_cnn": {
+    "mean_delta": 0.03401751106748396,
+    "paired_sd": 0.015394725137737757,
+    "sigma": 2.2096861595856208,
+    "seeds_better": 3,
+    "direction_consistent": true
+   }
+  }
+ },
+ "reproduction_check": {
+  "rerun": "cnn_det_verify_s42",
+  "original": "c4_log1p_s42",
+  "predictions_byte_identical": true,
+  "loss_curve_identical": true,
+  "test_embeddings_byte_identical": true,
+  "epochs": 38,
+  "note": "re-run 2026-09-16 while another training lane loaded the machine; original trained 2026-08-10"
+ },
+ "checkpoint_pair_identical": {
+  "cnn_paper": true,
+  "c4_log1p_s42": true
+ },
+ "operating_point_from_validation": {
+  "cnn_per_seed": {
+   "42": {
+    "threshold_val": 0.021904718875885004,
+    "threshold_test": 0.022482907772064197,
+    "achieved_test_fpr_with_val_threshold": 0.010518312001013812,
+    "unknown_recall_val_threshold": 0.48266794166865884,
+    "unknown_recall_test_threshold": 0.48266794166865884,
+    "family_recall_val_threshold": {
+     "Bot": 0.0,
+     "Web Attack Brute Force": 0.9051094890510949,
+     "Web Attack XSS": 0.9754601226993865
+    },
+    "family_recall_test_threshold": {
+     "Bot": 0.0,
+     "Web Attack Brute Force": 0.9051094890510949,
+     "Web Attack XSS": 0.9754601226993865
+    }
+   },
+   "43": {
+    "threshold_val": 0.013178029656410208,
+    "threshold_test": 0.014243011474609366,
+    "achieved_test_fpr_with_val_threshold": 0.010862284338396365,
+    "unknown_recall_val_threshold": 0.48266794166865884,
+    "unknown_recall_test_threshold": 0.48266794166865884,
+    "family_recall_val_threshold": {
+     "Bot": 0.0,
+     "Web Attack Brute Force": 0.9051094890510949,
+     "Web Attack XSS": 0.9754601226993865
+    },
+    "family_recall_test_threshold": {
+     "Bot": 0.0,
+     "Web Attack Brute Force": 0.9051094890510949,
+     "Web Attack XSS": 0.9754601226993865
+    }
+   },
+   "44": {
+    "threshold_val": 0.025451961159706032,
+    "threshold_test": 0.027035951614379827,
+    "achieved_test_fpr_with_val_threshold": 0.010482104386552492,
+    "unknown_recall_val_threshold": 0.48171169017451587,
+    "unknown_recall_test_threshold": 0.48171169017451587,
+    "family_recall_val_threshold": {
+     "Bot": 0.0,
+     "Web Attack Brute Force": 0.9037823490378235,
+     "Web Attack XSS": 0.9754601226993865
+    },
+    "family_recall_test_threshold": {
+     "Bot": 0.0,
+     "Web Attack Brute Force": 0.9037823490378235,
+     "Web Attack XSS": 0.9754601226993865
+    }
+   }
+  },
+  "achieved_test_fpr_mean": 0.010620900241987556,
+  "unknown_recall_val_threshold_mean": 0.4823491911706112,
+  "unknown_recall_test_threshold_mean": 0.4823491911706112,
+  "fused_channels": "not definable: the KG score exists only for the test stream (kg.py streams test), and the rank fusion normalises within the evaluated set, so no validation threshold transfers. Stated as a limitation rather than approximated."
+ },
+ "capture_faithful_prevalence": {
+  "benign_undersample_factor": 4.111931611429234,
+  "draws": 200,
+  "rows": {
+   "CNN alone": {
+    "as_reported_mean": 0.6299033620767855,
+    "capture_faithful_mean": 0.5844701481632786,
+    "capture_faithful_per_family": {
+     "Bot": 0.008090972552181922,
+     "Web Attack Brute Force": 0.8705291597226473,
+     "Web Attack XSS": 0.8747903122150067
+    }
+   },
+   "CNN + KG k=200 (causal)": {
+    "as_reported_mean": 0.5104246192434226,
+    "capture_faithful_mean": 0.3247495372312757,
+    "capture_faithful_per_family": {
+     "Bot": 0.06745409014202415,
+     "Web Attack Brute Force": 0.7272771320235499,
+     "Web Attack XSS": 0.1795173895282529
+    }
+   },
+   "CNN + KG k=800 (causal)": {
+    "as_reported_mean": 0.502993823488987,
+    "capture_faithful_mean": 0.3255277668636102,
+    "capture_faithful_per_family": {
+     "Bot": 0.07443556326597744,
+     "Web Attack Brute Force": 0.7506676760589913,
+     "Web Attack XSS": 0.15148006126586175
+    }
+   }
+  }
+ },
+ "base_paper_views_validation": {
+  "reproduces_paper_metrics": true,
+  "mismatch": {}
+ },
+ "base_paper_views": {
+  "cnn_old": {
+   "Multi-class 9 known classes": 99.81262729124235,
+   "Binary 9 known classes": 99.84189484800483,
+   "Multi-class 15 classes": 96.17122224354165,
+   "Binary 15 classes": 97.94519353206927,
+   "Binary 6 unknown classes": 47.85241851940393,
+   "_f1_Binary 6 unknown classes": 64.72996714840798,
+   "_balanced_Multi-class 9 known classes": 99.77585978448444
+  },
+  "cnn_new": {
+   "Multi-class 9 known classes": 99.81685147469261,
+   "Binary 9 known classes": 99.84732594101229,
+   "Multi-class 15 classes": 96.17529231860549,
+   "Binary 15 classes": 97.9396698587684,
+   "Binary 6 unknown classes": 47.55757430870986,
+   "_f1_Binary 6 unknown classes": 64.45966119217171,
+   "_balanced_Multi-class 9 known classes": 99.72657667743651
+  },
+  "delta_vs_their_1d_cnn_new": {
+   "Multi-class 9 known classes": 18.826851474692617,
+   "Binary 9 known classes": 0.4273259410122847,
+   "Multi-class 15 classes": 28.725292318605483,
+   "Binary 15 classes": 7.059669858768402,
+   "Binary 6 unknown classes": -0.7824256912901433
+  },
+  "delta_vs_their_1d_cnn_old": {
+   "Multi-class 9 known classes": 18.822627291242355,
+   "Binary 9 known classes": 0.42189484800482546,
+   "Multi-class 15 classes": 28.721222243541646,
+   "Binary 15 classes": 7.065193532069273,
+   "Binary 6 unknown classes": -0.4875814805960701
+  }
+ },
+ "ltn_matched": {
+  "ltn_repro_det": {
+   "description": "CE + base axioms, omega=1 (the base paper's Hybrid-LTN)",
+   "views_mean": {
+    "Multi-class 9 known classes": 99.8705589499887,
+    "Binary 9 known classes": 99.89318850418647,
+    "Multi-class 15 classes": 96.2270404158454,
+    "Binary 15 classes": 97.94955432678051,
+    "Binary 6 unknown classes": 46.61726033946928,
+    "_f1_Binary 6 unknown classes": 63.59019231336623,
+    "_balanced_Multi-class 9 known classes": 99.53365984816888
+   },
+   "view5_per_seed": [
+    46.736791776237155,
+    46.35429117857996,
+    46.76069806359072
+   ],
+   "macro_per_seed": [
+    0.5576941154358416,
+    0.5050689559413517,
+    0.5565030662644209
+   ],
+   "macro_mean": 0.5397553792138714
+  },
+  "ltn_repro_ctrl": {
+   "description": "CE + base axioms, omega=0 (its matched control)",
+   "views_mean": {
+    "Multi-class 9 known classes": 99.87780040733197,
+    "Binary 9 known classes": 99.89892132458324,
+    "Multi-class 15 classes": 96.23401768738336,
+    "Binary 15 classes": 97.93501834440974,
+    "Binary 6 unknown classes": 46.067415730337075,
+    "_f1_Binary 6 unknown classes": 63.07115040483834,
+    "_balanced_Multi-class 9 known classes": 99.55794774259589
+   },
+   "view5_per_seed": [
+    46.1391345923978,
+    47.19101123595505,
+    44.87210136265838
+   ],
+   "macro_per_seed": [
+    0.5419844493632716,
+    0.5471162257739138,
+    0.5570990659357631
+   ],
+   "macro_mean": 0.5487332470243161
+  },
+  "matched_comparison": {
+   "question": "does the base paper's SAT term (omega=1 vs 0, everything else equal) raise zero-day accuracy on our data?",
+   "view5_delta": {
+    "mean_delta": 0.5498446091322032,
+    "paired_sd": 1.3632873468212534,
+    "sigma": 0.4033226087033402,
+    "seeds_better": 2,
+    "direction_consistent": false
+   },
+   "macro_delta": {
+    "mean_delta": -0.008977867810444776,
+    "paired_sd": 0.029776797954336222,
+    "sigma": 0.30150548169123675,
+    "seeds_better": 1,
+    "direction_consistent": false
+   },
+   "base_paper_claim_pp": 12.13
+  }
+ },
+ "operational_best_c4_log1p": {
+  "k": 800,
+  "seeds": [
+   42,
+   43,
+   44
+  ],
+  "fprs": [
+   0.001,
+   0.01,
+   0.05,
+   0.1
+  ],
+  "noise_band": 0.0285,
+  "cnn_channel": "c4_log1p",
+  "operational_config": "CNN + KG k=800 (causal)",
+  "n_test": 114658,
+  "n_benign": 55237,
+  "n_zero_day": 4183,
+  "family_n": {
+   "Bot": 1956,
+   "Heartbleed": 11,
+   "Infiltration": 36,
+   "Web Attack Brute Force": 1507,
+   "Web Attack Sql Injection": 21,
+   "Web Attack XSS": 652
+  },
+  "powered_families": [
+   "Bot",
+   "Web Attack Brute Force",
+   "Web Attack XSS"
+  ],
+  "configs": {
+   "CNN alone": {
+    "macro_pr_auc": {
+     "per_seed": [
+      0.6298,
+      0.6269,
+      0.633
+     ],
+     "mean": 0.6299033620767855,
+     "sd": 0.003078430403020715
+    },
+    "recall_at_fpr": {
+     "ALL unknown flows": {
+      "0.001": {
+       "mean": 0.473344489600765,
+       "sd": 0.0006325009110840629,
+       "per_seed": [
+        0.4731,
+        0.4741,
+        0.4729
+       ]
+      },
+      "0.010": {
+       "mean": 0.4823491911706112,
+       "sd": 0.0005520920575564243,
+       "per_seed": [
+        0.4827,
+        0.4827,
+        0.4817
+       ]
+      },
+      "0.050": {
+       "mean": 0.49302733285520756,
+       "sd": 0.009485505514335168,
+       "per_seed": [
+        0.4841,
+        0.492,
+        0.503
+       ]
+      },
+      "0.100": {
+       "mean": 0.5111164236194119,
+       "sd": 0.0165161132674309,
+       "per_seed": [
+        0.5121,
+        0.4941,
+        0.5271
+       ]
+      }
+     },
+     "Bot": {
+      "0.001": {
+       "mean": 0.0,
+       "sd": 0.0,
+       "per_seed": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.010": {
+       "mean": 0.0,
+       "sd": 0.0,
+       "per_seed": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.050": {
+       "mean": 0.0,
+       "sd": 0.0,
+       "per_seed": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.100": {
+       "mean": 0.017552828902522154,
+       "sd": 0.020025852342364533,
+       "per_seed": [
+        0.0394,
+        0.0,
+        0.0133
+       ]
+      }
+     },
+     "Web Attack Brute Force": {
+      "0.001": {
+       "mean": 0.8982525989825261,
+       "sd": 0.00038311232195724777,
+       "per_seed": [
+        0.8978,
+        0.8985,
+        0.8985
+       ]
+      },
+      "0.010": {
+       "mean": 0.9046671090466711,
+       "sd": 0.0007662246439145596,
+       "per_seed": [
+        0.9051,
+        0.9051,
+        0.9038
+       ]
+      },
+      "0.050": {
+       "mean": 0.9323158593231585,
+       "sd": 0.026642149833954513,
+       "per_seed": [
+        0.9071,
+        0.9297,
+        0.9602
+       ]
+      },
+      "0.100": {
+       "mean": 0.9520017695200176,
+       "sd": 0.035859395196715514,
+       "per_seed": [
+        0.9297,
+        0.933,
+        0.9934
+       ]
+      }
+     },
+     "Web Attack XSS": {
+      "0.001": {
+       "mean": 0.9381390593047035,
+       "sd": 0.003542026191347377,
+       "per_seed": [
+        0.934,
+        0.9402,
+        0.9402
+       ]
+      },
+      "0.010": {
+       "mean": 0.9754601226993865,
+       "sd": 0.0,
+       "per_seed": [
+        0.9755,
+        0.9755,
+        0.9755
+       ]
+      },
+      "0.050": {
+       "mean": 0.9769938650306749,
+       "sd": 0.0015337423312883347,
+       "per_seed": [
+        0.9755,
+        0.977,
+        0.9785
+       ]
+      },
+      "0.100": {
+       "mean": 0.9856850715746422,
+       "sd": 0.011714150549478112,
+       "per_seed": [
+        0.9755,
+        0.9831,
+        0.9985
+       ]
+      }
+     }
+    }
+   },
+   "CNN + KG k=800 (s_kg)": {
+    "macro_pr_auc": {
+     "per_seed": [
+      0.6805,
+      0.6579,
+      0.6534
+     ],
+     "mean": 0.6639208731442694,
+     "sd": 0.014503571513769239
+    },
+    "recall_at_fpr": {
+     "ALL unknown flows": {
+      "0.001": {
+       "mean": 0.4122240816001275,
+       "sd": 0.023564777212043683,
+       "per_seed": [
+        0.4363,
+        0.3892,
+        0.4112
+       ]
+      },
+      "0.010": {
+       "mean": 0.47804605944696793,
+       "sd": 0.024771959041706548,
+       "per_seed": [
+        0.4865,
+        0.4975,
+        0.4502
+       ]
+      },
+      "0.050": {
+       "mean": 0.7137620527532075,
+       "sd": 0.1519342521901199,
+       "per_seed": [
+        0.8647,
+        0.7158,
+        0.5608
+       ]
+      },
+      "0.100": {
+       "mean": 0.9028607857199776,
+       "sd": 0.056045502244015624,
+       "per_seed": [
+        0.9362,
+        0.8382,
+        0.9343
+       ]
+      }
+     },
+     "Bot": {
+      "0.001": {
+       "mean": 0.0,
+       "sd": 0.0,
+       "per_seed": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.010": {
+       "mean": 0.03851397409679618,
+       "sd": 0.03422431575672713,
+       "per_seed": [
+        0.0501,
+        0.0654,
+        0.0
+       ]
+      },
+      "0.050": {
+       "mean": 0.4662576687116564,
+       "sd": 0.3462662745429609,
+       "per_seed": [
+        0.8292,
+        0.43,
+        0.1396
+       ]
+      },
+      "0.100": {
+       "mean": 0.8265167007498295,
+       "sd": 0.12188436425554937,
+       "per_seed": [
+        0.9049,
+        0.6861,
+        0.8885
+       ]
+      }
+     },
+     "Web Attack Brute Force": {
+      "0.001": {
+       "mean": 0.7867728378677284,
+       "sd": 0.04505114214406232,
+       "per_seed": [
+        0.8354,
+        0.7465,
+        0.7784
+       ]
+      },
+      "0.010": {
+       "mean": 0.8767971687679718,
+       "sd": 0.02284583292842351,
+       "per_seed": [
+        0.8865,
+        0.8932,
+        0.8507
+       ]
+      },
+      "0.050": {
+       "mean": 0.9482415394824154,
+       "sd": 0.047448735609090256,
+       "per_seed": [
+        0.9011,
+        0.996,
+        0.9476
+       ]
+      },
+      "0.100": {
+       "mean": 0.9907100199071003,
+       "sd": 0.009194695726974844,
+       "per_seed": [
+        0.9801,
+        0.996,
+        0.996
+       ]
+      }
+     },
+     "Web Attack XSS": {
+      "0.001": {
+       "mean": 0.8118609406952965,
+       "sd": 0.04927905597587287,
+       "per_seed": [
+        0.8497,
+        0.7561,
+        0.8298
+       ]
+      },
+      "0.010": {
+       "mean": 0.9054192229038854,
+       "sd": 0.00468566021979122,
+       "per_seed": [
+        0.9003,
+        0.9095,
+        0.9064
+       ]
+      },
+      "0.050": {
+       "mean": 0.9611451942740286,
+       "sd": 0.012862725588352879,
+       "per_seed": [
+        0.9463,
+        0.9693,
+        0.9678
+       ]
+      },
+      "0.100": {
+       "mean": 0.9851738241308793,
+       "sd": 0.012397091669715947,
+       "per_seed": [
+        0.9923,
+        0.9709,
+        0.9923
+       ]
+      }
+     }
+    },
+    "online": false,
+    "paired_vs_cnn": {
+     "mean_delta": 0.034033333333333325,
+     "paired_sd": 0.015376063648845015,
+     "sigma": 2.213397011782646,
+     "seeds_better": 3,
+     "direction_consistent": true
+    }
+   },
+   "CNN + KG k=800 (causal)": {
+    "macro_pr_auc": {
+     "per_seed": [
+      0.5272,
+      0.4986,
+      0.4833
+     ],
+     "mean": 0.502993823488987,
+     "sd": 0.022280421738033834
+    },
+    "recall_at_fpr": {
+     "ALL unknown flows": {
+      "0.001": {
+       "mean": 0.22742848035700056,
+       "sd": 0.007788216892418915,
+       "per_seed": [
+        0.2309,
+        0.2328,
+        0.2185
+       ]
+      },
+      "0.010": {
+       "mean": 0.4648976014025022,
+       "sd": 0.019305468042257915,
+       "per_seed": [
+        0.4738,
+        0.4781,
+        0.4427
+       ]
+      },
+      "0.050": {
+       "mean": 0.7708183919037372,
+       "sd": 0.13030359443993803,
+       "per_seed": [
+        0.9142,
+        0.7387,
+        0.6596
+       ]
+      },
+      "0.100": {
+       "mean": 0.9308311419236593,
+       "sd": 0.032290601472258894,
+       "per_seed": [
+        0.9677,
+        0.917,
+        0.9077
+       ]
+      }
+     },
+     "Bot": {
+      "0.001": {
+       "mean": 0.0,
+       "sd": 0.0,
+       "per_seed": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "0.010": {
+       "mean": 0.036298568507157465,
+       "sd": 0.02975354708988029,
+       "per_seed": [
+        0.0511,
+        0.0557,
+        0.002
+       ]
+      },
+      "0.050": {
+       "mean": 0.5577709611451942,
+       "sd": 0.31336590839922196,
+       "per_seed": [
+        0.9054,
+        0.4709,
+        0.297
+       ]
+      },
+      "0.100": {
+       "mean": 0.8781526925698705,
+       "sd": 0.07884213577723966,
+       "per_seed": [
+        0.9683,
+        0.8441,
+        0.8221
+       ]
+      }
+     },
+     "Web Attack Brute Force": {
+      "0.001": {
+       "mean": 0.6235346162353461,
+       "sd": 0.018819357019602585,
+       "per_seed": [
+        0.633,
+        0.6357,
+        0.6019
+       ]
+      },
+      "0.010": {
+       "mean": 0.8683919486839194,
+       "sd": 0.017522939456171917,
+       "per_seed": [
+        0.8719,
+        0.8839,
+        0.8494
+       ]
+      },
+      "0.050": {
+       "mean": 0.9738995797389958,
+       "sd": 0.04004760897794422,
+       "per_seed": [
+        0.9277,
+        0.996,
+        0.998
+       ]
+      },
+      "0.100": {
+       "mean": 0.993364299933643,
+       "sd": 0.008626410086264106,
+       "per_seed": [
+        0.9834,
+        0.998,
+        0.9987
+       ]
+      }
+     },
+     "Web Attack XSS": {
+      "0.001": {
+       "mean": 0.005623721881390593,
+       "sd": 0.0031927392629848665,
+       "per_seed": [
+        0.0046,
+        0.0092,
+        0.0031
+       ]
+      },
+      "0.010": {
+       "mean": 0.8486707566462167,
+       "sd": 0.00771966711172879,
+       "per_seed": [
+        0.8497,
+        0.8405,
+        0.8558
+       ]
+      },
+      "0.050": {
+       "mean": 0.9872188139059305,
+       "sd": 0.015963696314924364,
+       "per_seed": [
+        0.9693,
+        0.9923,
+        1.0
+       ]
+      },
+      "0.100": {
+       "mean": 0.9959100204498977,
+       "sd": 0.005806654750307058,
+       "per_seed": [
+        0.9893,
+        0.9985,
+        1.0
+       ]
+      }
+     }
+    },
+    "online": true,
+    "paired_vs_cnn": {
+     "mean_delta": -0.12686666666666668,
+     "paired_sd": 0.02358269139291215,
+     "sigma": 5.379651734949848,
+     "seeds_better": 0,
+     "direction_consistent": true
+    }
+   }
+  },
+  "caveats": [
+   "k was selected on test. ksweep_heldout.json re-selected it on a stratified half (rng 9001) and reported +0.0305 at 2.86 sigma on the other half for the transductive s_kg score - but only +0.0077 at 1.10 sigma, 2/3 seeds, for the causal score. k=800 is supported on held-out data for the offline variant only.",
+   "Only the causal row is operational (`operational_config`). s_kg uses test windows that arrive after the flow it scores; it is an offline upper bound, not a deployable number (audit F-05).",
+   "The variant ranking flips with k (causal leads at k=200, s_kg at k=800). Neither cross-variant gap is tested paired and both sit inside the 0.0285 band, so neither variant is asserted better.",
+   "Bot's detectability rides substantially on CIC-IDS2017's SCRIPTED attack windows; a real network with continuous low-rate C2 would not produce this signal.",
+   "The 10 % FPR column is reported for shape only. It is NOT a deployable operating point - at 55,237 benign test flows it is ~5,500 false alerts.",
+   "Web Brute Force and XSS score high by ABSORPTION into a known attack class, not by novel-class detection - see the standing caution.",
+   "Heartbleed, Infiltration and SQL Injection are below MIN_FAMILY_N=100 and are excluded from the macro and from the per-family table."
+  ]
+ },
+ "ksweep_heldout_c4_log1p_raw": {
+  "selected_k": 800,
+  "half_a_means": {
+   "100": 0.563852337043926,
+   "200": 0.6361048437251805,
+   "400": 0.6684336969390167,
+   "800": 0.6694568987841966
+  },
+  "half_b_means": {
+   "100": 0.5630920768188371,
+   "200": 0.6314060256897235,
+   "400": 0.6579038583767013,
+   "800": 0.6597878349659544
+  },
+  "held_out_delta_vs_k200": 0.028381809276230907,
+  "held_out_sigma": 1.56533340345936,
+  "held_out_seeds_better": 3,
+  "rng": 9001,
+  "cnn_channel": "c4_log1p",
+  "cnn_scoring": "raw",
+  "note": "k selected on half A, reported on half B; removes the test-set selection bias in ksweep_fusion.json. Top-level values are the transductive s_kg variant; `causal` is the online one.",
+  "causal": {
+   "selected_k": 200,
+   "half_a_means": {
+    "100": 0.45556549995658946,
+    "200": 0.5099073498703571,
+    "400": 0.5025314769590948,
+    "800": 0.5062608495805462
+   },
+   "half_b_means": {
+    "100": 0.4553987785936168,
+    "200": 0.5123118889052064,
+    "400": 0.4989219011113913,
+    "800": 0.5008875191982568
+   },
+   "held_out_delta_vs_k200": 0.0,
+   "held_out_sigma": Infinity,
+   "held_out_seeds_better": 0
+  },
+  "generated_by": "scripts/ksweep_heldout.py"
+ }
+}

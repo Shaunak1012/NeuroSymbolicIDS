@@ -141,7 +141,18 @@ def active_behaviour_indices():
     active = set(active_behaviour_names())
     return [i for i, n in enumerate(BEHAVIOUR_NAMES) if n in active]
 
-# Fixed domain knowledge, NOT data-fitted — standard well-known service ports.
+# The PORT LIST is fixed external domain knowledge — standard well-known service ports.
+#
+# ⚠️ THE PREDICATE IS NOT (audit F-08, 2026-09-16). It was designed to target Bot,
+# after an oracle analysis of Bot's TEST flows (skyline_oracle.py), and chosen over a
+# first candidate by "validating standalone against labels" (commit 8c9e40f) -- Bot
+# labels, and Bot is a test-only zero-day family. It fires on 99.95 % of Bot and 22.65 %
+# of benign because this capture's botnet C2 listens on 8080, which the list omits
+# while including 8443. So Ax6 is ORACLE-INFORMED: any positive zero-day effect from it
+# would not count as transfer. (It had none -- the symbolic arms are null or harmful --
+# so no published conclusion depends on it; the paper says so.)
+#
+# Original comment, kept: "Fixed domain knowledge, NOT data-fitted".
 # Deliberately not a percentile ramp: destination-port *magnitude* isn't ordinal
 # (port 8080 isn't "more" than port 443), and a magnitude ramp fit on this
 # dataset's training port distribution was tried and DROPPED — it was actively

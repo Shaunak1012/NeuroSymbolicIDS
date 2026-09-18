@@ -185,7 +185,13 @@ np.save(os.path.join(paths.predictions_dir(TAG), f"y_prob_{TAG}_test.npy"),
         patk.astype(np.float32))
 if SUBSET == 0:
     cnn.save(os.path.join(paths.MODELS, f"{TAG}.keras"))
+    # Determinism state and epochs travel with the numbers (audit F-01): without
+    # them a post-flag LTN run is indistinguishable in runs.jsonl from the pre-flag
+    # population it must never be pooled with. cnn_paper.py already did this.
     tracking.log_run(TAG, {"protocol": "paper", "loss": LOSS, "axioms": AXIOMS,
-                           "omega": OMEGA, "omega_mode": OMEGA_MODE, "seed": SEED}, metrics.flatten(res))
+                           "omega": OMEGA, "omega_mode": OMEGA_MODE, "seed": SEED,
+                           "epochs": EPOCHS, "best_epoch": best_ep, "transform": TFM,
+                           **{f"det_{k}": v for k, v in DET.items()}},
+                     metrics.flatten(res))
     print(f"logged {TAG} to runs.jsonl")
 print(f"DONE ({TAG})  best_val_acc={best_va:.4f}@{best_ep}")

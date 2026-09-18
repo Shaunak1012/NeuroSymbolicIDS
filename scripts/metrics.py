@@ -66,8 +66,26 @@ def _binary(y_mc, scores, mask, thr):
     }
 
 
-def evaluate(y_mc, scores, zero_day_classes, fpr=0.01):
-    """Full suite. Returns a nested dict of views + per-family zero-day breakdown."""
+def threshold_from(benign_scores, fpr=0.01):
+    """The score at which `fpr` of these benign flows would be flagged.
+
+    Pass VALIDATION benign scores and hand the result to `evaluate(thr=...)`, so the
+    operating point is not fitted to the data it is reported on (audit F-07).
+    """
+    return float(np.quantile(np.asarray(benign_scores, dtype=float), 1.0 - fpr))
+
+
+def evaluate(y_mc, scores, zero_day_classes, fpr=0.01, thr=None):
+    """Full suite. Returns a nested dict of views + per-family zero-day breakdown.
+
+    `thr` (added 2026-09-16, audit F-07): a decision threshold fixed ELSEWHERE, e.g.
+    `threshold_from(val_benign_scores, fpr)`. When omitted, the threshold is the
+    (1 - fpr) quantile of the benign scores IN THIS SET -- the historical behaviour,
+    kept so every existing record is reproducible. That makes `achieved_fpr` equal
+    `fpr` by construction and fits every threshold metric (F1, precision, recall,
+    per-family recall) to the data it is reported on. PR-AUC and ROC-AUC do not use
+    the threshold and are unaffected either way. `threshold_source` records which.
+    """
     y_mc = np.asarray(y_mc)
     scores = np.asarray(scores, dtype=float)
     zd = set(zero_day_classes)
@@ -75,10 +93,15 @@ def evaluate(y_mc, scores, zero_day_classes, fpr=0.01):
     is_zd = np.isin(y_mc, list(zd))
     is_known = ~is_benign & ~is_zd
 
-    # operating threshold set on benign to hit the target FPR
-    thr = float(np.quantile(scores[is_benign], 1.0 - fpr)) if is_benign.any() else 0.5
+    # operating threshold: given (fixed elsewhere), or fitted to THIS set's benign
+    if thr is not None:
+        thr, source = float(thr), "given"
+    elif is_benign.any():
+        thr, source = threshold_from(scores[is_benign], fpr), "evaluated_set_benign_quantile"
+    else:
+        thr, source = 0.5, "default"
 
-    out = {"fpr_target": fpr, "threshold": thr, "views": {}}
+    out = {"fpr_target": fpr, "threshold": thr, "threshold_source": source, "views": {}}
     out["views"]["known_only"]   = _binary(y_mc, scores, is_benign | is_known, thr)
     out["views"]["all"]          = _binary(y_mc, scores, np.ones(len(y_mc), bool), thr)
     out["views"]["zeroday_only"] = _binary(y_mc, scores, is_benign | is_zd, thr)  # SECONDARY

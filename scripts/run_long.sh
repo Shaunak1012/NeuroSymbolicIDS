@@ -33,6 +33,10 @@ if [ "${1:-}" = "--watch" ]; then WATCH=1; shift; fi
 
 SCRIPT="$1"; shift
 BASE="$(basename "$(basename "$SCRIPT" .py)" .sh)"
+# RUN_LONG_NAME names the log and pid file when the SAME launcher runs as several
+# concurrent lanes (added 2026-09-16); without it they would share one log and one
+# pid file. Inert when unset.
+BASE="${RUN_LONG_NAME:-$BASE}"
 LOG="outputs/${BASE}.log"
 mkdir -p outputs
 

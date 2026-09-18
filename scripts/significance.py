@@ -230,6 +230,32 @@ for a, b, metric, fam, why in TESTS:
     print(f"    {a}={r['obs_a']:.4f}  {b}={r['obs_b']:.4f}  diff={r['obs_diff']:+.4f}")
     print(f"    95% CI [{r['ci95_lo']:+.4f}, {r['ci95_hi']:+.4f}]  p={r['p_boot']:.4f}  -> {verdict}")
 
+# ------------------------------------------------ multiple comparisons ----
+# Added 2026-09-16 (audit F-11). The tests above are judged one at a time at
+# alpha=0.05; under the global null, 13 of them give a ~0.49 chance of at least one
+# false "SIGNIFICANT". Holm-Bonferroni over all of them is the conservative
+# correction -- conservative because it does not distinguish the pre-registered
+# directional predictions from the exploratory checks. Raw verdicts are kept.
+# Applied to the 2026-08-03 record it changes no verdict: every significant
+# comparison sits at the bootstrap floor (p < 1/B).
+_ps = [c["p_boot"] for c in RESULTS["comparisons"]]
+_order = sorted(range(len(_ps)), key=lambda i: _ps[i])
+_m, _run = len(_ps), 0.0
+for _rank, _i in enumerate(_order):
+    _run = max(_run, min(1.0, (_m - _rank) * _ps[_i]))
+    RESULTS["comparisons"][_i]["p_holm"] = _run
+    RESULTS["comparisons"][_i]["significant_holm"] = bool(_run < 0.05)
+RESULTS["multiple_comparisons"] = {
+    "method": "Holm-Bonferroni over all %d comparisons" % _m,
+    "note": "p_boot is 0 when no replicate crosses zero, i.e. p < 1/B with B=%d" % B}
+print("\n" + "=" * 100)
+print("HOLM-BONFERRONI over %d comparisons (raw verdicts kept)" % _m)
+print("=" * 100)
+for c in RESULTS["comparisons"]:
+    print("  %-14s vs %-14s [%-22s] p=%.4f  Holm p=%.4f  %s"
+          % (c["a"], c["b"], str(c["metric"])[:22], c["p_boot"], c["p_holm"],
+             "SIGNIFICANT" if c["significant_holm"] else "n.s."))
+
 # ------------------------------------------------- seed-level power caveat ----
 print("\n" + "=" * 100)
 print("SEED-LEVEL VARIANCE — reported separately, and it is UNDERPOWERED at n=3")

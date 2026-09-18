@@ -524,8 +524,28 @@ if pm:
         _pt["Binary 6 unknown classes"]["1D CNN"], "{:.2f}")
     chk("our CNN zero-day accuracy (view 5)", "paper_metrics",
         _us["Binary 6 unknown classes"], "{:.2f}")
-    chk("ltn_repro zero-day accuracy (view 5)", "paper_metrics",
-        pm["ours"]["LTN repro (CE+Ax1/2)"]["Binary 6 unknown classes"], "{:.2f}")
+    # The pre-flag, n=1 `ltn_repro` view-5 figure (47.24) is no longer quoted: it
+    # was compared against focal-loss arms, which cannot isolate the SAT term
+    # (audit CL-02). The matched comparison below replaced it on 2026-09-16.
+    chk("pre-flag ltn_repro view 5 (retired)", "paper_metrics",
+        pm["ours"]["LTN repro (CE+Ax1/2)"]["Binary 6 unknown classes"], "{:.2f}",
+        quoted=False)
+    _rb = load("rebase_deterministic")
+    _mc = (_rb or {}).get("ltn_matched", {}).get("matched_comparison")
+    if _mc:
+        _a = _rb["ltn_matched"]["ltn_repro_det"]["view5_per_seed"]
+        _b = _rb["ltn_matched"]["ltn_repro_ctrl"]["view5_per_seed"]
+        chk("CL-02 SAT-term effect on view 5 (matched)", "rebase_deterministic",
+            _mc["view5_delta"]["mean_delta"], "+{:.2f}")
+        chk("CL-02 per-seed view-5 effects", "rebase_deterministic",
+            "%+.2f, %+.2f and %+.2f" % tuple(x - y for x, y in zip(_a, _b)), "{}")
+        chk("CL-02 SAT-term effect on macro (matched)", "rebase_deterministic",
+            _mc["macro_delta"]["mean_delta"], "{:.4f}")
+        if _mc["view5_delta"]["direction_consistent"]:
+            BAD.append(("CL-02: the draft says the effect is not direction-consistent",
+                        "inconsistent", "rebase_deterministic"))
+    else:
+        unbacked("CL-02 matched SAT-term comparison", "rebase_deterministic.json has no ltn_matched")
     # pairs, not bare decimals: a lone "0.4" occurs all over the draft, so a
     # substring check on it could never fail.
     chk("known-class delta, multi-class views", "paper_metrics",
@@ -589,6 +609,50 @@ if ba:
                     "basepaper_audit"))
 else:
     unbacked("base-paper Table I / Fig. 3 claims", "basepaper_audit.json missing")
+
+# The KG fusion WITHDRAWAL (audit F-01, 2026-09-16). The draft withdraws the one
+# positive result because it does not hold across CNN runs; every number in that
+# withdrawal is checked against the population record and the deterministic re-base.
+fp = load("fusion_population")
+if fp:
+    _on = fp["fusion"]["k=800 causal"]["summary"]
+    _tr = fp["fusion"]["k=800 s_kg"]["summary"]
+    chk("withdrawal: online k800 runs gaining (pre-flag)", "fusion_population",
+        "%d of the %d" % (_on["pre_flag"]["runs_positive"], _on["pre_flag"]["n_cnn_runs"]), "{}")
+    chk("withdrawal: online k800 runs gaining (deterministic)", "fusion_population",
+        "%d of the %d" % (_on["deterministic"]["runs_positive"], _on["deterministic"]["n_cnn_runs"]), "{}")
+    chk("withdrawal: reference three, online", "fusion_population",
+        _on["pre_flag"]["reference_three_mean"], "+{:.4f}")
+    chk("withdrawal: other eight, online", "fusion_population",
+        _on["pre_flag"]["other_eight_mean"], "{:.4f}")
+    chk("withdrawal: transductive runs gaining", "fusion_population",
+        "%d of %d" % (_tr["pre_flag"]["runs_positive"], _tr["pre_flag"]["n_cnn_runs"]), "{}")
+    chk("withdrawal: other eight, transductive", "fusion_population",
+        _tr["pre_flag"]["other_eight_mean"], "{:.4f}")
+    chk("withdrawal: XSS rank vs gain, online", "fusion_population",
+        _on["pre_flag"]["xss_rank_vs_delta_spearman"], "+{:.2f}")
+    _xr = [fp["cnn"][t]["xss_median_rank"] for t in fp["populations"]["pre_flag"]]
+    chk("withdrawal: XSS rank range", "fusion_population",
+        "%.2f to %.2f" % (min(_xr), max(_xr)), "{}")
+    chk("withdrawal: reference runs' XSS ranks", "fusion_population",
+        "%.2f, %.2f and %.2f" % tuple(fp["cnn"][t]["xss_median_rank"]
+                                     for t in ("cnn_paper", "cnn_paper_s43", "cnn_paper_s44")), "{}")
+else:
+    unbacked("KG fusion withdrawal", "fusion_population.json missing")
+rb = load("rebase_deterministic")
+if rb:
+    chk("re-base: deterministic CNN macro", "rebase_deterministic",
+        rb["cnn_alone"]["new_mean"], "{:.4f}")
+    chk("re-base: online k800 fusion vs det CNN", "rebase_deterministic",
+        rb["fusion"]["CNN + KG k=800 (causal)"]["new_vs_new_cnn"]["mean_delta"], "{:.4f}",
+        quoted=True)
+obd = load("operational_best_c4_log1p")
+if obd:
+    _r = lambda c: 100 * obd["configs"][c]["recall_at_fpr"]["ALL unknown flows"]["0.010"]["mean"]  # noqa: E731
+    chk("re-base: det CNN unknown recall @1% FPR", "operational_best_c4_log1p",
+        _r("CNN alone"), "{:.1f} %")
+    chk("re-base: det CNN + online KG unknown recall @1% FPR", "operational_best_c4_log1p",
+        _r("CNN + KG k=800 (causal)"), "{:.1f} %")
 unbacked("Tier A/B per-method figures", "baselines_classic.json / deep_zoo.json - not itemised here yet")
 unbacked("double dissociation SD multiples (40 / 37 / 3.9)", "derived in STATUS from AE + CNN runs")
 # CLOSED 2026-09-12. This was unbacked for two days -- the note used to point
