@@ -316,8 +316,9 @@ configuration**, not a claim about attention.
 
 **(d) The base paper's own metric set.** Evaluated on Bizzarri et al.'s five views, we exceed their
 reported 1D CNN by 18.8 and 28.7 pp on the two multi-class known-class views and by 0.4 and 7.1 pp on
-the two binary ones, where both input modalities are already near saturation, and **reproduce their 1D CNN's zero-day
-accuracy almost exactly — 47.85 % against 48.34 %.** What we cannot reproduce is their Hybrid-LTN's
+the two binary ones, where both input modalities are already near saturation, and ~~**reproduce their 1D CNN's zero-day
+accuracy almost exactly — 47.85 % against 48.34 %.**~~ score 47.85 % against their 48.34 % on zero-day
+accuracy. *(Corrected 2026-09-18, itinerary 6.5: the agreement does not survive population matching. On the corrected-label release with the attempted, payload-less flows excluded — the closest analogue of their filtering — our CNN's view 5 is **0.69 %** (0.82 / 0.82 / 0.41 %), with 99 % of Web BF classified benign; our 47.85 % came from failed connection attempts. `split_variants.py`.)* What we cannot reproduce is their Hybrid-LTN's
 **+12 pp symbolic gain**, and that is now tested against a matched control: their loss (CE + SAT, ω = 1)
 against the same loss with the SAT term off (ω = 0), otherwise identical, three deterministic seeds each.
 The SAT term moves zero-day accuracy by **+0.55 pp** (+0.60, −0.84 and +1.89 on the three seeds) where
@@ -1049,8 +1050,9 @@ hybrid cross-entropy plus satisfiability loss, reporting improved unknown-attack
 vanilla CNN on CIC-IDS2017. That paper is our starting point, and a recent survey by the same group
 [9] places it in a fast-growing literature.
 
-🔴 **We reproduce their CNN and cannot reproduce their symbolic gain.** On their own metric our
-figures are 47.85 % against their 48.34 % for the 1D CNN — close agreement — while a matched
+🔴 **~~We reproduce their CNN and~~ We cannot reproduce their symbolic gain.** On their own metric our
+figures are 47.85 % against their 48.34 % for the 1D CNN ~~— close agreement —~~ *(an agreement that
+vanishes under population matching: 0.69 % on the attempted-excluded release, §3d)*, while a matched
 control shows their SAT term moving zero-day accuracy by +0.55 pp where they report +12.13 (§3d). We report this
 as a comparison **in form, not head-to-head**: the modality differs (flow features versus payload
 bytes), the zero-day membership differs by a swap, the class sizes differ, and they delete duplicate and

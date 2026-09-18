@@ -169,8 +169,8 @@ statement about attention models in general.
 **(d) The base paper's metrics.** On the five views used by Bizzarri et al. [8], our scores exceed their
 reported 1D CNN by 18.8 and 28.7 percentage points on the two multi-class known-class views, and by
 0.4 and 7.1 points on the two binary views, where known-class detection is already near saturation for
-both input modalities. On zero-day accuracy we
-reproduce their 1D CNN closely, with 47.85 % against 48.34 %. We do not reproduce the gain they report
+both input modalities. On zero-day accuracy our CNN scores 47.85 % against their 48.34 %, an agreement
+that does not survive population matching (below). We do not reproduce the gain they report
 for their hybrid LTN model. We trained their loss (cross-entropy plus the satisfiability term at
 ω = 1) and a matched control with the term switched off (ω = 0), identical in every other respect,
 with three deterministic seeds each. The satisfiability term changes zero-day accuracy by +0.55
@@ -181,7 +181,12 @@ and so could not isolate the term; the matched control replaces it. The comparis
 modality differs (flow features instead of payload bytes), the zero-day sets differ by one swap (they
 hold out PortScan and train on Infiltration, and we do the reverse), and the class sizes differ. They
 also equalise every known attack class and delete duplicate and payload-less records, and we do neither,
-so the agreement at 47.85 % and 48.34 % is between two differently filtered populations. Keeping
+so the agreement at 47.85 % and 48.34 % is between two differently filtered populations. We tested
+this directly. On the corrected-label release with the attempted, payload-less flows removed, which is
+the closest analogue of their filtering, our CNN's view-5 accuracy is 0.69 % (0.82, 0.82 and 0.41 %
+over three seeds), and 99 % of the remaining Web Brute Force flows are classified as benign. Our
+47.85 % came from failed connection attempts labelled as attacks, so the two figures agree by
+coincidence rather than because the models behave alike. Keeping
 the model fixed and changing only the family mix moves their headline from 48.32 % to 44.38 %, so the
 composition of the zero-day set accounts for roughly 4 of the 12 missing points.
 
@@ -847,8 +852,8 @@ combined cross-entropy and satisfiability loss, and report better accuracy on un
 standard CNN on CIC-IDS2017. That paper was our starting point, and a later survey by the same group [9]
 situates it in a growing literature.
 
-We reproduced their CNN but not their symbolic gain. On their metric we obtain 47.85 % against their
-48.34 % for the 1D CNN. Against a matched control that differs only in the satisfiability term, their
+We matched their CNN's headline figure, 47.85 % against their 48.34 %, only on an unfiltered population;
+filtered as they filter, ours is 0.69 % (Appendix B). We did not reproduce their symbolic gain. Against a matched control that differs only in the satisfiability term, their
 hybrid loss changes zero-day accuracy by +0.55 percentage points, not consistently in direction, where
 they report +12.13 (Appendix B). The comparison is approximate: the modality differs (flow features instead of payload
 bytes), the zero-day sets differ by one swap, class sizes differ, and they delete duplicate and
