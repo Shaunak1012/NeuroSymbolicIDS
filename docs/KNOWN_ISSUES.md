@@ -8,6 +8,14 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🔴 2026-09-18 — "We reproduce the base paper's CNN" withdrawn (6.5, FD-02)
+
+### [FIXED 2026-09-18] 🔴 The 47.85 % / 48.34 % agreement was a population coincidence
+
+Measured on the attempted-excluded corrected-label release (the analogue of their payload filtering), our
+CNN's view-5 zero-day accuracy is **0.69 %** (0.82 / 0.82 / 0.41 %), not 47.85 %. The paper no longer says
+we reproduce their CNN; it says the figures agree only on an unfiltered population.
+
 ## ✅ 2026-09-18 — The base paper's class balancing is measured (5.4, FD-01)
 
 ### [MEASURED 2026-09-18] 🟡 We do not equalise the known attack classes (FD-01)

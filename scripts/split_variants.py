@@ -58,6 +58,12 @@ SPLITS = {
                  "integrity": "split_integrity_paper_balanced"},
     "subsampled": {"subdir": "paper_subsampled", "cnn": "cnn_subsampled_s%d",
                    "ae": "ae_subsampled_s%d", "integrity": "split_integrity_paper_subsampled"},
+    # Itinerary 6.5 (FD-02, 2026-09-18): the corrected-label release with the
+    # "Attempted" flows excluded -- the closest analogue of the base paper's
+    # payload-filtered population. CNN runs trained on it on 2026-09-13
+    # (deterministic); no autoencoder on this variant.
+    "improved_exclude": {"subdir": "paper_improved_exclude", "cnn": "cnn_fixed_exclude_s%d",
+                         "ae": "ae_fixed_exclude_s%d", "integrity": "split_integrity_paper_improved_exclude"},
 }
 # random vs grouped vs chronological are different SPLITS (different test sets);
 # balanced and subsampled change only TRAINING (same test set as random).

@@ -2,6 +2,13 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-18 (Itinerary 6.5 — the base-paper agreement does not survive population matching)
+
+`split_variants.py` adds the corrected-label release with the attempted flows excluded (deterministic CNN
+runs from 2026-09-13). Its view-5 zero-day accuracy is **0.69 %** (0.82 / 0.82 / 0.41 %) against 47.56 % on
+our split and the base paper's 48.34 %: our 47.85 % came from failed connection attempts, and "we reproduce
+their CNN" is withdrawn from the paper (struck in place in the master draft; guarded by `verify_draft.py`).
+
 ## 2026-09-18 (Itinerary 6.4 — a bounded, pre-registered evasion test)
 
 `evasion.py` (committed with predictions V1–V3 before its first run): payload padding, time dilation and

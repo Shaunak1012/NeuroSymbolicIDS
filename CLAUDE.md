@@ -149,8 +149,8 @@ Do not restate it here — that is exactly what kept rotting.
 4. **Next, and ask the author before starting each:** ~~itinerary 5.4 (base-paper class balancing)~~
    ✅ done 2026-09-18 (balanced 0.4699 vs size-matched 0.2118 vs ours 0.6299 — STATUS), ~~6.4 (evasion
    experiment)~~ ✅ done 2026-09-18 (jitter evades the CNN, −0.068; every perturbation *raises* the AE and
-   forest — STATUS), 6.5 (view 5 on the relabelled data), **then** 4.4 (Mahalanobis on the
-   deterministic CNN).
+   forest — STATUS), ~~6.5 (view 5 on the relabelled data)~~ ✅ done 2026-09-18 (**0.69 %** — "we
+   reproduce their CNN" withdrawn), **then** 4.4 (Mahalanobis on the deterministic CNN).
 
 ~~**Next action (resume here — as of end of 2026-09-16):**~~ *(superseded 2026-09-17)* read STATUS → "AUDIT + REMEDIATION" and
 `REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).

@@ -1187,6 +1187,8 @@ inside one minute). *(2026-09-18, itinerary 5.4 / FD-01)* two more: `balanced` c
 has as many flows as the smallest (the base paper's rule: their 31,843 is their smallest class), benign
 matched to the attack total; `subsampled` is its control, the same sizes with the natural class mix. Both
 keep the **canonical test set byte-identical**, so they compare with `random` directly and pair by seed.
+*(6.5, 2026-09-18)* `split_variants.py` also includes `improved_exclude`, the corrected-label release with
+the attempted flows removed (CNN runs `cnn_fixed_exclude_s*`, no autoencoder).
 `split_variants.py` now also reports the base paper's views (known multi-class and balanced accuracy,
 known binary accuracy, view 5, false-alarm rate) from each run's own model and scaler.
 A variant **must** set `PAPER_SUBDIR`; overwriting the canonical split is refused.

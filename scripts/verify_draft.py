@@ -811,7 +811,7 @@ if _sv and all("per_seed" in _sv["splits"][k]["models"].get(m, {})
     for _k, _lab in (("grouped", "grouped"), ("chronological", "chronological")):
         chk("%s split: AE advantage on Bot" % _lab, "split_variants",
             -_sv["splits"][_k]["double_dissociation"]["Bot"]["cnn_minus_ae_mean"], "{:.3f}")
-    _dd_ok = all(v["direction_consistent"] for r in _sv["splits"].values()
+    _dd_ok = all(v["direction_consistent"] for r in (_sv["splits"][k] for k in ("random", "grouped", "chronological"))
                  for v in r["double_dissociation"].values())
     chk("double dissociation direction on every split and seed", "split_variants",
         "every seed of all three splits" if _dd_ok else "NOT consistent", "{}", ws=True)
@@ -867,6 +867,19 @@ if _ev:
         alt=("falsified for the forest",), ws=True)
 else:
     unbacked("evasion test (6.4)", "evasion.json missing")
+# 6.5 (2026-09-18): view 5 on the attempted-excluded corrected-label release.
+if _sv and "per_seed" in _sv["splits"].get("improved_exclude", {}).get("models", {}).get("cnn", {}):
+    _ie = _sv["splits"]["improved_exclude"]["models"]["cnn"]
+    chk("view 5 on the attempted-excluded release", "split_variants",
+        _ie["views_mean"]["view5_zero_day_acc"], "{:.2f} %")
+    _v = [q["absorption"]["_views"]["view5_zero_day_acc"] for q in _ie["per_seed"]]
+    chk("view 5 per seed on that release", "split_variants",
+        "%.2f, %.2f and %.2f %%" % tuple(_v), "{}",
+        alt=("%.2f / %.2f / %.2f %%" % tuple(_v),))
+    _wb = min(q["absorption"]["Web Attack Brute Force"]["frac_BENIGN"] for q in _ie["per_seed"])
+    chk("Web BF classified benign on that release", "split_variants", 100 * _wb, "{:.0f} %")
+else:
+    unbacked("view 5 on the relabelled release (6.5)", "split_variants.json has no improved_exclude runs")
 _si = load("split_integrity")
 if _si:
     chk("split: benign under-sampling factor", "split_integrity",
@@ -924,6 +937,9 @@ STALE = [
      "same retracted claim, abstract wording"),
     (r"(Random\s*Forest|random\s+forest)\s+(shows\s+the\s+same\s+pattern|behaves\s+(identically|the\s+same\s+way))",
      "only the untuned forest does; the tuned forest gives +0.923"),
+    # 6.5 (2026-09-18): the 47.85 / 48.34 agreement is a population coincidence.
+    (r"[Ww]e\s+reproduce(d)?\s+(their|its)\s+(1D\s+)?CNN",
+     "the agreement does not survive population matching (0.69 % on the attempted-excluded release)"),
     # E4 failed (2026-09-17): overlap does not decide which models reach Bot.
     (r"[Rr]eachability\s+(follows|tracks)\s+overlap",
      "overlap is an account of the CNN's failure; the pre-registered forest test (E4) failed"),
