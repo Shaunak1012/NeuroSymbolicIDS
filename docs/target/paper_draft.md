@@ -332,6 +332,22 @@ populations, not a replication. Holding the model fixed and changing only
 the family mix moves their headline from 48.32 % to 44.38 %, so **composition explains roughly 4 pp of
 the missing 12** — it is not explained away, but we say what is controlled.
 
+**Their class balancing (itinerary 5.4, 2026-09-18; `SPLIT_MODE=balanced` / `subsampled`,
+`split_variants.py`).** Our CNN under their rule — every known attack class cut to the smallest
+(**4,399** training flows each; their 31,843 is *their* smallest class), benign matched to the attack
+total, **our test set unchanged**, three deterministic seeds:
+
+| training set | flows | macro | Web BF | XSS | view 5 | web flows → BENIGN |
+|---|---:|---:|---:|---:|---:|---:|
+| ours (natural mix) | 883,796 | 0.6299 | 0.9147 | 0.9430 | 47.56 % | 5–10 % |
+| **balanced (their rule)** | 70,384 | **0.4699** | 0.7329 | 0.6364 | 45.10 % | 4–20 % |
+| same size, natural mix | 70,384 | 0.2118 | 0.3649 | 0.2122 | 3.01 % | **90–100 %** |
+
+At equal size **balancing helps on every seed** — because with the natural mix the slow-rate DoS classes
+keep only **350 / 369** training flows and the web attacks fall to BENIGN instead of being absorbed into
+them. The drop from 0.63 is the smaller training set. **Balancing does not explain their view-5 number**
+(45.10 % vs 47.56 % ours vs their 48.34 %).
+
 ### §3b Four problems in their evaluation, checked against their own figures
 
 We transcribed their Table I, Table II and the confusion matrices of their Figure 3 and checked them
