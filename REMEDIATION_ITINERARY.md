@@ -248,7 +248,7 @@ STAGE 0  decisions      [x] D1  [x] D2  [x] D3  [x] D4  [x] D5
 STAGE 1  no compute     [x] 1.1 [x] 1.2 [x] 1.3 [x] 1.4 [x] 1.5 [x] 1.6 [x] 1.7 [x] 1.8 [x] 1.9
 STAGE 2  write-up       [x] 2.1 [x] 2.2 [x] 2.3 [x] 2.4 [x] 2.5 [x] 2.6 [x] 2.7 [x] 2.8 [x] 2.9
 STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
-STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
+STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [x] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
                         [x] 4.10 [x] 4.11
 STAGE 5  protocol (D4)  [x] 5.1 [x] 5.2 [-] 5.3 [x] 5.4
 STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [x] 6.4 [x] 6.5
@@ -351,3 +351,20 @@ declared-external ones. The paper, CLAUDE.md and `scripts_reference.md` no longe
 end to end".
 
 **Not done.** 4.4: Mahalanobis on the deterministic CNN. 5.4, 6.4, 6.5 (optional). 8.1 waits on D3.
+
+**Update, 2026-09-18 — 4.4 closed.** Each downstream item, and where it now stands on the deterministic
+population:
+
+| item | status |
+|---|---|
+| `novelty.py` | ✅ `NOVELTY_CNN=c4_log1p_s<seed>`: MSP 0.5865, Mahalanobis 0.4127 (pre-flag 0.5884 / 0.3777); Bot lift still spreads across seeds (1.9–4.3×) |
+| `kg.py` | ✅ needs no re-derivation: it clusters raw features, not the CNN; reproduced byte for byte end to end |
+| `fusion_kg.py` | ✅ `rebase_deterministic.py`, `fusion_population.py`; the hard-coded 0.6399 now computed from the fused inputs |
+| `ksweep_fusion.py` | ✅ `ksweep_heldout.py` with `CNN_CHANNEL` on the deterministic CNN (2026-09-16) |
+| `significance.py`, `ablation.py`, `fitted_fusion.py` | ✅ deterministic records in `run_all_sandbox2/`; the axiom effect in `ablation_population.py` |
+| `operational.py` | ⚪ by design pinned to the 11-run pre-flag ensemble it describes; deterministic counterpart `operational_best_c4_log1p.json` |
+| `operational_best.py`, `paper_metrics.py` | ✅ `CHANNEL` and `rebase_deterministic.py` views (2026-09-16); `split_variants.py` views |
+| `field_gap.py` | ⚪ by design pinned to its recorded method population (a cross-method figure, not a CNN-anchored one) |
+| `paper_figures.py` | ✅ Figure 2 rebuilt from all 17 CNN runs; the others read population-labelled records |
+
+**The itinerary is complete** except the pre-flag / deterministic split that is deliberate and labelled.
