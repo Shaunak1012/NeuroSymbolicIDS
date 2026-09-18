@@ -82,7 +82,7 @@ Final Alert ◄─────────────────────�
   • KG Explanation (Reasoning Path)
 ```
 
-> **Note on input modality:** The diagram shows raw PCAP ingestion and payload normalization. The current and near-term implementation uses **CIC-IDS2017 flow-feature CSVs** (70 numeric statistics per flow) as an abstraction over packet extraction. The PCAP boxes represent the conceptual origin of the data; payload-level processing is a possible future extension. See [behaviour_abstraction.md](behaviour_abstraction.md) for the consequences of this choice.
+> **Note on input modality:** The diagram shows raw PCAP ingestion and payload normalization. The current and near-term implementation uses **CIC-IDS2017 flow-feature CSVs** (~~70~~ **68** numeric statistics per flow — corrected 2026-09-16, audit F-18) as an abstraction over packet extraction. The PCAP boxes represent the conceptual origin of the data; payload-level processing is a possible future extension. See [behaviour_abstraction.md](behaviour_abstraction.md) for the consequences of this choice.
 
 ## Three Pillars of the System
 

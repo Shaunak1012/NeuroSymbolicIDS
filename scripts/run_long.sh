@@ -66,6 +66,10 @@ esac
 #
 # nohup detaches from the terminal (ignores SIGHUP); disown removes the job from
 # the shell's table so teardown does not signal it.
+# PYTHONHASHSEED is read once, at interpreter start-up, so it has to be set HERE;
+# determinism.enable() setting it from inside Python reaches only subprocesses
+# (audit F-19, 2026-09-16). A caller's own value wins.
+export PYTHONHASHSEED="${PYTHONHASHSEED:-0}"
 PYTHONIOENCODING=utf-8 nohup "${RUNNER[@]}" "$@" >"$LOG" 2>&1 &
 PID=$!
 disown "$PID" 2>/dev/null || true

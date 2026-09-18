@@ -847,7 +847,8 @@ model trained on payload bytes learns whatever *payload* features separate those
 a novel class is again reachable only through overlap — **the failure relocates, it does not dissolve.**
 
 ✅ **Corroborated by the base paper, which *is* the payload version.** Bizzarri et al. use 1500 payload
-bytes: we beat them **18–29 pp on all four known-class views** while their 1D CNN's zero-day number
+bytes: we beat them ~~**18–29 pp on all four known-class views**~~ *(wrong range — corrected
+2026-09-16, CL-01: +18.8 / +0.4 / +28.7 / +7.1 pp)* while their 1D CNN's zero-day number
 matches ours (**48.34 % vs 47.85 %**). Payload costs known-class performance and buys nothing on
 zero-day.
 
@@ -1288,7 +1289,8 @@ was verified to fire on the offending file *before* the file was fixed. **Same s
 models**, so the capstone had no readable comparison to its own base paper or to the field's 99 %+
 claims. Both metric systems now come out of the same runs.
 
-- ✅ **We beat the base paper by 18–29 pp on all four known-class views** (multi-class 15 classes:
+- ✅ ~~**We beat the base paper by 18–29 pp on all four known-class views**~~ *(wrong range —
+  corrected 2026-09-16, CL-01: +18.82 / +0.42 / +28.72 / +7.07 pp)* (multi-class 15 classes:
   **96.17 % vs 67.52 %**). ⚠️ **A modality advantage, not a method one** — engineered flow features
   are far more separable than raw payload bytes. Not an algorithmic win; do not write it as one.
 - 🔴 **We reproduce their 1D CNN's zero-day accuracy almost exactly (47.85 % vs 48.34 %) and cannot

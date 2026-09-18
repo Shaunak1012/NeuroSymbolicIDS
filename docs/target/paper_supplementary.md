@@ -106,7 +106,9 @@ both of these checks with every run, so the stronger claims are not reintroduced
 
 **(a) One model, two protocols.** If the model is held fixed and only the evaluation protocol changes,
 XGBoost goes from 0.9936 to 0.6372 and our CNN from 0.9928 to 0.6446. The difference of 0.3564 comes
-entirely from the question being asked.
+entirely from the question being asked. It is not an artefact of the 17.0 % of test rows that duplicate a
+training row: with those rows removed the published-metric values are 0.9884 for the CNN and 0.9901 for
+XGBoost, and the zero-day values do not change, because no zero-day row has a duplicate in training.
 
 **(b) Seven classical baselines.** All seven score 0.977–0.985 on the published metric, compared with
 0.9928 for the CNN, which is the range reported in the literature. Their zero-day scores run from 0.0374
@@ -129,16 +131,33 @@ epochs). The Transformer result comes from a single configuration with little tu
 statement about attention models in general.
 
 **(d) The base paper's metrics.** On the five views used by Bizzarri et al. [8], our scores exceed their
-reported figures by 18–29 percentage points on all four known-class views. On zero-day accuracy we
+reported 1D CNN by 18.8 and 28.7 percentage points on the two multi-class known-class views, and by
+0.4 and 7.1 points on the two binary views, where known-class detection is already near saturation for
+both input modalities. On zero-day accuracy we
 reproduce their 1D CNN closely, with 47.85 % against 48.34 %. We cannot reproduce the +12 percentage
 point gain they report for their hybrid LTN model. Our closest reproduction of that model scores
 47.24 %, which is no better than our CNN. The comparison is approximate rather than direct. The input
 modality differs (flow features instead of payload bytes), the zero-day sets differ by one swap (they
-hold out PortScan and train on Infiltration, and we do the reverse), and the class sizes differ. Keeping
+hold out PortScan and train on Infiltration, and we do the reverse), and the class sizes differ. They
+also equalise every known attack class and delete duplicate and payload-less records, and we do neither,
+so the agreement at 47.85 % and 48.34 % is between two differently filtered populations. Keeping
 the model fixed and changing only the family mix moves their headline from 48.32 % to 44.38 %, so the
 composition of the zero-day set accounts for roughly 4 of the 12 missing points.
 
-### Two defects in the base paper's zero-day metric
+### Problems in the base paper's evaluation
+
+We found four problems. Each can be checked against the base paper's own Table I, Table II and the
+confusion matrices in its Figure 3, which we transcribed and checked against one another.
+
+**The reported gain is a change of operating point.** Across the five evaluation views, the hybrid LTN
+model improves on the 1D CNN by +0.09, +0.15, +0.07 and +2.15 percentage points on the four views that
+contain benign traffic, and by +12.13 points on the one view that does not. The confusion matrices show
+why. On the nine known classes the hybrid model makes 452 false positives against the CNN's 380, and
+227 false negatives against 536. The satisfiability term penalises calling an attack benign, so it moves
+the decision boundary towards the attack class. That trade costs nothing on a view without benign rows
+and costs something on every other view. The paper reports no ROC-AUC, PR-AUC or precision-recall curve,
+so nothing in it separates a better ranking from a different threshold. This is the resolution problem
+of this appendix, visible in the base paper's own figures.
 
 **No false-positive term.** Their zero-day view contains only attack rows. Precision is therefore always
 1, accuracy equals recall, and F1 = 2A/(1+A). Using this formula we recover every published F1 value from
@@ -148,8 +167,26 @@ attack would score 100 % on both. This is not a hypothetical case: a float32 sat
 pipeline once produced exactly that behaviour, and we noticed it only because our metric includes benign
 traffic.
 
-**Size weighting.** The metric also mixes families in proportion to their size, which is the problem
-described in Appendix A.
+**Size weighting, and one connection.** The metric also mixes families in proportion to their size,
+which is the problem described in Appendix A. In the base paper the mixture is dominated by two
+families: Heartbleed is 42.2 % of the zero-day set and Web Brute Force 36.8 %, together 79.0 %. The base
+paper counts payload-bearing packets rather than flows, and its 13,486 Heartbleed packets come from the
+11 Heartbleed flows in CIC-IDS2017. All 11 share one 5-tuple and fall within 20 minutes, so they are a
+single connection, and the largest component of the reported zero-day score is one network event. The
+unit change works in the other direction for PortScan, which the base paper holds out: 0.52 % of
+PortScan flows survive its payload filter, leaving 830 packets, 2.6 % of the zero-day set. No count in
+the base paper's Table I is directly comparable to a flow count.
+
+**Internal inconsistencies.** The known-class confusion matrices contain 159,160 rows, exactly 35.0 % of
+the 454,744 examples in Table I, whereas the stated 80/10/10 split would give 45,474. Three cells of
+Table II disagree with the confusion matrices: the 1D CNN's F1 on the fifteen-class view (printed as
+90.88, identical to the accuracy beside it, where the matrix gives 92.27), and the zero-day accuracy of
+the multi-class LTN (56.06 against 56.02) and of the binary LTN (39.40 against 39.48). In each case the
+model's other printed metric agrees with the matrix, and the headline pair of 48.34 % and 60.47 %
+reproduces exactly. The text says that five attack classes were held out, where Table I lists six.
+Finally, all results come from a single run with no seeds or variance, so the differences of 0.07 to
+0.15 points on the known-class views cannot be separated from training noise; Appendix E shows how large
+that noise was in our own pipeline.
 
 ---
 
@@ -644,14 +681,18 @@ but below the maximum, as expected given that the maximum was never a typical ru
    the macro average combines one strong signal and one weak one that move in opposite directions.
    Regrouping the families changes the values by 0.11–0.15 but leaves every ordering we report unchanged.
 3. **Flow features rather than payload bytes.** This departs from the base paper's input modality, and our
-   advantage of 18–29 percentage points on the known-class views is a modality advantage rather than an
+   advantage on the known-class views (18.8 and 28.7 percentage points on the multi-class views, 0.4 and
+   7.1 on the binary ones) is a modality advantage rather than an
    algorithmic one. The oracle probe, however, separates every sufficiently large family from benign
    traffic using flow features alone (Bot 0.9988, Web Brute Force 0.9999, XSS 0.9984). The Bot gap is
    therefore a gap in closed-set supervision rather than in modality. The mechanism of Appendix C would
    move to a payload representation rather than disappear, since a closed-set model on payload bytes
    would select the payload features that separate the same nine classes. Using payloads would, however,
    likely replace the web families' absorption into `DoS slowloris` with real detection, which this study
-   cannot claim.
+   cannot claim. It would also open a leakage path that flow features do not have: in this largely
+   unencrypted 2017 capture, a model reading raw payload bytes can key on protocol strings and on the
+   attack tools' own request headers. The base paper reports no control for this, and we cannot test it
+   without payload data.
 4. **Scripted attack windows** inflate any growth-based or temporal result (Appendix D).
 5. **Behaviour predicates are approximations.** The predicate we call `HighEntropy` is the standard
    deviation of packet length, not the Shannon entropy of the payload, so reading it as an indicator of
@@ -661,7 +702,12 @@ but below the maximum, as expected given that the maximum was never a typical ru
    scoring error, and it is normal for a rank-based metric, but a streaming deployment could not compute
    it without a fixed reference distribution, which would be a different estimator. We have not measured
    that variant and make no claim about how it would perform.
-7. **No adversarial evaluation**, which we leave to future work.
+7. **No adversarial evaluation**, which we leave to future work. A flow-feature detector is exposed to
+   padding, rate shaping and timing jitter, all of which an attacker controls, and nothing here measures
+   them.
+8. **One reporting split.** Every experiment in this paper was reported on the same test split. The
+   selection-sensitive results were re-selected on one half of it and reported on the other (Appendix D),
+   but the split as a whole has been examined many times.
 
 ---
 
@@ -703,9 +749,10 @@ situates it in a growing literature.
 We reproduced their CNN but not their symbolic gain. On their metric we obtain 47.85 % against their
 48.34 % for the 1D CNN, while our closest reproduction of their hybrid model scores 47.24 %, no better than
 our CNN (Appendix B). The comparison is approximate: the modality differs (flow features instead of payload
-bytes), the zero-day sets differ by one swap, and class sizes differ, with composition explaining roughly
-4 of the 12 missing points. Appendix B also describes two arithmetic problems in the metric on which the
-gain is reported. Our own symbolic component did no better, having no effect alone and a harmful effect in
+bytes), the zero-day sets differ by one swap, class sizes differ, and they delete duplicate and
+payload-less records while we do not, with composition explaining roughly
+4 of the 12 missing points. Appendix B describes four problems with the evaluation on which the gain is
+reported, the most important being that the gain is confined to the one view without benign traffic. Our own symbolic component did no better, having no effect alone and a harmful effect in
 combination (Appendix D).
 
 The systems that do report gains [14]–[16] are discussed in §1 and §3 of the main paper. The axiom of Grov

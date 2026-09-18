@@ -1,5 +1,10 @@
 """
-preprocess_paper.py — Paper-aligned split (Bizzarri et al.), Phase 0.
+preprocess_paper.py — Paper-INSPIRED split (after Bizzarri et al., ICCCN 2024), Phase 0.
+
+Not a replication: the paper equalises every known attack class to 31,843, holds out
+PortScan (we train on it) and trains on Infiltration (we hold it out), deletes duplicate
+and payload-less records, and works on payload packets rather than flows. See the
+protocol comment in config.yaml and BASEPAPER_COMPARISON.md (FD-01, FD-02).
 
 Reuses the already-processed 68-feature matrices (features_train/test.csv) and their
 multiclass labels, then re-slices them into the PAPER protocol:

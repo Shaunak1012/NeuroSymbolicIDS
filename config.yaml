@@ -5,10 +5,19 @@
 seed: 42
 
 # ============================================================
-# PROTOCOL: paper-aligned split (Bizzarri et al.)
+# PROTOCOL: paper-INSPIRED split (after Bizzarri et al., ICCCN 2024)
 #   9 known classes (benign + 8 attacks) -> stratified 80/10/10 into train/val/test
 #   6 rare classes  -> zero-day, appended to TEST only (never trained)
 #   benign under-sampled to ~1:1 vs total known-attack count
+#
+# NOT A REPLICATION (audit FD-01/FD-02, 2026-09-16). Four differences from the paper:
+#   * they EQUALISE every known attack class to 31,843 (Table I); we keep natural
+#     proportions (DoS Hulk : DoS Slowhttptest = 41.8 : 1 in train)
+#   * their zero-day set holds out PortScan and trains on Infiltration; ours is the reverse
+#   * they DELETE duplicates and payload-less records; we keep both
+#   * they count payload-bearing PACKETS (1500 bytes each); we count FLOWS (68 features)
+#   Measured: neither the class balance nor the duplicates explains our known-class
+#   advantage over them (balanced accuracy moves it +18.82 -> +18.79 pp; dedup <= 0.71 pp).
 # ============================================================
 protocol:
   name: paper                 # "paper" (this split) | "temporal" (secondary hard-mode)

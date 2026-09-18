@@ -6,6 +6,8 @@
 > produce the **superseded** temporal-split artifacts; no reported result uses them.
 > The "Expected baseline: PR-AUC ~0.45–0.55" figure at Step 3 is a stale temporal-split
 > estimate — current numbers are in [STATUS.md](STATUS.md) and [README](../README.md#key-results).
+> Feature count below is also stale: it is **68**, not 70, so every `(N, 70, 1)` shape is
+> `(N, 68, 1)` (verified by `check.py` and `X_train.npy`, 2026-09-16 audit F-18).
 
 ## Prerequisites
 
