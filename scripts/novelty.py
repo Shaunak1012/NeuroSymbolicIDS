@@ -41,7 +41,15 @@ cfg = config.get()
 _DEFAULT_SEED = cfg["seed"]
 SEED = int(os.environ.get("NOVELTY_SEED", _DEFAULT_SEED))
 SFX = "" if SEED == _DEFAULT_SEED else f"_s{SEED}"   # artifact suffix, matches cnn_paper.py
-print(f"CONFIG: seed={SEED} artifact_suffix='{SFX}'")
+# NOVELTY_CNN (added 2026-09-18, itinerary 4.4) scores a named CNN run instead of
+# cnn_paper[_s<seed>] -- e.g. NOVELTY_CNN=c4_log1p_s42 for the deterministic
+# population. Outputs are tagged msp_<run> / mahalanobis_<run>; the default is
+# unchanged. The pre-flag and deterministic populations are never pooled.
+CNN_RUN = os.environ.get("NOVELTY_CNN", "")
+CNN_TAG = CNN_RUN or f"cnn_paper{SFX}"
+SCALER_SFX = f"_{CNN_RUN}" if CNN_RUN else SFX
+OUT_SFX = f"_{CNN_RUN}" if CNN_RUN else SFX
+print(f"CONFIG: seed={SEED} cnn={CNN_TAG} output_suffix='{OUT_SFX}'")
 PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
 yte_mc = np.load(os.path.join(PAPER, "y_test_mc.npy"), allow_pickle=True)
 ytr_mc = np.load(os.path.join(PAPER, "y_train_mc.npy"), allow_pickle=True)
@@ -49,9 +57,9 @@ zero_day = set(np.load(os.path.join(PAPER, "zero_day_classes.npy"), allow_pickle
 
 # ---- MSP: reload CNN, max softmax on test ----
 print("Loading CNN + computing MSP...")
-model = load_model(os.path.join(paths.MODELS, f"cnn_paper{SFX}_best.keras"), compile=False)
+model = load_model(os.path.join(paths.MODELS, f"{CNN_TAG}_best.keras"), compile=False)
 # re-derive the scaled (N,68,1) input from raw features + saved scaler + transform
-scaler = pickle.load(open(os.path.join(paths.MODELS, f"scaler_paper{SFX}.pkl"), "rb"))
+scaler = pickle.load(open(os.path.join(paths.MODELS, f"scaler_paper{SCALER_SFX}.pkl"), "rb"))
 TFM = cfg["protocol"]["feature_transform"]
 Xte_raw = np.load(os.path.join(PAPER, "X_test.npy"))
 Xte_in = scaler.transform(features.transform(Xte_raw, TFM)).reshape(-1, Xte_raw.shape[1], 1)
@@ -60,8 +68,8 @@ msp = 1.0 - prob.max(axis=1)          # high = novel
 
 # ---- Mahalanobis in embedding space ----
 print("Computing Mahalanobis (per-class Gaussians on embeddings)...")
-E_tr = np.load(os.path.join(paths.EMBEDDINGS, f"X_train_cnn_paper{SFX}_emb.npy"))
-E_te = np.load(os.path.join(paths.EMBEDDINGS, f"X_test_cnn_paper{SFX}_emb.npy"))
+E_tr = np.load(os.path.join(paths.EMBEDDINGS, f"X_train_{CNN_TAG}_emb.npy"))
+E_te = np.load(os.path.join(paths.EMBEDDINGS, f"X_test_{CNN_TAG}_emb.npy"))
 classes = np.unique(ytr_mc)
 means = np.stack([E_tr[ytr_mc == c].mean(0) for c in classes])
 # shared covariance (tied), regularised
@@ -73,11 +81,11 @@ maha = np.sqrt(np.clip(maha, 0, None))                        # high = novel
 
 # ---- evaluate + save ----
 for name, score in [("msp", msp), ("mahalanobis", maha)]:
-    tag = f"{name}{SFX}"
+    tag = f"{name}{OUT_SFX}"
     r = metrics.evaluate(yte_mc, score, zero_day, fpr=0.01)
     z = r["views"]["zeroday_only"]
     print(f"\n=== {tag} ===  zeroday PR-AUC={z['pr_auc']:.4f}  ROC={z['roc_auc']:.4f}")
     metrics.print_report(r)
-    tracking.log_run(tag, {"protocol": "paper", "seed": SEED}, metrics.flatten(r))
+    tracking.log_run(tag, {"protocol": "paper", "seed": SEED, "cnn": CNN_TAG}, metrics.flatten(r))
     np.save(os.path.join(paths.PREDICTIONS, f"y_prob_{tag}_test.npy"), score.astype(np.float32))
 print("\nDONE (novelty) — MSP + Mahalanobis saved as fusion channels")

@@ -95,7 +95,13 @@ def ev(seed_scores):
     return a.mean(0), a[:, 0].min(), a[:, 0].max()
 
 
-BASE = 0.6399  # CNN alone, n=3
+# CNN-alone baseline, computed from the CNN channel this script actually fuses.
+# FIXED 2026-09-18 (itinerary 4.4): it was the constant 0.6399, the pre-flag
+# n=3 mean, so a run on the deterministic CNN (run_all_sandbox2) reported every
+# delta against the wrong population. Rounded to 4 dp, which reproduces the
+# historical 0.6399 exactly for the pre-flag inputs (mean 0.63985).
+_cnn_mean, BASE_LO, BASE_HI = ev(ranks["cnn"])
+BASE = round(float(_cnn_mean[0]), 4)
 print("=" * 96)
 print("PARAMETER-FREE MULTI-CHANNEL RANK FUSION (equal weights — nothing is fitted)")
 print("=" * 96)
@@ -120,7 +126,7 @@ for name, chans in SUBSETS.items():
                       "fam_web_attack_brute_force_pr_auc": float(m[2]),
                       "fam_web_attack_xss_pr_auc": float(m[3])})
 print("-" * 96)
-print(f"{'CNN alone (baseline)':26s} {BASE:>8.4f} [0.6353, 0.6446] {0.0:>+10.4f}  | "
+print(f"{'CNN alone (baseline)':26s} {BASE:>8.4f} [{BASE_LO:.4f}, {BASE_HI:.4f}] {0.0:>+10.4f}  | "
       f"{0.0446:>7.4f} {0.9226:>7.4f} {0.9524:>7.4f}")
 
 best = max(RES.items(), key=lambda kv: kv[1]["macro"])

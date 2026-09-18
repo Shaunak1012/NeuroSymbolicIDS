@@ -212,6 +212,9 @@ only — **no TensorFlow**, so these run even when TF is unavailable.
 
 ## `scripts/novelty.py`
 
+> *(2026-09-18, itinerary 4.4)* `NOVELTY_CNN=<run>` (e.g. `c4_log1p_s42`) scores a named CNN run instead of
+> `cnn_paper[_s<seed>]`; outputs are `msp_<run>` / `mahalanobis_<run>`. Deterministic: MSP 0.5865, Mahalanobis 0.4127.
+
 **Purpose**: Free open-set / novelty channels from the already-trained CNN — post-hoc, no retraining.
 
 - **MSP** — `1 − max softmax` (Hendrycks & Gimpel 2017 baseline) → macro 0.6123

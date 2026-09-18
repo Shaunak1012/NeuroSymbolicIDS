@@ -2,6 +2,15 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-18 (Itinerary 4.4 — the last CNN-anchored channels re-derived; the itinerary is complete)
+
+`novelty.py` gains `NOVELTY_CNN`; on the deterministic CNN MSP is 0.5865 and Mahalanobis 0.4127 (pre-flag
+0.5884 / 0.3777), with Mahalanobis's Bot lift still spreading across seeds. `fusion_kg.py` and
+`fusion_multi.py` now compute their CNN baseline from the channel they fuse instead of the constant
+0.6399 (which mis-stated every delta in the deterministic end-to-end run); `fusion_kg.py` no longer
+prints the withdrawn "all 3 seeds improve". Canonical records re-run byte-identical. Every item of
+itinerary 4.4 is accounted for in §14.
+
 ## 2026-09-18 (Itinerary 6.5 — the base-paper agreement does not survive population matching)
 
 `split_variants.py` adds the corrected-label release with the attempted flows excluded (deterministic CNN
