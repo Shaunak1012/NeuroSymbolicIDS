@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (88 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, plus `tests/`).
+> Last verified against source: **2026-09-05** (89 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** · **`baselines_tuned`** · **`bot_mechanism_recheck`** · **`repro_compare`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** · **`baselines_tuned`** · **`bot_mechanism_recheck`** · **`repro_compare`** · **`evasion`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
@@ -1246,6 +1246,19 @@ identical, 2 float-level (random forest 4.4e-16, thresholds 2.4e-14), 0 differen
 ```bash
 python scripts/repro_compare.py outputs/sandbox_e2e2
 ```
+
+## `scripts/evasion.py`
+
+*(added 2026-09-18, itinerary 6.4 / F-16; pre-registered — predictions V1–V3 committed before the first
+run.)* A bounded, **non-adaptive** evasion test. Three perturbations of the attacker's own (forward)
+traffic — payload padding (32 / 256 B per data-carrying packet), time dilation (×2 / ×10), timing jitter
+(10 / 100 ms) — are applied to the zero-day test flows only, in feature space, with every derived
+CICFlowMeter feature recomputed (exact sums for the length statistics; delta-updates so a zero-strength
+perturbation reproduces the stored features exactly). Scored by the deterministic CNN (`c4_log1p_s*`),
+the deterministic autoencoder (`ae_det_s*`) and the refit tuned forest, seeds 42–44, no retraining; the
+script aborts unless every baseline reproduces its stored scores. **Result:** jitter lowers the CNN to
+0.5620 (every seed); Bot stays unreachable; every perturbation *raises* the autoencoder and the forest.
+**Writes** `evasion.json`.
 
 ## `scripts/audit_rebase.sh`
 

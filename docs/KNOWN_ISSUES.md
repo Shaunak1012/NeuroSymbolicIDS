@@ -165,7 +165,12 @@ depends on it because the symbolic arms had no positive effect. Stays open as a 
 `Capstone_final (4) (1).ipynb`: 70 features, the base paper's zero-day set, accuracy headline, all
 `execution_count` null, a Heartbleed rule "validated" on n=11. ~~Decision **D3**.~~
 
-### [OPEN 2026-09-16] 🟡 No adversarial evaluation (F-16); one reporting split (F-17)
+### [OPEN 2026-09-16, F-16 partly addressed 2026-09-18] 🟡 No adversarial evaluation (F-16); one reporting split (F-17)
+
+> 🟡 **F-16 partly addressed** (`evasion.py`, pre-registered): a bounded, non-adaptive test — timing jitter
+> lowers the CNN to 0.5620; padding, slow-down and jitter all *raise* the autoencoder and the tuned forest.
+> Still open: an adaptive (benign-mimicry) adversary, and packet-level rather than feature-level
+> perturbation.
 
 Both are now stated in the paper's limitations. No experiment has been run.
 

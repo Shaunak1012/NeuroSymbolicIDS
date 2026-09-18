@@ -147,9 +147,10 @@ Do not restate it here — that is exactly what kept rotting.
    (kept private, gitignored); D5 = push as five sequential PRs, each merged locally `--no-ff`.
    ~~whether the tuned forest's features overlap Bot's~~ answered (E4 failed).
 4. **Next, and ask the author before starting each:** ~~itinerary 5.4 (base-paper class balancing)~~
-   ✅ done 2026-09-18 (balanced 0.4699 vs size-matched 0.2118 vs ours 0.6299 — STATUS), 6.4 (evasion
-   experiment), 6.5 (view 5 on the relabelled data), **then** 4.4 (Mahalanobis on the deterministic
-   CNN).
+   ✅ done 2026-09-18 (balanced 0.4699 vs size-matched 0.2118 vs ours 0.6299 — STATUS), ~~6.4 (evasion
+   experiment)~~ ✅ done 2026-09-18 (jitter evades the CNN, −0.068; every perturbation *raises* the AE and
+   forest — STATUS), 6.5 (view 5 on the relabelled data), **then** 4.4 (Mahalanobis on the
+   deterministic CNN).
 
 ~~**Next action (resume here — as of end of 2026-09-16):**~~ *(superseded 2026-09-17)* read STATUS → "AUDIT + REMEDIATION" and
 `REMEDIATION_ITINERARY.md`. Work is on branch `fix/audit-remediation` (not pushed).
@@ -384,7 +385,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 88 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **17 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `split_variants.sh`, `ae_seeds.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 89 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **17 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `split_variants.sh`, `ae_seeds.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -397,7 +398,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 88 Python scripts + 17 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 89 Python scripts + 17 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline

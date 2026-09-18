@@ -251,7 +251,7 @@ STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
 STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 [x] 4.8 [x] 4.9
                         [x] 4.10 [x] 4.11
 STAGE 5  protocol (D4)  [x] 5.1 [x] 5.2 [-] 5.3 [x] 5.4
-STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
+STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [x] 6.4 [ ] 6.5
 STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [x] 7.4
 STAGE 8  hygiene        [x] 8.1 [x] 8.2
 ```
