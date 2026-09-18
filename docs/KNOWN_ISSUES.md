@@ -8,6 +8,16 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## ✅ 2026-09-18 — The base paper's class balancing is measured (5.4, FD-01)
+
+### [MEASURED 2026-09-18] 🟡 We do not equalise the known attack classes (FD-01)
+
+The base paper's rule (every known attack class cut to the smallest), applied to our training set with the
+test set unchanged: CNN macro **0.4699** vs 0.6299, against **0.2118** for a size-matched natural-mix
+control (worse on every seed). Balancing helps at equal size because it keeps the slow-rate DoS classes the
+web attacks are absorbed into; the loss relative to ours is training size. It does not explain their
+view-5 48.34 % (balanced 45.10 %). Stays a documented protocol difference; the paper reports all three.
+
 ## ✅ 2026-09-18 — The pipeline runs end to end (7.4)
 
 ### [FIXED 2026-09-18] 🟡 "`run_all.py` has never been executed end to end"
