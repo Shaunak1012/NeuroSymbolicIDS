@@ -1,0 +1,1497 @@
+{
+ "threat_model": "forward-traffic perturbations of zero-day test flows only; models not retrained",
+ "strengths": {
+  "pad": [
+   0,
+   32,
+   256
+  ],
+  "slow": [
+   1,
+   2,
+   10
+  ],
+  "jitter": [
+   0,
+   10000,
+   100000
+  ]
+ },
+ "results": {
+  "pad": {
+   "0": {
+    "cnn": {
+     "macro_mean": 0.6299033620767855,
+     "family_mean": {
+      "Bot": 0.03209076627651319,
+      "Web Attack Brute Force": 0.9146500122219768,
+      "Web Attack XSS": 0.9429693077318664
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.629768308212828,
+       "family": {
+        "Bot": 0.04825033825565475,
+        "Web Attack Brute Force": 0.9028072998737224,
+        "Web Attack XSS": 0.938247286509107
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6268946812643791,
+       "family": {
+        "Bot": 0.024126904884934446,
+        "Web Attack Brute Force": 0.9119929345618719,
+        "Web Attack XSS": 0.9445642043463308
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6330470967531493,
+       "family": {
+        "Bot": 0.023895055688950347,
+        "Web Attack Brute Force": 0.929149802230336,
+        "Web Attack XSS": 0.9460964323401614
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.09846173063501674,
+     "family_mean": {
+      "Bot": 0.13379321520242862,
+      "Web Attack Brute Force": 0.10541997988115452,
+      "Web Attack XSS": 0.056171996821467125
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.07586216368131869,
+       "family": {
+        "Bot": 0.10872041851856576,
+        "Web Attack Brute Force": 0.07922474272560556,
+        "Web Attack XSS": 0.03964132979978476
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.13138545814690392,
+       "family": {
+        "Bot": 0.17748803198273888,
+        "Web Attack Brute Force": 0.13924942640227717,
+        "Web Attack XSS": 0.07741891605569573
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.08813757007682767,
+       "family": {
+        "Bot": 0.11517119510598128,
+        "Web Attack Brute Force": 0.09778577051558085,
+        "Web Attack XSS": 0.05145574460892089
+       },
+       "recall_1pct": {
+        "Bot": 0.006134969325153374,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6407296615076913,
+     "family_mean": {
+      "Bot": 0.21959453250735686,
+      "Web Attack Brute Force": 0.8936951216723809,
+      "Web Attack XSS": 0.8088993303433365
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.635335058694214,
+       "family": {
+        "Bot": 0.1934953013753165,
+        "Web Attack Brute Force": 0.8980127273487769,
+        "Web Attack XSS": 0.8144971473585487
+       },
+       "recall_1pct": {
+        "Bot": 0.017382413087934562,
+        "Web Attack Brute Force": 0.9946914399469144,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6498782736750761,
+       "family": {
+        "Bot": 0.2545647346816118,
+        "Web Attack Brute Force": 0.8907401208009581,
+        "Web Attack XSS": 0.8043299655426583
+       },
+       "recall_1pct": {
+        "Bot": 0.3113496932515337,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9861963190184049
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.636975652153784,
+       "family": {
+        "Bot": 0.2107235614651423,
+        "Web Attack Brute Force": 0.8923325168674078,
+        "Web Attack XSS": 0.8078708781288023
+       },
+       "recall_1pct": {
+        "Bot": 0.29243353783231085,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9831288343558282
+       }
+      }
+     ]
+    }
+   },
+   "32": {
+    "cnn": {
+     "macro_mean": 0.630113991766701,
+     "family_mean": {
+      "Bot": 0.03306461306754794,
+      "Web Attack Brute Force": 0.914214761143886,
+      "Web Attack XSS": 0.9430626010886693
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6310207221450863,
+       "family": {
+        "Bot": 0.052503751512523636,
+        "Web Attack Brute Force": 0.9022734568464492,
+        "Web Attack XSS": 0.938284958076286
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6263166201140682,
+       "family": {
+        "Bot": 0.023023210270905654,
+        "Web Attack Brute Force": 0.9112270822505548,
+        "Web Attack XSS": 0.9446995678207442
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6330046330409488,
+       "family": {
+        "Bot": 0.02366687741921452,
+        "Web Attack Brute Force": 0.9291437443346539,
+        "Web Attack XSS": 0.946203277368978
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.160178491204278,
+     "family_mean": {
+      "Bot": 0.3189357988569565,
+      "Web Attack Brute Force": 0.10542939521215149,
+      "Web Attack XSS": 0.056170279543726026
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.13306236628462983,
+       "family": {
+        "Bot": 0.2803298455906118,
+        "Web Attack Brute Force": 0.07921804501533124,
+        "Web Attack XSS": 0.039639208247946395
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.21265215299816,
+       "family": {
+        "Bot": 0.42122099013211856,
+        "Web Attack Brute Force": 0.13932071528145623,
+        "Web Attack XSS": 0.07741475358090522
+       },
+       "recall_1pct": {
+        "Bot": 0.18200408997955012,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.13482095433004418,
+       "family": {
+        "Bot": 0.25525656084813914,
+        "Web Attack Brute Force": 0.09774942533966693,
+        "Web Attack XSS": 0.05145687680232647
+       },
+       "recall_1pct": {
+        "Bot": 0.006134969325153374,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6694602866256271,
+     "family_mean": {
+      "Bot": 0.30750857986633323,
+      "Web Attack Brute Force": 0.8920550228893612,
+      "Web Attack XSS": 0.8088172571211866
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6721536849622751,
+       "family": {
+        "Bot": 0.30579185708017176,
+        "Web Attack Brute Force": 0.8963257843008439,
+        "Web Attack XSS": 0.8143434135058094
+       },
+       "recall_1pct": {
+        "Bot": 0.37576687116564417,
+        "Web Attack Brute Force": 0.9834107498341075,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.688162950982003,
+       "family": {
+        "Bot": 0.3694058070358295,
+        "Web Attack Brute Force": 0.8908142520299028,
+        "Web Attack XSS": 0.8042687938802768
+       },
+       "recall_1pct": {
+        "Bot": 0.050102249488752554,
+        "Web Attack Brute Force": 1.0,
+        "Web Attack XSS": 0.9861963190184049
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.648064223932603,
+       "family": {
+        "Bot": 0.24732807548299846,
+        "Web Attack Brute Force": 0.889025032337337,
+        "Web Attack XSS": 0.8078395639774734
+       },
+       "recall_1pct": {
+        "Bot": 0.057770961145194276,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9831288343558282
+       }
+      }
+     ]
+    }
+   },
+   "256": {
+    "cnn": {
+     "macro_mean": 0.6291271724295996,
+     "family_mean": {
+      "Bot": 0.031110379223873084,
+      "Web Attack Brute Force": 0.9128311086488984,
+      "Web Attack XSS": 0.9434400294160277
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6275695392951018,
+       "family": {
+        "Bot": 0.04553998433587447,
+        "Web Attack Brute Force": 0.8987362430424161,
+        "Web Attack XSS": 0.9384323905070151
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6263529633372333,
+       "family": {
+        "Bot": 0.024128633632032048,
+        "Web Attack Brute Force": 0.9097009881623943,
+        "Web Attack XSS": 0.9452292682172735
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9044459190444591,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6334590146564639,
+       "family": {
+        "Bot": 0.023662519703712737,
+        "Web Attack Brute Force": 0.9300560947418846,
+        "Web Attack XSS": 0.9466584295237948
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.18183373955588522,
+     "family_mean": {
+      "Bot": 0.38360332840664646,
+      "Web Attack Brute Force": 0.1057318957970057,
+      "Web Attack XSS": 0.05616599446400355
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.1629814164527825,
+       "family": {
+        "Bot": 0.3698760087388765,
+        "Web Attack Brute Force": 0.07943225537900227,
+        "Web Attack XSS": 0.039635985240468664
+       },
+       "recall_1pct": {
+        "Bot": 0.3721881390593047,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.23253704037759573,
+       "family": {
+        "Bot": 0.4802182876888149,
+        "Web Attack Brute Force": 0.13999842508202004,
+        "Web Attack XSS": 0.07739440836195234
+       },
+       "recall_1pct": {
+        "Bot": 0.3721881390593047,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.14998276183727746,
+       "family": {
+        "Bot": 0.300715688792248,
+        "Web Attack Brute Force": 0.09776500692999479,
+        "Web Attack XSS": 0.051467589789589624
+       },
+       "recall_1pct": {
+        "Bot": 0.0081799591002045,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6831308242922466,
+     "family_mean": {
+      "Bot": 0.3517753252762262,
+      "Web Attack Brute Force": 0.8891804343442926,
+      "Web Attack XSS": 0.8084367132562208
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.7074623314025393,
+       "family": {
+        "Bot": 0.4146551465016428,
+        "Web Attack Brute Force": 0.8938356760113075,
+        "Web Attack XSS": 0.8138961716946677
+       },
+       "recall_1pct": {
+        "Bot": 0.37883435582822084,
+        "Web Attack Brute Force": 0.9635036496350365,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6413239260406719,
+       "family": {
+        "Bot": 0.23147845051439236,
+        "Web Attack Brute Force": 0.8886897865780155,
+        "Web Attack XSS": 0.8038035410296079
+       },
+       "recall_1pct": {
+        "Bot": 0.05368098159509203,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9846625766871165
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.7006062154335284,
+       "family": {
+        "Bot": 0.4091923788126435,
+        "Web Attack Brute Force": 0.8850158404435547,
+        "Web Attack XSS": 0.807610427044387
+       },
+       "recall_1pct": {
+        "Bot": 0.09202453987730061,
+        "Web Attack Brute Force": 0.960185799601858,
+        "Web Attack XSS": 0.9831288343558282
+       }
+      }
+     ]
+    }
+   }
+  },
+  "slow": {
+   "1": {
+    "cnn": {
+     "macro_mean": 0.6299033620767855,
+     "family_mean": {
+      "Bot": 0.03209076627651319,
+      "Web Attack Brute Force": 0.9146500122219768,
+      "Web Attack XSS": 0.9429693077318664
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.629768308212828,
+       "family": {
+        "Bot": 0.04825033825565475,
+        "Web Attack Brute Force": 0.9028072998737224,
+        "Web Attack XSS": 0.938247286509107
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6268946812643791,
+       "family": {
+        "Bot": 0.024126904884934446,
+        "Web Attack Brute Force": 0.9119929345618719,
+        "Web Attack XSS": 0.9445642043463308
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6330470967531493,
+       "family": {
+        "Bot": 0.023895055688950347,
+        "Web Attack Brute Force": 0.929149802230336,
+        "Web Attack XSS": 0.9460964323401614
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.09846173063501674,
+     "family_mean": {
+      "Bot": 0.13379321520242862,
+      "Web Attack Brute Force": 0.10541997988115452,
+      "Web Attack XSS": 0.056171996821467125
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.07586216368131869,
+       "family": {
+        "Bot": 0.10872041851856576,
+        "Web Attack Brute Force": 0.07922474272560556,
+        "Web Attack XSS": 0.03964132979978476
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.13138545814690392,
+       "family": {
+        "Bot": 0.17748803198273888,
+        "Web Attack Brute Force": 0.13924942640227717,
+        "Web Attack XSS": 0.07741891605569573
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.08813757007682767,
+       "family": {
+        "Bot": 0.11517119510598128,
+        "Web Attack Brute Force": 0.09778577051558085,
+        "Web Attack XSS": 0.05145574460892089
+       },
+       "recall_1pct": {
+        "Bot": 0.006134969325153374,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6407296527789598,
+     "family_mean": {
+      "Bot": 0.21959453250735686,
+      "Web Attack Brute Force": 0.8936950954861863,
+      "Web Attack XSS": 0.8088993303433365
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6353350325080195,
+       "family": {
+        "Bot": 0.1934953013753165,
+        "Web Attack Brute Force": 0.898012648790193,
+        "Web Attack XSS": 0.8144971473585487
+       },
+       "recall_1pct": {
+        "Bot": 0.017382413087934562,
+        "Web Attack Brute Force": 0.9946914399469144,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6498782736750761,
+       "family": {
+        "Bot": 0.2545647346816118,
+        "Web Attack Brute Force": 0.8907401208009581,
+        "Web Attack XSS": 0.8043299655426583
+       },
+       "recall_1pct": {
+        "Bot": 0.3113496932515337,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9861963190184049
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.636975652153784,
+       "family": {
+        "Bot": 0.2107235614651423,
+        "Web Attack Brute Force": 0.8923325168674078,
+        "Web Attack XSS": 0.8078708781288023
+       },
+       "recall_1pct": {
+        "Bot": 0.29243353783231085,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9831288343558282
+       }
+      }
+     ]
+    }
+   },
+   "2": {
+    "cnn": {
+     "macro_mean": 0.6297948230299474,
+     "family_mean": {
+      "Bot": 0.03315799878429694,
+      "Web Attack Brute Force": 0.9119471144550774,
+      "Web Attack XSS": 0.9442793558504681
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.62941120370084,
+       "family": {
+        "Bot": 0.04694154046570175,
+        "Web Attack Brute Force": 0.8998099513811069,
+        "Web Attack XSS": 0.9414821192557115
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6270483531387963,
+       "family": {
+        "Bot": 0.02504729239213969,
+        "Web Attack Brute Force": 0.9111192760800859,
+        "Web Attack XSS": 0.9449784909441632
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.632924912250206,
+       "family": {
+        "Bot": 0.027485163495049383,
+        "Web Attack Brute Force": 0.9249121159040393,
+        "Web Attack XSS": 0.9463774573515293
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.11620175124126442,
+     "family_mean": {
+      "Bot": 0.14204257020885572,
+      "Web Attack Brute Force": 0.13342203302809538,
+      "Web Attack XSS": 0.07314065048684217
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.08592788226965119,
+       "family": {
+        "Bot": 0.11696063602280607,
+        "Web Attack Brute Force": 0.093798747947647,
+        "Web Attack XSS": 0.047024262838500495
+       },
+       "recall_1pct": {
+        "Bot": 0.0015337423312883436,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.15968666793208927,
+       "family": {
+        "Bot": 0.1883199876067828,
+        "Web Attack Brute Force": 0.184267749242221,
+        "Web Attack XSS": 0.10647226694726399
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.10299070352205282,
+       "family": {
+        "Bot": 0.12084708699697834,
+        "Web Attack Brute Force": 0.12219960189441811,
+        "Web Attack XSS": 0.06592542167476204
+       },
+       "recall_1pct": {
+        "Bot": 0.006134969325153374,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6793124916322038,
+     "family_mean": {
+      "Bot": 0.35224270403425734,
+      "Web Attack Brute Force": 0.8870642188484146,
+      "Web Attack XSS": 0.7986305520139393
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6513120212025868,
+       "family": {
+        "Bot": 0.2846927511651578,
+        "Web Attack Brute Force": 0.8817090068755334,
+        "Web Attack XSS": 0.7875343055670693
+       },
+       "recall_1pct": {
+        "Bot": 0.315439672801636,
+        "Web Attack Brute Force": 0.9940278699402787,
+        "Web Attack XSS": 0.9800613496932515
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.692815514298989,
+       "family": {
+        "Bot": 0.40060841541321696,
+        "Web Attack Brute Force": 0.8806821334913583,
+        "Web Attack XSS": 0.7971559939923918
+       },
+       "recall_1pct": {
+        "Bot": 0.3287321063394683,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9969325153374233
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6938099393950354,
+       "family": {
+        "Bot": 0.37142694552439726,
+        "Web Attack Brute Force": 0.8988015161783521,
+        "Web Attack XSS": 0.8112013564823568
+       },
+       "recall_1pct": {
+        "Bot": 0.4166666666666667,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9831288343558282
+       }
+      }
+     ]
+    }
+   },
+   "10": {
+    "cnn": {
+     "macro_mean": 0.598166534386232,
+     "family_mean": {
+      "Bot": 0.035493458718624554,
+      "Web Attack Brute Force": 0.8722461409165293,
+      "Web Attack XSS": 0.8867600035235422
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6037012777727578,
+       "family": {
+        "Bot": 0.03915058311324845,
+        "Web Attack Brute Force": 0.8691334325852687,
+        "Web Attack XSS": 0.9028198176197566
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.8898473788984738,
+        "Web Attack XSS": 0.950920245398773
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.5637068797504573,
+       "family": {
+        "Bot": 0.027833215158395836,
+        "Web Attack Brute Force": 0.8383919512628647,
+        "Web Attack XSS": 0.8248954728301114
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9044459190444591,
+        "Web Attack XSS": 0.9555214723926381
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6270914456354809,
+       "family": {
+        "Bot": 0.03949657788422937,
+        "Web Attack Brute Force": 0.9092130389014546,
+        "Web Attack XSS": 0.9325647201207587
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9044459190444591,
+        "Web Attack XSS": 0.9570552147239264
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.22088707589592393,
+     "family_mean": {
+      "Bot": 0.2046273418516725,
+      "Web Attack Brute Force": 0.28094741206137885,
+      "Web Attack XSS": 0.17708647377472045
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.20405398738358058,
+       "family": {
+        "Bot": 0.2032990680534842,
+        "Web Attack Brute Force": 0.2555837694290513,
+        "Web Attack XSS": 0.15327912466820623
+       },
+       "recall_1pct": {
+        "Bot": 0.13548057259713703,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.2724745593780951,
+       "family": {
+        "Bot": 0.2589260882662073,
+        "Web Attack Brute Force": 0.335186290528777,
+        "Web Attack XSS": 0.22331129933930102
+       },
+       "recall_1pct": {
+        "Bot": 0.004601226993865031,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.18613268092609617,
+       "family": {
+        "Bot": 0.15165686923532606,
+        "Web Attack Brute Force": 0.25207217622630834,
+        "Web Attack XSS": 0.1546689973166541
+       },
+       "recall_1pct": {
+        "Bot": 0.011247443762781187,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.7174038397202445,
+     "family_mean": {
+      "Bot": 0.4302234985158768,
+      "Web Attack Brute Force": 0.9023353401575003,
+      "Web Attack XSS": 0.8196526804873567
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.7184786544788548,
+       "family": {
+        "Bot": 0.4297457114142026,
+        "Web Attack Brute Force": 0.9054839403540064,
+        "Web Attack XSS": 0.8202063116683556
+       },
+       "recall_1pct": {
+        "Bot": 0.5884458077709611,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9570552147239264
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.721665635309864,
+       "family": {
+        "Bot": 0.4207879649237444,
+        "Web Attack Brute Force": 0.9083125217630778,
+        "Web Attack XSS": 0.8358964192427701
+       },
+       "recall_1pct": {
+        "Bot": 0.58640081799591,
+        "Web Attack Brute Force": 1.0,
+        "Web Attack XSS": 0.9815950920245399
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.7120672293720146,
+       "family": {
+        "Bot": 0.4401368192096834,
+        "Web Attack Brute Force": 0.8932095583554165,
+        "Web Attack XSS": 0.8028553105509444
+       },
+       "recall_1pct": {
+        "Bot": 0.5996932515337423,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9769938650306749
+       }
+      }
+     ]
+    }
+   }
+  },
+  "jitter": {
+   "0": {
+    "cnn": {
+     "macro_mean": 0.6299033620767855,
+     "family_mean": {
+      "Bot": 0.03209076627651319,
+      "Web Attack Brute Force": 0.9146500122219768,
+      "Web Attack XSS": 0.9429693077318664
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.629768308212828,
+       "family": {
+        "Bot": 0.04825033825565475,
+        "Web Attack Brute Force": 0.9028072998737224,
+        "Web Attack XSS": 0.938247286509107
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6268946812643791,
+       "family": {
+        "Bot": 0.024126904884934446,
+        "Web Attack Brute Force": 0.9119929345618719,
+        "Web Attack XSS": 0.9445642043463308
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6330470967531493,
+       "family": {
+        "Bot": 0.023895055688950347,
+        "Web Attack Brute Force": 0.929149802230336,
+        "Web Attack XSS": 0.9460964323401614
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.09846173063501674,
+     "family_mean": {
+      "Bot": 0.13379321520242862,
+      "Web Attack Brute Force": 0.10541997988115452,
+      "Web Attack XSS": 0.056171996821467125
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.07586216368131869,
+       "family": {
+        "Bot": 0.10872041851856576,
+        "Web Attack Brute Force": 0.07922474272560556,
+        "Web Attack XSS": 0.03964132979978476
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.13138545814690392,
+       "family": {
+        "Bot": 0.17748803198273888,
+        "Web Attack Brute Force": 0.13924942640227717,
+        "Web Attack XSS": 0.07741891605569573
+       },
+       "recall_1pct": {
+        "Bot": 0.0010224948875255625,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.08813757007682767,
+       "family": {
+        "Bot": 0.11517119510598128,
+        "Web Attack Brute Force": 0.09778577051558085,
+        "Web Attack XSS": 0.05145574460892089
+       },
+       "recall_1pct": {
+        "Bot": 0.006134969325153374,
+        "Web Attack Brute Force": 0.0,
+        "Web Attack XSS": 0.0
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6407106096597128,
+     "family_mean": {
+      "Bot": 0.21959453250735686,
+      "Web Attack Brute Force": 0.8936856298529271,
+      "Web Attack XSS": 0.8088516666188545
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6353350325080195,
+       "family": {
+        "Bot": 0.1934953013753165,
+        "Web Attack Brute Force": 0.898012648790193,
+        "Web Attack XSS": 0.8144971473585487
+       },
+       "recall_1pct": {
+        "Bot": 0.017382413087934562,
+        "Web Attack Brute Force": 0.9946914399469144,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.649821144317335,
+       "family": {
+        "Bot": 0.2545647346816118,
+        "Web Attack Brute Force": 0.8907117239011806,
+        "Web Attack XSS": 0.8041869743692125
+       },
+       "recall_1pct": {
+        "Bot": 0.3113496932515337,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9861963190184049
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.636975652153784,
+       "family": {
+        "Bot": 0.2107235614651423,
+        "Web Attack Brute Force": 0.8923325168674078,
+        "Web Attack XSS": 0.8078708781288023
+       },
+       "recall_1pct": {
+        "Bot": 0.29243353783231085,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.9831288343558282
+       }
+      }
+     ]
+    }
+   },
+   "10000": {
+    "cnn": {
+     "macro_mean": 0.5620179896088057,
+     "family_mean": {
+      "Bot": 0.026780780617747246,
+      "Web Attack Brute Force": 0.8505801494963511,
+      "Web Attack XSS": 0.808693038712319
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.5791359911658831,
+       "family": {
+        "Bot": 0.03277346061932122,
+        "Web Attack Brute Force": 0.8592911215921232,
+        "Web Attack XSS": 0.8453433912862048
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.5340404461140836,
+       "family": {
+        "Bot": 0.025399881711902952,
+        "Web Attack Brute Force": 0.8321154468472248,
+        "Web Attack XSS": 0.7446060097831231
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.5728775315464506,
+       "family": {
+        "Bot": 0.02216899952201757,
+        "Web Attack Brute Force": 0.860333880049705,
+        "Web Attack XSS": 0.8361297150676292
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.4387488877048756,
+     "family_mean": {
+      "Bot": 0.41611083202436694,
+      "Web Attack Brute Force": 0.5123191413389622,
+      "Web Attack XSS": 0.3878166897512978
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.4047032306902832,
+       "family": {
+        "Bot": 0.39229980395164776,
+        "Web Attack Brute Force": 0.4748969376540631,
+        "Web Attack XSS": 0.3469129504651386
+       },
+       "recall_1pct": {
+        "Bot": 0.25408997955010226,
+        "Web Attack Brute Force": 0.8035832780358327,
+        "Web Attack XSS": 0.9248466257668712
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.4272927754336036,
+       "family": {
+        "Bot": 0.4504195019536468,
+        "Web Attack Brute Force": 0.4804236990839216,
+        "Web Attack XSS": 0.35103512526324254
+       },
+       "recall_1pct": {
+        "Bot": 0.25153374233128833,
+        "Web Attack Brute Force": 0.8042468480424685,
+        "Web Attack XSS": 0.9248466257668712
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.4842506569907401,
+       "family": {
+        "Bot": 0.40561319016780634,
+        "Web Attack Brute Force": 0.5816367872789017,
+        "Web Attack XSS": 0.46550199352551225
+       },
+       "recall_1pct": {
+        "Bot": 0.2561349693251534,
+        "Web Attack Brute Force": 0.8049104180491041,
+        "Web Attack XSS": 0.9263803680981595
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6649387082920274,
+     "family_mean": {
+      "Bot": 0.253746751123009,
+      "Web Attack Brute Force": 0.9070961909031747,
+      "Web Attack XSS": 0.8339731828498985
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6526358036918126,
+       "family": {
+        "Bot": 0.20333950915327936,
+        "Web Attack Brute Force": 0.9135737975940209,
+        "Web Attack XSS": 0.8409941043281375
+       },
+       "recall_1pct": {
+        "Bot": 0.02556237218813906,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6883092986594298,
+       "family": {
+        "Bot": 0.33539045659088235,
+        "Web Attack Brute Force": 0.9014531727316656,
+        "Web Attack XSS": 0.8280842666557414
+       },
+       "recall_1pct": {
+        "Bot": 0.4452965235173824,
+        "Web Attack Brute Force": 0.9980092899800929,
+        "Web Attack XSS": 0.9769938650306749
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6538710225248399,
+       "family": {
+        "Bot": 0.22251028762486522,
+        "Web Attack Brute Force": 0.9062616023838377,
+        "Web Attack XSS": 0.8328411775658167
+       },
+       "recall_1pct": {
+        "Bot": 0.050102249488752554,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.995398773006135
+       }
+      }
+     ]
+    }
+   },
+   "100000": {
+    "cnn": {
+     "macro_mean": 0.5630140744018507,
+     "family_mean": {
+      "Bot": 0.02722564884180641,
+      "Web Attack Brute Force": 0.8538278425809757,
+      "Web Attack XSS": 0.80798873178277
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.5804365780162947,
+       "family": {
+        "Bot": 0.03313184558956158,
+        "Web Attack Brute Force": 0.8627899505715666,
+        "Web Attack XSS": 0.845387937887756
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.5332227902344179,
+       "family": {
+        "Bot": 0.02627562007028515,
+        "Web Attack Brute Force": 0.8320084035706647,
+        "Web Attack XSS": 0.7413843470623039
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9051094890510949,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.5753828549548395,
+       "family": {
+        "Bot": 0.022269480865572504,
+        "Web Attack Brute Force": 0.8666851736006956,
+        "Web Attack XSS": 0.8371939103982504
+       },
+       "recall_1pct": {
+        "Bot": 0.0,
+        "Web Attack Brute Force": 0.9037823490378235,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      }
+     ]
+    },
+    "ae": {
+     "macro_mean": 0.47633733025281594,
+     "family_mean": {
+      "Bot": 0.5019126553441349,
+      "Web Attack Brute Force": 0.5317932016873176,
+      "Web Attack XSS": 0.3953061337269954
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.4426351688639341,
+       "family": {
+        "Bot": 0.47832504013881083,
+        "Web Attack Brute Force": 0.4953317556125624,
+        "Web Attack XSS": 0.35424871084042925
+       },
+       "recall_1pct": {
+        "Bot": 0.30930470347648265,
+        "Web Attack Brute Force": 0.8069011280690113,
+        "Web Attack XSS": 0.9309815950920245
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.4651840837453982,
+       "family": {
+        "Bot": 0.5356622931110127,
+        "Web Attack Brute Force": 0.5008955692481449,
+        "Web Attack XSS": 0.358994388877037
+       },
+       "recall_1pct": {
+        "Bot": 0.2852760736196319,
+        "Web Attack Brute Force": 0.8049104180491041,
+        "Web Attack XSS": 0.9294478527607362
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.5211927381491156,
+       "family": {
+        "Bot": 0.49175063278258113,
+        "Web Attack Brute Force": 0.5991522802012457,
+        "Web Attack XSS": 0.4726753014635201
+       },
+       "recall_1pct": {
+        "Bot": 0.3236196319018405,
+        "Web Attack Brute Force": 0.8082282680822827,
+        "Web Attack XSS": 0.9309815950920245
+       }
+      }
+     ]
+    },
+    "rf": {
+     "macro_mean": 0.6605636064389392,
+     "family_mean": {
+      "Bot": 0.25142925380203096,
+      "Web Attack Brute Force": 0.9035882275489802,
+      "Web Attack XSS": 0.826673337965806
+     },
+     "per_seed": [
+      {
+       "seed": 42,
+       "macro": 0.6480780635567727,
+       "family": {
+        "Bot": 0.1963870171903453,
+        "Web Attack Brute Force": 0.9119731830230925,
+        "Web Attack XSS": 0.83587399045688
+       },
+       "recall_1pct": {
+        "Bot": 0.02556237218813906,
+        "Web Attack Brute Force": 0.9986728599867286,
+        "Web Attack XSS": 0.9754601226993865
+       }
+      },
+      {
+       "seed": 43,
+       "macro": 0.6846132458819535,
+       "family": {
+        "Bot": 0.33539045659088235,
+        "Web Attack Brute Force": 0.8977426997636272,
+        "Web Attack XSS": 0.8207065812913509
+       },
+       "recall_1pct": {
+        "Bot": 0.4452965235173824,
+        "Web Attack Brute Force": 0.9980092899800929,
+        "Web Attack XSS": 0.9769938650306749
+       }
+      },
+      {
+       "seed": 44,
+       "macro": 0.6489995098780911,
+       "family": {
+        "Bot": 0.22251028762486522,
+        "Web Attack Brute Force": 0.9010487998602209,
+        "Web Attack XSS": 0.8234394421491873
+       },
+       "recall_1pct": {
+        "Bot": 0.050102249488752554,
+        "Web Attack Brute Force": 0.9993364299933643,
+        "Web Attack XSS": 0.995398773006135
+       }
+      }
+     ]
+    }
+   }
+  }
+ },
+ "delta_vs_unperturbed": {
+  "pad": {
+   "32": {
+    "cnn": 0.00021062968991547582,
+    "ae": 0.061716760569261245,
+    "rf": 0.028730625117935782
+   },
+   "256": {
+    "cnn": -0.0007761896471859542,
+    "ae": 0.08337200892086848,
+    "rf": 0.0424011627845553
+   }
+  },
+  "slow": {
+   "2": {
+    "cnn": -0.00010853904683816307,
+    "ae": 0.017740020606247672,
+    "rf": 0.03858283012451247
+   },
+   "10": {
+    "cnn": -0.031736827690553526,
+    "ae": 0.12242534526090719,
+    "rf": 0.07667417821255318
+   }
+  },
+  "jitter": {
+   "10000": {
+    "cnn": -0.06788537246797988,
+    "ae": 0.34028715706985885,
+    "rf": 0.024209046784336108
+   },
+   "100000": {
+    "cnn": -0.06688928767493485,
+    "ae": 0.3778755996177992,
+    "rf": 0.019833944931247904
+   }
+  }
+ },
+ "predictions": {
+  "V1_cnn_bot_stays_below_0.08": true,
+  "V1_cnn_bot_max": 0.035493458718624554,
+  "V2_each_supervised_model_loses_more_than_noise": {
+   "cnn": true,
+   "rf": false
+  },
+  "V3_slow10_raises_autoencoder": true
+ }
+}
