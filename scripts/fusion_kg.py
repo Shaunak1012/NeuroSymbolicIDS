@@ -1,7 +1,11 @@
 """
 fusion_kg.py — parameter-free rank fusion of the CNN and the KG.
 
-🟢 THIS IS THE FIRST COMBINATION IN THE PROJECT TO BEAT THE CNN BASELINE.
+~~🟢 THIS IS THE FIRST COMBINATION IN THE PROJECT TO BEAT THE CNN BASELINE.~~
+
+🔴 WITHDRAWN 2026-09-16 (fusion_population.py): the gain belonged to the three
+reference CNN runs below. Across 11 pre-flag CNN runs the fusion gains in 5, and
+in 0 of 6 deterministic runs. The figures below are kept as the historical record.
 
     CNN alone   macro 0.6399 [0.6353, 0.6446]
     CNN + KG    macro 0.6926 [0.6626, 0.7328]     +0.0528, p<0.001, ranges DISJOINT
@@ -86,6 +90,11 @@ for i, (c, k) in enumerate(zip(CNN, KG)):
 
 a = np.array([r[1:] for r in rows])
 print(f"\n  MEAN macro {a[:,0].mean():.4f}  range [{a[:,0].min():.4f}, {a[:,0].max():.4f}]")
-print(f"  vs CNN alone 0.6399 [0.6353, 0.6446]  -> {a[:,0].mean()-0.6399:+.4f}")
-print("\n  Verified 2026-08-03: all 3 seeds improve, ranges disjoint from the CNN's,")
-print("  paired bootstrap p<0.001, and the gain survives the lateness control.")
+# FIXED 2026-09-18 (itinerary 4.4): the CNN baseline was the constant 0.6399 and
+# the run printed "all 3 seeds improve" regardless of the result. It is now
+# computed from the CNN arrays fused above, and the claim is not printed: the
+# gain was withdrawn on 2026-09-16 (fusion_population.py -- it belonged to three
+# CNN runs, 5 of 11 pre-flag and 0 of 6 deterministic runs gain).
+cnn_m = np.array([metrics.evaluate(yte, _L(c), zero_day, fpr=0.01)["macro"]["pr_auc"] for c in CNN])
+print(f"  vs CNN alone {cnn_m.mean():.4f} [{cnn_m.min():.4f}, {cnn_m.max():.4f}]  -> "
+      f"{a[:,0].mean()-cnn_m.mean():+.4f}  (seeds better: {int((a[:,0] > cnn_m).sum())}/3)")
