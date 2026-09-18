@@ -846,6 +846,27 @@ if _sv and all("per_seed" in _sv["splits"].get(k, {}).get("models", {}).get("cnn
         "on every seed" if _bmin > _umax else "NOT on every seed", "{}", ws=True)
 else:
     unbacked("class balancing (5.4)", "split_variants.json has no balanced/subsampled runs")
+# 6.4 (2026-09-18): the bounded, pre-registered evasion test.
+_ev = load("evasion")
+if _ev:
+    _er, _ed = _ev["results"], _ev["delta_vs_unperturbed"]
+    chk("evasion: CNN macro under 10 ms jitter", "evasion", _er["jitter"]["10000"]["cnn"]["macro_mean"])
+    chk("evasion: CNN Bot max", "evasion", _ev["predictions"]["V1_cnn_bot_max"])
+    chk("evasion: CNN cost of x10 slow-down", "evasion", -_ed["slow"]["10"]["cnn"], "{:.3f}")
+    chk("evasion: largest autoencoder gain", "evasion",
+        max(v["ae"] for n in _ed.values() for v in n.values()), "{:.3f}")
+    chk("evasion: largest forest gain", "evasion",
+        max(v["rf"] for n in _ed.values() for v in n.values()), "{:.3f}")
+    _base = {q["seed"]: q["macro"] for q in _er["pad"]["0"]["cnn"]["per_seed"]}
+    _jit = all(q["macro"] < _base[q["seed"]] for q in _er["jitter"]["10000"]["cnn"]["per_seed"])
+    chk("evasion: jitter lowers the CNN on every seed", "evasion",
+        "on every seed" if _jit else "NOT on every seed", "{}", ws=True)
+    _rf_never = all(v["rf"] > 0 for n in _ed.values() for v in n.values())
+    chk("evasion: V2 falsified for the forest", "evasion",
+        "it did not" if _rf_never else "forest lost", "{}",
+        alt=("falsified for the forest",), ws=True)
+else:
+    unbacked("evasion test (6.4)", "evasion.json missing")
 _si = load("split_integrity")
 if _si:
     chk("split: benign under-sampling factor", "split_integrity",

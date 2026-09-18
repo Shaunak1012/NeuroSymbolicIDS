@@ -380,8 +380,10 @@ Bot (§5).
 show that the findings generalise to other network environments. Under corrected labels only two
 zero-day families have enough samples. We use flow features rather than payload bytes throughout,
 although the oracle result suggests that modality is not the obstacle. The thresholds in our exogeneity
-test are conventions. We do not evaluate against adaptive adversaries, and the system has not been
-deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
+test are conventions. A bounded, non-adaptive evasion test (Appendix F) finds that timing jitter
+lowers the CNN's macro zero-day PR-AUC to 0.5620, while every perturbation we tried raises the scores
+of the autoencoder and the tuned forest; we do not evaluate an adaptive adversary, and the system has
+not been deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
 optimistic: at the capture's own benign proportion the CNN's macro zero-day PR-AUC is 0.5845, not
 0.6299. The split is stratified at random over a chronologically ordered capture and is not grouped by
 connection. Grouping by connection lowers the CNN's macro zero-day PR-AUC from 0.6299 to 0.5589, and a

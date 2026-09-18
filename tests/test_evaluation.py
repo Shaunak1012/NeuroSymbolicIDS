@@ -336,6 +336,38 @@ class EndToEndReproduction(unittest.TestCase):
                     self.assertTrue(s["external_inputs"])
 
 
+class Evasion(unittest.TestCase):
+    """6.4 (2026-09-18): the pre-registered, non-adaptive evasion test."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.r = _load("evasion")
+        if cls.r is None:
+            raise unittest.SkipTest("evasion.json not generated")
+
+    def test_predictions_as_recorded(self):
+        p = self.r["predictions"]
+        self.assertTrue(p["V1_cnn_bot_stays_below_0.08"])
+        self.assertTrue(p["V2_each_supervised_model_loses_more_than_noise"]["cnn"])
+        self.assertFalse(p["V2_each_supervised_model_loses_more_than_noise"]["rf"])
+        self.assertTrue(p["V3_slow10_raises_autoencoder"])
+
+    def test_zero_strength_is_the_unperturbed_score(self):
+        res = self.r["results"]
+        for model in ("cnn", "ae", "rf"):
+            base = res["pad"]["0"][model]["macro_mean"]
+            for n, st in (("slow", "1"), ("jitter", "0")):
+                with self.subTest(model=model, perturbation=n):
+                    self.assertAlmostEqual(res[n][st][model]["macro_mean"], base, places=3)
+
+    def test_every_perturbation_raises_the_anomaly_scorers(self):
+        for n, byst in self.r["delta_vs_unperturbed"].items():
+            for st, d in byst.items():
+                with self.subTest(perturbation=n, strength=st):
+                    self.assertGreater(d["ae"], 0)
+                    self.assertGreater(d["rf"], 0)
+
+
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""
 
