@@ -62,6 +62,17 @@ The tuned forest **matches** the CNN; it does not beat it. Its **Bot PR-AUC is 0
 seed)** — above the autoencoder. ~~Whether its features overlap Bot's more than the CNN's is
 unmeasured.~~ Measured the same day: it does not (E4 above).
 
+### 🔴 6.5 — "we reproduce the base paper's CNN" does not survive population matching
+
+View 5 (the base paper's zero-day accuracy) on the corrected-label release with the attempted,
+payload-less flows excluded — the closest analogue of their payload filtering — using the deterministic
+CNN runs already trained on it (`cnn_fixed_exclude_s42-44`, `split_variants.py`): **0.69 %** (0.82 / 0.82 /
+0.41 %), against 47.56 % on our split (47.85 % pre-flag) and their 48.34 %. 99 % of the remaining Web BF
+flows are classified benign. **Our 47.85 % came from failed connection attempts labelled as attacks**; the
+agreement with their 48.34 % is a coincidence of two differently filtered populations. Paper: "we reproduce
+their CNN" withdrawn in the body, Appendix B and Appendix G (struck in place in the master draft);
+`verify_draft.py` flags the phrase if it returns unstruck.
+
 ### ✅ 6.4 — a bounded evasion test (pre-registered, `evasion.py`)
 
 Forward-traffic perturbations of the zero-day test flows, derived features recomputed, models not
