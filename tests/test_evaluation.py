@@ -271,14 +271,30 @@ class SplitVariants(unittest.TestCase):
         self.assertGreater(self.s["chronological"]["models"]["cnn"]["known_only_pr_auc_mean"], 0.99)
 
     def test_double_dissociation_keeps_direction_everywhere(self):
-        for split, row in self.s.items():
+        for split, row in ((k, self.s[k]) for k in ("random", "grouped", "chronological")):
             for fam, v in row["double_dissociation"].items():
                 with self.subTest(split=split, family=fam):
                     self.assertTrue(v["direction_consistent"])
                     self.assertEqual(v["cnn_minus_ae_mean"] < 0, fam == "Bot")
 
+    def test_class_balancing_at_equal_size(self):
+        """5.4: the base paper's balancing vs a size-matched natural-mix control,
+        both on the canonical test set."""
+        if not all("per_seed" in self.s.get(k, {}).get("models", {}).get("cnn", {})
+                   for k in ("balanced", "subsampled")):
+            self.skipTest("balanced / subsampled runs not present")
+        b, u, r = self.s["balanced"], self.s["subsampled"], self.s["random"]
+        self.assertEqual(b["n_test"], r["n_test"])
+        self.assertEqual(u["n_test"], r["n_test"])
+        self.assertEqual(sum(b["train_counts"].values()), sum(u["train_counts"].values()))
+        self.assertEqual(len({v for k, v in b["train_counts"].items() if k != "BENIGN"}), 1)
+        self.assertGreater(min(self._macros("balanced")), max(self._macros("subsampled")))
+        self.assertLess(max(self._macros("balanced")), min(self._macros("random")))
+        for p in u["models"]["cnn"]["per_seed"]:
+            self.assertGreater(p["absorption"]["Web Attack XSS"]["frac_BENIGN"], 0.9)
+
     def test_web_families_absorbed_into_slowloris_on_every_split(self):
-        for split, row in self.s.items():
+        for split, row in ((k, self.s[k]) for k in ("random", "grouped", "chronological")):
             for p in row["models"]["cnn"]["per_seed"]:
                 with self.subTest(split=split, seed=p["seed"]):
                     self.assertEqual(p["absorption"]["Bot"]["modal_class"], "BENIGN")

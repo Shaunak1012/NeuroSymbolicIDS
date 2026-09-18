@@ -51,7 +51,17 @@ SPLITS = {
                 "integrity": "split_integrity_paper_grouped"},
     "chronological": {"subdir": "paper_chrono", "cnn": "cnn_chrono_s%d", "ae": "ae_chrono_s%d",
                       "integrity": "split_integrity_paper_chrono"},
+    # Itinerary 5.4 (FD-01, 2026-09-18): the base paper's class balancing, and its
+    # size-matched control. Both keep the canonical TEST set, so every metric here
+    # is directly comparable with `random` and pairs by seed.
+    "balanced": {"subdir": "paper_balanced", "cnn": "cnn_balanced_s%d", "ae": "ae_balanced_s%d",
+                 "integrity": "split_integrity_paper_balanced"},
+    "subsampled": {"subdir": "paper_subsampled", "cnn": "cnn_subsampled_s%d",
+                   "ae": "ae_subsampled_s%d", "integrity": "split_integrity_paper_subsampled"},
 }
+# random vs grouped vs chronological are different SPLITS (different test sets);
+# balanced and subsampled change only TRAINING (same test set as random).
+PROTOCOL_SPLITS = ("random", "grouped", "chronological")
 
 
 def pred(tag):
@@ -87,6 +97,22 @@ def absorption(tag, P, y):
         top, n = c.most_common(1)[0]
         out[fam] = {"modal_class": top, "modal_frac": n / float((y == fam).sum()),
                     "frac_BENIGN": c.get("BENIGN", 0) / float((y == fam).sum())}
+    # The base paper's views (Table II), from this run's own scaler and model.
+    # View 5 has no benign rows, so it is reported with the false-alarm rate.
+    pred = np.array(classes, dtype=object)[am]
+    known = np.isin(y, classes)
+    ben = y == "BENIGN"
+    zd = ~known
+    pb, yb = pred != "BENIGN", y != "BENIGN"
+    per_class = [float((pred[y == c] == c).mean()) for c in classes]
+    out["_views"] = {
+        "view1_multiclass_known_acc": 100 * float((pred[known] == y[known]).mean()),
+        "view1_balanced_acc": 100 * float(np.mean(per_class)),
+        "view2_binary_known_acc": 100 * float((pb[known] == yb[known]).mean()),
+        "view5_zero_day_acc": 100 * float(pb[zd].mean()),
+        "false_alarm_rate": 100 * float(pb[ben].mean()),
+        "per_class_recall": {c: 100 * r for c, r in zip(classes, per_class)},
+    }
     return out
 
 
@@ -196,6 +222,14 @@ def main():
         c = row["models"].get("cnn", {})
         if "per_seed" not in c:
             continue
+        v = {k: float(np.mean([p_["absorption"]["_views"][k] for p_ in c["per_seed"]]))
+             for k in ("view1_multiclass_known_acc", "view1_balanced_acc",
+                       "view2_binary_known_acc", "view5_zero_day_acc", "false_alarm_rate")}
+        c["views_mean"] = v
+        print("  %-14s views: known multi %.2f%% (balanced %.2f%%) | known binary %.2f%% | "
+              "view 5 %.2f%% | FAR %.2f%%" % (name, v["view1_multiclass_known_acc"],
+                                               v["view1_balanced_acc"], v["view2_binary_known_acc"],
+                                               v["view5_zero_day_acc"], v["false_alarm_rate"]))
         parts = []
         for f in FAMS:
             ab = [p_["absorption"][f] for p_ in c["per_seed"]]
