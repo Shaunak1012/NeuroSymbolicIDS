@@ -145,10 +145,15 @@ XGBoost / RF / IsolationForest never see the validation split. ~~Not yet re-run 
 Selected on Bot labels (commit 8c9e40f). Relabelled in `behavior.py` and the paper; no conclusion
 depends on it because the symbolic arms had no positive effect. Stays open as a design fact.
 
-### [OPEN 2026-09-16] 🟡 A second pipeline lives in an untracked notebook (F-13, F-14)
+### [CLOSED 2026-09-18 — D3: not the deliverable] 🟡 A second pipeline lives in an untracked notebook (F-13, F-14)
+
+> ✅ **D3 decided: the notebook is not the capstone deliverable.** It stays private: gitignored, not
+> archived in the public repository. Recorded here so the caveats survive: its "Heartbleed 0 → 100 %
+> recall" rests on **n=11** flows (one connection) at a **10.2 %** system FPR, and its zero-day set is
+> the **base paper's**, not `config.yaml`'s. None of its numbers is cited anywhere.
 
 `Capstone_final (4) (1).ipynb`: 70 features, the base paper's zero-day set, accuracy headline, all
-`execution_count` null, a Heartbleed rule "validated" on n=11. Decision **D3**.
+`execution_count` null, a Heartbleed rule "validated" on n=11. ~~Decision **D3**.~~
 
 ### [OPEN 2026-09-16] 🟡 No adversarial evaluation (F-16); one reporting split (F-17)
 

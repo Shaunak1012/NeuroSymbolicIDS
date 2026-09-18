@@ -244,7 +244,7 @@ Everything that moves, and why. ~~**Directions of every comparative conclusion s
 ```
 STATUS 2026-09-17                 [x] done   [~] partial / running   [ ] not started   [-] not needed
 
-STAGE 0  decisions      [x] D1  [x] D2  [ ] D3  [x] D4  [ ] D5
+STAGE 0  decisions      [x] D1  [x] D2  [x] D3  [x] D4  [x] D5
 STAGE 1  no compute     [x] 1.1 [x] 1.2 [x] 1.3 [x] 1.4 [x] 1.5 [x] 1.6 [x] 1.7 [x] 1.8 [x] 1.9
 STAGE 2  write-up       [x] 2.1 [x] 2.2 [x] 2.3 [x] 2.4 [x] 2.5 [x] 2.6 [x] 2.7 [x] 2.8 [x] 2.9
 STAGE 3  code           [x] 3.1 [x] 3.2 [x] 3.3 [x] 3.4 [x] 3.5 [x] 3.6 [x] 3.7
@@ -253,7 +253,7 @@ STAGE 4  RE-BASE        [x] 4.1 [x] 4.2 [x] 4.3 [~] 4.4 [x] 4.5 [x] 4.6 [x] 4.7 
 STAGE 5  protocol (D4)  [x] 5.1 [x] 5.2 [-] 5.3 [ ] 5.4
 STAGE 6  modelling      [x] 6.1 [x] 6.2 [x] 6.3 [ ] 6.4 [ ] 6.5
 STAGE 7  engineering    [x] 7.1 [x] 7.2 [x] 7.3 [x] 7.4
-STAGE 8  hygiene        [ ] 8.1 [x] 8.2
+STAGE 8  hygiene        [x] 8.1 [x] 8.2
 ```
 
 **Minimum set before the paper is shared with anyone:** 1.1, 1.3, 1.5, 2.1, 2.2, 3.1, 4.2, 4.3, 4.4,

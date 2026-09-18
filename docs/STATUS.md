@@ -227,9 +227,9 @@ controlled result (it is currently unsupported — the comparison crossed loss f
 | # | Decision | Recommendation |
 |---|---|---|
 | **D1** | The 1:1 benign under-sampling makes every absolute PR-AUC optimistic (0.6299 → 0.5845). Keep and report both, or re-split? | ✅ **Decided 2026-09-17: keep + report both.** Appendix A / §9 / master draft now state the base rate (`verify_draft` checks it) |
-| **D3** | Is `Capstone_final (4) (1).ipynb` the capstone deliverable? (Its zero-day set is the base paper's.) | Author's call |
+| **D3** | Is `Capstone_final (4) (1).ipynb` the capstone deliverable? (Its zero-day set is the base paper's.) | ✅ **Decided 2026-09-18: no.** Kept private (gitignored, not archived in the public repo); caveats recorded in KNOWN_ISSUES (F-13/F-14) |
 | **D4** | Run the grouped (Flow-ID) and chronological splits (~2 days CPU)? | ✅ **Decided 2026-09-17: yes.** Splits built; CNN + AE training at seeds 42-44 on each (`split_variants.sh`); ~3 h per lane |
-| **D5** | Push `docs/paper-revision` + `fix/audit-remediation` to the public repo? | Author's call (similarity-checker exposure) |
+| **D5** | Push `docs/paper-revision` + `fix/audit-remediation` to the public repo? | ✅ **Decided 2026-09-18: yes, sequentially** — five contiguous PRs of the existing history, each merged locally with `--no-ff` before the next |
 | **new** | The paper's positive result is gone. Reframe §6 / the contribution list around "nothing beats the neural baseline, and here is why" — or look for a fusion that is stable across CNN runs? | ✅ **Decided 2026-09-17: reframe** (abstract, §7, §9 and conclusion already carry it) |
 
 D2 (BeaconLike provenance) was answered from the repository's history.
