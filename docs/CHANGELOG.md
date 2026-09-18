@@ -2,6 +2,41 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-17 (Remediation day 2 — Bot-ranking claim retracted; the pipeline reproduces from raw data)
+
+Branch `fix/audit-remediation`, not pushed. The author approved D1 (keep 1:1, report both), D4 (run the
+split variants) and the reframe; D3 and D5 stay open.
+
+**🔴 Retracted: "the CNN's Bot ranking is noise (ρ = −0.090)" and "a random forest shows the same
+pattern"** (`bot_mechanism_recheck.py`). Over all pairs of the 6 deterministic / 11 pre-flag CNN runs,
+Bot's median rank agreement is +0.55 / +0.59 (pairs −0.54 to +0.92); −0.090 was the three reference
+runs. The forest's 0.068 is its default `max_features`; tuned, +0.923. Absorption (every Bot flow
+BENIGN) holds in all 17 runs. Paper abstract, §4, Figure 2 (redrawn), Appendix C and master draft
+(struck in place) corrected; CLAUDE.md's "established result (2)" struck.
+
+**F-12 closed** (`baselines_tuned.py`): validation-selected XGBoost 0.6180, RandomForest 0.6407 (≈ det CNN
+0.6299), IsolationForest 0.0564. Tuned forest Bot 0.2196 (6.4× chance). Reported under pitfall P6.
+
+**D1 in the paper**: base-rate paragraph (0.6299 → 0.5845 capture-faithful; online fusion 0.5030 →
+0.3255) and a split-boundary paragraph (54.9 % shared 5-tuples; Web BF/XSS share theirs with DoS/DDoS
+training flows from the same attacker and server; Bot none). Checked by `verify_draft.py`; Bot case
+pinned by a test.
+
+**OOD battery on the deterministic CNN** (`ood_scores.py`, `OOD_POPULATION=det`): best Bot 0.0576, 28 %
+under the pre-set threshold (pre-flag 0.0783, 2 %).
+
+**Re-run defects fixed.** `operational.py` and `best_config.py` globbed for their CNN ensemble (now 27
+files, four test lengths) → `fusion_population.PRE_FLAG`. `field_gap.py` (42 → 71 groups on re-run) and
+`metric_divergence.py` pinned to their recorded method sets. All four records regenerate byte-identically.
+
+**7.4, first `run_all.py --run`** (sandbox via `NSIDS_WORKDIR`, `--keep-going`): preprocess, split,
+timeline byte-identical to canonical from the raw CSVs; seed-42 CNN byte-identical to `c4_log1p_s42`
+(predictions, embeddings, history). `behaviour_thresholds.npy` differs in the 14th digit.
+
+**Also:** deterministic autoencoder reference `ae_det_s42-44` (macro 0.0985, Bot 0.1338); split-variant
+training started (first n=1 results: grouped 0.5746, chronological 0.6101); tests 30 → 37; scripts
+85 → 87 (`baselines_tuned.py`, `bot_mechanism_recheck.py`).
+
 ## 2026-09-16 (Repository audit, base-paper comparison, remediation — the fusion result is withdrawn)
 
 Branch `fix/audit-remediation`, stacked on `docs/paper-revision`. **Not pushed** (decision D5).

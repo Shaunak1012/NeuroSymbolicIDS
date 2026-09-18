@@ -407,43 +407,63 @@ def nesy_fig1_thesis():
 
 
 def nesy_fig2_mechanism():
-    """Cross-seed rank agreement by family: Bot's ranking is noise for
-    closed-set discriminative learners, not for the benign-only autoencoder."""
+    """Cross-run rank agreement by family, from bot_mechanism_recheck.json.
+
+    CHANGED 2026-09-17. The first version drew three runs per model from
+    bot_failure_analysis.json and showed the CNN's Bot ranking as noise (-0.090),
+    with the untuned random forest agreeing (+0.068). Over every pair of the six
+    deterministic CNN runs the Bot median is +0.55 and the pairs span -0.52 to
+    +0.92, and a forest whose max_features was selected on validation gives
+    +0.92. The figure now shows the spread and both forests."""
     from matplotlib.patches import Patch
     _nesy_style()
-    rank = load("bot_failure_analysis.json")["results"]["H2b_cross_seed_rank_corr"]
+    d = load("bot_mechanism_recheck.json")
+    ap, rs = d["all_pairs"]["deterministic"]["all"], d["rank_stability"]
     fams = ["Bot", "Web Attack Brute Force", "Web Attack XSS"]
     short = ["Bot", "Web Brute Force", "Web XSS"]
-    models = [("cnn_paper", "1D CNN", S_BLUE, H_BLUE, None),
-              ("random_forest", "Random forest", S_ORANGE, H_ORANGE, "////"),
-              ("autoencoder", "Autoencoder (benign-only)", S_AQUA, H_AQUA, "\\\\\\\\")]
-    fig, ax = plt.subplots(figsize=(6.6, 2.45))
-    group_w, gap = 0.72, 0.012              # about 2px at this size
-    bw = group_w / len(models)
-    for j, (key, label, fill, hink, hatch) in enumerate(models):
+
+    def three(name):
+        r = rs[name]
+        return ([r[f]["mean"] for f in fams], [min(r[f]["pairs"]) for f in fams],
+                [max(r[f]["pairs"]) for f in fams])
+
+    series = [
+        ("1D CNN (6 runs, median and range)", S_BLUE, H_BLUE, None,
+         ([ap[f]["median"] for f in fams], [ap[f]["min"] for f in fams],
+          [ap[f]["max"] for f in fams])),
+        ("Random forest, default features", "white", H_ORANGE, "////",
+         three("RandomForest, untuned (max_features=sqrt)")),
+        ("Random forest, tuned", S_ORANGE, H_ORANGE, None,
+         three("RandomForest, tuned (max_features=0.3)")),
+        ("Autoencoder (benign-only)", S_AQUA, H_AQUA, "\\\\\\\\",
+         three("Autoencoder, deterministic")),
+    ]
+    fig, ax = plt.subplots(figsize=(6.6, 2.6))
+    group_w, gap = 0.8, 0.012
+    bw = group_w / len(series)
+    for j, (label, fill, hink, hatch, (mid, lo, hi)) in enumerate(series):
         for i, fam in enumerate(fams):
-            v = rank[key][fam]
-            x = i + (j - 1) * bw
-            ax.bar(x, v, width=bw - gap, color=fill, edgecolor=hink, lw=0,
-                   hatch=hatch, zorder=3)
-            if fam == "Bot":               # label the story, not every bar
-                ax.text(x, v + (0.035 if v >= 0 else -0.035), ("%+.3f" % v).replace("-", "−"),
-                        ha="center", va="bottom" if v >= 0 else "top",
-                        fontsize=7.3, color=INK, zorder=4)
+            x = i + (j - (len(series) - 1) / 2) * bw
+            ax.bar(x, mid[i], width=bw - gap, color=fill, edgecolor=hink,
+                   lw=0.8 if fill == "white" else 0, hatch=hatch, zorder=3)
+            ax.plot([x, x], [lo[i], hi[i]], color=INK2, lw=0.8, zorder=4)
+            if fam == "Bot":
+                ax.text(x, max(mid[i], hi[i]) + 0.03, ("%+.2f" % mid[i]).replace("-", "−"),
+                        ha="center", va="bottom", fontsize=6.8, color=INK, zorder=5)
     ax.axhline(0, color=INK2, lw=0.9, zorder=2)
-    ax.set_ylim(-0.22, 1.02)
-    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
+    ax.set_ylim(-0.62, 1.12)
+    ax.set_yticks([-0.5, 0, 0.5, 1.0])
     ax.yaxis.grid(True, color=HAIR, lw=0.7, zorder=0)
     ax.set_axisbelow(True)
     for side in ("top", "right", "left", "bottom"):
         ax.spines[side].set_visible(False)
     ax.set_xticks(range(len(fams)))
     ax.set_xticklabels(short, color=INK)
-    ax.set_ylabel("Cross-seed rank agreement\n(Spearman ρ)", fontsize=8)
-    handles = [Patch(facecolor=f, edgecolor=h, hatch=ht, lw=0, label=l)
-               for _, l, f, h, ht in models]
-    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, 1.16),
-              ncol=3, frameon=False, fontsize=7.8, handlelength=1.6,
+    ax.set_ylabel("Rank agreement between\ntraining runs (Spearman ρ)", fontsize=8)
+    handles = [Patch(facecolor=f, edgecolor=h, hatch=ht, lw=0.8 if f == "white" else 0, label=l)
+               for l, f, h, ht, _ in series]
+    ax.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.0, 1.22),
+              ncol=2, frameon=False, fontsize=7.4, handlelength=1.6,
               columnspacing=1.4, labelcolor=INK)
     _save_nesy(fig, "nesy_fig2_mechanism")
 

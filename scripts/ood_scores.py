@@ -56,6 +56,12 @@ O2  They WILL differ on the web families, where the CNN has real signal, since
 Run:  python scripts/ood_scores.py
 Out:  outputs/metadata/ood_scores.json
       outputs/predictions/y_prob_ood_<name>_test.npy
+
+OOD_POPULATION=det (added 2026-09-17, audit F-01 / item 4.4) scores the three
+DETERMINISTIC CNN runs (c4_log1p_s42-44) instead of the three pre-flag reference
+runs, which are the same three runs that carried the withdrawn fusion gain.
+Outputs get a "det" infix (ood_scores_det.json, ood_det_<name>); the default is
+unchanged. The two populations are never pooled.
 """
 import os
 import sys
@@ -74,7 +80,13 @@ import tracking                                 # noqa: E402
 cfg = config.get()
 P, PR, MD = paths.PAPER, paths.PREDICTIONS, paths.METADATA
 TFM = cfg["protocol"]["feature_transform"]
-SEEDS = [("cnn_paper", 42), ("cnn_paper_s43", 43), ("cnn_paper_s44", 44)]
+POP = os.environ.get("OOD_POPULATION", "reference")
+if POP not in ("reference", "det"):
+    sys.exit("OOD_POPULATION must be reference or det")
+SEEDS = ([("cnn_paper", 42), ("cnn_paper_s43", 43), ("cnn_paper_s44", 44)] if POP == "reference"
+         else [("c4_log1p_s42", 42), ("c4_log1p_s43", 43), ("c4_log1p_s44", 44)])
+PFX = "ood_" if POP == "reference" else "ood_det_"
+POSTHOC_ON = "cnn_paper" if POP == "reference" else "c4_log1p"
 TEMPS = [1.0, 10.0, 100.0, 1000.0]
 ODIN_EPS = 0.0014                                # ODIN paper default
 FAMS = ["Bot", "Web Attack Brute Force", "Web Attack XSS"]
@@ -170,6 +182,7 @@ print("\n" + "=" * 100)
 print(f"{'scorer':18s} {'macro':>8s} {'Bot':>9s} {'Bot lift':>9s} {'Web BF':>9s} {'XSS':>9s}")
 print("-" * 100)
 RES = {"config": {"temps": TEMPS, "odin_eps": ODIN_EPS, "seeds": [s for _, s in SEEDS],
+                  "population": POP, "cnn_runs": [t for t, _ in SEEDS],
                   "note": "all values reported; nothing tuned on zero-day"},
        "scorers": {}}
 BOT_CHANCE = 1956 / (1956 + 55237)
@@ -186,8 +199,8 @@ for name, arrs in CHANNELS.items():
     # cast can collapse distinct values into ties, so the saved file would no
     # longer reproduce the logged metric (found 2026-08-05 in
     # baselines_classic.py, where it moved GaussianNB's macro by 0.067).
-    np.save(os.path.join(paths.predictions_dir(f"ood_{name}"),
-                         f"y_prob_ood_{name}_test.npy"), np.asarray(arrs[0], np.float64))
+    np.save(os.path.join(paths.predictions_dir(f"{PFX}{name}"),
+                         f"y_prob_{PFX}{name}_test.npy"), np.asarray(arrs[0], np.float64))
 
 for name, a in sorted(rows, key=lambda r: -r[1]["macro"]):
     print(f"{name:18s} {a['macro']:>8.4f} {a['Bot']:>9.4f} {a['bot_lift']:>8.2f}x "
@@ -216,6 +229,8 @@ if o1:
     print("        It buys Bot by destroying known-class discrimination entirely")
     print(f"        (Web BF {RES['scorers'][best_bot[0]]['Web Attack Brute Force']:.4f}, "
           f"XSS {RES['scorers'][best_bot[0]]['Web Attack XSS']:.4f}).")
+    if POP == "det":
+        print("     -> (comparators below are PRE-FLAG figures; this run is the det population)")
     print("     -> And it is still BELOW every (B)-family channel already measured:")
     print("        AE 0.1314 | RandomForest 0.1311 | Mahalanobis 0.1030 | KG causal 0.3103.")
     print("     -> So: the standard OOD battery does NOT rescue Bot, the representational")
@@ -237,11 +252,11 @@ RES["predictions"] = {"O1_no_scorer_rescues_bot": bool(o1),
                       "best_bot_value": best_bot[1]["Bot"]}
 
 for name, a in rows:
-    tracking.log_run(f"ood_{name}", {"protocol": "paper", "posthoc_on": "cnn_paper",
+    tracking.log_run(f"{PFX}{name}", {"protocol": "paper", "posthoc_on": POSTHOC_ON,
                                      "n_seeds": a["n_seeds"], "fitted": False},
                      {"macro_zd_pr_auc": a["macro"], "fam_bot_pr_auc": a["Bot"]})
 
-outp = os.path.join(MD, "ood_scores.json")
+outp = os.path.join(MD, "ood_scores.json" if POP == "reference" else "ood_scores_det.json")
 with open(outp, "w", encoding="utf-8") as f:
     json.dump(RES, f, indent=1)
 print(f"\nwrote {outp}")

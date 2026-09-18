@@ -1,0 +1,120 @@
+{
+ "config": {
+  "temps": [
+   1.0,
+   10.0,
+   100.0,
+   1000.0
+  ],
+  "odin_eps": 0.0014,
+  "seeds": [
+   42,
+   43,
+   44
+  ],
+  "population": "det",
+  "cnn_runs": [
+   "c4_log1p_s42",
+   "c4_log1p_s43",
+   "c4_log1p_s44"
+  ],
+  "note": "all values reported; nothing tuned on zero-day"
+ },
+ "scorers": {
+  "cnn_p_attack": {
+   "macro": 0.6299033620767855,
+   "Bot": 0.03209076627651319,
+   "Web Attack Brute Force": 0.9146500122219768,
+   "Web Attack XSS": 0.9429693077318664,
+   "bot_lift": 0.9383267871434656,
+   "n_seeds": 3
+  },
+  "msp": {
+   "macro": 0.586537865629888,
+   "Bot": 0.03209076627651319,
+   "Web Attack Brute Force": 0.8682261553028102,
+   "Web Attack XSS": 0.8592966753103405,
+   "bot_lift": 0.9383267871434656,
+   "n_seeds": 3
+  },
+  "max_logit": {
+   "macro": 0.5781226200393285,
+   "Bot": 0.023848158166425493,
+   "Web Attack Brute Force": 0.8665783602980874,
+   "Web Attack XSS": 0.843941341653473,
+   "bot_lift": 0.697314780169925,
+   "n_seeds": 3
+  },
+  "entropy": {
+   "macro": 0.5907944519436183,
+   "Bot": 0.030924144461673315,
+   "Web Attack Brute Force": 0.87331636359627,
+   "Web Attack XSS": 0.8681428477729116,
+   "bot_lift": 0.9042150277078128,
+   "n_seeds": 3
+  },
+  "margin": {
+   "macro": 0.5783355063556109,
+   "Bot": 0.04127609303850598,
+   "Web Attack Brute Force": 0.8572680261554831,
+   "Web Attack XSS": 0.8364623998728437,
+   "bot_lift": 1.206903675435211,
+   "n_seeds": 3
+  },
+  "energy_T1": {
+   "macro": 0.5494211733540583,
+   "Bot": 0.02385327808901323,
+   "Web Attack Brute Force": 0.8353848231607127,
+   "Web Attack XSS": 0.7890254188124489,
+   "bot_lift": 0.6974644855546696,
+   "n_seeds": 3
+  },
+  "energy_T10": {
+   "macro": 0.015972324219393277,
+   "Bot": 0.028427328815523265,
+   "Web Attack Brute Force": 0.013592148758981112,
+   "Web Attack XSS": 0.005897495083675459,
+   "bot_lift": 0.8312086998702567,
+   "n_seeds": 3
+  },
+  "energy_T100": {
+   "macro": 0.025238289348617545,
+   "Bot": 0.05629643625011432,
+   "Web Attack Brute Force": 0.01352912926117039,
+   "Web Attack XSS": 0.00588930253456792,
+   "bot_lift": 1.6460951321333275,
+   "n_seeds": 3
+  },
+  "energy_T1000": {
+   "macro": 0.025691267554132775,
+   "Bot": 0.05761541231544903,
+   "Web Attack Brute Force": 0.01355474978722373,
+   "Web Attack XSS": 0.005903640559725556,
+   "bot_lift": 1.6846616955815321,
+   "n_seeds": 3
+  },
+  "odin_T1": {
+   "macro": 0.6019675097756364,
+   "Bot": 0.03195108057488061,
+   "Web Attack Brute Force": 0.8843030518327485,
+   "Web Attack XSS": 0.8896483969192799,
+   "bot_lift": 0.9342424086498705,
+   "n_seeds": 3
+  },
+  "odin_T1000": {
+   "macro": 0.570151984443139,
+   "Bot": 0.024564334427953426,
+   "Web Attack Brute Force": 0.8587244372282221,
+   "Web Attack XSS": 0.8271671816732412,
+   "bot_lift": 0.7182556129539572,
+   "n_seeds": 3
+  }
+ },
+ "predictions": {
+  "O1_no_scorer_rescues_bot": true,
+  "O2_scorers_differ_on_web": true,
+  "msp_bot": 0.03209076627651319,
+  "best_bot_scorer": "energy_T1000",
+  "best_bot_value": 0.05761541231544903
+ }
+}

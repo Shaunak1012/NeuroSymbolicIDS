@@ -39,7 +39,6 @@ Out:  outputs/metadata/best_config.json
 import os
 import sys
 import json
-import glob
 
 import numpy as np
 from scipy.stats import rankdata
@@ -47,6 +46,7 @@ from scipy.stats import rankdata
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import paths                                        # noqa: E402
 import metrics                                      # noqa: E402
+from fusion_population import PRE_FLAG             # noqa: E402
 
 P = paths.PAPER
 PR = paths.PREDICTIONS
@@ -91,8 +91,12 @@ def main():
     # cnn_auxhead_* is EXCLUDED and the exclusion is load-bearing: it matches the
     # glob but is a DIFFERENT architecture, so including it would silently answer
     # "does a heterogeneous ensemble help?" while being reported as an ensemble.
-    files = [f for f in sorted(glob.glob(os.path.join(PR, "y_prob_cnn_*_test.npy")))
-             if "auxhead" not in f and "logodds" not in f and "2018" not in f]
+    #
+    # FIXED 2026-09-17 (audit item 7.4): the glob matched 11 runs when this record was
+    # written (2026-09-10) and matches 27 now, including other test sets and other
+    # configurations. The set is the pre-flag population, named explicitly.
+    files = sorted(os.path.join(PR, "y_prob_%s_test.npy" % t) for t in PRE_FLAG)
+    assert len(files) == 11 and all(os.path.exists(f) for f in files), "missing ensemble runs"
     ens = np.mean([np.load(f) for f in files], axis=0)
     print("ensemble over %d CNN runs: macro %.4f" % (len(files), ev(ens)))
 

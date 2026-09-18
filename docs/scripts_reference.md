@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (83 Python scripts, plus 15 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, plus `tests/`).
+> Last verified against source: **2026-09-05** (87 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py` and `bot_mechanism_recheck.py` 2026-09-17, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -21,7 +21,7 @@ All scripts live in `scripts/`. Run them **from the project root** using the ven
 |---|---|
 | **Infrastructure** | `paths` · `config` · `features` · `tracking` · `metrics` |
 | **Current pipeline** (paper split) | `preprocess` → `preprocess_paper` → `cnn_paper` → `baselines` · `novelty` → `behavior` → `ltn_paper` · `cnn_auxhead_paper` · **`autoencoder_paper`** |
-| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** |
+| **Analysis / one-off** | `skyline_oracle` · `rescore_logits` · `fusion_beaconlike` · **`modality_analysis`** · **`kg_precheck`** · **`kg_readiness`** · **`audit_leakage`** · **`significance`** · **`bot_failure_analysis`** · **`comparability`** · **`robustness`** · **`basepaper_audit`** · **`split_integrity`** · **`ksweep_heldout`** · **`rebase_deterministic`** · **`fusion_population`** · **`ablation_population`** · **`split_variants`** · **`baselines_tuned`** · **`bot_mechanism_recheck`** |
 | **Maintenance** | **`repair_runs_log`** (one-shot `runs.jsonl` integrity repair) · **`lint_conventions`** (run at the end of every session) |
 | **Phase-4 gates** | **`kg_precheck`** → **`kg_readiness`** → **`kg_criteria`** · **`timeline`** (timestamp utility) |
 | **Phase 4 — build** | **`kg`** (class in **`kg_graph`**) → **`kg_visualize`** · **`explain`** |
@@ -475,6 +475,9 @@ floor is p=0.25, so no seed-level claim in this project can reach p<0.05. Needs 
 **Writes** `outputs/metadata/significance.json`.
 
 ## `scripts/bot_failure_analysis.py`
+
+> 🔴 **H2(b) retracted 2026-09-17 — see `bot_mechanism_recheck.py` below.** The three-run cross-seed
+> ρ (CNN −0.090, RF 0.068) does not hold over all CNN runs or for a tuned forest. H1 and H3 stand.
 
 **Purpose**: answer the project's last open research question — *why* does the CNN sit at chance on
 Bot when the skyline oracle proved the signal is fully present in the 68 features?
@@ -1015,6 +1018,11 @@ T=10/100/1000, so real — just useless.
 **Writes** `outputs/metadata/ood_scores.json` + `y_prob_ood_<name>_test.npy` per scorer (so any of
 them can be fused or compared like any other channel), and logs each to `runs.jsonl`.
 
+`OOD_POPULATION=det` *(added 2026-09-17, audit item 4.4)* scores the deterministic CNN runs
+`c4_log1p_s42-44` instead of the pre-flag reference runs `cnn_paper`, `_s43`, `_s44`, which are the three
+runs that carried the withdrawn fusion gain. It writes `ood_scores_det.json`,
+`y_prob_ood_det_<name>_test.npy` and `ood_det_<name>` log entries; the default is unchanged.
+
 ## `scripts/paper_metrics.py`
 
 **Purpose**: **Our runs in the base paper's metric set (Accuracy + F1, five test-set views) and in
@@ -1155,6 +1163,67 @@ no training, and reports the gain per CNN run. Online k=800: **5/11** pre-flag r
 three **+0.0615**, other eight **−0.1190**), **0/6** deterministic. The gain tracks each run's median
 XSS rank among **all** test flows (0.52–0.88 across runs; Spearman **+0.95**), which a benign-only
 PR-AUC cannot see and a whole-set rank fusion does. **Writes** `fusion_population.json`.
+
+## `scripts/ablation_population.py`
+
+*(added 2026-09-17, audit F-01.)* Re-tests `ablation.py`'s rungs across every CNN run on disk (11
+pre-flag, 6 deterministic), holding the LTN and KG channels at their three seeds. No training.
+🔴 **The abstract's rung does not hold:** adding LTN-Ax6 on top of CNN+KG is −0.0245 on the reference
+three but +0.0294 across pre-flag runs and **+0.0886 on 6/6 deterministic runs** — the axiom-free
+control added the same way does more (+0.1211), because any third channel repairs a broken CNN+KG
+fusion. ✅ **The axiom effect is robust:** axioms on vs off (same trainer, same position) is negative
+with **every one of 17 CNN runs** — −0.0062 / −0.0068 alone, −0.0212 / −0.0324 with the KG. The
+deterministic base-axiom matched pair (`ltn_repro_det` vs `ltn_repro_ctrl`) is negative alone (10/11,
+5/6) and inconsistent with the KG. **Writes** `ablation_population.json`.
+
+## Split variants — `preprocess_paper.py` modes, `split_variants.sh`, `ae_seeds.sh`, `split_variants.py`
+
+*(added 2026-09-17, audit F-02 / F-03, decision D4.)* `preprocess_paper.py` takes `SPLIT_MODE`:
+`random` (default, **byte-identical** to before — verified by regenerating every canonical file into a
+scratch directory and hashing), `grouped` (no Flow ID on both sides; every group containing a zero-day
+flow goes to test — 42,500 known/benign flows), `chronological` (within each known class, earliest 80 %
+train / next 10 % val / latest 10 % test; timestamps are minute-resolution, so bursty classes split
+inside one minute). A variant **must** set `PAPER_SUBDIR`; overwriting the canonical split is refused.
+`timeline.py` functions take `root=` so a variant's timestamps land in its own directory (before this
+they would have overwritten the canonical ones). `split_integrity.py` honours `PAPER_SUBDIR`.
+
+```bash
+SPLIT_MODE=grouped PAPER_SUBDIR=paper_grouped python scripts/preprocess_paper.py
+```
+
+`split_variants.sh <subdir> <name>` trains the CNN and the autoencoder at seeds 42/43/44 on a variant;
+`ae_seeds.sh <subdir> <stem>` trains only the autoencoder (used for the deterministic canonical
+reference `ae_det_s*`, since every earlier canonical AE run predates the determinism flags).
+`split_variants.py` compares the three splits: known-class detection (raw and deduplicated), macro and
+per-family zero-day PR-AUC for both models, and the double dissociation. **Writes**
+`split_variants.json`.
+
+## `scripts/baselines_tuned.py`
+
+*(added 2026-09-17, audit F-12.)* `baselines.py` uses fixed hyperparameters and never reads the
+validation split, while the CNN gets early stopping, learning-rate annealing and checkpoint selection on
+validation, so every CNN-vs-baseline statement was tuning-mismatched. This gives each baseline a small
+grid selected on the same zero-day-free validation split: **XGBoost** `max_depth` {4,6,8,10} ×
+`learning_rate` {0.05,0.1,0.3}, up to 1000 trees with early stopping on validation log-loss (no
+subsampling, so still seed-invariant: one run); **RandomForest** `max_depth` {10,20,30} × `max_features`
+{sqrt, 0.3}, 200 trees, selected on validation PR-AUC, then seeds 42/43/44; **IsolationForest**
+`n_estimators` {100,200,400} × `max_samples` {256, 4096, auto} on benign training flows only, same
+selection, seeds 42/43/44. Test data and zero-day labels are never used for selection. Logs
+`xgboost_tuned`, `random_forest_tuned_s*`, `isolation_forest_tuned_s*` and compares them with the
+untuned records and the deterministic CNN. **Writes** `baselines_tuned.json`. Long job — launch through
+`run_long.sh`.
+
+## `scripts/bot_mechanism_recheck.py`
+
+*(added 2026-09-17, audit F-01 / F-12.)* Re-measures `bot_failure_analysis.py`'s H1 (absorption) and
+H2(b) (cross-seed rank agreement) beyond the three pre-flag reference runs: all 11 pre-flag and 6
+distinct deterministic CNN runs (log-odds computed from the saved models where missing; existing files
+untouched), plus untuned/tuned RandomForest and IsolationForest and pre-flag/deterministic autoencoder.
+Reports all-pairs median/range, split into different-seed and same-seed pairs. **Result:** absorption
+holds in 17/17 runs; Bot's median ρ is **+0.55** (deterministic) / **+0.59** (pre-flag), range −0.54 to
++0.92, so "the Bot ranking is noise (−0.090)" is retracted; the tuned forest gives **+0.923**. Nothing is
+logged to `runs.jsonl`. **Writes** `bot_mechanism_recheck.json` and `y_prob_<run>_logodds_test.npy` for
+runs that had none. `paper_figures.py --nesy` builds Figure 2 from it.
 
 ## `scripts/audit_rebase.sh`
 

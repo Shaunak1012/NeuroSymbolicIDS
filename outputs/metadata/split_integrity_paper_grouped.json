@@ -1,0 +1,105 @@
+{
+ "zero_day_in_train": [],
+ "zero_day_in_val": [],
+ "n_features": 68,
+ "sizes": {
+  "train": 850877,
+  "val": 106728,
+  "test": 151324
+ },
+ "duplicates": {
+  "test_rows_duplicated_in_train": 26558,
+  "fraction": 0.1755042161190558,
+  "per_class": {
+   "BENIGN": 0.062444713230913655,
+   "Bot": 0.0,
+   "DDoS": 0.000166685187243027,
+   "DoS GoldenEye": 0.0014534883720930232,
+   "DoS Hulk": 0.2503829523200124,
+   "DoS Slowhttptest": 0.04135021097046414,
+   "DoS slowloris": 0.09407894736842105,
+   "FTP-Patator": 0.30758988015978694,
+   "Heartbleed": 0.0,
+   "Infiltration": 0.0,
+   "PortScan": 0.5895411018530033,
+   "SSH-Patator": 0.48,
+   "Web Attack Brute Force": 0.0,
+   "Web Attack Sql Injection": 0.0,
+   "Web Attack XSS": 0.0
+  }
+ },
+ "group_overlap": {
+  "flow_id_fraction": 0.0,
+  "flow_id_per_class": {
+   "BENIGN": 0.0,
+   "Bot": 0.0,
+   "DDoS": 0.0,
+   "DoS GoldenEye": 0.0,
+   "DoS Hulk": 0.0,
+   "DoS Slowhttptest": 0.0,
+   "DoS slowloris": 0.0,
+   "FTP-Patator": 0.0,
+   "Heartbleed": 0.0,
+   "Infiltration": 0.0,
+   "PortScan": 0.0,
+   "SSH-Patator": 0.0,
+   "Web Attack Brute Force": 0.0,
+   "Web Attack Sql Injection": 0.0,
+   "Web Attack XSS": 0.0
+  },
+  "source_ip_fraction": 0.9919180037535354
+ },
+ "temporal": {
+  "train_start": "2017-07-03 08:55:58",
+  "train_end": "2017-07-07 17:02:00",
+  "test_start": "2017-07-03 08:56:37",
+  "test_end": "2017-07-07 17:02:00",
+  "test_inside_train_range": 1.0
+ },
+ "benign": {
+  "pooled": 2271320,
+  "kept": 552373,
+  "undersample_factor": 4.111931611429234,
+  "pooled_share": 0.8031893901995703,
+  "test_share": 0.3660556157648489
+ },
+ "constant_columns": {
+  "dropped": [
+   "Bwd PSH Flags",
+   "Fwd URG Flags",
+   "Bwd URG Flags",
+   "CWE Flag Count",
+   "Fwd Avg Bytes/Bulk",
+   "Fwd Avg Packets/Bulk",
+   "Fwd Avg Bulk Rate",
+   "Bwd Avg Bytes/Bulk",
+   "Bwd Avg Packets/Bulk",
+   "Bwd Avg Bulk Rate"
+  ],
+  "any_dropped_column_still_present": false,
+  "checked_on_full_capture": true,
+  "non_constant_on_full_capture": {
+   "Fwd URG Flags": {
+    "rows": 315,
+    "labels": {
+     "BENIGN": 315
+    },
+    "files": [
+     "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"
+    ],
+    "urg_flag_count_also_1": 315
+   },
+   "CWE Flag Count": {
+    "rows": 315,
+    "labels": {
+     "BENIGN": 315
+    },
+    "files": [
+     "Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv"
+    ],
+    "urg_flag_count_also_1": 315
+   }
+  }
+ },
+ "split_dir": "data\\processed\\paper_grouped"
+}

@@ -152,6 +152,12 @@ class GroupAndTimeOverlap(unittest.TestCase):
             with self.subTest(family=fam):
                 self.assertTrue(all(f in tr for f in te[y == fam]))
 
+    def test_bot_sessions_never_recur_in_train(self):
+        # The paper contrasts this with the web families (Appendix A).
+        tr = set(pd.read_csv(os.path.join(P, "meta_train.csv"), usecols=["Flow ID"])["Flow ID"].astype(str))
+        te = pd.read_csv(os.path.join(P, "meta_test.csv"), usecols=["Flow ID"])["Flow ID"].astype(str).values
+        self.assertFalse(any(f in tr for f in te[_y("test") == "Bot"]))
+
     def test_test_lies_inside_train_time_range(self):
         import timeline
         tr, te = timeline.load_timestamps("train"), timeline.load_timestamps("test")

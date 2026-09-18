@@ -8,6 +8,52 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🔴 2026-09-17 — Remediation, day 2: one more retraction, four latent re-run defects
+
+### [FIXED 2026-09-17] 🔴 "The CNN's Bot ranking is noise (ρ = −0.090)" was three runs — retracted
+
+`bot_failure_analysis.py` H2(b) measured cross-seed rank agreement on the three pre-flag reference runs
+(the same three that carried the withdrawn fusion gain) and on the **untuned** random forest.
+`bot_mechanism_recheck.py` widened it: over all pairs of the 6 deterministic / 11 pre-flag CNN runs,
+Bot's median ρ is **+0.55 / +0.59** (pairs −0.54 to +0.92). Bot is the least consistent family, not
+noise. The forest's 0.068 is `max_features="sqrt"`; with `max_features=0.3` (selected on validation by
+`baselines_tuned.py`) it is **+0.923**, and its Bot PR-AUC is 0.2196 (6.4× chance). So "the instability
+belongs to closed-set discriminative learning" is unsupported. **Fixed:** abstract, §4, Figure 2
+(`paper_figures.py --nesy` now reads the recheck record), Appendix C, master draft (struck in place),
+CLAUDE.md; `verify_draft.py` flags the retracted wording if it returns unstruck; tests pin the finding.
+**What stands:** 100 % of Bot flows are classified BENIGN in **all 17** CNN runs; 0/8 feature overlap;
+oracle 0.9988. **Sixth single-population trap**, and the second caught in the same three runs.
+
+### [OPEN 2026-09-17] 🟡 Does the tuned forest reach Bot because its features overlap Bot's?
+
+The tuned forest ranks Bot at 6.4× chance and consistently (ρ +0.923) while still scoring every Bot
+flow below 0.5. The paper's mechanism predicts reach in proportion to feature overlap, but the 0/8
+overlap was measured with an XGBoost known-class model, not with this forest. Unmeasured; the paper
+says so.
+
+### [FIXED 2026-09-17] 🟡 Four analysis scripts would not reproduce their records if re-run
+
+Each chose its population from whatever was on disk, and the disk has grown since the record was
+written:
+
+| script | population rule | what a re-run would have done | fix | re-run check |
+|---|---|---|---|---|
+| `operational.py` | glob `y_prob_cnn_*_test.npy` (11 files then) | 27 files, four test-set lengths → crash; same-length 67-feature / augmentation runs silently in the "ensemble" | `fusion_population.PRE_FLAG` | `operational.json` + `.png` byte-identical |
+| `best_config.py` | same glob | same crash | same list | `best_config.json` byte-identical |
+| `field_gap.py` | every v2-macro row in `runs.jsonl` (42 groups) | **71 groups**, incl. the 2018 capture, relabelled data, tuned baselines → the paper's 40 methods / 37 of 169 / ρ would move | pinned `METHODS` (42) | `field_gap.json` + `.png` byte-identical |
+| `metric_divergence.py` | every prediction file of canonical length (57 groups) | tuned baselines, det OOD scores, det re-runs added | pinned `METHODS` (57) | `metric_divergence.json` byte-identical |
+
+`metric_divergence.py` excluded the chronological split's runs only because that test set is one row
+shorter (114,657 vs 114,658). The split-variant runs also log to the shared `runs.jsonl`; any future
+consumer that aggregates by name must pin its population the same way.
+
+### [OPEN 2026-09-17] ⚪ `behaviour_thresholds.npy` differs from a fresh run in the 14th digit
+
+The sandbox run (7.4) regenerates it with `burst` upper 666666.6666666666 vs 666666.666666667 and
+`large_pkt` upper 867.0190588662787 vs …2996. The canonical file dates from 2026-08-03, before the
+environment was locked; a numerical-library change is the likely cause. No measurable effect expected;
+recorded so the byte-identity claim is not overstated.
+
 ## 🔴🔴 2026-09-16 — Audit issues (`AUDIT_REPORT.md`, `BASEPAPER_COMPARISON.md`)
 
 Full detail, evidence and fixes are in those two files and `REMEDIATION_ITINERARY.md`. Summary of
@@ -29,9 +75,13 @@ is stable across CNN runs (not ensemble averaging — that fused worse, 2026-09-
 54.88 % of test flows share their 5-tuple with a training flow (100 % for four DoS families and all
 three Web Attack zero-day families); 100 % of test lies inside the training time range.
 `split_integrity.json`, pinned by `tests/test_split_integrity.py`. Measuring grouped and chronological
-variants is decision **D4** (STATUS).
+variants is decision **D4** (STATUS). *(2026-09-17: D4 decided yes; `paper_grouped` / `paper_chrono`
+built, CNN + AE training at three seeds each, `split_variants.py` compares them.)*
 
-### [OPEN 2026-09-16] 🟡 Absolute PR-AUC is measured at a 4.11× inflated attack base rate (F-04)
+### [FIXED 2026-09-17] 🟡 Absolute PR-AUC is measured at a 4.11× inflated attack base rate (F-04)
+
+> ✅ **Decision D1 (2026-09-17): keep the 1:1 protocol and report both.** Appendix A, §2, §9 and the
+> master draft state the base rate and the capture-faithful figures; `verify_draft.py` checks them.
 
 Benign is under-sampled before the split. At capture-faithful prevalence the det CNN's macro is
 0.5845, not 0.6299; online fusions fall to ~0.325. Recall and FPR are unaffected. Decision **D1**.
@@ -47,9 +97,14 @@ appear" crossed loss functions. The matched control (CE + ω=0) and a 3-seed det
 were launched 2026-09-16 (`audit_rebase.sh`). Close when `rebase_deterministic.py` reports
 `ltn_matched`, and rewrite the paper sentence to match.
 
-### [OPEN 2026-09-16] 🟡 Tuning is not matched between the CNN and the classical baselines (F-12)
+### [FIXED 2026-09-17] 🟡 Tuning is not matched between the CNN and the classical baselines (F-12)
 
-XGBoost / RF / IsolationForest never see the validation split. Not yet re-run (itinerary 6.1).
+> ✅ **`baselines_tuned.py`** selects each on the validation split (3 seeds for the forests): XGBoost
+> 0.6180 (untuned 0.6372), RandomForest **0.6407** (0.5995), IsolationForest 0.0564 (0.0653). The
+> tuned forest is within post-flag seed noise of the deterministic CNN (+0.0108 vs SD 0.0171). It also
+> overturned the forest half of the Bot-ranking claim (2026-09-17 block above).
+
+XGBoost / RF / IsolationForest never see the validation split. ~~Not yet re-run (itinerary 6.1).~~
 
 ### [OPEN 2026-09-16] 🟡 `BeaconLike` is oracle-informed (F-08)
 

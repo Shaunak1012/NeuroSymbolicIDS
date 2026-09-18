@@ -159,6 +159,21 @@ class Rebase(unittest.TestCase):
         for arm in ("ltn_repro_det", "ltn_repro_ctrl"):
             self.assertEqual(len(r["ltn_matched"][arm]["view5_per_seed"]), 3)
 
+    def test_axioms_are_worse_than_their_control_with_every_cnn_run(self):
+        """The robust symbolic result (2026-09-17): same trainer, axioms on vs off,
+        negative with every CNN run on disk, alone and with the KG fused."""
+        r = _load("ablation_population")
+        if r is None:
+            self.skipTest("ablation_population.json not generated")
+        for rung in ("axioms, alone (Ax6 vs ctrl)", "axioms, on KG (Ax6 vs ctrl)"):
+            for pop in ("pre_flag", "deterministic"):
+                s = r["summary"][rung][pop]
+                with self.subTest(rung=rung, pop=pop):
+                    self.assertEqual(s["runs_negative"], s["n_runs"])
+        # and the withdrawn abstract rung really does reverse off the reference runs
+        self.assertLess(r["summary"]["Ax6 on KG"]["reference_three"]["mean"], 0)
+        self.assertEqual(r["summary"]["Ax6 on KG"]["deterministic"]["runs_positive"], 6)
+
     def test_fusion_gain_is_not_a_property_of_the_method(self):
         """The withdrawal, pinned: the reference three gain, the other eight lose, and
         the gain is explained by where the CNN run ranks XSS."""
@@ -171,6 +186,45 @@ class Rebase(unittest.TestCase):
         self.assertGreater(s["pre_flag"]["reference_three_mean"], 0)
         self.assertLess(s["pre_flag"]["other_eight_mean"], 0)
         self.assertGreater(s["pre_flag"]["xss_rank_vs_delta_spearman"], 0.9)
+
+
+class BotMechanism(unittest.TestCase):
+    """Retraction of 2026-09-17: Bot's ranking is not noise across CNN runs, and the
+    forest's inconsistency is its default configuration. Absorption is universal."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.r = _load("bot_mechanism_recheck")
+        cls.b = _load("baselines_tuned")
+        if cls.r is None:
+            raise unittest.SkipTest("bot_mechanism_recheck.json not generated")
+
+    def test_every_cnn_run_absorbs_bot(self):
+        runs = [v for pop in self.r["absorption"].values() for v in pop.values()]
+        self.assertEqual(len(runs), 17)
+        for v in runs:
+            self.assertEqual(v["Bot"]["frac_argmax_BENIGN"], 1.0)
+            self.assertEqual(v["Web Attack XSS"]["modal_class"], "DoS slowloris")
+
+    def test_bot_ranking_is_not_noise_over_all_runs(self):
+        for pop in ("pre_flag", "deterministic"):
+            bot = self.r["all_pairs"][pop]["all"]["Bot"]
+            with self.subTest(pop=pop):
+                self.assertGreater(bot["median"], 0.5)
+                self.assertLess(bot["min"], 0)          # but it is the most variable family
+                for fam in ("Web Attack Brute Force", "Web Attack XSS", "BENIGN"):
+                    self.assertGreater(self.r["all_pairs"][pop]["all"][fam]["median"], bot["median"])
+        self.assertAlmostEqual(self.r["rank_stability"]["CNN, pre-flag reference (log-odds)"]
+                               ["Bot"]["mean"], -0.090, places=3)
+
+    def test_forest_inconsistency_is_its_default_configuration(self):
+        rs = self.r["rank_stability"]
+        self.assertLess(rs["RandomForest, untuned (max_features=sqrt)"]["Bot"]["mean"], 0.1)
+        self.assertGreater(rs["RandomForest, tuned (max_features=0.3)"]["Bot"]["mean"], 0.9)
+        if self.b is not None:
+            rf = self.b["models"]["random_forest"]
+            self.assertEqual(rf["selected"]["max_features"], "0.3")
+            self.assertTrue(all(run["family"]["Bot"] > 0.0342 for run in rf["runs"]))
 
 
 class DraftVerification(unittest.TestCase):

@@ -171,12 +171,42 @@ if fg:
 ab = REC["ablation"]
 if ab:
     chk("ablation: CNN macro", "ablation", ab["CNN"]["macro_mean"])
-    chk("ablation: CNN+KG macro", "ablation", ab["CNN + KG"]["macro_mean"])
+    chk("ablation: CNN+KG macro (withdrawn fusion)", "ablation", ab["CNN + KG"]["macro_mean"],
+        quoted=False)
     chk("ablation: CNN+KG paired delta", "ablation",
         ab["CNN + KG"]["paired_delta_mean"], "+{:.4f}")
-    chk("ablation: FULL macro", "ablation", ab["CNN + LTN-Ax6 + KG (FULL)"]["macro_mean"])
+    # 2026-09-17: the stacked comparison (CNN+KG 0.6926 -> FULL 0.6708) was built
+    # on the withdrawn three-run fusion and reverses on other CNN runs; the draft
+    # keeps it only struck through, the submission files drop it.
+    chk("ablation: FULL macro (withdrawn claim)", "ablation",
+        ab["CNN + LTN-Ax6 + KG (FULL)"]["macro_mean"], quoted=False)
     chk("ablation: LTN-Ax6 paired delta", "ablation",
         ab["CNN + LTN-Ax6"]["paired_delta_mean"], "{:.4f}")
+
+apop = load("ablation_population")
+if apop:
+    # The robust symbolic result: axioms on vs off, same trainer, same fusion
+    # position, across every CNN run on disk (audit F-01, 2026-09-17).
+    _s = apop["summary"]
+    _al, _kg = _s["axioms, alone (Ax6 vs ctrl)"], _s["axioms, on KG (Ax6 vs ctrl)"]
+    chk("axiom effect, alone, pre-flag runs", "ablation_population",
+        -_al["pre_flag"]["mean"], "{:.4f}")
+    chk("axiom effect, alone, deterministic runs", "ablation_population",
+        -_al["deterministic"]["mean"], "{:.4f}")
+    chk("axiom effect, with KG, pre-flag runs", "ablation_population",
+        -_kg["pre_flag"]["mean"], "{:.4f}")
+    chk("axiom effect, with KG, deterministic runs", "ablation_population",
+        -_kg["deterministic"]["mean"], "{:.4f}")
+    _n = sum(_x[p]["n_runs"] for _x in (_al,) for p in ("pre_flag", "deterministic"))
+    _neg = all(_x[p]["runs_negative"] == _x[p]["n_runs"]
+               for _x in (_al, _kg) for p in ("pre_flag", "deterministic"))
+    chk("axiom effect: number of CNN runs", "ablation_population", "all %d" % _n, "{}",
+        alt=("%d CNN" % _n, "%d CNN runs" % _n))
+    if not _neg:
+        BAD.append(("the draft says the axioms are worse with every CNN run",
+                    "all runs negative", "ablation_population"))
+else:
+    unbacked("axiom effect across CNN runs", "ablation_population.json missing")
 
 op = REC["operational"]
 if op:
@@ -646,6 +676,78 @@ if rb:
     chk("re-base: online k800 fusion vs det CNN", "rebase_deterministic",
         rb["fusion"]["CNN + KG k=800 (causal)"]["new_vs_new_cnn"]["mean_delta"], "{:.4f}",
         quoted=True)
+    # D1 (2026-09-17): absolute PR-AUC is measured at the 1:1 benign ratio; the
+    # paper states what it is at the capture's own benign proportion.
+    _cf = rb.get("capture_faithful_prevalence", {}).get("rows", {})
+    if _cf:
+        chk("base rate: det CNN macro, capture-faithful", "rebase_deterministic",
+            _cf["CNN alone"]["capture_faithful_mean"], "{:.4f}")
+        chk("base rate: k800 fusion as reported", "rebase_deterministic",
+            _cf["CNN + KG k=800 (causal)"]["as_reported_mean"], "{:.4f}")
+        chk("base rate: k800 fusion, capture-faithful", "rebase_deterministic",
+            _cf["CNN + KG k=800 (causal)"]["capture_faithful_mean"], "{:.4f}")
+    else:
+        unbacked("capture-faithful PR-AUC", "rebase_deterministic.json has no capture_faithful_prevalence")
+# 2026-09-17: the Bot-ranking claim, widened from three runs to every CNN run.
+_bm = load("bot_mechanism_recheck")
+if _bm:
+    _ap = {k: v["all"]["Bot"] for k, v in _bm["all_pairs"].items()}
+    chk("Bot rank agreement, det CNN median", "bot_mechanism_recheck",
+        _ap["deterministic"]["median"], "+{:.2f}")
+    chk("Bot rank agreement, pre-flag CNN median", "bot_mechanism_recheck",
+        _ap["pre_flag"]["median"], "+{:.2f}")
+    chk("Bot rank agreement, det CNN lowest pair", "bot_mechanism_recheck",
+        _ap["deterministic"]["min"], "{:.2f}", alt=("%.2f" % _ap["deterministic"]["min"],))
+    chk("Bot rank agreement, det pairs below 0.3", "bot_mechanism_recheck",
+        "%d of %d" % (round(_ap["deterministic"]["frac_below_0.3"] * _ap["deterministic"]["n_pairs"]),
+                      _ap["deterministic"]["n_pairs"]), "{}",
+        alt=("%d of the %d" % (round(_ap["deterministic"]["frac_below_0.3"] * _ap["deterministic"]["n_pairs"]),
+                               _ap["deterministic"]["n_pairs"]),))
+    _rs = _bm["rank_stability"]
+    chk("tuned RF Bot rank agreement", "bot_mechanism_recheck",
+        _rs["RandomForest, tuned (max_features=0.3)"]["Bot"]["mean"], "+{:.3f}")
+    chk("det AE Bot rank agreement", "bot_mechanism_recheck",
+        _rs["Autoencoder, deterministic"]["Bot"]["mean"], "+{:.3f}")
+    _n = sum(len(v) for v in _bm["absorption"].values())
+    _all = all(r["Bot"]["frac_argmax_BENIGN"] == 1.0 for v in _bm["absorption"].values() for r in v.values())
+    chk("Bot absorbed as BENIGN in every CNN run", "bot_mechanism_recheck",
+        "all %d" % _n if _all else "NOT all %d" % _n, "{}")
+else:
+    unbacked("Bot ranking over all CNN runs", "bot_mechanism_recheck.json missing")
+_bt = load("baselines_tuned")
+if _bt:
+    chk("tuned RF macro", "baselines_tuned", _bt["models"]["random_forest"]["tuned_macro_mean"])
+    chk("tuned RF Bot PR-AUC", "baselines_tuned",
+        _bt["models"]["random_forest"]["tuned_family_mean"]["Bot"])
+    chk("tuned RF Bot lift", "baselines_tuned",
+        _bt["models"]["random_forest"]["tuned_family_mean"]["Bot"] / (1956 / (1956 + 55237)),
+        "{:.1f}", alt=())
+else:
+    unbacked("tuned baselines", "baselines_tuned.json missing")
+_od = load("ood_scores_det")
+if _od:
+    _b = _od["predictions"]["best_bot_scorer"]
+    chk("OOD (det CNN): best Bot", "ood_scores_det", _od["predictions"]["best_bot_value"])
+    chk("OOD (det CNN): best-Bot scorer's lift", "ood_scores_det",
+        _od["scorers"][_b]["bot_lift"], "{:.2f}x")
+    chk("OOD (det CNN): best-Bot scorer's macro", "ood_scores_det", _od["scorers"][_b]["macro"])
+    chk("OOD (det CNN): margin under 0.08", "ood_scores_det",
+        100 * (0.08 - _od["predictions"]["best_bot_value"]) / 0.08, "{:.0f} %",
+        alt=("{:.0f} per cent".format(100 * (0.08 - _od["predictions"]["best_bot_value"]) / 0.08),))
+else:
+    unbacked("OOD battery on the deterministic CNN", "ood_scores_det.json missing")
+_si = load("split_integrity")
+if _si:
+    chk("split: benign under-sampling factor", "split_integrity",
+        _si["benign"]["undersample_factor"], "{:.2f}")
+    chk("split: test rows duplicated in train", "split_integrity",
+        100 * _si["duplicates"]["fraction"], "{:.1f} %")
+    chk("split: test flows sharing a 5-tuple with train", "split_integrity",
+        100 * _si["group_overlap"]["flow_id_fraction"], "{:.1f} %")
+    chk("split: test flows sharing a source address", "split_integrity",
+        100 * _si["group_overlap"]["source_ip_fraction"], "{:.1f} %")
+else:
+    unbacked("split boundary figures", "split_integrity.json missing")
 obd = load("operational_best_c4_log1p")
 if obd:
     _r = lambda c: 100 * obd["configs"][c]["recall_at_fpr"]["ALL unknown flows"]["0.010"]["mean"]  # noqa: E731
@@ -683,6 +785,14 @@ STALE = [
      "stale verification count; the checker reports the live figure on each run"),
     (r"\bSix\s+claims\s+in\s+this\s+paper\s+have\s+no\s+machine-readable",
      "stale unbacked count; it is four, and two of the six named have since been backed"),
+    # Retracted 2026-09-17 (bot_mechanism_recheck.py): -0.090 was three runs; the
+    # median over all CNN run pairs is +0.55 / +0.59.
+    (r"ranking\s+(of\s+(that\s+class|Bot\s+flows)\s+)?is\s+(\*\*)?noise",
+     "Bot's ranking is not noise over all CNN runs (median rho +0.55 / +0.59)"),
+    (r"changes\s+arbitrarily\s+from\s+one\s+training\s+seed",
+     "same retracted claim, abstract wording"),
+    (r"(Random\s*Forest|random\s+forest)\s+(shows\s+the\s+same\s+pattern|behaves\s+(identically|the\s+same\s+way))",
+     "only the untuned forest does; the tuned forest gives +0.923"),
 ]
 import re as _re
 _LIVE = _re.sub(r"(?s)~~.*?~~", "", NORM)

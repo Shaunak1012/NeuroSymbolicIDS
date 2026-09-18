@@ -66,6 +66,23 @@ EXCLUDE_PREFIX = ("cnn_kfold", "cnn_noise_r", "det_verify", "cnn_repro", "smoke"
 
 _SUFFIX = re.compile(r"(_logodds)?(_s\d+)?(_logodds)?$")
 
+# PINNED 2026-09-17 (audit item 7.4). The population used to be "every v2-macro row in
+# runs.jsonl". By 2026-09-17 that set had grown (42 -> 71 groups, adding runs on the
+# 2018 capture, on relabelled data, deterministic re-runs and the tuned baselines; the
+# split-variant runs log there too), so a re-run would silently change the published
+# figures. These are the
+# 42 method groups in the record written 2026-09-09; a new method enters only by
+# editing this list.
+METHODS = frozenset([
+    "autoencoder_paper", "c4_log1p", "c4_raw", "cnn_auxhead_l0.5", "cnn_paper",
+    "decision_tree", "deep_cnn_lstm", "deep_gru", "deep_lstm", "deep_svdd",
+    "deep_transformer", "fusion_cnn_allbehaviours", "fusion_cnn_beaconlike",
+    "fusion_cnn_kg", "isolation_forest", "kg", "kg_causal", "kg_s43_causal",
+    "kg_s44_causal", "knn_k5", "linear_svm", "lof", "logistic_regression", "ltn_anat_w0p5",
+    "ltn_anat_w1p0", "ltn_anat_w2p0", "ltn_ax6_ratio_w1p0", "ltn_ax6_w0p5", "ltn_ax6_w1p0",
+    "ltn_ctrl_w0", "ltn_repro", "ltn_v2", "mahalanobis", "mlp", "msp", "naive_bayes",
+    "ocsvm_sgd", "postdet", "random_forest", "rbf_svm_nystroem", "vae", "xgboost"])
+
 
 def base_name(name):
     """Collapse seed and rescore suffixes so seeds of one method group together."""
@@ -93,6 +110,8 @@ def field_noise(rows):
         v = r.get("metrics", {}).get(FIELD)
         if v is None or r["name"].startswith(EXCLUDE_PREFIX):
             continue
+        if base_name(r["name"]) not in METHODS:
+            continue
         g[base_name(r["name"])].append(float(v))
     sds = [float(np.std(v, ddof=1)) for v in g.values() if len(v) >= 3]
     return float(np.median(sds)) if sds else float("nan")
@@ -113,6 +132,8 @@ def main():
         name = r["name"]
         if name.startswith(EXCLUDE_PREFIX):
             skipped += 1
+            continue
+        if base_name(name) not in METHODS:
             continue
         g = groups[base_name(name)]
         g["field"].append(float(m[FIELD]))

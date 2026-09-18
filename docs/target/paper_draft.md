@@ -57,13 +57,17 @@ doubles web-attack precision (0.088 → 0.213); logical reasoning over entity re
 true positives from 0.0 % to 35.5 % at a 0.5 % false-positive rate; alerts are mapped to an external
 attack taxonomy. **Our own symbolic pillar did the opposite** — its Logic Tensor Network axioms are
 deterministic functions of the flow features the network already reads — and it was null alone
-(−0.0004, n.s.) and significantly harmful when stacked (0.6926 → 0.6708, p < 0.0001).
+(−0.0004, n.s.) and ~~significantly harmful when stacked (0.6926 → 0.6708, p < 0.0001)~~ **worse than the
+same trainer without axioms with all 17 CNN runs we paired it with** *(2026-09-17: the stacked comparison
+was built on the withdrawn three-run fusion and reverses on other CNN runs; `ablation_population.py`)*.
 
 We propose that **symbolic knowledge helps exactly to the extent it lies outside the model's learned
 feature basis**, and show the same property explains a second failure. A closed-set learner reaches a
 novel attack family only insofar as its signature overlaps that basis; for Bot the overlap is empty
-(**0 of 8** discriminative features shared), every flow is classified benign, and the ranking is
-noise (cross-seed ρ = **−0.090**). This unreachability survives five attempts to break it,
+(**0 of 8** discriminative features shared) and every flow is classified benign in all 17 CNN runs~~,
+and the ranking is noise (cross-seed ρ = **−0.090**)~~. *(Corrected 2026-09-17: over all pairs of our CNN runs Bot's cross-run ρ has a median of +0.55
+(6 deterministic runs) / +0.59 (11 pre-flag runs), range −0.54 to +0.92; −0.090 was the three
+reference runs. `bot_mechanism_recheck.py`.)* This unreachability survives five attempts to break it,
 including an independent capture where Bot is abundant (**0.83×** chance) and corrected labels that
 remove attack flows which transmitted no payload.
 
@@ -82,9 +86,10 @@ A closed-set discriminative model learns only the features that separate the cla
 on, so a novel class is reachable exactly to the extent its signature overlaps that basis. We show
 this is not a metaphor but a measurable property with a testable consequence, and that for one attack
 family the overlap is **empty**. For CIC-IDS2017's Bot family, **0 of 8** discriminative features are
-shared with the known-class task, **100 %** of Bot flows are classified BENIGN at mean
-p(BENIGN) = 0.9984, and the resulting ranking is **noise** — cross-seed Spearman **ρ = −0.090**,
-against 0.68–0.83 for every other family. The information is present: an oracle with Bot labels
+shared with the known-class task, and **100 %** of Bot flows are classified BENIGN in all 17 CNN runs
+(mean p(BENIGN) ≥ 0.998; 0.9984 on the first three)~~, and the resulting ranking is **noise** —
+cross-seed Spearman **ρ = −0.090**, against 0.68–0.83 for every other family~~. Bot's ranking is the
+least consistent family between runs, not noise (see the note above). The information is present: an oracle with Bot labels
 reaches PR-AUC **0.9988** from the same flow features. The claim survived five attempts to break it;
 two measurement failures — one in the published metric (37 of 169 method pairs indistinguishable
 while ≥2× apart on zero-day), one in the labels (Web Brute Force 0.8861 → 0.0072 once flows with
@@ -103,8 +108,12 @@ analyst's knowledge of how networks and attacks behave ought to help.
 
 We built a neuro-symbolic intrusion detector to test that promise and it failed. Its Logic Tensor
 Network axioms — over behaviours such as burst traffic, high packet-size variance and beacon-like
-periodicity — contributed **−0.0004** macro zero-day PR-AUC alone (not significant) and **harmed**
-the system significantly when stacked on a knowledge-graph channel (0.6926 → 0.6708, p < 0.0001).
+periodicity — contributed **−0.0004** macro zero-day PR-AUC alone (not significant), and against the same trainer
+without axioms they are worse with **every one of 17 CNN runs** — by **0.0062** (11/11) and **0.0068**
+(6/6 deterministic) alone, **0.0212** and **0.0324** with the KG fused. ~~and **harmed** the system
+significantly when stacked on a knowledge-graph channel (0.6926 → 0.6708, p < 0.0001)~~ *(withdrawn
+2026-09-17: that comparison is positive on 6/6 deterministic CNN runs — any third channel repairs a
+broken CNN+KG fusion)*.
 This paper is about why, and the answer turns out to be general.
 
 **The published systems that report gains share a property ours lacked.** Grov et al. add a single
@@ -122,8 +131,8 @@ outside the model's learned feature basis** — and make three contributions aro
 1. **A mechanism that unifies two failures.** The same property governs *novel attack families*: a
    closed-set learner reaches a family it never saw only insofar as that family's signature overlaps
    the features it learned. For the Bot family the overlap is empty (0 of 8 discriminative features),
-   every flow is classified benign at p(BENIGN) = 0.9984, and the ranking is noise (cross-seed
-   ρ = −0.090). Symbolic knowledge inside the basis adds nothing; a novel class outside it cannot be
+   every flow is classified benign in all 17 CNN runs~~, and the ranking is noise (cross-seed
+   ρ = −0.090)~~. Symbolic knowledge inside the basis adds nothing; a novel class outside it cannot be
    reached. **One principle, two consequences** (§4).
 2. **A durability test.** That unreachability survives five attempts to break it: an independent
    capture where Bot is abundant rather than rare, corrected labels that discard attack flows which
@@ -229,6 +238,21 @@ feature-vector duplicates of training rows. De-duplicating costs the supervised 
 zero-day families measure **0.0 % overlap** with training. Duplication therefore inflates *the
 field's* metric and leaves *ours* untouched — this is a property of the comparison, not a flaw in our
 numbers.
+
+**Base rate.** Benign flows are under-sampled **4.11×** before the split (as in the base paper), so
+every PR-AUC and lift here is measured at roughly four times the capture's attack prevalence. Recall and
+FPR are within-class rates and are unaffected. At the capture's own benign proportion the deterministic
+CNN's macro zero-day PR-AUC is **0.5845**, not 0.6299, and the online CNN + KG fusion (k = 800, causal)
+falls from 0.5030 to **0.3255** (`rebase_deterministic.py`, 200 thinning draws). Every absolute PR-AUC in
+this paper is therefore an upper bound for deployment; comparisons are made within the 1:1 protocol.
+
+**Split boundary.** The split is stratified at random over a time-ordered capture and is not grouped by
+connection: **54.9 %** of test flows share a Flow ID (5-tuple) with a training flow, **98.9 %** share a
+source address, and every test flow lies inside the training time range (`split_integrity.py`). Bot shares
+no 5-tuple with training. **Every** Web Brute Force and XSS flow does, with training flows of *other*
+classes (mostly DoS Hulk and DDoS): the web and DoS attacks come from the same address (172.16.0.1)
+against the same server (192.168.10.50:80), and source ports repeat, so the shared 5-tuples mark the same
+attacker and target, not the same connection. This is consistent with the absorption result below.
 
 **Feature transform.** We use `log1p`, justified **on the headline metric**: 0.6299 ± 0.0031 against
 0.1606 ± 0.0039 for raw features, over three seeds per arm (Welch t = 163). We note plainly that our
@@ -347,17 +371,28 @@ We establish this on Bot, where the overlap is empty:
   with it goes most of the quantitative force of the reachable half. What this section establishes
   well is the **unreachable** direction; the reachable direction is now a consistent sign over two
   families and little more. §7 gives the full accounting.
-- Consequently the model's Bot ranking is **noise**: cross-seed Spearman **ρ = −0.090**, against
+- ~~Consequently the model's Bot ranking is **noise**: cross-seed Spearman **ρ = −0.090**, against
   0.68–0.83 for every other family. RandomForest behaves identically (ρ = 0.068); **the autoencoder
   does not (ρ = 0.827)**. The property therefore belongs to *closed-set discriminative learning*, not
-  to neural networks.
-  ⚠️ **This is a stability statistic computed over three seeds, and §7 warns that n = 3 is far too
+  to neural networks.~~
+  ~~⚠️ **This is a stability statistic computed over three seeds, and §7 warns that n = 3 is far too
   few to estimate a dispersion.** We rely on it here for one reason, which we state rather than
   assume: the quantity is not marginal. Bot sits at ρ ≈ 0 while every other family sits at 0.68–0.83
   — a categorical separation, not a difference of degree — and it reproduces across two unrelated
   model families while the autoencoder, on the same three seeds, returns 0.827. **A three-seed
   estimate cannot tell us that Bot's ρ is −0.090 rather than −0.02 or +0.05; it is entirely adequate
-  to tell us it is not 0.7.** Only the second claim is load-bearing.
+  to tell us it is not 0.7.** Only the second claim is load-bearing.~~
+  🔴 **RETRACTED 2026-09-17 (`bot_mechanism_recheck.py`).** The three-seed estimate was not adequate
+  even for the load-bearing claim. Over all **15** pairs of six deterministic CNN runs, Bot's median ρ
+  is **+0.55** (pairs **−0.52 to +0.92**, 5 of 15 below 0.3); over the **55** pairs of the 11 pre-flag
+  runs it is **+0.59** (−0.54 to +0.92). Bot *is* the least consistent family (benign +0.71, web
+  +0.78–0.93, 1 of their 210 pairs below 0.3), but it is not noise, and −0.090 was the low end.
+  RandomForest's 0.068 is its **default** `max_features="sqrt"`; with `max_features` selected on
+  validation (`baselines_tuned.py`) it gives **+0.923** and Bot PR-AUC **0.2196** (6.4× chance, every
+  seed above chance). The deterministic autoencoder gives **+0.754**. So the inconsistency is a
+  property of this CNN and of the forest's default configuration, **not** of closed-set discriminative
+  learning, and whether the tuned forest's features overlap Bot's more than the CNN's is unmeasured.
+  What survives: 100 % of Bot flows are BENIGN in **all 17** CNN runs, 0/8 overlap, oracle 0.9988.
 - **The information is present.** An oracle given Bot labels reaches PR-AUC **0.9988** from the same
   68 flow features (Web BF 0.9999, XSS 0.9984). ⚠️ The oracle trains on zero-day labels; it is an
   **upper bound, not a method**, and it is excluded from every method comparison in this paper. Its
@@ -367,9 +402,11 @@ We establish this on Bot, where the overlap is empty:
 **One cause, four symptoms — and we separate what is measured from what is inferred.** The
 mechanism accounts for four otherwise unrelated observations: the clustering-purity lottery we hit
 building the knowledge graph, the spread in Mahalanobis Bot scores, RandomForest's Bot swing across
-seeds, and the CNN's own failure. ⚠️ **Two of those links are measured and two are argued.**
+seeds, and the CNN's own failure. ⚠️ ~~**Two of those links are measured and two are argued.**
 RandomForest's instability is measured on the same axis as the CNN's (ρ = 0.068 against 0.827 for the
-autoencoder), and the CNN's is the direct observation. The purity lottery and the Mahalanobis spread
+autoencoder), and~~ **One link is measured and three are argued** *(corrected 2026-09-17: RandomForest's
+Bot swing disappears when its feature sampling is tuned, so it is not evidence for the mechanism)*;
+the CNN's failure is the direct observation. The purity lottery and the Mahalanobis spread
 are **independently observed phenomena that the mechanism explains**; we did not run a manipulation
 that isolates the mechanism as their cause. We regard the unification as the contribution, and we
 label it as an explanatory claim rather than a fifth measurement.
@@ -389,7 +426,9 @@ four temperatures, entropy, ODIN at two settings, and margin — against a falsi
 0.08 macro-Bot **fixed in advance**. The best reaches **0.0783**. ⚠️ We say plainly that this *passed
 by two per cent* and do not round it to a clean pass; a threshold set slightly lower would have
 flipped the verdict. The one scorer that buys Bot anything (`energy_T1000`, 2.29× chance) does so by
-**destroying known-class discrimination**, collapsing macro to 0.0326.
+**destroying known-class discrimination**, collapsing macro to 0.0326. These are the three pre-flag
+reference CNN runs; on the three **deterministic** runs (`OOD_POPULATION=det`) the same scorer is best
+again at **0.0576** (1.68× chance, **28 %** under the threshold), macro 0.0257 — a clearer pass.
 
 ---
 
@@ -403,7 +442,7 @@ architecture as much as anyone else's.
 | **More architecture** (LSTM, GRU, CNN-LSTM, Transformer) | Nothing escapes the top tier upward and nothing touches Bot (best 0.0626, against the knowledge graph's 0.3103). CNN-LSTM lands **0.0031** from the plain CNN, so the **convolutional front-end is doing the work**; pure recurrence halves the score. |
 | **More classical baselines** | 16× spread, none competitive (§3b caveats apply). |
 | **Benign-only anomaly methods** (VAE, Deep SVDD, OC-SVM, LOF) | **LOF reaches macro 0.3360 ± 0.0135 and does *not* collapse on web attacks** — a correction to our own earlier framing, which attributed that collapse to the benign-only *family* when it is a property of **reconstruction-error scoring**. |
-| **The symbolic pillar itself** | **−0.0004 (n.s.)** alone, and it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043. |
+| **The symbolic pillar itself** | **−0.0004 (n.s.)** alone; against the axiom-free control it is worse with **all 17 CNN runs** (alone and with the KG). ~~it **significantly harms** the system stacked on the knowledge graph (0.6926 → 0.6708, **p < 0.0001**), diluting Bot from 0.2518 to 0.2043~~ *(withdrawn 2026-09-17, `ablation_population.py`: +0.0886 on 6/6 deterministic CNN runs)* |
 | **Calibration** | Isotonic regression reaches ECE **0.0001** on known classes while **zero-day ECE does not move** (0.0387) — a **287×** gap. **The better the calibration, the wider the gap.** |
 | **Abstention** | Zero-day precision **does not move (+0.0000)** at any non-degenerate coverage. |
 | **Training on a second dataset** (CSE-CIC-IDS2018's known pool, doubling the training set) | 🔴 **Actively harmful: −0.1461 macro against a seed-matched control, 0/3 seeds better, direction consistent.** And the harm is *imported false positives*, not lost detection — see below. |
@@ -513,8 +552,10 @@ same mechanism this paper claims for the closed-set case, now observed in the op
 
 🔴 **And the ceiling of that mechanism is chance.** The *best* case for Bot, from the most
 heterogeneous merge we can construct out of the known classes, is **+0.068 with the sign flipping
-between seeds** — the same instability signature as the CNN's own Bot ranking (cross-seed
-ρ = −0.090). **Bot's rank is noise regardless of which model produces it.** Restructuring the label
+between seeds** ~~— the same instability signature as the CNN's own Bot ranking (cross-seed
+ρ = −0.090). **Bot's rank is noise regardless of which model produces it.**~~ The CNN's own Bot ranking
+also varies between runs, though a tuned random forest ranks Bot consistently (§4, corrected
+2026-09-17). Restructuring the label
 space steers *which* novel families a reject region reaches; it does not make an unreachable one
 reachable.
 
@@ -715,8 +756,9 @@ magnitude**, and we treat the 2017 magnitude as a property of that capture.
 
 ⚠️ **It is a dissociation between two models, not two method families.** RandomForest — a supervised
 method — **ties the autoencoder on Bot** (0.1311 versus 0.1314, p = 0.88) while beating it by 0.50 on
-macro. We do not write this up as a supervised-versus-unsupervised result; that stronger form is
-falsified by our own data.
+macro. With `max_features` selected on validation (`baselines_tuned.py`, 2026-09-17) the same forest
+reaches **0.2196** on Bot, above the autoencoder. We do not write this up as a
+supervised-versus-unsupervised result; that stronger form is falsified by our own data.
 
 ⚠️ **The web-attack half is not zero-day detection.** The CNN assigns **~90 % of Web Brute Force and
 XSS flows to `DoS slowloris`**, a known *attack* class, so their 0.92–0.95 PR-AUC is **absorption into
@@ -769,7 +811,7 @@ report where we fail.
 | P3 | Data snooping | ✅ Selection on a held-out half with an rng fixed independently of any model seed. It caught a +0.007 result that is **−0.0008** on the reporting half. ⚠️ Residual: the cluster count was *first* swept on test, and we say so where we report it. |
 | P4 | Spurious correlations | ✅ This is §4 and the absorption analysis: the web families' 0.92–0.95 is **absorption into a known attack class**, not detection, and an earlier explanation of our own was falsified and withdrawn. |
 | P5 | Biased parameter selection | ✅ Noise floor measured before any delta is interpreted; every comparison paired on seed. |
-| P6 | Inappropriate baseline | ✅ Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. |
+| P6 | Inappropriate baseline | ✅ Four deep architectures, seven classical, four benign-only, nine post-hoc OOD scorers, and every comparison against a **seed-matched** baseline rather than a pooled mean. XGBoost / RandomForest / IsolationForest re-run with hyperparameters selected on validation (`baselines_tuned.py`, 2026-09-17): the tuned forest (**0.6407**) is within seed noise of the deterministic CNN (0.6299). |
 | P7 | Inappropriate performance measures | 🔑 **This is the paper's subject**, not a box we tick — §3. |
 | P8 | Base rate fallacy | ✅ PR-AUC over ROC, prevalence and lift reported, families below 100 flows excluded from the macro, and cross-dataset comparison done **only** in lift because prevalence differs by orders of magnitude. |
 | P9 | Lab-only evaluation | ❌ **Not addressed.** Throughput is measured (7.95 µs/flow) but nothing is deployed. |
@@ -815,9 +857,10 @@ payload is trivially unlike normal traffic, and that is what was being scored.
 ✅ **§4's pre-registered falsifier did not fire, and the way it failed to fire is the point.** The
 criterion was effective-Bot lift *clearly above chance, consistently across seeds*. Effective Bot
 lifts **0.57 / 0.64 / 8.99** — **two of three runs below a random ranker**, a 16× spread between best
-and worst. The mean of 3.4× describes no run that happened. That instability is precisely the
-signature §4 documents for Bot (cross-seed rank ρ = −0.090): **the ranking is noise**, so Bot's
-unreachability is a property of the model rather than an artefact of empty flows.
+and worst. The mean of 3.4× describes no run that happened. ~~That instability is precisely the
+signature §4 documents for Bot (cross-seed rank ρ = −0.090): **the ranking is noise**,~~ That spread
+matches the variable Bot ranking §4 documents (a third of deterministic run pairs agree at ρ < 0.3), so
+Bot's unreachability is a property of the model rather than an artefact of empty flows.
 
 🧭 **What this does to the paper is uncomfortable and we state it plainly.** §3 argues the field's
 published metric cannot measure zero-day detection. This shows that the metric *we* advocate was, on
@@ -931,8 +974,9 @@ recurring pitfalls across 30 top-tier security papers and give recommendations f
 **We are downstream of both, and we try to supply what they ask for.** Sommer and Paxson's claim is
 qualitative — machine learning struggles with novelty. §4 supplies a **mechanism** for one instance
 of it (empty overlap between the novel class's discriminative features and the trained basis) and
-shows the failure is not merely inaccuracy but **instability**: the model's ranking of that class is
-noise, cross-seed ρ = −0.090. §1 supplies the **quantitative** counterpart — ~~33 %~~ **22 %** of comparable method pairs (37 of
+shows the failure ~~is not merely inaccuracy but **instability**: the model's ranking of that class is
+noise, cross-seed ρ = −0.090~~ takes the form of confident misclassification (every Bot flow benign in
+all 17 CNN runs; corrected 2026-09-17). §1 supplies the **quantitative** counterpart — ~~33 %~~ **22 %** of comparable method pairs (37 of
 169) are indistinguishable on the published metric while differing ≥2× on the capability at issue.
 *(Corrected 2026-09-15: "33 %" was a stale figure from an earlier method count and matched neither
 the tie-degenerate-excluded headline, 22 %, nor the all-methods figure, 30 %.)* Against
@@ -1148,8 +1192,9 @@ capability, and **too coarse in its own reporting regime to separate methods on 
 of comparable method pairs (37 of 169, 22 %) are indistinguishable on it while differing twofold or
 more on the capability the numbers are used to claim. Underneath that, a closed-set discriminative model cannot reach a novel
 class whose signature does not overlap the basis it was trained on, and when the overlap is empty the
-model is not merely inaccurate but **unstable**: its ranking of that class is noise. We showed this
-with a mechanism, traced four independent symptoms to it, and demonstrated that neither more
+model ~~is not merely inaccurate but **unstable**: its ranking of that class is noise~~ classifies that
+class confidently as benign. We showed this with a mechanism, ~~traced four independent symptoms to
+it~~ offered it as the explanation of several symptoms (one of them measured), and demonstrated that neither more
 architecture, nor classical baselines, nor benign-only anomaly detection, nor a standard OOD battery,
 nor calibration, nor abstention, nor our own symbolic pillar removes it.
 

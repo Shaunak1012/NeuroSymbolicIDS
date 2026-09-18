@@ -14,13 +14,13 @@ that is rarely stated: the knowledge they add, whether an asset inventory, a rel
 external attack taxonomy, is information the neural network could not compute from its input. Our own
 system did not have this property. Its Logic Tensor Network axioms are deterministic functions of the
 flow features the network already receives. On its own the symbolic component had no measurable effect
-(−0.0004, n.s.), and combined with a knowledge-graph channel it lowered performance (0.6926 → 0.6708,
-p < 0.0001). We argue that symbolic knowledge can help a neural detector only to the extent that it lies
+(−0.0004, n.s.), and it was worse than the same trainer run without axioms in all 17 CNN training runs
+we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge can help a neural detector only to the extent that it lies
 outside the model's learned feature basis, and that the same condition explains a second failure. A
 closed-set classifier reaches an attack family it has never seen only in so far as that family's
 signature overlaps the features it learned. For Bot there is no overlap (0 of 8 discriminative features
-are shared), every Bot flow is classified as benign, and the ranking of Bot flows changes arbitrarily
-from one training seed to the next (ρ = −0.090). The result held under five attempts to overturn it,
+are shared), and every Bot flow is classified as benign in all 17 of our CNN training runs. The result
+held under five attempts to overturn it,
 among them an independent capture in which Bot is common and a relabelled release of the dataset. We
 then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not. Host-role
 predicates derived from metadata the network never sees can still be predicted from its features, with
@@ -38,9 +38,10 @@ detector is weakest on attacks that never appeared in training, and those are th
 about how networks and attacks behave should matter most.
 
 We built a neuro-symbolic intrusion detector to test the idea, and it did not work. Its Logic Tensor
-Network axioms encode behaviours such as burst traffic, packet-size variance and periodic, beacon-like
-connections. Alone they changed macro zero-day PR-AUC by −0.0004, which is not significant. Added on top
-of a knowledge-graph channel they made the system significantly worse (0.6926 → 0.6708, p < 0.0001).
+Network axioms encode behaviours such as burst traffic, packet-size variance and destination ports
+outside the standard service ports. Alone they changed macro zero-day PR-AUC by −0.0004, which is not
+significant. Compared with the same trainer run without axioms, they made the system worse with every
+one of the 17 CNN training runs we paired them with, whether or not a knowledge-graph channel was added.
 This paper sets out to explain that outcome, and we think the explanation applies beyond our system.
 
 Published systems that do report gains have something ours did not. Grov et al. [14] add a single axiom
@@ -90,7 +91,8 @@ effect sizes, but they do not affect the mechanism.
 and benign traffic are treated as known. They are split 80/10/10 with stratification, and benign traffic
 is under-sampled to a 1:1 ratio, giving 883,796 training, 110,475 validation and 114,658 test flows. Six
 rare families (Bot, Heartbleed, Infiltration, and Web Attack Brute Force, XSS and SQL Injection) occur
-only in the test set.
+only in the test set. Under-sampling benign traffic raises the attack base rate about fourfold, so
+absolute PR-AUC values here are higher than they would be at the capture's own prevalence (Appendix A).
 
 **Metric.** Our main metric is macro zero-day PR-AUC over the three unseen families with enough samples:
 Bot (n = 1,956), Web Attack Brute Force (n = 1,507) and Web Attack XSS (n = 652). Heartbleed (n = 11),
@@ -119,8 +121,13 @@ destination port outside a list of standard service ports (`BeaconLike`).
 
 **Results.** We tried injecting the axioms at the loss, at the representation and at inference. In every
 case the symbolic component either lowered macro zero-day PR-AUC or left it unchanged. On its own it
-contributes −0.0004 (n.s.). On top of the knowledge graph it significantly reduces performance
-(0.6926 → 0.6708, p < 0.0001) and lowers the Bot score from 0.2518 to 0.2043. One axiom seemed at first
+contributes −0.0004 (n.s.). The cleaner test holds everything but the axioms fixed: the same trainer
+with the axiom weight at zero. Against it, the axioms lower macro zero-day PR-AUC with each of the 11
+CNN runs trained before our determinism controls (by 0.0062 on average) and each of the 6 trained after
+(0.0068), and by more when a knowledge-graph channel is also fused (0.0212 and 0.0324). An earlier
+version of this comparison, which added the axioms on top of a knowledge-graph fusion built on three
+CNN runs, reported a significant loss; that fusion does not hold across CNN runs (supplementary §D),
+so we report the matched comparison instead. One axiom seemed at first
 to help on Bot, but the effect disappeared when we repeated the experiment over several seeds. Because
 the sign of the effect is the same in every configuration, we do not think better tuning would change
 the conclusion.
@@ -154,22 +161,24 @@ also accounts for a failure that at first seems unrelated.
 A closed-set discriminative model learns the features that separate the classes in its training
 objective and has no reason to learn others. It follows that a class the model has never seen can be
 reached only as far as that class's signature overlaps the learned basis. This is the precondition of
-§3 again, with an unseen class in the place of an injected predicate. When the overlap is empty, the
-model's output on the class is not just poor. It is also unstable, since nothing in the training
-objective constrains it.
+§3 again, with an unseen class in the place of an injected predicate. When the overlap is empty,
+nothing in the training objective constrains the model's output on the class.
 
 Bot is a case where the overlap is empty, and we use it to test this account:
 
-- On all three seeds, 100 % of Bot flows are classified as BENIGN, with mean p(BENIGN) = 0.9984. The
-  model is not uncertain about Bot; it is confidently wrong, so confidence-based rejection methods have
-  nothing to work with.
+- In all 17 CNN training runs, 100 % of Bot flows are classified as BENIGN, with a mean p(BENIGN) of at
+  least 0.998 in every run. The model is not uncertain about Bot; it is confidently wrong, so
+  confidence-based rejection methods have nothing to work with.
 - The eight features that best separate Bot from benign traffic have 0 of 8 in common with the eight
   features most used for the known classes.
-- The ranking of Bot flows is not stable across seeds (Figure 2). The Spearman correlation between seeds
-  is ρ = −0.090, compared with 0.68–0.83 for every other family. A random forest shows the same pattern
-  (ρ = 0.068) but the autoencoder does not (ρ = 0.827), which points to closed-set discriminative
-  training rather than to neural networks as such. Three seeds cannot tell −0.090 apart from −0.02, but
-  they are enough to rule out a value near 0.7, and that is all the argument needs.
+- Bot is the family whose ranking agrees least between training runs (Figure 2). Over all 15 pairs of
+  six deterministic CNN runs, the median Spearman correlation on Bot flows is +0.55, and single pairs
+  range from −0.52 to +0.92; the web families have medians of +0.81 and +0.93. The 11 runs trained before
+  we enabled determinism look the same (median +0.59). The three runs we first analysed gave −0.090, the
+  low end of this range rather than its typical value, and we no longer describe the Bot ranking as
+  noise. Nor is the inconsistency a property of closed-set training in general. A random forest with
+  default feature sampling shows it (ρ = 0.068), but with the number of features per split selected on
+  validation the same forest gives +0.923 and ranks Bot at 6.4 times chance (Appendix C).
 - The information is available in the features. An oracle trained with Bot labels reaches a PR-AUC of
   0.9988 from the same inputs. It uses zero-day labels and so is an upper bound rather than a usable
   method, but it shows that the obstacle is the lack of supervision, not missing information or the
@@ -177,17 +186,18 @@ Bot is a case where the overlap is empty, and we use it to test this account:
 
 ![Figure 2](../../outputs/figures/nesy_fig2_mechanism.png)
 
-**Figure 2.** *Bot's ranking is unstable for closed-set learners.* For each unseen family, the bars show
-how well a model's ranking of the test flows agrees with itself across three training seeds (Spearman ρ).
-On Bot, the two closed-set discriminative learners disagree with themselves (1D CNN −0.090, random forest
-+0.068), while the benign-only autoencoder is consistent (+0.827). The instability therefore comes from
-closed-set discriminative training and not from the use of a neural network. The zero line marks no
-agreement. We draw no threshold because none was measured. Three seeds cannot separate −0.090 from −0.02,
-but they are enough to show the value is not near 0.7.
+**Figure 2.** *Agreement between training runs, by family.* Each bar shows how well a model's ranking of
+one unseen family's test flows agrees between training runs (Spearman ρ), and each line shows the range
+over pairs of runs. The CNN bar is the median over all 15 pairs of six deterministic runs; the forests
+and the autoencoder have three runs each. Bot is the CNN's least consistent family and its most variable
+one. A random forest with default feature sampling is also inconsistent on Bot, but the same forest with
+its feature sampling selected on validation is the most consistent model on Bot, so the inconsistency
+depends on the model's configuration and not only on closed-set training.
 
 Taken together, knowledge that lies inside the basis (our axioms) adds no evidence, and a class that lies
-outside it (Bot) is not reached. Both follow from what a closed-set objective does and does not
-constrain. The evidence is stronger for the unreachable case than for the reachable one (§7). Our
+outside it (Bot) is not reached by the CNN. Both follow from what a closed-set objective does and does
+not constrain. A tuned random forest reaches Bot partially, and we have not measured whether its
+features overlap Bot's more than the CNN's do. The evidence is stronger for the unreachable case than for the reachable one (§7). Our
 support for the claim that overlapping families are reached came from web-attack scores, and most of
 those scores disappear under corrected labels. The ordering between families holds; the sizes of the
 scores do not.
@@ -205,12 +215,12 @@ each attempt we wrote down, before running it, what result would count against t
 | Corrected labels [2], attack flows without payload removed | a labelling artefact | the remaining Bot flows (n = 738) give lifts of 0.57 / 0.64 / 8.99; two of three seeds are below chance |
 | Reject class: three known families merged into `UNKNOWN` | the model was never trained to reject | at best chance level (+0.068), with the sign changing between seeds |
 | Cross-dataset augmentation with the 2018 known classes | the basis was too narrow | −0.1461 macro against a seed-matched control; better on 0/3 seeds |
-| Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method reaches Bot; the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance |
+| Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method reaches Bot; the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance (0.0576 on deterministic re-runs) |
 
 The corrected-label experiment is the hardest test, and the way it fails deserves a comment. Our
 criterion was a lift above chance on every seed. The mean lift is 3.4×, which on its own would look like
-detection, but no individual run is close to that value. The large spread between seeds is the same
-instability described in §4.
+detection, but no individual run is close to that value. The large spread between seeds matches the
+variable Bot ranking described in §4.
 
 The reject-class experiment gave the clearest positive evidence. We ran two versions that differ only in
 which known families are merged into `UNKNOWN`, and they produce a double dissociation that holds on every
@@ -343,8 +353,8 @@ further gap: the benchmark provides no external knowledge artefact.
 
 **Closed worlds and machine learning for security.** Sommer and Paxson [5] argued that intrusion
 detection is a difficult setting for machine learning because the events of interest lie outside the
-closed world of the training data. §4 gives a mechanism for one instance of this and shows that the
-failure shows up as instability as well as inaccuracy. Arp et al. [6] list ten common pitfalls in machine
+closed world of the training data. §4 gives a mechanism for one instance of this, in which the failure
+takes the form of confident misclassification. Arp et al. [6] list ten common pitfalls in machine
 learning for security. Supplementary §E checks this work against all ten; two of them, lab-only
 evaluation and the threat model, are not addressed here.
 
@@ -361,7 +371,10 @@ show that the findings generalise to other network environments. Under corrected
 zero-day families have enough samples. We use flow features rather than payload bytes throughout,
 although the oracle result suggests that modality is not the obstacle. The thresholds in our exogeneity
 test are conventions. We do not evaluate against adaptive adversaries, and the system has not been
-deployed.
+deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
+optimistic: at the capture's own benign proportion the CNN's macro zero-day PR-AUC is 0.5845, not
+0.6299. The split is stratified at random over a chronologically ordered capture and is not grouped by
+connection; Appendix A reports what crosses the boundary.
 
 **Conclusion.** Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside
 the model's learned feature basis. The same condition makes an attack family with no overlap unreachable,

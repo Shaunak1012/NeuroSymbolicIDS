@@ -1,0 +1,844 @@
+{
+ "method": "mean pairwise Spearman over one family's test flows (3 seeds); absorption = argmax class of each flow",
+ "absorption": {
+  "pre_flag": {
+   "cnn_paper": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9983813762664795,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.10460903495550156,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03067484662576687,
+     "mean_p_BENIGN": 0.041333332657814026,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9294478527607362
+    }
+   },
+   "cnn_paper_s43": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9998806715011597,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10152621101526212,
+     "mean_p_BENIGN": 0.10813131928443909,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03374233128834356,
+     "mean_p_BENIGN": 0.05013955011963844,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    }
+   },
+   "cnn_paper_s44": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9981589317321777,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.11002624034881592,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03834355828220859,
+     "mean_p_BENIGN": 0.050929825752973557,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9294478527607362
+    }
+   },
+   "cnn_paper_s45": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9997498393058777,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.10669728368520737,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8885202388852024
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03834355828220859,
+     "mean_p_BENIGN": 0.04862409085035324,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9294478527607362
+    }
+   },
+   "cnn_paper_s46": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9998154640197754,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10218978102189781,
+     "mean_p_BENIGN": 0.12651588022708893,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8566688785666888
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03987730061349693,
+     "mean_p_BENIGN": 0.07279765605926514,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9263803680981595
+    }
+   },
+   "cnn_paper_s47": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9989344477653503,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.12861233949661255,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03834355828220859,
+     "mean_p_BENIGN": 0.07564611732959747,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9309815950920245
+    }
+   },
+   "cnn_repro_s42": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9997904300689697,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.09754479097544791,
+     "mean_p_BENIGN": 0.10151548683643341,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8069011280690113
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.029141104294478526,
+     "mean_p_BENIGN": 0.040548764169216156,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9263803680981595
+    }
+   },
+   "cnn_noise_r1": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9999052882194519,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.10682585835456848,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8812209688122097
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03067484662576687,
+     "mean_p_BENIGN": 0.045916225761175156,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9294478527607362
+    }
+   },
+   "cnn_noise_r2": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.999323844909668,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.09887193098871931,
+     "mean_p_BENIGN": 0.1160883679986,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8958195089581951
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03680981595092025,
+     "mean_p_BENIGN": 0.061682719737291336,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9309815950920245
+    }
+   },
+   "cnn_noise_r3": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9993774890899658,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.1217900961637497,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8049104180491041
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03067484662576687,
+     "mean_p_BENIGN": 0.05974560230970383,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9263803680981595
+    }
+   },
+   "cnn_noise_r4": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9997928142547607,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.099535500995355,
+     "mean_p_BENIGN": 0.10743867605924606,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8991373589913736
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03987730061349693,
+     "mean_p_BENIGN": 0.05033502355217934,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    }
+   }
+  },
+  "deterministic": {
+   "c4_log1p_s42": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9994707107543945,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.11394817382097244,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.05674846625766871,
+     "mean_p_BENIGN": 0.0670347735285759,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    }
+   },
+   "c4_log1p_s43": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9998707175254822,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.1120821163058281,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8978102189781022
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.046012269938650305,
+     "mean_p_BENIGN": 0.060039568692445755,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9355828220858896
+    }
+   },
+   "c4_log1p_s44": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9998224973678589,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.10525806248188019,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8998009289980093
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.05214723926380368,
+     "mean_p_BENIGN": 0.052856966853141785,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    }
+   },
+   "postdet_s45": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9994867444038391,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10086264100862641,
+     "mean_p_BENIGN": 0.12128224223852158,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8984737889847378
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03374233128834356,
+     "mean_p_BENIGN": 0.05890621989965439,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9340490797546013
+    }
+   },
+   "postdet_s46": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9999228715896606,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10019907100199071,
+     "mean_p_BENIGN": 0.11573462188243866,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8248175182481752
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03374233128834356,
+     "mean_p_BENIGN": 0.06004148721694946,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9279141104294478
+    }
+   },
+   "postdet_s47": {
+    "Bot": {
+     "frac_argmax_BENIGN": 1.0,
+     "mean_p_BENIGN": 0.9989610314369202,
+     "modal_class": "BENIGN",
+     "modal_frac": 1.0
+    },
+    "Web Attack Brute Force": {
+     "frac_argmax_BENIGN": 0.10152621101526212,
+     "mean_p_BENIGN": 0.11019804328680038,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.8035832780358327
+    },
+    "Web Attack XSS": {
+     "frac_argmax_BENIGN": 0.03680981595092025,
+     "mean_p_BENIGN": 0.05469359830021858,
+     "modal_class": "DoS slowloris",
+     "modal_frac": 0.9248466257668712
+    }
+   }
+  }
+ },
+ "rank_stability": {
+  "CNN, pre-flag reference (log-odds)": {
+   "Bot": {
+    "mean": -0.08975759349337675,
+    "pairs": [
+     -0.4971,
+     -0.3568,
+     0.5846
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.6782980872768071,
+    "pairs": [
+     0.6442,
+     0.8216,
+     0.5691
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.8296808355846305,
+    "pairs": [
+     0.9023,
+     0.7711,
+     0.8156
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.6962737883756821,
+    "pairs": [
+     0.6934,
+     0.6776,
+     0.7178
+    ]
+   },
+   "runs": [
+    "cnn_paper_logodds",
+    "cnn_paper_s43_logodds",
+    "cnn_paper_s44_logodds"
+   ]
+  },
+  "CNN, deterministic (log-odds)": {
+   "Bot": {
+    "mean": 0.5091156269840453,
+    "pairs": [
+     0.5656,
+     0.7739,
+     0.1879
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.8079967294324844,
+    "pairs": [
+     0.8098,
+     0.8964,
+     0.7177
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.9211017617251379,
+    "pairs": [
+     0.9206,
+     0.9117,
+     0.931
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.7227204248163432,
+    "pairs": [
+     0.7464,
+     0.6971,
+     0.7247
+    ]
+   },
+   "runs": [
+    "c4_log1p_s42_logodds",
+    "c4_log1p_s43_logodds",
+    "c4_log1p_s44_logodds"
+   ]
+  },
+  "RandomForest, untuned (max_features=sqrt)": {
+   "Bot": {
+    "mean": 0.06849440328857404,
+    "pairs": [
+     -0.4357,
+     -0.1045,
+     0.7457
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.8033860158439025,
+    "pairs": [
+     0.8389,
+     0.7961,
+     0.7751
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.756857061301269,
+    "pairs": [
+     0.7656,
+     0.7761,
+     0.7289
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.6528446265610305,
+    "pairs": [
+     0.634,
+     0.6666,
+     0.6579
+    ]
+   },
+   "runs": [
+    "random_forest",
+    "random_forest_s43",
+    "random_forest_s44"
+   ]
+  },
+  "RandomForest, tuned (max_features=0.3)": {
+   "Bot": {
+    "mean": 0.922784060461177,
+    "pairs": [
+     0.9417,
+     0.9435,
+     0.8832
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.8212607967085499,
+    "pairs": [
+     0.801,
+     0.8852,
+     0.7776
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.8262523176896868,
+    "pairs": [
+     0.7877,
+     0.8694,
+     0.8217
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.8143481810978188,
+    "pairs": [
+     0.82,
+     0.7992,
+     0.8239
+    ]
+   },
+   "runs": [
+    "random_forest_tuned_s42",
+    "random_forest_tuned_s43",
+    "random_forest_tuned_s44"
+   ]
+  },
+  "Autoencoder, pre-flag": {
+   "Bot": {
+    "mean": 0.827425703136408,
+    "pairs": [
+     0.7562,
+     0.9411,
+     0.785
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.9413111959718959,
+    "pairs": [
+     0.9188,
+     0.9884,
+     0.9168
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.9116945010613017,
+    "pairs": [
+     0.8713,
+     0.9799,
+     0.8839
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.971043489484177,
+    "pairs": [
+     0.9749,
+     0.9751,
+     0.9632
+    ]
+   },
+   "runs": [
+    "autoencoder_paper",
+    "autoencoder_paper_s43",
+    "autoencoder_paper_s44"
+   ]
+  },
+  "Autoencoder, deterministic": {
+   "Bot": {
+    "mean": 0.7542096055516362,
+    "pairs": [
+     0.6115,
+     0.7036,
+     0.9476
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.9618033951146868,
+    "pairs": [
+     0.9484,
+     0.9752,
+     0.9619
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.9515686916381968,
+    "pairs": [
+     0.9356,
+     0.9759,
+     0.9432
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.9726203418052993,
+    "pairs": [
+     0.9722,
+     0.9735,
+     0.9722
+    ]
+   },
+   "runs": [
+    "ae_det_s42",
+    "ae_det_s43",
+    "ae_det_s44"
+   ]
+  },
+  "IsolationForest, untuned": {
+   "Bot": {
+    "mean": 0.9565718331511079,
+    "pairs": [
+     0.9497,
+     0.9573,
+     0.9627
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.6290537096207811,
+    "pairs": [
+     0.5165,
+     0.6059,
+     0.7647
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.3396979963230631,
+    "pairs": [
+     0.222,
+     0.3588,
+     0.4383
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.9892867909922544,
+    "pairs": [
+     0.9899,
+     0.9899,
+     0.9881
+    ]
+   },
+   "runs": [
+    "isolation_forest",
+    "isolation_forest_s43",
+    "isolation_forest_s44"
+   ]
+  },
+  "IsolationForest, tuned": {
+   "Bot": {
+    "mean": 0.938982922636546,
+    "pairs": [
+     0.9493,
+     0.9314,
+     0.9363
+    ]
+   },
+   "Web Attack Brute Force": {
+    "mean": 0.8060187173473196,
+    "pairs": [
+     0.7974,
+     0.8215,
+     0.7991
+    ]
+   },
+   "Web Attack XSS": {
+    "mean": 0.6422686335227398,
+    "pairs": [
+     0.7302,
+     0.5634,
+     0.6332
+    ]
+   },
+   "BENIGN": {
+    "mean": 0.9839474484063763,
+    "pairs": [
+     0.9842,
+     0.9858,
+     0.9819
+    ]
+   },
+   "runs": [
+    "isolation_forest_tuned_s42",
+    "isolation_forest_tuned_s43",
+    "isolation_forest_tuned_s44"
+   ]
+  }
+ },
+ "all_pairs": {
+  "pre_flag": {
+   "all": {
+    "Bot": {
+     "n_pairs": 55,
+     "median": 0.5879319223575051,
+     "mean": 0.45106679525640125,
+     "min": -0.5434532768876201,
+     "max": 0.9180119440486804,
+     "frac_below_0.3": 0.2545454545454545
+    },
+    "Web Attack Brute Force": {
+     "n_pairs": 55,
+     "median": 0.7782130943246558,
+     "mean": 0.7344286384578244,
+     "min": 0.15184426459353778,
+     "max": 0.9911889062807587,
+     "frac_below_0.3": 0.01818181818181818
+    },
+    "Web Attack XSS": {
+     "n_pairs": 55,
+     "median": 0.8899504336287642,
+     "mean": 0.8528848385721183,
+     "min": 0.3445441133003508,
+     "max": 0.9895020352574031,
+     "frac_below_0.3": 0.0
+    },
+    "BENIGN": {
+     "n_pairs": 55,
+     "median": 0.7148285350298745,
+     "mean": 0.7054207525112691,
+     "min": 0.6228901966113041,
+     "max": 0.7917687989594001,
+     "frac_below_0.3": 0.0
+    }
+   },
+   "different_seed": {
+    "Bot": {
+     "n_pairs": 40,
+     "median": 0.5704350110073401,
+     "mean": 0.49106870351201176,
+     "min": -0.4970778913725662,
+     "max": 0.9180119440486804,
+     "frac_below_0.3": 0.225
+    },
+    "Web Attack Brute Force": {
+     "n_pairs": 40,
+     "median": 0.7726227732618605,
+     "mean": 0.7239300575447837,
+     "min": 0.15184426459353778,
+     "max": 0.9812834245716062,
+     "frac_below_0.3": 0.025
+    },
+    "Web Attack XSS": {
+     "n_pairs": 40,
+     "median": 0.8847679256142451,
+     "mean": 0.8396067017025185,
+     "min": 0.3445441133003508,
+     "max": 0.9819541062284537,
+     "frac_below_0.3": 0.0
+    },
+    "BENIGN": {
+     "n_pairs": 40,
+     "median": 0.7193868354877928,
+     "mean": 0.7118117198459861,
+     "min": 0.6258328405783514,
+     "max": 0.7776209569867243,
+     "frac_below_0.3": 0.0
+    }
+   },
+   "same_seed": {
+    "Bot": {
+     "n_pairs": 15,
+     "median": 0.6041240672864586,
+     "mean": 0.3443950399081064,
+     "min": -0.5434532768876201,
+     "max": 0.8776564366705841,
+     "frac_below_0.3": 0.3333333333333333
+    },
+    "Web Attack Brute Force": {
+     "n_pairs": 15,
+     "median": 0.7782130943246558,
+     "mean": 0.7624248542259328,
+     "min": 0.45782180315386944,
+     "max": 0.9911889062807587,
+     "frac_below_0.3": 0.0
+    },
+    "Web Attack XSS": {
+     "n_pairs": 15,
+     "median": 0.9043726522921784,
+     "mean": 0.8882932035577178,
+     "min": 0.7396086713824058,
+     "max": 0.9895020352574031,
+     "frac_below_0.3": 0.0
+    },
+    "BENIGN": {
+     "n_pairs": 15,
+     "median": 0.6799182439789087,
+     "mean": 0.6883781729520236,
+     "min": 0.6228901966113041,
+     "max": 0.7917687989594001,
+     "frac_below_0.3": 0.0
+    }
+   }
+  },
+  "deterministic": {
+   "all": {
+    "Bot": {
+     "n_pairs": 15,
+     "median": 0.5528670278863672,
+     "mean": 0.3808924390397068,
+     "min": -0.5181041959762104,
+     "max": 0.91877948985477,
+     "frac_below_0.3": 0.3333333333333333
+    },
+    "Web Attack Brute Force": {
+     "n_pairs": 15,
+     "median": 0.8098443789827539,
+     "mean": 0.7880349562043973,
+     "min": 0.5154513242655536,
+     "max": 0.960584361940127,
+     "frac_below_0.3": 0.0
+    },
+    "Web Attack XSS": {
+     "n_pairs": 15,
+     "median": 0.9329465573475091,
+     "mean": 0.927602565751852,
+     "min": 0.8505515658992969,
+     "max": 0.9697261965627703,
+     "frac_below_0.3": 0.0
+    },
+    "BENIGN": {
+     "n_pairs": 15,
+     "median": 0.7100283327528821,
+     "mean": 0.7084329016536627,
+     "min": 0.6590779553197537,
+     "max": 0.7463598994618006,
+     "frac_below_0.3": 0.0
+    }
+   },
+   "different_seed": {
+    "Bot": {
+     "n_pairs": 15,
+     "median": 0.5528670278863672,
+     "mean": 0.3808924390397068,
+     "min": -0.5181041959762104,
+     "max": 0.91877948985477,
+     "frac_below_0.3": 0.3333333333333333
+    },
+    "Web Attack Brute Force": {
+     "n_pairs": 15,
+     "median": 0.8098443789827539,
+     "mean": 0.7880349562043973,
+     "min": 0.5154513242655536,
+     "max": 0.960584361940127,
+     "frac_below_0.3": 0.0
+    },
+    "Web Attack XSS": {
+     "n_pairs": 15,
+     "median": 0.9329465573475091,
+     "mean": 0.927602565751852,
+     "min": 0.8505515658992969,
+     "max": 0.9697261965627703,
+     "frac_below_0.3": 0.0
+    },
+    "BENIGN": {
+     "n_pairs": 15,
+     "median": 0.7100283327528821,
+     "mean": 0.7084329016536627,
+     "min": 0.6590779553197537,
+     "max": 0.7463598994618006,
+     "frac_below_0.3": 0.0
+    }
+   }
+  }
+ },
+ "expectations": {
+  "E1_det_cnn_bot_rho_near_zero": false,
+  "E2_det_cnn_absorbs_bot": true,
+  "E3_tuned_rf_bot_rho_high": true
+ }
+}

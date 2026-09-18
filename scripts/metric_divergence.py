@@ -61,6 +61,25 @@ EXCLUDE_PREFIX = ("cnn_kfold", "cnn_noise_r", "det_verify", "cnn_repro", "smoke"
                   "xgboost_oracle")
 _SUFFIX = re.compile(r"(_logodds)?(_s\d+)?(_logodds)?$")
 
+# PINNED 2026-09-17 (audit item 7.4). The population used to be "every prediction file
+# with the canonical test length". By 2026-09-17 that set had grown (tuned baselines,
+# deterministic OOD scores, det re-runs), so a re-run would silently change the
+# published figures. These are the 57 method groups in the record written 2026-09-12;
+# a new method enters only by editing this list.
+METHODS = frozenset([
+    "autoencoder_paper", "c4_log1p", "c4_raw", "cnn_67", "cnn_aug", "cnn_auxhead_l0.5",
+    "cnn_paper", "deep_cnn_lstm", "deep_gru", "deep_lstm", "deep_svdd", "deep_transformer",
+    "fusion_cnn_allbehaviours", "fusion_cnn_beaconlike", "fusion_cnn_kg",
+    "isolation_forest", "kg", "kg_k100", "kg_k100_s42_causal", "kg_k100_s43_causal",
+    "kg_k100_s44_causal", "linear_svm", "locoR_hetero", "locoR_homog", "loco_DDoS", "lof",
+    "logistic_regression", "ltn_anat_w0p5", "ltn_anat_w1p0", "ltn_anat_w2p0",
+    "ltn_ax6_ratio_w1p0", "ltn_ax6_w0p5", "ltn_ax6_w1p0", "ltn_ctrl_w0",
+    "ltn_focal_both_w0.1_ratio", "ltn_repro", "ltn_v2", "mahalanobis", "mlp", "msp",
+    "ocsvm_sgd", "ood_cnn_p_attack", "ood_energy_T1", "ood_energy_T10", "ood_energy_T100",
+    "ood_energy_T1000", "ood_entropy", "ood_margin", "ood_max_logit", "ood_msp",
+    "ood_odin_T1", "ood_odin_T1000", "postdet", "random_forest", "rbf_svm_nystroem", "vae",
+    "xgboost"])
+
 
 def base_name(name):
     """Collapse seed and rescore suffixes -- identical to field_gap.py."""
@@ -95,7 +114,7 @@ def main():
     for p in sorted(glob.glob(os.path.join(paths.PREDICTIONS,
                                            "y_prob_*_test.npy"))):
         tag = os.path.basename(p)[len("y_prob_"):-len("_test.npy")]
-        if tag.startswith(EXCLUDE_PREFIX) or sat.get(tag):
+        if tag.startswith(EXCLUDE_PREFIX) or sat.get(tag) or base_name(tag) not in METHODS:
             continue
         s = np.load(p)
         if s.shape != yte.shape:

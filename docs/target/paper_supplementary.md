@@ -43,6 +43,24 @@ effect on the zero-day metric, since all six zero-day families have 0.0 % overla
 Duplication therefore inflates the metric most papers report and leaves ours unchanged. This is a
 difference between the two metrics rather than a problem with our numbers.
 
+**Base rate.** Benign flows are under-sampled before the split, by a factor of 4.11, so every PR-AUC and
+lift in this paper is measured at an attack prevalence about four times that of the capture. Recall and
+false-positive rate are rates within a class and are not affected. Scored at the capture's own benign
+proportion, the CNN's macro zero-day PR-AUC is 0.5845 rather than 0.6299 (three deterministic seeds),
+and its online fusion with the knowledge graph (k = 800, causal) falls from 0.5030 to 0.3255. A
+monitored network carries a smaller share of attacks still, so every absolute PR-AUC here is an upper
+bound for deployment. We keep the 1:1 protocol because it matches the base paper and all comparisons in
+this paper are made within it.
+
+**Split boundary.** The split is stratified at random over a capture recorded in time order, and flows
+are not grouped by connection. 54.9 % of test flows share a Flow ID (5-tuple) with a training flow,
+98.9 % share a source address with one, and every test flow lies inside the training time range. Bot
+flows share no 5-tuple with training. Every Web Attack Brute Force and XSS flow does, with training flows
+of other classes, mostly DoS Hulk and DDoS. The web and DoS attacks were launched from the same address
+(172.16.0.1) against the same server (192.168.10.50, port 80), and source ports repeat, so these shared
+5-tuples mark the same attacker and target rather than the same connection. This agrees with the
+absorption result in Appendix D: the CNN places most web-attack flows in a known DoS class.
+
 **Feature transform.** We apply `log1p` to the features. On the main metric this gives 0.6299 ± 0.0031,
 against 0.1606 ± 0.0039 with raw features, over three seeds per setting (Welch t = 163). Our original
 reason for the choice relied on the contaminated overall binary metric, so we repeated the comparison on
@@ -207,8 +225,8 @@ objective. A novel class can then be reached only to the extent that its signatu
 basis. When there is no overlap, the model's output on that class is not only poor but unstable, because
 nothing in the objective constrains it. Bot is such a case.
 
-- On all three seeds, 100 % of Bot flows are classified as BENIGN, with a mean p(BENIGN) of 0.9984. The
-  model is confident that Bot traffic is benign, which is why the confidence-based remedies in Appendix D
+- In all 17 CNN training runs (11 trained before determinism was enabled, 6 after), 100 % of Bot flows
+  are classified as BENIGN, with a mean p(BENIGN) of at least 0.998 in every run. The model is confident that Bot traffic is benign, which is why the confidence-based remedies in Appendix D
   cannot work.
 - The eight features that best separate Bot from benign traffic share 0 of 8 with the eight features
   selected by the known-class task. (We compare sets of eight; for Web Brute Force the overlap is 1 of 8.)
@@ -218,16 +236,21 @@ nothing in the objective constrains it. Bot is such a case.
   (2.1× chance). The ordering remains, since Web Brute Force is above chance on every seed and Bot is
   not, but the size of the effect is mostly gone. The unreachable direction is well supported. The
   reachable direction now amounts to a consistent sign over two families. Appendix E has the details.
-- The model's ranking of Bot flows is therefore close to random. The Spearman correlation between seeds is
-  ρ = −0.090, against 0.68–0.83 for every other family. A random forest behaves the same way
-  (ρ = 0.068), while the autoencoder does not (ρ = 0.827). The instability belongs to closed-set
-  discriminative learning and not to neural networks specifically.
-- This is a stability statistic over three seeds, and Appendix E notes that three seeds are far too few
-  to estimate a dispersion. We still use it because the difference is large. Bot sits near ρ = 0 while
-  every other family sits between 0.68 and 0.83, the pattern appears in two unrelated model families, and
-  the autoencoder gives 0.827 on the same three seeds. Three seeds cannot tell us whether Bot's value is
-  −0.090, −0.02 or +0.05, but they are enough to show that it is not 0.7, and the argument only needs the
-  latter.
+- The CNN's ranking of Bot flows is the least consistent of any family between training runs, but it is
+  not random. Over all 15 pairs of six deterministic runs, the median Spearman correlation on Bot flows is
+  +0.55; pairs range from −0.52 to +0.92, and 5 of the 15 are below 0.3. Over the 55 pairs of the 11
+  earlier runs the median is +0.59 (−0.54 to +0.92, 14 of 55 below 0.3). Benign flows give a median of
+  +0.71 and the web families +0.78 to +0.93, and only one of their 210 pairs falls below 0.3. Our first
+  analysis used three runs and found ρ = −0.090, which lies near the bottom of this range. Appendix E
+  notes that three runs cannot estimate a dispersion; here they did not estimate the centre either.
+- The comparison with other models does not support a statement about closed-set learners in general. A
+  random forest with default feature sampling is also inconsistent on Bot (ρ = 0.068 over three seeds).
+  With the fraction of features per split selected on validation (0.3 instead of the square root), the
+  same forest gives +0.923, its Bot PR-AUC rises from 0.1311 to 0.2196 (6.4× chance), and every seed
+  ranks Bot above chance. The benign-only autoencoder gives +0.754 on its deterministic runs (+0.827 on
+  the earlier ones). The inconsistency is therefore a property of this CNN, and of the forest's default
+  configuration, rather than of closed-set discriminative training. We did not measure whether the tuned
+  forest's features overlap Bot's more than the CNN's do.
 - The information needed to detect Bot is present. An oracle trained with Bot labels reaches a PR-AUC of
   0.9988 from the same 68 flow features (Web Brute Force 0.9999, XSS 0.9984). The oracle uses zero-day
   labels, so it is an upper bound and not a method, and we exclude it from every method comparison. It
@@ -235,14 +258,13 @@ nothing in the objective constrains it. Bot is such a case.
   input modality is not the barrier, because there is no missing information for packet payloads to
   provide.
 
-**One cause for four observations.** The mechanism accounts for four observations that otherwise seem
-unrelated: the variability in cluster purity we met when building the knowledge graph, the spread of
+**One cause for several observations.** We first offered the mechanism as the common cause of four
+observations: the variability in cluster purity we met when building the knowledge graph, the spread of
 Mahalanobis scores on Bot, the random forest's changing Bot results across seeds, and the CNN's own
-failure. Two of these links are measured and two are argued. The random forest's instability is measured
-on the same statistic as the CNN's (ρ = 0.068, against 0.827 for the autoencoder), and the CNN's failure
-is observed directly. The purity variability and the Mahalanobis spread are separate observations that the
-mechanism would explain, but we did not run an intervention that isolates the mechanism as their cause. We
-present the connection as an explanation, not as a further measurement.
+failure. Only the last is measured directly. The random forest's changing results disappear when its
+feature sampling is tuned (above), so they are not evidence for the mechanism. The purity variability and
+the Mahalanobis spread are observations the mechanism would explain, but we did not run an intervention
+that isolates it as their cause. We present these connections as an explanation, not as a measurement.
 
 **Replication on an independent capture.** One could object that Bot is simply rare in CIC-IDS2017
 (n = 1,956) and that its failure is a sample-size effect. CSE-CIC-IDS2018 allows this to be checked,
@@ -259,6 +281,9 @@ classes. The falsification threshold, fixed before running them, was 0.08 macro 
 scorer reaches 0.0783. This is only about two per cent below the threshold, and a slightly lower threshold
 would have given the opposite verdict. The only scorer that improves Bot at all (energy with T = 1000,
 2.29× chance) does so by destroying known-class discrimination, and its macro score falls to 0.0326.
+These scores were computed on the three CNN runs used before training was made deterministic. On the
+three deterministic runs the verdict is clearer: the same scorer is again the best on Bot, at 0.0576
+(1.68× chance, 28 per cent below the threshold), with a macro score of 0.0257.
 
 ---
 
@@ -273,7 +298,7 @@ This part of the study took the most effort, and much of it concerns our own arc
 | More architectures (LSTM, GRU, CNN-LSTM, Transformer) | None moves above the top group and none improves Bot (best 0.0626, against 0.3103 for the knowledge graph). The CNN-LSTM is within 0.0031 of the plain CNN, so the convolutional front end does most of the work; pure recurrence halves the score. |
 | More classical baselines | A 16× spread and nothing competitive (caveats in Appendix B). |
 | Benign-only anomaly detectors (VAE, Deep SVDD, OC-SVM, LOF) | LOF reaches a macro score of 0.3360 ± 0.0135 and does not collapse on web attacks. We had earlier attributed that collapse to benign-only methods in general; it is actually a property of reconstruction-error scoring. |
-| The symbolic component | −0.0004 (n.s.) on its own; combined with the knowledge graph it significantly lowers performance (0.6926 → 0.6708, p < 0.0001) and reduces Bot from 0.2518 to 0.2043. |
+| The symbolic component | −0.0004 (n.s.) on its own. Against the same trainer with the axiom weight at zero, the axioms are worse with every CNN run we paired them with: by 0.0062 (11 of 11 runs) and 0.0068 (6 of 6 deterministic runs) alone, and by 0.0212 and 0.0324 when the knowledge-graph channel is also fused. The base-paper axioms, compared with a matched control under cross-entropy, are worse alone in 10 of 11 and 5 of 6 runs and inconsistent when the knowledge graph is added. |
 | Calibration | Isotonic regression reaches an ECE of 0.0001 on known classes, while zero-day ECE stays at 0.0387, a 287× gap. Better calibration on known classes widens the gap. |
 | Abstention | Zero-day precision does not change (+0.0000) at any non-degenerate coverage. |
 | Training on a second dataset (known classes of CSE-CIC-IDS2018, doubling the training set) | Harmful: −0.1461 macro against a seed-matched control, better on 0/3 seeds, consistent in direction. The damage comes from new false positives, not lost detections (see below). |
@@ -379,8 +404,8 @@ features of the classes merged into it, which is the closed-set mechanism appear
 setting.
 
 The upper limit of this effect for Bot is chance. The most heterogeneous merge we can build from the known
-classes gives +0.068, with the sign changing between seeds. This is the same instability as the CNN's own
-Bot ranking (cross-seed ρ = −0.090), so Bot's ranking is unstable whichever model produces it. Changing
+classes gives +0.068, with the sign changing between seeds. The CNN's own Bot ranking also varies between
+runs (Appendix C), although a tuned random forest ranks Bot consistently. Changing
 the label space can steer which new families a reject class reaches, but it does not make an unreachable
 family reachable.
 
@@ -541,7 +566,8 @@ specific to that capture.
 
 The dissociation is between two models, not between two families of methods. A random forest, which is
 supervised, ties with the autoencoder on Bot (0.1311 against 0.1314, p = 0.88) while beating it by 0.50
-on the macro score. The broader supervised-versus-unsupervised claim is contradicted by our own data, and
+on the macro score. With its feature sampling selected on validation the same forest reaches 0.2196 on
+Bot, above the autoencoder. The broader supervised-versus-unsupervised claim is contradicted by our own data, and
 we do not make it.
 
 The web-attack half of the result is not zero-day detection. The CNN assigns about 90 % of Web Brute
@@ -596,7 +622,7 @@ pitfalls. We checked this work against their list.
 | P3 | Data snooping | Selection is done on a held-out half with a random generator fixed independently of model seeds. This caught a +0.007 result that is −0.0008 on the evaluation half. Remaining issue: the cluster count was first swept on test, which we state where we report it. |
 | P4 | Spurious correlations | Covered by Appendix C and the absorption analysis. The web families' 0.92–0.95 reflects absorption into a known attack class rather than detection, and one of our earlier explanations was tested and withdrawn. |
 | P5 | Biased parameter selection | The noise floor was measured before any difference was interpreted, and every comparison is paired on seed. |
-| P6 | Inappropriate baseline | Four deep architectures, seven classical models, four benign-only models and nine post-hoc OOD scorers, each compared with a seed-matched baseline rather than a pooled mean. |
+| P6 | Inappropriate baseline | Four deep architectures, seven classical models, four benign-only models and nine post-hoc OOD scorers, each compared with a seed-matched baseline rather than a pooled mean. XGBoost, the random forest and the isolation forest were also re-run with hyperparameters selected on the validation split; the tuned random forest (0.6407) is within seed noise of the CNN (0.6299). |
 | P7 | Inappropriate performance measures | This is a central topic of the work (Appendix B). |
 | P8 | Base rate fallacy | PR-AUC rather than ROC, prevalence and lift reported, families below 100 flows excluded from the macro average, and cross-dataset comparisons made only in lift because prevalence differs by orders of magnitude. |
 | P9 | Lab-only evaluation | Not addressed. Throughput is measured (7.95 µs/flow), but nothing has been deployed. |
@@ -641,9 +667,9 @@ from normal traffic, and that difference is what was being scored.
 The falsification criterion we had set for Appendix C did not trigger, and the way it failed to trigger
 is informative. The criterion was an effective-Bot lift clearly above chance and consistent across seeds.
 The three seeds give 0.57, 0.64 and 8.99. Two of the three runs are below a random ranker, and the best
-and worst differ by a factor of 16. The mean of 3.4× does not describe any actual run. This instability is
-the same pattern Appendix C reports for Bot (cross-seed rank ρ = −0.090): the ranking is essentially
-random, so Bot's unreachability comes from the model and not from the empty flows.
+and worst differ by a factor of 16. The mean of 3.4× does not describe any actual run. This spread
+matches the variable Bot ranking reported in Appendix C, where a third of the pairs of deterministic runs
+agree at less than 0.3, so Bot's unreachability comes from the model and not from the empty flows.
 
 This has an uncomfortable consequence for the paper. Appendix B argues that the published metric cannot
 measure zero-day detection. The corrected labels show that on two of three families the metric we propose
@@ -758,8 +784,8 @@ top security venues and give recommendations for avoiding them.
 
 Our work builds on both. Sommer and Paxson's argument is qualitative. Appendix C offers a mechanism for one
 instance of it (no overlap between a new class's discriminative features and the trained basis) and shows
-that the failure takes the form of instability as well as inaccuracy, with a cross-seed ρ of −0.090 for
-Bot. Appendix B gives a quantitative counterpart: 22 % of comparable method pairs (37 of 169) cannot be
+that the failure takes the form of confident misclassification: all 17 of our CNN runs classify every Bot
+flow as benign. Appendix B gives a quantitative counterpart: 22 % of comparable method pairs (37 of 169) cannot be
 distinguished on the published metric while differing by a factor of two or more on the capability in
 question. Following Arp et al., Appendix E measures the pipeline's reproducibility, expresses differences
 relative to it, and lists the claims of ours that it led us to withdraw.
