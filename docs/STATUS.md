@@ -4,7 +4,28 @@
 
 ## ▶ RESUME HERE (next session)
 
-## 🎯 VENUE DECIDED (2026-09-15): NeSy
+## 🔴 VENUE DROPPED (2026-09-15, later the same day): plain research paper
+
+**Decided by the author:** *"don't add venue and whatnot"*, then "plain paper only, drop NeSy" and
+"leave it anonymous". The paper is now a venue-free research paper with no author line.
+- **Source:** [paper_body.md](target/paper_body.md) + [paper_supplementary.md](target/paper_supplementary.md)
+  (renamed from `nesy_*`), still verified together (172 / 0 mismatched).
+- **Build:** `python scripts/md_to_latex.py --compile` (renamed from `md_to_pmlr.py`) writes
+  `docs/target/paper_latex/main.pdf`. Plain `article` layout, **27 pages** including references and
+  appendices, 0 undefined references, 0 overfull lines.
+- **Removed:** the NeSy class file, the anonymised title block ("Author names withheld / Under Review"),
+  the proceedings header, the 10-page check and the "released upon acceptance" line. That line also
+  contradicted Appendix H, which says weights are not released; it now says so.
+- The framing (exogeneity precondition, *one principle, two consequences*) is unchanged. It is the
+  paper's argument, not a venue requirement.
+- 🟡 **Still open:** the repository is public, and pushing the branch puts the paper text on GitHub. If
+  the capstone report goes through a similarity checker such as Turnitin, the checker would match that
+  text. The author decides visibility.
+
+The NeSy-era planning below is **historical**. Its constraints (10 pages, double-blind, PMLR) no
+longer apply.
+
+## ~~🎯 VENUE DECIDED (2026-09-15): NeSy~~ — superseded above
 
 **Chosen by the author.** The recommended alternative was **RAID 2027 with AISec 2027 as fallback**,
 on the grounds that the security-methodology content now outweighs the neuro-symbolic content, and
@@ -33,11 +54,28 @@ identical to the master**, so the split lost and altered nothing; every decimal 
 appears verbatim in the master. `paper_draft.md` stays the full research record · **remap §-numbered
 cross-references inside the appendices and strip emoji/internal commentary** ✅ **done 2026-09-15** · ~~add 1–2 figures
 (room exists)~~ ✅ **done 2026-09-15** — Figure 1 (the thesis) and Figure 2 (the mechanism), palette validated, body now 3,531 words · ~~convert to the PMLR
-template~~ 🟡 **source done 2026-09-15, NOT compiled** — `docs/target/nesy_latex/` is generated from the markdown by
+template~~ ✅ **done and compiled 2026-09-15** (~~source done, NOT compiled~~) — `docs/target/nesy_latex/` is generated from the markdown by
 `md_to_pmlr.py` (`\documentclass[anon]{nesy2026}`, 17-entry `refs.bib`, supplementary after the bibliography as
-`\appendix`). Its lint passes: structure, cite keys, labels, figures, and **all 428 numbers identical to the
-verified markdown**. 🔴 **The 10-page limit is UNVERIFIED — no TeX distribution is installed.** Compile on
-Overleaf (no install) or with a local TeX install (author's permission needed) before this item closes ·
+`\appendix`). Its lint passes: structure, cite keys, labels, figures, and **all ~~428~~ 419 numbers identical to the
+verified markdown** *(419 after the 2026-09-15 prose revision removed a table the supplementary duplicated from the body)*.
+· 🟡 **Prose revision done 2026-09-15, committed locally, NOT pushed.** Body and supplementary rewritten in plain
+academic prose, with all numbers kept (172 verified / 0 mismatched) and style habits counted before and after. Em dashes: body 29 → 1,
+supplementary 113 → 0. Mid-sentence bold: body 89 → 22, supplementary 292 → 53 (paragraph headings only). Emoji
+and the words "honest" and "load-bearing" removed. Stale supplementary content removed: the old security-paper contributions list, a
+dangling "Fig. 1" reference, lowercase "this appendix" remap artefacts, a duplicate Appendix D heading and the
+r = +0.992 note. **Originality:** no shared run of ≥5 words with the abstracts of 15 of the 17 cited works. The
+one 8-word overlap found (Engelen et al.'s list of error stages) was reworded. [3] and [4] could not be checked
+(publisher sign-in). 🔴 **Open decision for the author, now sharper:** the repository is public. Pushing this
+branch would put the exact submission text on GitHub, where a similarity checker would match it at 100 % and a reviewer could find it
+by searching a sentence. Make the repository private before pushing, or keep the submission files out of it ·
+~~🔴 **The 10-page limit is UNVERIFIED — no TeX distribution is installed.** Compile on Overleaf (no install) or with a
+local TeX install (author's permission needed) before this item closes~~ ✅ **VERIFIED 2026-09-15:** MiKTeX 25.12
+installed (user scope, winget, author-approved). `md_to_pmlr.py --compile` gives 29 pages in total, **the body ends on page 9 of 10**
+(read from a `\label{body:end}` in `main.aux`, not estimated), 0 undefined citations or references and 0 overfull lines in
+our text. Smart App Control did not block the TeX binaries. Anonymised title page confirmed ("Author names
+withheld"), and the PDF info dictionary no longer carries the build date with its UTC offset. 🟡 **Not yet looked
+at page by page by a human.** No PDF renderer is available in the session, so the layout (figures, table widths,
+page breaks) has not been visually reviewed ·
 ~~the build-note blocks in both files must be deleted at conversion~~ ✅ stripped by the generator · ~~verify references [14]–[17] and check or drop [16]~~ ✅ **done 2026-09-15** — three errors caught, one a fabricated title; see the draft's citation banner · ~~anonymisation pass~~ ✅ **done 2026-09-15** — reviewer-visible text in body and supplementary has no identifying strings and no code identifiers (script names were removed because the repository is **public** and a name like `field_gap.py` is a search-engine pointer to it); figure PNG/PDF metadata carries only Matplotlib's software tag. Four stale running counts removed along the way. 🟡 **Open decision for the author:** NeSy **explicitly permits preprints** and says nothing against public code, so keeping the repository public is within the rules — but `paper_draft.md` is in it verbatim, so a reviewer who searched a supplementary sentence could find it. Making the repo private during review is optional extra caution, not a requirement, and is the author's call · close the 4 unbacked numbers ·
 ~~anonymisation pass~~ *(duplicate of the item above, done)* · NeSy 2027 CFP check once announced.
 

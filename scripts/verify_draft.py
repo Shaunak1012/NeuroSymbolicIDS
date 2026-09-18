@@ -160,8 +160,13 @@ if fg:
         k["worst_pair_field_gap"], "{:.4f}")
     chk("field: worst valid pair, macro ratio", "field_gap",
         k["worst_pair_macro_ratio"], "{:.1f}")
+    # The submission names methods in prose, not by run identifier. The alt is the whole
+    # pair phrase and is keyed by identifier, so a different worst pair still fails.
+    PAIR_PROSE = {"deep_cnn_lstm": ("a CNN-LSTM and a linear SVM",),
+                  "linear_svm": ("a CNN-LSTM and a linear SVM",)}
     for m in k["worst_pair"]:
-        chk("field: worst valid pair names (%s)" % m, "field_gap", m, "{}")
+        chk("field: worst valid pair names (%s)" % m, "field_gap", m, "{}",
+            alt=PAIR_PROSE.get(m, ()))
 
 ab = REC["ablation"]
 if ab:

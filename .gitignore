@@ -59,3 +59,6 @@ Thumbs.db
 outputs/*.pid
 outputs/*.log
 data/improved_2017/
+
+# LaTeX build directory for the paper (md_to_latex.py --compile)
+docs/target/paper_latex/_build/

@@ -5,27 +5,32 @@
 > to its third. **If a claim appears here without its caveat, that is a defect in this draft, not a
 > simplification.**
 >
-> **Format:** Markdown until the content is stable, then the NeSy PMLR LaTeX template.
+> **Format:** ~~Markdown until the content is stable, then the NeSy PMLR LaTeX template.~~ The paper
+> version is [paper_body.md](paper_body.md) + [paper_supplementary.md](paper_supplementary.md),
+> built into a plain, venue-free LaTeX paper by `md_to_latex.py`.
 > **Section numbering matches the outline** so the two stay diffable.
 >
-> 🎯 **VENUE DECIDED 2026-09-15: NeSy** (Neurosymbolic Learning and Reasoning), by the author.
+> 🔴 **VENUE DROPPED 2026-09-15, by the author.** The paper is no longer written for any venue: no
+> template, no page limit, no anonymised submission block. The earlier decision is kept below,
+> struck through, for the record.
+>
+> ~~🎯 **VENUE DECIDED 2026-09-15: NeSy** (Neurosymbolic Learning and Reasoning), by the author.
 > Recommended alternatives were RAID 2027 with AISec 2027 as fallback, on the grounds that the
 > security-methodology content outweighs the neuro-symbolic content; NeSy was chosen and this draft is
-> re-led accordingly. **Two hard constraints now govern it:**
-> - **10 pages, excluding references and supplementary material** (NeSy 2026 full-paper rules;
+> re-led accordingly. **Two hard constraints now govern it:**~~
+> - ~~**10 pages, excluding references and supplementary material** (NeSy 2026 full-paper rules;
 >   2027 not yet announced). At 12,324 words this draft is roughly **twice** that. Supplementary
 >   material is uncounted, so most of §3, §7's lessons and the per-experiment detail move there
->   rather than being cut.
-> - **Double-blind; submissions must be anonymised.** No author, repository or institution may be
->   identifiable. A pass for this is required before submission.
+>   rather than being cut.~~
+> - ~~**Double-blind; submissions must be anonymised.** No author, repository or institution may be
+>   identifiable. A pass for this is required before submission.~~
 >
 > ✅ **All eleven sections are drafted, all thirteen references verified, and one adversarial review
 > pass applied (2026-09-09).** Figures are built (`paper_figures.py`, `field_gap.py`) and referenced
 > by number.
 >
-> 🔄 **RE-LED FOR NeSy 2026-09-15.** The title and abstract below lead with the neuro-symbolic
-> contribution — the exogeneity precondition — because that is what this venue's reviewers are
-> evaluating. The mechanism and the measurement failures are unchanged and now serve it. The
+> 🔄 **RE-LED 2026-09-15** (~~for NeSy~~; the venue was later dropped, and the framing kept). The
+> title and abstract below lead with the neuro-symbolic contribution — the exogeneity precondition. The mechanism and the measurement failures are unchanged and now serve it. The
 > security-framed title (*"Unreachable by Construction: Zero-Day Blindness in Closed-Set Intrusion
 > Detection, and the Two Measurement Failures That Hid It"*) is retained here for the record and for
 > a possible security-venue version.

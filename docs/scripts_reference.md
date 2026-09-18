@@ -841,19 +841,27 @@ The first version's sub-labels collided and its boundary line inherited the fill
 leaving the one line that carries the argument nearly invisible. The second ran the inside item's
 labels across that boundary. Both were found only by looking at the output.
 
-## `scripts/md_to_pmlr.py`
+## `scripts/md_to_latex.py` (was `md_to_pmlr.py`)
 
-**Purpose**: Generate the NeSy PMLR LaTeX submission **from** `nesy_body.md` +
-`nesy_supplementary.md` into `docs/target/nesy_latex/` (`main.tex`, `refs.bib`, `nesy2026.cls`,
-`figures/`). The markdown stays the source of truth because it is what `verify_draft.py` checks. A
-number retyped into a `.tex` file by hand would be one that no check had ever seen.
+**Purpose**: Generate the paper's LaTeX source and PDF **from** `docs/target/paper_body.md` +
+`paper_supplementary.md` into `docs/target/paper_latex/` (`main.tex`, `refs.bib`, `figures/`, and
+`main.pdf` with `--compile`). The markdown stays the source of truth because it is what
+`verify_draft.py` checks. A number retyped into a `.tex` file by hand would be one that no check
+had ever seen.
 
 ```bash
-python scripts/md_to_pmlr.py          # generate + lint; exit 1 on any lint problem
+python scripts/md_to_latex.py            # generate + lint; exit 1 on any lint problem
+python scripts/md_to_latex.py --compile  # + pdflatex/bibtex in _build/ (gitignored), main.pdf
 ```
 
-- **Body, then `\bibliography`, then the supplementary as `\appendix`**, because NeSy counts 10 pages
-  *excluding* references and supplementary material. Build-note blocks are stripped.
+- **Plain `article` layout, no venue.** 11 pt, 1-inch margins, Latin Modern, `natbib` (round)
+  with `plainnat`, no author line. The order is body, `\bibliography`, `\clearpage`, then the
+  appendices under `\appendix`. Build-note blocks are stripped.
+- 🔴 **The venue was dropped on 2026-09-15 at the author's request.** This script was written as
+  `md_to_pmlr.py` for the NeSy 2026 PMLR template (`\documentclass[anon]{nesy2026}`), with an
+  anonymised title block and a check that the body ended by page 10. The template, the class file,
+  the `\label{body:end}` probe and the page-limit check were all removed. At that point the NeSy
+  build compiled to 29 pages with the body ending on page 9.
 - **Citations:** "Surname et al. [n]" becomes `\citet`, bare `[n]` / `[a]–[b]` become `\citep`.
   `§N` becomes `Section~\ref{sec:N}`, and "supplementary §X" / "Appendix X" become
   `Appendix~\ref{apd:X}`.
@@ -861,13 +869,23 @@ python scripts/md_to_pmlr.py          # generate + lint; exit 1 on any lint prob
   initials, exactly as verified.** The first draft of the `.bib` expanded first names from memory,
   which is the error class behind three of the four reference errors caught so far ([10], [15],
   [16]), so it was reverted before commit.
-- **The lint is structural, not a compile.** It checks brace and environment balance, cite keys
-  against the `.bib`, `\ref` labels, figure files, unmapped non-ASCII and leftover markdown. It also
-  checks that **every decimal and thousands-grouped number in the converted markdown reaches the
-  `.tex` unchanged** (428 today). Each check was shown to fire by planting its error in a scratch
-  copy.
-- 🔴 **It cannot measure the page count.** No TeX distribution is installed locally. `jmlr.cls`,
-  which `nesy2026.cls` loads, ships with TeX Live and Overleaf.
+- **The lint is structural.** It checks brace and environment balance, cite keys against the
+  `.bib`, `\ref` labels, figure files, unmapped non-ASCII and leftover markdown. It also checks
+  that **every decimal and thousands-grouped number in the converted markdown reaches the `.tex`
+  unchanged** (419 today). Generated column widths and preamble lengths are excluded from that
+  count. A section sign left in the prose is caught: the unicode pass would silently turn it into
+  `\S{}`, which is what the check looks for. Straight double quotes are typeset as LaTeX quotes.
+  Each check was shown to fire by planting its error in a scratch copy.
+- **`--compile`** finds `pdflatex` on PATH or in MiKTeX's per-user location (MiKTeX 25.12 was
+  installed on 2026-09-15). It runs pdflatex → bibtex → pdflatex ×3 and fails on a TeX error or any
+  undefined citation or reference. It also reports overfull lines; there are 0 today, in 27 pages.
+- **What real compiles caught that the structural lint could not:** (1) the jmlr class refused
+  `tabularx`, so wide tables use fixed `p{}` columns sized by content, and numeric columns get extra
+  width because digits and minus signs set wider than text; (2) `array` had only been loaded
+  implicitly by `tabularx`; (3) the PDF info dictionary carried the build timestamp with the
+  author's UTC offset, now suppressed with `\pdfinfoomitdate`, `\pdftrailerid{}` and
+  `\pdfsuppressptexinfo`; (4) a long `aws s3 sync` command in a code span could not break and
+  overflowed by 21.5 pt, so it was shortened to the bucket name.
 
 ⚠️ **The lint crashed on its own first real finding.** The non-ASCII report printed the offending
 character, and a cp1252 Windows console cannot encode `ρ`, so the check died reporting the error it

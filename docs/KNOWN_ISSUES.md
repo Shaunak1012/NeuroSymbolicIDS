@@ -39,6 +39,10 @@ rebuild, or any change that introduces unseen unsigned binaries. Long jobs go th
 `run_long.sh` and the sweeps are resumable and fail-soft, which is what limited the damage — all six
 runs failed in under a minute rather than hanging.
 
+✅ **2026-09-15 data point:** MiKTeX 25.12, installed per-user through winget (signed installer,
+hash verified), ran `pdflatex`/`bibtex` and fetched its on-demand packages with no block. Signed,
+reputable binaries pass; the TensorFlow block was specific to those DLLs.
+
 ⚠️ **Resolution is the user's call, not an automated fix.** Either disable Smart App Control
 (Windows Security → App & browser control — **one-way by design**, Microsoft does not allow
 re-enabling without a Windows reinstall) or move training to WSL2, which SAC does not govern.

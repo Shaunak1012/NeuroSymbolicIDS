@@ -2,6 +2,70 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-15 (Venue dropped — the paper is now a plain, venue-free research paper)
+
+- **Author's decision:** no venue, no template, no author line. Replaces the NeSy decision made
+  earlier the same day, which STATUS and the master draft now show struck through.
+- **Renames:** `md_to_pmlr.py` → `md_to_latex.py`, `nesy_body.md` → `paper_body.md`,
+  `nesy_supplementary.md` → `paper_supplementary.md`, `nesy_latex/` → `paper_latex/`. The figure
+  files keep their `nesy_fig*` names; they are internal file names and never appear in the PDF.
+- **Build:** a plain `article` class (11 pt, 1-inch margins, Latin Modern, natbib/plainnat) replaces
+  `\documentclass[anon]{nesy2026}`. The class file, the `\label{body:end}` probe and the 10-page
+  check are removed, and `--compile` now fails only on TeX errors or undefined references.
+  **27 pages, 0 undefined references, 0 overfull lines.**
+- **Text:** the "Anonymous submission" lines are removed. "Code, per-run records and trained models
+  will be released upon acceptance" contradicted Appendix H (weights are not released) and now
+  matches it. A long `aws s3 sync` command that overflowed its line by 21.5 pt is shortened to the
+  bucket name.
+- The PDF text contains no venue strings; the only "NeSy" left is Grov et al.'s real citation
+  "(NeSy 2024)". Verification: 172 verified / 0 mismatched on both master and paper.
+
+## 2026-09-15 (NeSy submission COMPILES — body ends on page 9 of 10)
+
+- **MiKTeX 25.12 installed** with the author's approval: winget, user scope, installer hash verified
+  (`basic-miktex-25.12-x64.exe`, 142 MB, miktex.org CTAN mirror). Smart App Control did not block it.
+- **`md_to_pmlr.py --compile`** runs pdflatex → bibtex → pdflatex ×3 in `nesy_latex/_build/`
+  (gitignored), copies `main.pdf` out (gitignored by `*.pdf`) and checks the limit. **29 pages in
+  total; the body ends on page 9**, read from a `\label{body:end}` in `main.aux`; 0 undefined
+  citations or references; 0 overfull lines in our text. The check was shown to fail with the limit
+  lowered to 8.
+- **What the first compile caught** (the structural lint could not): the jmlr class refuses
+  `tabularx`, so wide tables now use content-sized `p{}` columns; `array` had been loaded only
+  implicitly by `tabularx`; table and paragraph overflows (2–17 pt) were fixed with numeric-column
+  padding and `\emergencystretch`. The remaining 8.9 pt overflow is in the class's own first-page
+  header.
+- **Double-blind:** the PDF info dictionary carried the build timestamp with its UTC offset. It is now
+  suppressed. Title page confirmed as "Author names withheld / Under Review for NeSy 2026", and no
+  identifying strings appear in the PDF text.
+- ~~STATUS: "10-page limit UNVERIFIED"~~ struck through with the measurement. The layout has not been
+  reviewed page by page, since no renderer is available in the session.
+
+## 2026-09-15 (Submission prose revised; originality checked against cited abstracts)
+
+- **`nesy_body.md` and `nesy_supplementary.md` rewritten in plain academic prose.** Claims, caveats and
+  numbers are unchanged. Every recorded value still verifies (172 / 0 mismatched / 0 stale, master and
+  submission), and a before/after number diff shows only deliberate removals.
+- **Style counted, not eyeballed** (per 1,000 words, body / supplementary): em dashes 9.3 → 0.3 /
+  12.4 → 0.0; bold spans 28.6 → 6.0 / 32.0 → 6.2 (what remains is paragraph run-in headings); emoji and
+  the words "honest" and "load-bearing" removed. Mean sentence length 22.1 → 19.6 words in the body.
+- **Defects removed from the supplementary:** the old security-paper *Contributions* list citing a
+  non-existent "Fig. 1"; lowercase "this appendix" sentence starts left by the reference remap; a second
+  `## Appendix D` heading that would have become an unnumbered `\section*`; the internal r = +0.992
+  note; Arp et al. and Engelen et al. cited by venue instead of by reference number; long passages
+  repeated verbatim from the body (§3/§6 table and argument), now shortened to pointers plus the details
+  the body lacks.
+- **Originality check:** word-sequence overlap against the abstracts of the cited works (OpenAlex,
+  arXiv, publisher page). No shared run of five or more words across 15 of 17 abstracts. The one 8-word
+  run found (Engelen et al.'s list of error stages) was reworded. [3] and [4] could not be checked,
+  since their abstracts are behind publisher sign-in. This is not a full-text plagiarism scan.
+- `verify_draft.py`: the worst-pair name check accepts the prose phrase "a CNN-LSTM and a linear SVM",
+  keyed by run identifier so that a different pair still fails.
+- `md_to_pmlr.py`: "Supplementary §X" with a capital S was not converted to a reference. The lint's
+  section-sign check could never fire, because the unicode pass had already mapped § to `\S{}`. Both
+  are fixed, and the check was shown to fire by planting the error.
+- 🔴 **Committed locally, not pushed.** The repository is public, and pushing would publish the exact
+  submission text (see STATUS open decision).
+
 ## 2026-09-15 (PMLR LaTeX source generated — structurally linted, not compiled)
 
 - **`scripts/md_to_pmlr.py`** generates `docs/target/nesy_latex/` from `nesy_body.md` +
