@@ -2,6 +2,18 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-19 (IEEE conference versions: 7 pages of 9, and a 6-page IEEE ICC 2027 cut)
+
+`build_ieee_md.py` builds both versions as markdown from the verified `paper_body.md`: the full version adds
+a base-paper section and a reproducibility section from already-verified numbers, and the short version
+only deletes. `verify_draft.py` gains `VERIFY_SUBSET`, which rejects any number in a derived text that is
+missing from the verified texts and applies the stale guards. `md_to_latex.py --ieee` typesets with
+IEEEtran and checks the page budget; the author block is anonymous until D6 is answered. Reading the PDFs
+caught two defects the checks could not: every IEEE-numbered reference had been renumbered twice, and two
+tables overflowed their column by up to 75.8 pt. Both are fixed. Two body sentences were corrected so they
+stay true after E4. STATUS's Open Decisions table still showed D1/D3/D4/D5 and the reframe as open after
+they were decided; they are now marked decided in place.
+
 ## 2026-09-18 (Itinerary 4.4 — the last CNN-anchored channels re-derived; the itinerary is complete)
 
 `novelty.py` gains `NOVELTY_CNN`; on the deterministic CNN MSP is 0.5865 and Mahalanobis 0.4127 (pre-flag
