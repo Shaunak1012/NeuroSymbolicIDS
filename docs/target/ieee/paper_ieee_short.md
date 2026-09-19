@@ -1,35 +1,12 @@
 # Knowledge the Network Already Has: An Exogeneity Precondition for Neuro-Symbolic Intrusion Detection
 
-> **Build note — not part of the paper.** Derived from [paper_draft.md](paper_draft.md), which
-> remains the full verified research record. Every quantity here is checked by `verify_draft.py`
-> against `outputs/metadata/*.json`, over this file and [paper_supplementary.md](paper_supplementary.md)
-> together. `md_to_latex.py` strips this block when it generates the LaTeX.
-
----
-
 ## Abstract
 
-Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property
-that is rarely stated: the knowledge they add, whether an asset inventory, a relational graph or an
-external attack taxonomy, is information the neural network could not compute from its input. Our own
-system did not have this property. Its Logic Tensor Network axioms are deterministic functions of the
-flow features the network already receives. On its own the symbolic component had no measurable effect
-(−0.0004, n.s.), and it was worse than the same trainer run without axioms in all 17 CNN training runs
-we paired it with, alone and combined with a knowledge-graph channel. We argue that symbolic knowledge
-can help a neural detector only to the extent that it lies outside the model's learned feature basis,
-and we ask whether the same condition explains a second failure. None of the eight features that best
-separate Bot from benign traffic is among the eight that a model of the known-class task relies on most,
-and every Bot flow is classified as benign in all 17 of our CNN training runs. This failure held under
-five attempts to overturn it, among them an independent capture in which Bot is common and a relabelled
-release of the dataset. The overlap account is not complete, however: a random forest tuned on
-validation reaches Bot in part without relying more on Bot's features, as a test we specified in advance
-showed. We then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not.
-Host-role predicates derived from metadata the network never sees can still be predicted from its
-features, with AUC 0.990–0.994. Knowledge aggregated from the capture itself is not exogenous, and a
-benchmark with no external knowledge source therefore cannot support the experiment that published
-neuro-symbolic gains rely on.
+Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994). Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
 
----
+## Index Terms
+
+Intrusion detection, neuro-symbolic learning, zero-day attacks, CIC-IDS2017, Logic Tensor Networks, reproducibility
 
 ## 1 Introduction
 
@@ -55,7 +32,7 @@ predicates, in contrast, is a fixed function of flow features the network alread
 could act as an inductive bias. It could not add evidence.
 
 We state this as a precondition: symbolic knowledge helps a neural detector to the extent that it lies
-outside the model's learned feature basis. The paper makes three contributions around it.
+outside the model's learned feature basis. The paper makes four contributions around it.
 
 1. **One principle, and how far it reaches (§3–§4).** Knowledge that falls inside the learned basis adds
    nothing. We ask whether the same condition explains attack families that are absent from training:
@@ -68,6 +45,7 @@ outside the model's learned feature basis. The paper makes three contributions a
 3. **A negative result on evaluability (§6).** Host-role knowledge built from metadata that the network
    never sees can still be recovered from the network's features. A benchmark without an external
    knowledge artefact cannot host the experiment on which published neuro-symbolic gains depend.
+4. **A controlled re-examination of the base system (§7).** The satisfiability gain of the neuro-symbolic system our work started from does not appear against a matched control.
 
 ![Figure 1](../../outputs/figures/nesy_fig1_thesis.png)
 
@@ -76,18 +54,16 @@ is, the features a closed-set objective selects. (a) Symbolic knowledge can only
 basis. Our Logic Tensor Network axioms are functions of the flow features and add no evidence, while the
 knowledge used in published systems [14–16] cannot be computed from the input. (b) Our account of unseen
 families: a family is reached as far as it overlaps the basis. Web Brute Force shares 1 of 8
-discriminative features and is reached only weakly once label artefacts are removed (§7). Bot shares none
+discriminative features and is reached only weakly once label artefacts are removed (§8). Bot shares none
 and is not reached by the CNN. A tuned random forest reaches Bot in part without relying more on its
 features (§4), so panel (b) describes our CNN rather than every model. Note that inside and outside lead
 to opposite outcomes in the two panels.
 
-Two measurement problems limit the magnitudes we can report (§7), and we show both on our own system.
+Two measurement problems limit the magnitudes we can report (§8), and we show both on our own system.
 The metric most papers report cannot separate methods by zero-day ability. In addition, once the labels
 are corrected, two of our three main zero-day families turn out to have been measuring whether the
 dataset labels a failed connection attempt as an attack. These problems cap what we can claim about
 effect sizes, but they do not affect the CNN's failure on Bot.
-
----
 
 ## 2 Setting and measurement
 
@@ -96,7 +72,7 @@ and benign traffic are treated as known. They are split 80/10/10 with stratifica
 is under-sampled to a 1:1 ratio, giving 883,796 training, 110,475 validation and 114,658 test flows. Six
 rare families (Bot, Heartbleed, Infiltration, and Web Attack Brute Force, XSS and SQL Injection) occur
 only in the test set. Under-sampling benign traffic raises the attack base rate about fourfold, so
-absolute PR-AUC values here are higher than they would be at the capture's own prevalence (Appendix A).
+absolute PR-AUC values here are higher than they would be at the capture's own prevalence (§10).
 
 **Metric.** Our main metric is macro zero-day PR-AUC over the three unseen families with enough samples:
 Bot (n = 1,956), Web Attack Brute Force (n = 1,507) and Web Attack XSS (n = 652). Heartbleed (n = 11),
@@ -111,9 +87,7 @@ nondeterminism alone, 0.0171 across seeds with determinism enabled (n = 6) and 0
 splits, which puts the uncertainty on a single absolute number at about 0.0285. All comparisons are
 paired on seed. We call a difference established only if its sign is the same on every seed, and we give
 magnitudes as ranges. This procedure led us to withdraw one of our own earlier claims: a gap of 0.9 SD
-that a paired bootstrap had reported as significant (p = 0.001; supplementary §E).
-
----
+that a paired bootstrap had reported as significant (p = 0.001).
 
 ## 3 A symbolic pillar that could not help
 
@@ -130,7 +104,7 @@ with the axiom weight at zero. Against it, the axioms lower macro zero-day PR-AU
 CNN runs trained before our determinism controls (by 0.0062 on average) and each of the 6 trained after
 (0.0068), and by more when a knowledge-graph channel is also fused (0.0212 and 0.0324). An earlier
 version of this comparison, which added the axioms on top of a knowledge-graph fusion built on three
-CNN runs, reported a significant loss; that fusion does not hold across CNN runs (supplementary §D),
+CNN runs, reported a significant loss; that fusion does not hold across CNN runs (§8),
 so we report the matched comparison instead. One axiom seemed at first
 to help on Bot, but the effect disappeared when we repeated the experiment over several seeds. Because
 the sign of the effect is the same in every configuration, we do not think better tuning would change
@@ -158,8 +132,6 @@ This leads to the precondition we propose: *symbolic knowledge helps a neural de
 that it lies outside the model's learned feature basis.* The next section shows that the same condition
 also accounts for a failure that at first seems unrelated.
 
----
-
 ## 4 One principle, two consequences
 
 A closed-set discriminative model learns the features that separate the classes in its training
@@ -184,7 +156,7 @@ Bot is a case where the overlap appears to be empty, and we use it to test this 
   low end of this range rather than its typical value, and we no longer describe the Bot ranking as
   noise. Nor is the inconsistency a property of closed-set training in general. A random forest with
   default feature sampling shows it (ρ = 0.068), but with the number of features per split selected on
-  validation the same forest gives +0.923 and ranks Bot at 6.4 times chance (Appendix C).
+  validation the same forest gives +0.923 and ranks Bot at 6.4 times chance.
 - The information is available in the features. An oracle trained with Bot labels reaches a PR-AUC of
   0.9988 from the same inputs. It uses zero-day labels and so is an upper bound rather than a usable
   method, but it shows that the obstacle is the lack of supervision, not missing information or the
@@ -207,12 +179,10 @@ features more than the untuned forest does. We specified this test before runnin
 the tuned forest puts less of its importance on Bot's eight features (0.19 against 0.21, lower on every
 seed) and more on the eight known-class features (0.39 against 0.24). Overlap as we measure it
 therefore does not decide which models reach Bot, and we offer the account as an explanation of the
-CNN's failure rather than as a general law. The evidence is stronger for the unreachable case than for the reachable one (§7). Our
+CNN's failure rather than as a general law. The evidence is stronger for the unreachable case than for the reachable one (§8). Our
 support for the claim that overlapping families are reached came from web-attack scores, and most of
 those scores disappear under corrected labels. The ordering between families holds; the sizes of the
 scores do not.
-
----
 
 ## 5 Durability: five attempts to break it
 
@@ -227,11 +197,6 @@ each attempt we wrote down, before running it, what result would count against t
 | Cross-dataset augmentation with the 2018 known classes | the basis was too narrow | −0.1461 macro against a seed-matched control; better on 0/3 seeds |
 | Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method in the sweep reaches Bot (a validation-tuned random forest does in part, §4); the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance (0.0576 on deterministic re-runs) |
 
-The corrected-label experiment is the hardest test, and the way it fails deserves a comment. Our
-criterion was a lift above chance on every seed. The mean lift is 3.4×, which on its own would look like
-detection, but no individual run is close to that value. The large spread between seeds matches the
-variable Bot ranking described in §4.
-
 The reject-class experiment gave the clearest positive evidence. We ran two versions that differ only in
 which known families are merged into `UNKNOWN`, and they produce a double dissociation that holds on every
 seed and for every family. Merging three similar DoS variants ranks Bot below chance (−0.206) while giving
@@ -239,14 +204,6 @@ the best scores on the web families. Merging three dissimilar families reverses 
 difference on Bot is +0.274 (2.57σ, 3/3 seeds). A reject class is therefore not a neutral "none of the
 above" category. What it can reach depends on the features of the classes merged into it, which is the
 mechanism of §4 appearing in an open-set setting. For Bot, chance level remains the upper limit.
-
-Augmentation failed for a different reason. Adding a related attack family from the other capture
-sharpened one decision region until it began to fire on benign traffic from the original capture. The
-number of benign flows scoring above the median Web Brute Force flow rose from 2 to 242, and 81 % of them
-were assigned to `SSH-Patator`. Widening the basis along directions it already covered added false
-positives, not new reach.
-
----
 
 ## 6 Evaluability: the benchmark cannot supply exogenous knowledge
 
@@ -278,19 +235,15 @@ enough to determine host role and cross-flow structure. In a testbed where each 
 role, the characteristics of a flow nearly identify the host, and with it the host's aggregate
 properties.
 
-**What generalises.** Knowledge obtained by aggregating the same data is not exogenous. The axiom of Grov
-et al. works because their asset inventory comes from outside the traffic capture. Ours was inferred from
-the capture, and whatever can be inferred from the capture can largely be inferred from its features as
-well. CIC-IDS2017 comes with no asset inventory, topology or threat intelligence, so neuro-symbolic
-methods of the kind used in the literature cannot be properly evaluated on it. For this reason we did not
-run the injection experiments: injecting a predicate the model can already compute would present feature
-engineering as a symbolic result. The thresholds we used (AUC < 0.75, R² < 0.5) are conventions, and a
-predicate at R² = 0.90 still leaves some variance unexplained. A stronger predictor, however, could only
-make the conclusion stronger.
+## 7 Re-examining the base paper
 
----
+Our work started from Bizzarri et al. [8], who trained a Logic Tensor Network on CIC-IDS2017 with a combined cross-entropy and satisfiability loss and reported better accuracy on unknown attacks. We re-examined that result with controls it did not have.
 
-## 7 What limits the magnitudes
+**The gain does not appear against a matched control.** We trained their loss (cross-entropy plus the satisfiability term at ω = 1) and a matched control with the term switched off (ω = 0), identical in every other respect, with three deterministic seeds each. The satisfiability term changes zero-day accuracy by +0.55 percentage points (+0.60, −0.84 and +1.89 on the three seeds), against the +12.13 they report, and changes macro zero-day PR-AUC by −0.0090, better on 1 seed of 3. Neither change is consistent in direction.
+
+**The reported gain is a change of operating point.** Across the five evaluation views, the hybrid LTN model improves on the 1D CNN by +0.09, +0.15, +0.07 and +2.15 percentage points on the four views that contain benign traffic, and by +12.13 points on the one view that does not. On the nine known classes the hybrid model makes 452 false positives against the CNN's 380. The satisfiability term penalises calling an attack benign, so it moves the decision boundary towards the attack class. Their zero-day view contains only attack rows, so precision is always 1, accuracy equals recall, and F1 = 2A/(1+A); a model that flags every flow as an attack would score 100 % on both.
+
+## 8 What limits the magnitudes
 
 Two measurement problems limit how much weight any of our numbers can bear. We report both, and the
 second one removes two of our own main zero-day families from consideration.
@@ -311,14 +264,6 @@ different from normal traffic. Measuring a mislabelled benchmark with a better m
 labels. This is why the reachable case in §4 is weak. The unreachable case is unaffected, because §5
 tested it on these corrected labels.
 
-**Metric resolution.** The metric the field usually reports does not resolve the capability it is used to
-support. Across 31 methods evaluated under the same protocol, 37 of 169 method pairs (22 %) cannot be
-told apart statistically on this metric even though their macro zero-day PR-AUC differs by a factor of
-two or more. In the most extreme pair, the two methods are 0.0052 apart on the reported metric and 16.6×
-apart on zero-day performance. The metric is neither noisy nor unrelated to zero-day performance
-(ρ = +0.582); it is simply too coarse in the range where results are reported. Supplementary §B gives the
-full analysis.
-
 **A component that appeared to help, withdrawn.** Fused with our three reference CNN runs, the
 knowledge-graph channel, which scores cluster growth over time, raised macro zero-day PR-AUC, and the gain
 held when its number of clusters was selected on one half of the test set and reported on the other
@@ -327,31 +272,14 @@ of the same CNN configuration, the online variant improves on its own CNN run in
 the 6 deterministic re-runs. The gain follows where each CNN run happens to rank one web-attack family
 among all test flows (Spearman +0.95), a property that varies between runs of one configuration and that
 no per-family score reveals. The gain belonged to three runs rather than to the method, and we withdraw
-it (supplementary §D). With it withdrawn, no component of our architecture has been shown to improve on
+it. With it withdrawn, no component of our architecture has been shown to improve on
 the neural baseline.
 
----
-
-## 8 Related work
+## 9 Related work
 
 **Neuro-symbolic intrusion detection.** Logic Tensor Networks [7] provide the machinery for turning fuzzy
 logic into a loss. Bizzarri et al. [8] applied it to CIC-IDS2017 with a combined cross-entropy and
-satisfiability loss and reported better accuracy on unknown attacks. Our work started from that paper,
-and a survey by the same group [9] places it within a growing body of work. We matched its CNN's headline
-number but did not reproduce its symbolic gain. On its own metric our CNN scores 47.85 % against the reported 48.34 %, an agreement
-that does not survive filtering our data the way they filter theirs (below). To test
-the gain we trained its loss (cross-entropy plus the satisfiability term) and the same loss without that
-term, otherwise identical, three deterministic seeds each: the term changes zero-day accuracy by
-+0.55 percentage points, not consistently in direction, against the +12.13 reported (Appendix B). The
-comparison is indicative rather than exact,
-because the input modality, the set of zero-day classes, the class balancing and the cleaning all
-differ. In particular they delete duplicate and payload-less records and we do not, so the two CNN
-figures are measured on differently filtered populations. Filtered as closely to theirs as our data
-allow, with the payload-less attack attempts removed, our CNN's zero-day accuracy on that view is
-0.69 %. The reported gain is also confined to the
-one evaluation view that contains no benign traffic, and the paper's own confusion matrices show the
-hybrid model making more false positives than the CNN, which is what a shift of operating point looks
-like (Appendix B). As we read them, the gains reported in
+satisfiability loss and reported better accuracy on unknown attacks. Section §7 re-examines that result under a matched control. As we read them, the gains reported in
 [14]–[16] come from exogenous knowledge. We do not criticise those papers, since their knowledge really is
 exogenous. Our point is that this property does the work and is usually left implicit, and without it a
 reader cannot tell a knowledge result from a feature-engineering result. We state the property, test it,
@@ -368,29 +296,23 @@ further gap: the benchmark provides no external knowledge artefact.
 detection is a difficult setting for machine learning because the events of interest lie outside the
 closed world of the training data. §4 gives a mechanism for one instance of this, in which the failure
 takes the form of confident misclassification. Arp et al. [6] list ten common pitfalls in machine
-learning for security. Supplementary §E checks this work against all ten; two of them, lab-only
-evaluation and the threat model, are not addressed here.
+learning for security. Of the ten, lab-only evaluation is not addressed here, and the threat model only in part
+(§10).
 
-**Open-set recognition and OOD scoring.** Unseen attacks have long been treated as an open-set
-recognition problem [10], and post-hoc scorers do so without retraining [11]–[13]. None of them helps on
-Bot (§5).
-
----
-
-## 9 Limitations and conclusion
+## 10 Limitations and conclusion
 
 **Limitations.** Our two captures come from the same producer and use related methods, so they do not
 show that the findings generalise to other network environments. Under corrected labels only two
 zero-day families have enough samples. We use flow features rather than payload bytes throughout,
 although the oracle result suggests that modality is not the obstacle. The thresholds in our exogeneity
-test are conventions. A bounded, non-adaptive evasion test (Appendix F) finds that timing jitter
+test are conventions. A bounded, non-adaptive evasion test finds that timing jitter
 lowers the CNN's macro zero-day PR-AUC to 0.5620, while every perturbation we tried raises the scores
 of the autoencoder and the tuned forest; we do not evaluate an adaptive adversary, and the system has
 not been deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
 optimistic: at the capture's own benign proportion the CNN's macro zero-day PR-AUC is 0.5845, not
 0.6299. The split is stratified at random over a chronologically ordered capture and is not grouped by
 connection. Grouping by connection lowers the CNN's macro zero-day PR-AUC from 0.6299 to 0.5589, and a
-chronological split halves the benign-only autoencoder's score (Appendix A).
+chronological split halves the benign-only autoencoder's score.
 
 **Conclusion.** Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside
 the model's learned feature basis. The same condition accounts for our CNN's failure on an attack family
@@ -402,9 +324,7 @@ We suggest that anyone reporting a neuro-symbolic gain should first check that t
 not already present in the input, and should be aware that some benchmarks make this impossible.
 
 *Code, configuration and per-run records are released with this paper; the dataset and trained
-weights are not (Appendix H).*
-
----
+weights are not.*
 
 ## References
 

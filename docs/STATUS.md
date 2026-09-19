@@ -1,8 +1,37 @@
 # Project Status (Living Document)
 
-> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-17**.
+> **Update this file at the end of every working session.** It is the single source of truth for "where are we right now." Last updated: **2026-09-19**.
 
 ## ▶ RESUME HERE (next session)
+
+## 📄 IEEE CONFERENCE VERSIONS (2026-09-19) — 7-page and 6-page builds, both checked
+
+The author asked for an IEEE paper at a venue with at least 15 editions, and chose **both**: a
+**9-page** IEEE two-column version (CNSM-style budget, references included) and a **6-page** cut for
+**IEEE ICC 2027**, Communication & Information System Security symposium, **deadline 2 Oct 2026**.
+Branch `docs/ieee-paper`.
+
+| version | source (generated) | LaTeX | pages | numbers checked |
+|---|---|---|---:|---|
+| full | `docs/target/ieee/paper_ieee_full.md` | `docs/target/ieee/full_latex/` | **7 of 9** | 119, 0 unverified, 0 stale |
+| short (ICC) | `docs/target/ieee/paper_ieee_short.md` | `docs/target/ieee/short_latex/` | **6 of 6** | 0 unverified, 0 stale |
+
+- **Traceable by construction.** `build_ieee_md.py` builds both from the verified `paper_body.md`.
+  The full version adds a base-paper section (§7) and a reproducibility section (§10) written only
+  from numbers already verified in the draft. The short version **only deletes** paragraphs and
+  words. `verify_draft.py`'s new subset mode requires every number in a derived text to appear in the
+  verified texts and runs the stale guards; tests cover both versions and show the check fails on an
+  invented number and on the withdrawn "we reproduce their CNN".
+- **The short cut drops:** the base paper's class-balancing and coincidental-agreement paragraphs,
+  "Metric resolution", "What generalises", two §5 prose paragraphs (their rows stay in the table), the
+  open-set related-work paragraph and the reproducibility section.
+- **Two body sentences changed** so they stay true after E4: the durability row now says a tuned forest
+  reaches Bot in part, and the conclusion says overlap alone does not decide which models reach a family.
+- ⚠️ **Not yet confirmed:** the author list and whether the review is blind (D6), and ICC 2027's page
+  limit from its author kit (D7). The PDFs build with an anonymous author block until D6 is answered.
+
+**Next:** answer D6/D7, then read both PDFs end to end as a reviewer would. Figure 1's caption
+(146 words) is the easiest place to gain space if ICC's limit is stricter.
 
 ## 🔴 REMEDIATION, DAY 2 (2026-09-17) — a sixth single-population retraction; the pipeline reproduces from raw data
 
@@ -3722,11 +3751,13 @@ delta as a **multiple of it** — that ratio, not the raw number, decides whethe
 
 | Decision | Default chosen | Revisit? |
 |----------|----------------|----------|
-| 🔴 **D1 — benign under-sampling (audit F-04)** | ⬜ **OPEN 2026-09-16** | It is deliberate and matches Bizzarri; its unstated effect is that every absolute PR-AUC is measured at a 4.11× inflated attack base rate (det CNN 0.6299 → **0.5845** at capture prevalence). Recommendation: keep the split and report both columns. |
-| 🔴 **D3 — the notebook** | ⬜ **OPEN 2026-09-16** | `Capstone_final (4) (1).ipynb` (untracked) is a second pipeline whose zero-day set is the **base paper's** (PortScan held out, Infiltration trained). Is it the capstone deliverable? If yes: track + re-execute; if not: archive with a banner. |
-| 🔴 **D4 — grouped and chronological splits (audit F-02/F-03)** | ⬜ **OPEN 2026-09-16** | 54.88 % 5-tuple overlap, 100 % temporal overlap. ~2 days CPU to measure. Recommendation: run them, at least as a measured limitation. |
-| 🔴 **D5 — push the audit branches?** | ⬜ **OPEN** (see the venue section) | `docs/paper-revision` and `fix/audit-remediation` are local only; the repository is public. |
-| 🔴 **Reframe the paper after the fusion withdrawal?** | ⬜ **OPEN 2026-09-16** | The paper's one positive result is gone. Option A: reframe §6 and the contribution list around "nothing beats the neural baseline, and here is why" (the thesis predicts it). Option B: look for a fusion that is stable across CNN runs (e.g. fuse with an ensemble or with calibrated scores rather than whole-set ranks) — but the 11-run ensemble already fused *worse*. Recommendation: A. |
+| 🔴 **D1 — benign under-sampling (audit F-04)** | ~~⬜ OPEN 2026-09-16~~ ✅ **DECIDED 2026-09-17: keep 1:1, report both** (0.6299 at 1:1; 0.5845 at the capture's own proportion) | It is deliberate and matches Bizzarri; its unstated effect is that every absolute PR-AUC is measured at a 4.11× inflated attack base rate (det CNN 0.6299 → **0.5845** at capture prevalence). Recommendation: keep the split and report both columns. |
+| 🔴 **D3 — the notebook** | ~~⬜ OPEN 2026-09-16~~ ✅ **DECIDED 2026-09-18: not the deliverable** — kept private and gitignored | `Capstone_final (4) (1).ipynb` (untracked) is a second pipeline whose zero-day set is the **base paper's** (PortScan held out, Infiltration trained). Is it the capstone deliverable? If yes: track + re-execute; if not: archive with a banner. |
+| 🔴 **D4 — grouped and chronological splits (audit F-02/F-03)** | ~~⬜ OPEN 2026-09-16~~ ✅ **RUN 2026-09-17** — grouped −0.071, chronological halves the AE, the dissociation holds | 54.88 % 5-tuple overlap, 100 % temporal overlap. ~2 days CPU to measure. Recommendation: run them, at least as a measured limitation. |
+| 🔴 **D5 — push the audit branches?** | ~~⬜ OPEN~~ ✅ **DECIDED 2026-09-18: five sequential PRs** (#83–#87), each merged locally `--no-ff` | `docs/paper-revision` and `fix/audit-remediation` are local only; the repository is public. |
+| 🔴 **Reframe the paper after the fusion withdrawal?** | ~~⬜ OPEN 2026-09-16~~ ✅ **DONE 2026-09-17** ("go ahead with it"): the paper is framed around the precondition, with no positive fusion claim | The paper's one positive result is gone. Option A: reframe §6 and the contribution list around "nothing beats the neural baseline, and here is why" (the thesis predicts it). Option B: look for a fusion that is stable across CNN runs (e.g. fuse with an ensemble or with calibrated scores rather than whole-set ranks) — but the 11-run ensemble already fused *worse*. Recommendation: A. |
+| 🔴 **D6 — author list and blind review for the IEEE versions** | ⬜ **OPEN 2026-09-19** | The PDFs build anonymous by default; `md_to_latex.py --ieee ... --authors` fills the block from `AUTHORS`, taken from the weekly report (four PES University students; guide not listed). Confirm names, order, affiliation and whether ICC 2027 review is blind before any camera-ready build. |
+| 🔴 **D7 — ICC 2027 page limit** | ⬜ **OPEN 2026-09-19** | Built to 6 pages including references (the usual ICC limit). Confirm from the ICC 2027 author kit, including whether a paid extra page is allowed; the 7-page full version is ready if so. |
 | ~~D2 — was `BeaconLike` chosen before or after the Bot measurement?~~ | ✅ **ANSWERED 2026-09-16** | After — commit 8c9e40f designed it on Bot and validated it against Bot labels. Relabelled oracle-informed in code and paper. |
 | KG backend | NetworkX | If scale demands, → Neo4j |
 | Fusion mechanism | Fixed weights (Phase 1) → logistic (Phase 2) | After KG exists |

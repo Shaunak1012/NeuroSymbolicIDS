@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (89 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, plus `tests/`).
+> Last verified against source: **2026-09-05** (90 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, `build_ieee_md.py` 2026-09-19, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -896,6 +896,43 @@ python scripts/md_to_latex.py --compile  # + pdflatex/bibtex in _build/ (gitigno
 ⚠️ **The lint crashed on its own first real finding.** The non-ASCII report printed the offending
 character, and a cp1252 Windows console cannot encode `ρ`, so the check died reporting the error it
 had found. It now prints code points only. Same bug class as non-negotiable #6.
+
+**`--ieee <md> [--pages N] [--authors] [--compile]`** (added 2026-09-19) converts one of the derived
+IEEE texts from `build_ieee_md.py` into an IEEEtran two-column conference paper in
+`docs/target/ieee/<variant>_latex/`. It uses `\documentclass[conference]{IEEEtran}`, numeric
+citations (`natbib` numbers + `IEEEtranN`), `IEEEkeywords`, full-width `figure*` for both figures
+and `\footnotesize` tables. It runs the same lint and number check, and with `--compile` it
+reports the page count against `--pages` (default 9, references included), exiting 1 when over.
+The author block is **anonymous unless `--authors` is given**, because the author list has not
+been confirmed. Compiles caught two layout defects that the lint cannot see: tables sized for one
+page width overflowed an IEEE column by up to 75.8 pt (so wrapping now starts at 14 characters
+instead of 28), and the lint counted 0 figures because it matched `figure` and not `figure*`.
+
+## `scripts/build_ieee_md.py`
+
+**Purpose**: Build the IEEE conference versions of the paper **as markdown, from the verified
+`paper_body.md`**, so each is checked by `verify_draft.py` before it is typeset.
+
+```bash
+python scripts/build_ieee_md.py            # docs/target/ieee/paper_ieee_full.md  (<= 9 pages, 7 today)
+python scripts/build_ieee_md.py --short    # docs/target/ieee/paper_ieee_short.md (<= 6 pages, IEEE ICC)
+VERIFY_SUBSET=docs/target/ieee/paper_ieee_full.md python scripts/verify_draft.py
+```
+
+- **Full version:** a condensed abstract and index terms, the eight body sections, a new
+  "Re-examining the base paper" section (§7) and a "Reproducibility" section (§10), both written
+  from numbers already verified in the draft. Supplementary and appendix pointers are rewritten
+  to sections in this paper or removed.
+- **Section references are renumbered on the body text before any edit.** An earlier version did
+  it after, so every IEEE number inserted by an edit was shifted a second time (for example,
+  contribution 4 pointed at §8 instead of §7). Caught by reading the compiled PDF.
+- **Short version:** `SHORT_DROP` removes whole paragraphs, and `SHORT_EDIT` makes only
+  word deletions and the section renumbering. No sentence is rewritten, so every surviving claim is
+  one the subset check has already verified. A missing target stops the build.
+- **The subset check** (`VERIFY_SUBSET`, in `verify_draft.py`) requires every decimal and
+  thousands-grouped number in the derived text to appear in the verified texts. It also runs the
+  stale-claim guards. Tests: `DraftVerification.test_ieee_versions` and
+  `test_subset_mode_catches_invented_and_stale_text`.
 
 ## `scripts/noise_postdet.py` + `scripts/noise_postdet.sh`
 

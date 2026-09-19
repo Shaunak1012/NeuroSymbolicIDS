@@ -62,6 +62,7 @@ data/improved_2017/
 
 # LaTeX build directory for the paper (md_to_latex.py --compile)
 docs/target/paper_latex/_build/
+docs/target/ieee/*_latex/_build/
 
 # End-to-end reproduction sandbox (run_all.py with NSIDS_WORKDIR, 2026-09-17)
 outputs/sandbox*/

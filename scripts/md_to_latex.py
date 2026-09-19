@@ -33,6 +33,17 @@ and 10-page check went with it.
 
 Run:  python scripts/md_to_latex.py            (generate + lint)
       python scripts/md_to_latex.py --compile  (+ compile check, main.pdf)
+
+IEEE MODE (added 2026-09-19)
+----------------------------
+      python scripts/md_to_latex.py --ieee docs/target/ieee/paper_ieee_full.md --compile
+
+converts one of the derived IEEE conference texts (built by build_ieee_md.py and checked
+by verify_draft.py's subset mode) into an IEEEtran two-column conference paper in
+docs/target/ieee/<variant>_latex/: numeric IEEE citations (natbib + IEEEtranN), figures
+across both columns, IEEE keywords, and the same structural lint and number check. The
+page count is reported against the budget given by --pages (default 9, references
+included). The author block is anonymous unless --authors is given.
 """
 import io
 import os
@@ -178,7 +189,8 @@ def table_to_latex(rows, in_supp):
     ncol = len(header)
     longest = [max(len(r[j]) if j < len(r) else 0 for r in [header] + body) for j in range(ncol)]
     right = [(sep[j] if j < len(sep) else "").endswith(":") for j in range(ncol)]
-    if max(longest) > 28:
+    # a two-column IEEE page is about half as wide, so wrap sooner there
+    if max(longest) > (14 if IEEE["on"] else 28):
         # A table with long text gets fixed-width wrapping columns sized by content. Padding covers
         # the inter-column space; numeric columns get more because digits and math minus signs set
         # wider than a text character.
@@ -189,7 +201,7 @@ def table_to_latex(rows, in_supp):
     else:
         specs = ["r" if rt else "l" for rt in right]
     env = "tabular"
-    out = ["\\begin{center}\\small",
+    out = ["\\begin{center}" + ("\\footnotesize" if IEEE["on"] else "\\small"),
            "\\begin{%s}{@{}%s@{}}" % (env, "".join(specs)), "\\toprule"]
     out.append(" & ".join("\\textbf{%s}" % inline(h, in_supp) if h else "" for h in header)
                + " \\\\")
@@ -199,6 +211,9 @@ def table_to_latex(rows, in_supp):
         out.append(" & ".join(inline(c, in_supp) for c in r) + " \\\\")
     out += ["\\bottomrule", "\\end{%s}" % env, "\\end{center}"]
     return "\n".join(out)
+
+
+IEEE = {"on": False}
 
 
 def blocks_to_latex(md, in_supp=False):
@@ -223,10 +238,14 @@ def blocks_to_latex(md, in_supp=False):
                 cap.append(lines[j].strip())
                 j += 1
             caption = re.sub(r"^\*\*Figure \d+\.\*\*\s*", "", " ".join(cap))
-            out.append("\\begin{figure}[htbp]\n\\centering\n"
-                       "\\includegraphics[width=\\linewidth]{figures/%s}\n"
+            env = "figure*" if IEEE["on"] else "figure"
+            place = "[t]" if IEEE["on"] else "[htbp]"
+            width = "\\textwidth" if IEEE["on"] else "\\linewidth"
+            out.append("\\begin{%s}%s\n\\centering\n"
+                       "\\includegraphics[width=%s]{figures/%s}\n"
                        "\\caption{%s}\\label{%s}\n"
-                       "\\end{figure}" % (stem, inline(caption, in_supp), FIGURES[stem]))
+                       "\\end{%s}" % (env, place, width, stem, inline(caption, in_supp),
+                                       FIGURES[stem], env))
             i = j
             continue
 
@@ -570,9 +589,9 @@ def lint():
     else:
         print("numbers: all %d decimal/grouped figures carried over unchanged" % len(src_nums))
     stats = {"sections": len(re.findall(r"\\section\{", body.split("\\appendix")[0])),
-             "appendices": len(re.findall(r"\\section\{", body.split("\\appendix")[-1])),
+             "appendices": len(re.findall(r"\\section\{", body.split("\\appendix")[1])) if "\\appendix" in body else 0,
              "tables": len(re.findall(r"\\begin\{tabularx?\}", body)),
-             "figures": len(re.findall(r"\\begin\{figure\}", body)),
+             "figures": len(re.findall(r"\\begin\{figure\*?\}", body)),
              "citations": len(re.findall(r"\\cite[pt]\{", body)),
              "refs": len(re.findall(r"\\ref\{", body))}
     print("structure: %s" % ", ".join("%s %d" % kv for kv in stats.items()))
@@ -630,6 +649,112 @@ def compile_pdf():
     print("COMPILE CHECK PASSED - main.pdf written to %s" % OUT)
     return 0
 
+
+# ---------------------------------------------------------------------------
+# IEEE conference mode
+# ---------------------------------------------------------------------------
+AUTHORS = [
+    ("Maya Nithyanand Bhagath", "PES University, Bengaluru, India"),
+    ("Mithun R", "PES University, Bengaluru, India"),
+    ("Nevin Thomas", "PES University, Bengaluru, India"),
+    ("Shaunak A. Rai", "PES University, Bengaluru, India"),
+]
+
+
+def _ieee_regions(src):
+    md = strip_build_notes(io.open(src, encoding="utf-8").read())
+    title = re.search(r"(?m)^# (.+)$", md).group(1).strip()
+    abstract = re.search(r"(?ms)^## Abstract\s*\n(.*?)(?=^## )", md).group(1).strip()
+    kw = re.search(r"(?ms)^## Index Terms\s*\n(.*?)(?=^## )", md).group(1).strip()
+    main = re.search(r"(?ms)^## 1 Introduction.*?(?=^## References)", md).group(0)
+    return title, abstract, kw, main
+
+
+def generate_ieee(src, out):
+    global OUT
+    OUT = out
+    IEEE["on"] = True
+    title, abstract, kw, main = _ieee_regions(src)
+    os.makedirs(os.path.join(OUT, "figures"), exist_ok=True)
+    # anonymous by default: the author list is added with --authors once the authors confirm it
+    anonymous = "--authors" not in sys.argv
+    if anonymous:
+        author = "\\author{\\IEEEauthorblockN{Anonymous Authors}\\IEEEauthorblockA{Under review}}"
+    else:
+        author = "\\author{" + "\n\\and\n".join(
+            "\\IEEEauthorblockN{%s}\\IEEEauthorblockA{%s}" % (n, a) for n, a in AUTHORS) + "}"
+    tex = [
+        "% Generated by scripts/md_to_latex.py --ieee from " + os.path.basename(src) + ".",
+        "% Do not edit by hand: change the markdown (checked by verify_draft.py's subset mode) and regenerate.",
+        "\\documentclass[conference]{IEEEtran}",
+        "\\IEEEoverridecommandlockouts",
+        "\\pdfinfoomitdate=1",
+        "\\pdftrailerid{}",
+        "\\pdfsuppressptexinfo=-1",
+        "\\usepackage[T1]{fontenc}",
+        "\\usepackage{amsmath,amssymb}",
+        "\\usepackage{graphicx}",
+        "\\usepackage{booktabs}",
+        "\\usepackage{array}",
+        "\\usepackage[numbers,sort&compress]{natbib}",
+        "\\usepackage{url}",
+        "\\usepackage[hidelinks]{hyperref}",
+        "\\setlength{\\emergencystretch}{1.5em}",
+        "",
+        "\\title{%s}" % inline(title),
+        author,
+        "",
+        "\\begin{document}",
+        "\\maketitle",
+        "",
+        "\\begin{abstract}",
+        inline(" ".join(abstract.split())),
+        "\\end{abstract}",
+        "",
+        "\\begin{IEEEkeywords}",
+        inline(" ".join(kw.split())),
+        "\\end{IEEEkeywords}",
+        "",
+        blocks_to_latex(main),
+        "",
+        "\\bibliographystyle{IEEEtranN}",
+        "\\bibliography{refs}",
+        "",
+        "\\end{document}",
+        "",
+    ]
+    io.open(os.path.join(OUT, "main.tex"), "w", encoding="utf-8", newline="\n").write("\n".join(tex))
+    io.open(os.path.join(OUT, "refs.bib"), "w", encoding="utf-8", newline="\n").write(BIB)
+    for stem in FIGURES:
+        shutil.copyfile(os.path.join(paths.FIGURES, stem + ".png"),
+                        os.path.join(OUT, "figures", stem + ".png"))
+    global _converted_source
+    _converted_source = lambda: "\n".join((title, abstract, kw, main))  # noqa: E731
+    print("wrote %s" % OUT)
+
+
+def _page_budget(pages_allowed):
+    log = io.open(os.path.join(OUT, "_build", "main.log"), encoding="latin-1").read()
+    m = re.search(r"Output written on main\.pdf \((\d+) pages", log)
+    n = int(m.group(1)) if m else -1
+    print("page budget: %d of %d allowed (references included)" % (n, pages_allowed))
+    if n > pages_allowed:
+        print("OVER BUDGET by %d page(s)" % (n - pages_allowed))
+        return 1
+    return 0
+
+
+if __name__ == "__main__" and "--ieee" in sys.argv:
+    _src = sys.argv[sys.argv.index("--ieee") + 1]
+    _src = _src if os.path.isabs(_src) else os.path.join(paths.ROOT, _src)
+    _stem = os.path.splitext(os.path.basename(_src))[0].replace("paper_ieee_", "")
+    _out = os.path.join(os.path.dirname(_src), _stem + "_latex")
+    _pages = int(sys.argv[sys.argv.index("--pages") + 1]) if "--pages" in sys.argv else 9
+    generate_ieee(_src, _out)
+    _rc = lint()
+    if _rc == 0 and "--compile" in sys.argv:
+        _rc = compile_pdf() or _page_budget(_pages)
+    sys.exit(_rc)
 
 if __name__ == "__main__":
     generate()
