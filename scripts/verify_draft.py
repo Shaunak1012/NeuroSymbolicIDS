@@ -953,6 +953,38 @@ for pat, why in STALE:
     for mo in _re.finditer(pat, _LIVE, flags=_re.I):
         STALE_HITS.append((mo.group(0).replace("\n", " "), why))
 
+# ---- SUBSET MODE (added 2026-09-19): a DERIVED paper version --------------------
+# VERIFY_SUBSET=<file> checks a shortened version (the IEEE conference papers) that
+# cannot carry every verified claim: every decimal or comma-grouped number in it must
+# appear in the verified texts (master draft, body, supplementary), and the stale-claim
+# guards must not fire on it. The full checks above still run on the verified texts.
+_SUB = os.environ.get("VERIFY_SUBSET", "")
+if _SUB:
+    with open(os.path.join(paths.ROOT, _SUB), encoding="utf-8") as _f:
+        _sub_text = _f.read()
+    _ver = ""
+    for _vp in ("paper_draft.md", "paper_body.md", "paper_supplementary.md"):
+        with open(os.path.join(paths.ROOT, "docs", "target", _vp), encoding="utf-8") as _f:
+            _ver += _f.read() + "\n"
+    _n = lambda t: (t.replace("\u2212", "-").replace("\u2013", "-"))  # noqa: E731
+    _num = _re.compile(r"\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+")
+    _have = set(_num.findall(_n(_ver)))
+    _need = _num.findall(_n(_re.sub(r"(?s)~~.*?~~", "", _sub_text)))
+    _missing = sorted(set(x for x in _need if x not in _have))
+    _live_sub = _re.sub(r"(?s)~~.*?~~", "", _n(_sub_text).replace("\u00d7", "x"))
+    _stale_sub = [(mo.group(0), why) for pat, why in STALE
+                  for mo in _re.finditer(pat, _live_sub, flags=_re.I)]
+    print("=" * 96)
+    print("SUBSET CHECK - %s against the verified paper texts" % _SUB)
+    print("  %d numbers in the derived text, %d distinct" % (len(_need), len(set(_need))))
+    for x in _missing:
+        print("  UNVERIFIED NUMBER %s - not in the verified texts" % x)
+    for hit, why in _stale_sub:
+        print("  STALE     %r %s" % (hit, why))
+    print("%d unverified numbers, %d stale" % (len(_missing), len(_stale_sub)))
+    print("=" * 96)
+    sys.exit(1 if (_missing or _stale_sub) else 0)
+
 print("=" * 96)
 for label, want in OK:
     print(f"  OK        {label:44s} {want}")
