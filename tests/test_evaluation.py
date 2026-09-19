@@ -397,6 +397,28 @@ class DraftVerification(unittest.TestCase):
                                              "docs/target/paper_supplementary.md"})
         self.assertEqual(rc, 0, out[-2000:])
 
+    def test_ieee_versions(self):
+        """The derived IEEE conference texts carry only verified numbers and no stale claim."""
+        for name in ("paper_ieee_full.md", "paper_ieee_short.md"):
+            with self.subTest(name=name):
+                rc, out = self._run({"VERIFY_SUBSET": "docs/target/ieee/" + name})
+                self.assertEqual(rc, 0, out[-2000:])
+
+    def test_subset_mode_catches_invented_and_stale_text(self):
+        """The subset check fails on a number nobody measured and on a withdrawn claim."""
+        import tempfile
+        for text in ("Our macro zero-day PR-AUC is 0.7777 on Bot.",
+                     "We reproduce their CNN on the five views."):
+            with self.subTest(text=text):
+                fd, path = tempfile.mkstemp(suffix=".md")
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    f.write(text + "\n")
+                try:
+                    rc, out = self._run({"VERIFY_SUBSET": path})
+                finally:
+                    os.remove(path)
+                self.assertEqual(rc, 1, out[-2000:])
+
 
 if __name__ == "__main__":
     unittest.main()
