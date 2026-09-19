@@ -225,7 +225,7 @@ each attempt we wrote down, before running it, what result would count against t
 | Corrected labels [2], attack flows without payload removed | a labelling artefact | the remaining Bot flows (n = 738) give lifts of 0.57 / 0.64 / 8.99; two of three seeds are below chance |
 | Reject class: three known families merged into `UNKNOWN` | the model was never trained to reject | at best chance level (+0.068), with the sign changing between seeds |
 | Cross-dataset augmentation with the 2018 known classes | the basis was too narrow | −0.1461 macro against a seed-matched control; better on 0/3 seeds |
-| Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method reaches Bot; the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance (0.0576 on deterministic re-runs) |
+| Sweep over 4 deep architectures, 7 classical models, 4 benign-only models and 9 OOD scorers | the choice of method | no method in the sweep reaches Bot (a validation-tuned random forest does in part, §4); the best OOD scorer gets 0.0783 against a threshold of 0.08 fixed in advance (0.0576 on deterministic re-runs) |
 
 The corrected-label experiment is the hardest test, and the way it fails deserves a comment. Our
 criterion was a lift above chance on every seed. The mean lift is 3.4×, which on its own would look like
@@ -393,8 +393,9 @@ connection. Grouping by connection lowers the CNN's macro zero-day PR-AUC from 0
 chronological split halves the benign-only autoencoder's score (Appendix A).
 
 **Conclusion.** Symbolic knowledge helps a neural intrusion detector to the extent that it lies outside
-the model's learned feature basis. The same condition makes an attack family with no overlap unreachable,
-and that unreachability held under every test we designed to break it. The neuro-symbolic systems that
+the model's learned feature basis. The same condition accounts for our CNN's failure on an attack family
+whose features it does not use, a failure that held under every test we designed to break it, although
+a tuned random forest shows that overlap alone does not decide which models reach such a family. The neuro-symbolic systems that
 report gains use knowledge that is truly exogenous. Ours did not, and on CIC-IDS2017 we could not
 construct any, because knowledge aggregated from a capture can be recovered from that capture's features.
 We suggest that anyone reporting a neuro-symbolic gain should first check that the injected knowledge is
