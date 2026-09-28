@@ -1,0 +1,106 @@
+{
+  "bot_span": [
+    "2017-07-07T09:34:00",
+    "2017-07-07T12:59:00"
+  ],
+  "bot_hosts": [
+    "192.168.10.12",
+    "192.168.10.14",
+    "192.168.10.15",
+    "192.168.10.17",
+    "192.168.10.5",
+    "192.168.10.8",
+    "192.168.10.9"
+  ],
+  "c2_addr": "205.174.165.73",
+  "n": {
+    "c2_pos": 1255,
+    "c2_neg": 2075,
+    "c3_pos": 701
+  },
+  "per_seed": [
+    {
+      "seed": 42,
+      "residual": {
+        "macro_pr_auc": 0.22955393849322955,
+        "bot_lift": 5.55042983877981,
+        "c2_same_host_same_time_auc": 0.6724853837661402,
+        "c3_c2_server_vs_all_benign_auc": 0.971601892785328
+      },
+      "what_only": {
+        "macro_pr_auc": 0.1076105773831011,
+        "bot_lift": 1.7306055478553188,
+        "c2_same_host_same_time_auc": 0.9314541352661643,
+        "c3_c2_server_vs_all_benign_auc": 0.7821099752313575
+      },
+      "raw": {
+        "macro_pr_auc": 0.083884143011394,
+        "bot_lift": 1.4831010378524496,
+        "c2_same_host_same_time_auc": 0.4685414486631786,
+        "c3_c2_server_vs_all_benign_auc": 0.9177697700354202
+      },
+      "cnn": {
+        "macro_pr_auc": 0.629768308212828,
+        "bot_lift": 1.4108290367360237,
+        "c2_same_host_same_time_auc": 0.709461527384438,
+        "c3_c2_server_vs_all_benign_auc": 0.7995146552643845
+      }
+    },
+    {
+      "seed": 43,
+      "residual": {
+        "macro_pr_auc": 0.17916290092860834,
+        "bot_lift": 7.417193442393433,
+        "c2_same_host_same_time_auc": 0.7848167810684972,
+        "c3_c2_server_vs_all_benign_auc": 0.9691346098643747
+      },
+      "what_only": {
+        "macro_pr_auc": 0.09553709784853404,
+        "bot_lift": 2.3628139947699767,
+        "c2_same_host_same_time_auc": 0.93597657562521,
+        "c3_c2_server_vs_all_benign_auc": 0.7893115070458804
+      },
+      "raw": {
+        "macro_pr_auc": 0.07417089420852467,
+        "bot_lift": 1.4293471689327517,
+        "c2_same_host_same_time_auc": 0.4703950463207411,
+        "c3_c2_server_vs_all_benign_auc": 0.9124773118103429
+      },
+      "cnn": {
+        "macro_pr_auc": 0.6268946812643791,
+        "bot_lift": 0.705465271515366,
+        "c2_same_host_same_time_auc": 0.277394518312293,
+        "c3_c2_server_vs_all_benign_auc": 0.5214048079218334
+      }
+    },
+    {
+      "seed": 44,
+      "residual": {
+        "macro_pr_auc": 0.26658980926796444,
+        "bot_lift": 4.938444350869181,
+        "c2_same_host_same_time_auc": 0.7004579273268373,
+        "c3_c2_server_vs_all_benign_auc": 0.9623176871071736
+      },
+      "what_only": {
+        "macro_pr_auc": 0.15361414902653484,
+        "bot_lift": 1.9718480810623569,
+        "c2_same_host_same_time_auc": 0.9464011904190468,
+        "c3_c2_server_vs_all_benign_auc": 0.7935931736715273
+      },
+      "raw": {
+        "macro_pr_auc": 0.080400135960552,
+        "bot_lift": 1.2543995415901052,
+        "c2_same_host_same_time_auc": 0.4811479863677819,
+        "c3_c2_server_vs_all_benign_auc": 0.8852760444508642
+      },
+      "cnn": {
+        "macro_pr_auc": 0.6330470967531493,
+        "bot_lift": 0.6986860531790068,
+        "c2_same_host_same_time_auc": 0.2234566313061009,
+        "c3_c2_server_vs_all_benign_auc": 0.5321743522149156
+      }
+    }
+  ],
+  "verdict": "K0",
+  "auc_pass": 0.75
+}
