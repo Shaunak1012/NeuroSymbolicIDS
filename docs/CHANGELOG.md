@@ -2,6 +2,15 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-28 (last: ICC facts checked, the PDF read as a reviewer)
+
+Official ICC 2027 guidelines: 6 printed pages at submission, hard; pages 7–8 only after acceptance (US$100
+each); deadline 2 Oct 2026; **not blind** — the PDF's author list must match EDAS exactly, so the anonymous
+build cannot be submitted (D7 answered, D6 half answered). Reading the ICC PDF end to end found four
+defects, all fixed: a doubled "Section Section VII" (build script + converter both expanding §), a §8
+opener promising two measurement problems in a cut that keeps one (present since 2026-09-19), reference
+[11] without its arXiv identifier, and a doubled "and" in the abstract. The named build is 6 of 6.
+
 ## 2026-09-28 (later: the exogeneity test is made conditional; low-data axioms; documentation debt)
 
 **Exogeneity, done properly.** The marginal test (R² of predicting a predicate from X) cannot show a

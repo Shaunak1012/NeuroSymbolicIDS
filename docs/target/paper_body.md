@@ -25,7 +25,7 @@ release of the dataset. The overlap account is not complete, however: a random f
 validation reaches Bot in part without relying more on Bot's features, as a test we specified in advance
 showed. We then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not.
 Host-role predicates derived from metadata the network never sees can still be predicted from its
-features, with AUC 0.990–0.994, and the part the features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. A benchmark with no external knowledge source therefore cannot support
+features, with AUC 0.990–0.994, and the part the features cannot predict reaches unseen attacks through the attacker's identity and otherwise no better than the features themselves. A benchmark with no external knowledge source therefore cannot support
 the experiment that published neuro-symbolic gains rely on.
 
 ---
@@ -65,7 +65,7 @@ outside the model's learned feature basis. The paper makes three contributions a
    in which the family is plentiful, corrected labels, an explicitly trained reject class, cross-dataset
    augmentation, and a sweep over architectures and out-of-distribution scorers.
 3. **A negative result on evaluability (§6).** Host-role knowledge built from metadata that the network
-   never sees can still be recovered from the network's features, and what cannot be recovered reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. A benchmark without an external
+   never sees can still be recovered from the network's features, and what cannot be recovered reaches unseen attacks through the attacker's identity and otherwise no better than the features themselves. A benchmark without an external
    knowledge artefact cannot host the experiment on which published neuro-symbolic gains depend.
 
 ![Figure 1](../../outputs/figures/nesy_fig1_thesis.png)
