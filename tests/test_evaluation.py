@@ -475,5 +475,62 @@ class DraftVerification(unittest.TestCase):
                 self.assertEqual(rc, 1, out[-2000:])
 
 
+class ConditionalExogeneity(unittest.TestCase):
+    """2026-09-28: the residual test replaces the marginal one, and the identity controls say
+    what the residual carries. Both were pre-registered (R1/R2, K1/K0)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.r = _load("exogeneity_residual")
+        cls.c = _load("exogeneity_residual_controls")
+        if cls.r is None or cls.c is None:
+            raise unittest.SkipTest("exogeneity residual records not generated")
+
+    def test_marginal_test_misses_what_the_residual_carries(self):
+        # R2 on both views: the residual reaches Bot >= 2x on every seed, so high
+        # marginal R2 does NOT mean "no new evidence".
+        for view in ("static_host_role", "host_window"):
+            with self.subTest(view=view):
+                v = self.r["views"][view]
+                self.assertEqual(v["verdict"], "R2")
+                self.assertTrue(all(l >= 2.0 for l in v["residual_bot_lift"]))
+                self.assertGreater(v["residual_macro_mean"], v["raw_macro_mean"])
+
+    def test_the_residual_signal_is_not_host_behaviour(self):
+        # K0: with host and time held fixed, X's own projection beats the residual on
+        # every seed -- the residual's Bot lift is identity (C2 server) plus X.
+        self.assertEqual(self.c["verdict"], "K0")
+        for p in self.c["per_seed"]:
+            with self.subTest(seed=p["seed"]):
+                self.assertGreater(p["what_only"]["c2_same_host_same_time_auc"],
+                                   p["residual"]["c2_same_host_same_time_auc"])
+                self.assertGreater(p["residual"]["c3_c2_server_vs_all_benign_auc"], 0.95)
+
+    def test_same_host_control_is_powered_and_identity_free(self):
+        n = self.c["n"]
+        self.assertGreaterEqual(n["c2_pos"], 100)
+        self.assertGreaterEqual(n["c2_neg"], 100)
+        self.assertNotIn(self.c["c2_addr"], self.c["bot_hosts"])
+
+
+class LowDataAxioms(unittest.TestCase):
+    """2026-09-28: the inductive-bias reply to the precondition, pre-registered L1/L2."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.r = _load("ltn_lowdata")
+        if cls.r is None:
+            raise unittest.SkipTest("ltn_lowdata.json not generated")
+
+    def test_axioms_do_not_help_when_data_is_scarce(self):
+        self.assertEqual(self.r["verdict"], "L1")
+        self.assertLess(self.r["delta_mean"], 0)
+        self.assertLessEqual(self.r["seeds_positive"], 1)
+
+    def test_evaluated_on_the_canonical_test_set(self):
+        # ltn_lowdata.py refuses to run otherwise; the record must name the subsampled split.
+        self.assertEqual(self.r["subdir"], "paper_subsampled")
+
+
 if __name__ == "__main__":
     unittest.main()

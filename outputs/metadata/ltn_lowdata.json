@@ -1,0 +1,74 @@
+{
+  "subdir": "paper_subsampled",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "noise_sd": 0.0171,
+  "per_seed": [
+    {
+      "seed": 42,
+      "control": {
+        "macro_pr_auc": 0.22734336957229037,
+        "family": {
+          "Bot": 0.0579043433079827,
+          "Web Attack Brute Force": 0.39160372715030084,
+          "Web Attack XSS": 0.23252203825858753
+        }
+      },
+      "axioms": {
+        "macro_pr_auc": 0.24168017003366646,
+        "family": {
+          "Bot": 0.08272465785751498,
+          "Web Attack Brute Force": 0.39723175741557465,
+          "Web Attack XSS": 0.24508409482790977
+        }
+      },
+      "delta": 0.014336800461376087
+    },
+    {
+      "seed": 43,
+      "control": {
+        "macro_pr_auc": 0.3285211432491803,
+        "family": {
+          "Bot": 0.06861700611308025,
+          "Web Attack Brute Force": 0.5585345698451074,
+          "Web Attack XSS": 0.3584118537893532
+        }
+      },
+      "axioms": {
+        "macro_pr_auc": 0.24238158049451775,
+        "family": {
+          "Bot": 0.07083057820444649,
+          "Web Attack Brute Force": 0.42129084131668726,
+          "Web Attack XSS": 0.23502332196241948
+        }
+      },
+      "delta": -0.08613956275466256
+    },
+    {
+      "seed": 44,
+      "control": {
+        "macro_pr_auc": 0.3194810504088394,
+        "family": {
+          "Bot": 0.09385406344043123,
+          "Web Attack Brute Force": 0.526801679370201,
+          "Web Attack XSS": 0.337787408415886
+        }
+      },
+      "axioms": {
+        "macro_pr_auc": 0.23985777534068134,
+        "family": {
+          "Bot": 0.08858298205294834,
+          "Web Attack Brute Force": 0.3956441626762109,
+          "Web Attack XSS": 0.23534618129288476
+        }
+      },
+      "delta": -0.07962327506815806
+    }
+  ],
+  "delta_mean": -0.05047534578714818,
+  "seeds_positive": 1,
+  "verdict": "L1"
+}

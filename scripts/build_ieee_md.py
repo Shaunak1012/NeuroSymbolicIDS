@@ -69,7 +69,9 @@ ABSTRACT = (
     "test how far the same condition explains a second failure: every Bot flow is classified as benign "
     "in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show "
     "that the benchmark cannot host the experiment published gains rely on, because host-role knowledge "
-    "derived from the capture is predictable from the flow features (AUC 0.990-0.994). Re-examining the "
+    "derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the "
+    "features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no "
+    "better than the features themselves. Re-examining the "
     "neuro-symbolic system our work started from, we find that its reported gain does not appear against "
     "a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under "
     "deterministic training, and the pipeline reproduces from the raw data.")
@@ -214,6 +216,14 @@ SHORT_DROP = [
     "## 10 Reproducibility",
     "Training is deterministic: two full 50-epoch runs",
     "**Open-set recognition and OOD scoring.**",
+    # 2026-09-28: the conditional exogeneity test (section 6) added ~280 words; the durability
+    # table keeps the reject-class result, so its prose explanation is the first thing to go.
+    "The reject-class experiment gave the clearest positive evidence.",
+    # ...and the introduction's preview of section 8, which the reader reaches anyway.
+    "Two measurement problems limit the magnitudes we can report",
+    # ...and the low-data comparison in section 3 (~85 words): the base paper's operating-point
+    # analysis goes; the matched control that the abstract cites stays. The 9-page version keeps both.
+    "**The reported gain is a change of operating point.**",
 ]
 # Edits inside kept sentences: each only deletes words, or follows the section renumbering
 # (section 10 is dropped above, so Limitations and conclusion becomes section 10).

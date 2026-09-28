@@ -8,6 +8,43 @@
 > missing the entire 2026-07-27 measurement-defect class, which lived only in STATUS/CHANGELOG.
 > Severity now reflects impact on **current** work; issues scoped to superseded code are marked as such.
 
+## 🔴 2026-09-28 — the exogeneity test measured the wrong quantity; three latent defects
+
+### [FIXED 2026-09-28] 🔴 §6 inferred "no new evidence" from marginal predictability
+
+`exogenous_predicate.py` and `hostwindow.py` call a predicate W "not exogenous" when gradient boosting
+predicts it from X with high R²/AUC, and the paper added that "a stronger predictor could only make the
+conclusion stronger". Evidence enters through the residual W − E[W|X]; an average R² says nothing about
+where that residual sits. Measured (`exogeneity_residual.py`, pre-registered): the residual reaches Bot
+at 3.6–7.4× on both views. **The conclusion survived** only because pre-registered controls
+(`exogeneity_residual_controls.py`, K0 on 3 of 3 seeds) attribute that signal to attacker identity and
+to X. **Fixed:** §6 of the body, Appendix D, master draft (struck in place); `verify_draft.py` flags the
+old sentence. **Rule going forward (CLAUDE.md standing caution):** test injected knowledge by its
+residual, never by R² alone.
+
+### [OPEN — limit of the capture] 🟡 The web families cannot be separated from attacker identity
+
+All Web Brute Force and XSS flows come from 172.16.0.1, which sends 80 benign test flows. No
+same-host control is possible, so any host/pair/window signal on those families is unattributable on
+CIC-IDS2017. Stated in the paper's limitations. Not fixable on this dataset.
+
+### [FIXED 2026-09-28] 🟡 `rescore_logits.py` ignored `PAPER_SUBDIR`
+
+Its scaler was always fitted on the canonical training split, so a model trained on any other split
+(grouped, chronological, balanced, subsampled, 2018) would have been rescored with the wrong
+preprocessing, silently. No recorded result used that path (checked against `runs.jsonl`); the low-data
+test would have been the first. It now honours `PAPER_SUBDIR` and logs `paper_subdir`, as does
+`ltn_paper.py`.
+
+### [FIXED 2026-09-28] 🔴 The onboarding file presented withdrawn results as current
+
+`CLAUDE.md` (auto-loaded every session) still carried the CNN+KG fusion gain as "✅ direction",
+Bot's three-run ρ as the mechanism, "C4 still open" and a stale next action, up to 12 days after STATUS
+retracted them; `AGENTS.md` was a drifting full copy. STATUS's canonical tables sat below 3,700 lines of
+history, and four of its rows were stale in the same way. **Fixed:** history archived verbatim under
+`docs/archive/` with the stale claims struck; `CLAUDE.md` 520 → ~345 lines, STATUS 3,939 → ~290,
+`AGENTS.md` a pointer; lint checks `onboarding-stale-claims` and `onboarding-single-source`.
+
 ## 🔴 2026-09-18 — "We reproduce the base paper's CNN" withdrawn (6.5, FD-02)
 
 ### [FIXED 2026-09-18] 🔴 The 47.85 % / 48.34 % agreement was a population coincidence

@@ -1,0 +1,731 @@
+{
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "thresholds": {
+    "auc_exo": 0.75,
+    "lift_reach": 2.0
+  },
+  "views": {
+    "static_host_role": {
+      "predicates": [
+        "UnusualPortForHost",
+        "ServesWebPort",
+        "FanOutLog",
+        "PairPersistenceLog"
+      ],
+      "per_seed": [
+        {
+          "seed": 42,
+          "r2_test": {
+            "UnusualPortForHost": 0.7866245314622313,
+            "ServesWebPort": 0.8878317544106423,
+            "FanOutLog": 0.9491701984964271,
+            "PairPersistenceLog": 0.9146943159391683
+          },
+          "univariate_abs_residual_auc": {
+            "UnusualPortForHost": {
+              "Bot": 0.7442058931557723,
+              "Web Attack Brute Force": 0.8160745085912536,
+              "Web Attack XSS": 0.8259669348954883
+            },
+            "ServesWebPort": {
+              "Bot": 0.6863895845650123,
+              "Web Attack Brute Force": 0.7494052863285297,
+              "Web Attack XSS": 0.7375270876827359
+            },
+            "FanOutLog": {
+              "Bot": 0.9150135465717479,
+              "Web Attack Brute Force": 0.9920582189608993,
+              "Web Attack XSS": 0.9927864380492715
+            },
+            "PairPersistenceLog": {
+              "Bot": 0.684633695746379,
+              "Web Attack Brute Force": 0.9989935508520388,
+              "Web Attack XSS": 0.9967192402709529
+            }
+          },
+          "channel": {
+            "residual": {
+              "macro_pr_auc": 0.4655707836176501,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.20434211707824362,
+                  "lift": 5.97491753683844,
+                  "roc_auc": 0.8318402782906882
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.6711301841269898,
+                  "lift": 25.270478545522167,
+                  "roc_auc": 0.992742331442893
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.5212400496477166,
+                  "lift": 44.680345298713554,
+                  "roc_auc": 0.9916405670112425
+                }
+              }
+            },
+            "raw": {
+              "macro_pr_auc": 0.2888144503375337,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.18457801458167875,
+                  "lift": 5.3970196257515095,
+                  "roc_auc": 0.575042344953201
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.43329499712478436,
+                  "lift": 16.31512363427257,
+                  "roc_auc": 0.9643807592736753
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.248570339306138,
+                  "lift": 21.307281738467406,
+                  "roc_auc": 0.9643807592736753
+                }
+              }
+            }
+          }
+        },
+        {
+          "seed": 43,
+          "r2_test": {
+            "UnusualPortForHost": 0.7751320743614567,
+            "ServesWebPort": 0.8877030033801419,
+            "FanOutLog": 0.9629846321634675,
+            "PairPersistenceLog": 0.9205578409672355
+          },
+          "univariate_abs_residual_auc": {
+            "UnusualPortForHost": {
+              "Bot": 0.7723702942734993,
+              "Web Attack Brute Force": 0.7957200989945492,
+              "Web Attack XSS": 0.8004142717532516
+            },
+            "ServesWebPort": {
+              "Bot": 0.6700102297617483,
+              "Web Attack Brute Force": 0.7496144471697328,
+              "Web Attack XSS": 0.7487965410843691
+            },
+            "FanOutLog": {
+              "Bot": 0.9206135650531806,
+              "Web Attack Brute Force": 0.9816837523399651,
+              "Web Attack XSS": 0.9826137643801706
+            },
+            "PairPersistenceLog": {
+              "Bot": 0.7583446935649258,
+              "Web Attack Brute Force": 0.9986798276099493,
+              "Web Attack XSS": 0.996405311368269
+            }
+          },
+          "channel": {
+            "residual": {
+              "macro_pr_auc": 0.37727126191663424,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.13639107417836835,
+                  "lift": 3.9880443279567594,
+                  "roc_auc": 0.851671013801728
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.5706202614247845,
+                  "lift": 21.485916466017233,
+                  "roc_auc": 0.9860962640337092
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.42480245014674983,
+                  "lift": 36.413779350079295,
+                  "roc_auc": 0.9861940699257888
+                }
+              }
+            },
+            "raw": {
+              "macro_pr_auc": 0.23147890869961585,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.24450536358220287,
+                  "lift": 7.14928182993708,
+                  "roc_auc": 0.575327109696077
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.29601257120408564,
+                  "lift": 11.145943822431743,
+                  "roc_auc": 0.9351793182106196
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.153918791312559,
+                  "lift": 13.1938149197356,
+                  "roc_auc": 0.9351793182106196
+                }
+              }
+            }
+          }
+        },
+        {
+          "seed": 44,
+          "r2_test": {
+            "UnusualPortForHost": 0.7766029143668698,
+            "ServesWebPort": 0.8867808486802355,
+            "FanOutLog": 0.9517059690110918,
+            "PairPersistenceLog": 0.9256856450026434
+          },
+          "univariate_abs_residual_auc": {
+            "UnusualPortForHost": {
+              "Bot": 0.758087237249061,
+              "Web Attack Brute Force": 0.8270305435014005,
+              "Web Attack XSS": 0.834195031982097
+            },
+            "ServesWebPort": {
+              "Bot": 0.6707657258869598,
+              "Web Attack Brute Force": 0.7660623026368165,
+              "Web Attack XSS": 0.7666899054392611
+            },
+            "FanOutLog": {
+              "Bot": 0.8837398906063565,
+              "Web Attack Brute Force": 0.9889510674512899,
+              "Web Attack XSS": 0.990232912699332
+            },
+            "PairPersistenceLog": {
+              "Bot": 0.6838436487457116,
+              "Web Attack Brute Force": 0.998257649708485,
+              "Web Attack XSS": 0.9960176622076138
+            }
+          },
+          "channel": {
+            "residual": {
+              "macro_pr_auc": 0.43121412129349995,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.12445960286788729,
+                  "lift": 3.6391707908093447,
+                  "roc_auc": 0.8238992922225858
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.6624333228750279,
+                  "lift": 24.943010267565086,
+                  "roc_auc": 0.9881556171554849
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.5067494381375848,
+                  "lift": 43.438219859005336,
+                  "roc_auc": 0.9900332710214357
+                }
+              }
+            },
+            "raw": {
+              "macro_pr_auc": 0.26220222777080887,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.2028635215282091,
+                  "lift": 5.931683735563836,
+                  "roc_auc": 0.5712276154661009
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.3765617191404298,
+                  "lift": 14.178910544727637,
+                  "roc_auc": 0.9548943642848091
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.20718144264378774,
+                  "lift": 17.759453447727996,
+                  "roc_auc": 0.9548943642848091
+                }
+              }
+            }
+          }
+        }
+      ],
+      "residual_bot_lift": [
+        5.97491753683844,
+        3.9880443279567594,
+        3.6391707908093447
+      ],
+      "residual_reaches_bot_3of3": true,
+      "univariate_hits_3of3": [
+        {
+          "predicate": "UnusualPortForHost",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.8160745085912536,
+            0.7957200989945492,
+            0.8270305435014005
+          ]
+        },
+        {
+          "predicate": "UnusualPortForHost",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.8259669348954883,
+            0.8004142717532516,
+            0.834195031982097
+          ]
+        },
+        {
+          "predicate": "FanOutLog",
+          "family": "Bot",
+          "auc": [
+            0.9150135465717479,
+            0.9206135650531806,
+            0.8837398906063565
+          ]
+        },
+        {
+          "predicate": "FanOutLog",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.9920582189608993,
+            0.9816837523399651,
+            0.9889510674512899
+          ]
+        },
+        {
+          "predicate": "FanOutLog",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.9927864380492715,
+            0.9826137643801706,
+            0.990232912699332
+          ]
+        },
+        {
+          "predicate": "PairPersistenceLog",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.9989935508520388,
+            0.9986798276099493,
+            0.998257649708485
+          ]
+        },
+        {
+          "predicate": "PairPersistenceLog",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.9967192402709529,
+            0.996405311368269,
+            0.9960176622076138
+          ]
+        }
+      ],
+      "residual_macro_mean": 0.4246853889425948,
+      "raw_macro_mean": 0.2608318622693195,
+      "verdict": "R2"
+    },
+    "host_window": {
+      "predicates": [
+        "Flows60",
+        "Dsts60",
+        "Ports60",
+        "Flows600",
+        "Dsts600",
+        "Ports600",
+        "PairFlows600",
+        "GapCV600"
+      ],
+      "per_seed": [
+        {
+          "seed": 42,
+          "r2_test": {
+            "Flows60": 0.7153528033025204,
+            "Dsts60": 0.5393683094513262,
+            "Ports60": 0.7605164148443255,
+            "Flows600": 0.7683760647253199,
+            "Dsts600": 0.8745048914061149,
+            "Ports600": 0.7490437754674426,
+            "PairFlows600": 0.8263168605023888,
+            "GapCV600": 0.8676053939418408
+          },
+          "univariate_abs_residual_auc": {
+            "Flows60": {
+              "Bot": 0.5901754062703517,
+              "Web Attack Brute Force": 0.6190485160289994,
+              "Web Attack XSS": 0.7240039324134897
+            },
+            "Dsts60": {
+              "Bot": 0.575987644133054,
+              "Web Attack Brute Force": 0.7174807419399105,
+              "Web Attack XSS": 0.7107153491741276
+            },
+            "Ports60": {
+              "Bot": 0.6804903349548643,
+              "Web Attack Brute Force": 0.8085399851294104,
+              "Web Attack XSS": 0.848650838756053
+            },
+            "Flows600": {
+              "Bot": 0.8124727170256829,
+              "Web Attack Brute Force": 0.8513198101937746,
+              "Web Attack XSS": 0.9471825866697557
+            },
+            "Dsts600": {
+              "Bot": 0.7059100054559471,
+              "Web Attack Brute Force": 0.8184741219890753,
+              "Web Attack XSS": 0.7910476340045477
+            },
+            "Ports600": {
+              "Bot": 0.6945465992183227,
+              "Web Attack Brute Force": 0.9749899086591447,
+              "Web Attack XSS": 0.9783484296502156
+            },
+            "PairFlows600": {
+              "Bot": 0.6742836815872767,
+              "Web Attack Brute Force": 0.4462400236399443,
+              "Web Attack XSS": 0.31501657497958324
+            },
+            "GapCV600": {
+              "Bot": 0.5176794876792855,
+              "Web Attack Brute Force": 0.9178229267215426,
+              "Web Attack XSS": 0.9663941136636985
+            }
+          },
+          "channel": {
+            "residual": {
+              "macro_pr_auc": 0.22955393849322955,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.18982464225785164,
+                  "lift": 5.55042983877981,
+                  "roc_auc": 0.7986145904172809
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.3120539839341698,
+                  "lift": 11.749961024791327,
+                  "roc_auc": 0.9728688199930038
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.18678318928766718,
+                  "lift": 16.01092893573379,
+                  "roc_auc": 0.9768730526606433
+                }
+              }
+            },
+            "raw": {
+              "macro_pr_auc": 0.083884143011394,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.05072203993564582,
+                  "lift": 1.4831010378524496,
+                  "roc_auc": 0.5547249909508731
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.13454539610068403,
+                  "lift": 5.066120740767893,
+                  "roc_auc": 0.9086940488893375
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.06638499299785215,
+                  "lift": 5.69047680008736,
+                  "roc_auc": 0.9120241322639722
+                }
+              }
+            }
+          }
+        },
+        {
+          "seed": 43,
+          "r2_test": {
+            "Flows60": 0.7135831502704972,
+            "Dsts60": 0.5365588986955816,
+            "Ports60": 0.757921257158049,
+            "Flows600": 0.7658754478296995,
+            "Dsts600": 0.8685067314972277,
+            "Ports600": 0.7523653221071611,
+            "PairFlows600": 0.825798544217463,
+            "GapCV600": 0.8677350337782224
+          },
+          "univariate_abs_residual_auc": {
+            "Flows60": {
+              "Bot": 0.6634811092695084,
+              "Web Attack Brute Force": 0.6399815266684757,
+              "Web Attack XSS": 0.7351688724249139
+            },
+            "Dsts60": {
+              "Bot": 0.5731612612733685,
+              "Web Attack Brute Force": 0.73818861425735,
+              "Web Attack XSS": 0.729777269859238
+            },
+            "Ports60": {
+              "Bot": 0.8275351170359306,
+              "Web Attack Brute Force": 0.80928245746245,
+              "Web Attack XSS": 0.8373901457089923
+            },
+            "Flows600": {
+              "Bot": 0.8508551531413641,
+              "Web Attack Brute Force": 0.8466487516259639,
+              "Web Attack XSS": 0.9404412786352528
+            },
+            "Dsts600": {
+              "Bot": 0.7498530685379413,
+              "Web Attack Brute Force": 0.8739609096395493,
+              "Web Attack XSS": 0.8495393969388572
+            },
+            "Ports600": {
+              "Bot": 0.6974825212183839,
+              "Web Attack Brute Force": 0.968901875791088,
+              "Web Attack XSS": 0.9695507845668042
+            },
+            "PairFlows600": {
+              "Bot": 0.649796357158573,
+              "Web Attack Brute Force": 0.7516096741315901,
+              "Web Attack XSS": 0.5941411303950596
+            },
+            "GapCV600": {
+              "Bot": 0.5518352632769306,
+              "Web Attack Brute Force": 0.9013700737867696,
+              "Web Attack XSS": 0.9570193403083711
+            }
+          },
+          "channel": {
+            "residual": {
+              "macro_pr_auc": 0.17916290092860834,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.2536679379176045,
+                  "lift": 7.417193442393433,
+                  "roc_auc": 0.8621132222470395
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.18634534996374896,
+                  "lift": 7.016576335994009,
+                  "roc_auc": 0.947482452971937
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.09747541490447155,
+                  "lift": 8.355526784656458,
+                  "roc_auc": 0.9508423323879
+                }
+              }
+            },
+            "raw": {
+              "macro_pr_auc": 0.07417089420852467,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.04888365818251293,
+                  "lift": 1.4293471689327517,
+                  "roc_auc": 0.5564557556464349
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.11849247786711731,
+                  "lift": 4.461670314593036,
+                  "roc_auc": 0.8963745942725968
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.05513654657594378,
+                  "lift": 4.726267563777488,
+                  "roc_auc": 0.8966816276677709
+                }
+              }
+            }
+          }
+        },
+        {
+          "seed": 44,
+          "r2_test": {
+            "Flows60": 0.7124301722106778,
+            "Dsts60": 0.5227669739792404,
+            "Ports60": 0.7605213261403156,
+            "Flows600": 0.7632184905109844,
+            "Dsts600": 0.863032503204562,
+            "Ports600": 0.747856974724588,
+            "PairFlows600": 0.8257413460266876,
+            "GapCV600": 0.8638834485267005
+          },
+          "univariate_abs_residual_auc": {
+            "Flows60": {
+              "Bot": 0.6396802069816796,
+              "Web Attack Brute Force": 0.658961308295716,
+              "Web Attack XSS": 0.7580770469158498
+            },
+            "Dsts60": {
+              "Bot": 0.5675241142527202,
+              "Web Attack Brute Force": 0.8248369435011891,
+              "Web Attack XSS": 0.817031873029892
+            },
+            "Ports60": {
+              "Bot": 0.7107763245739414,
+              "Web Attack Brute Force": 0.8434923462280693,
+              "Web Attack XSS": 0.864670042563939
+            },
+            "Flows600": {
+              "Bot": 0.871410369512774,
+              "Web Attack Brute Force": 0.8770422328906677,
+              "Web Attack XSS": 0.9589678597445852
+            },
+            "Dsts600": {
+              "Bot": 0.7018081788336283,
+              "Web Attack Brute Force": 0.9500071352065724,
+              "Web Attack XSS": 0.9444232832287329
+            },
+            "Ports600": {
+              "Bot": 0.6736986213302907,
+              "Web Attack Brute Force": 0.9776326680810862,
+              "Web Attack XSS": 0.9796429351669342
+            },
+            "PairFlows600": {
+              "Bot": 0.6589172792250889,
+              "Web Attack Brute Force": 0.5308570144126127,
+              "Web Attack XSS": 0.3921040855628135
+            },
+            "GapCV600": {
+              "Bot": 0.5318903469796425,
+              "Web Attack Brute Force": 0.903411707521906,
+              "Web Attack XSS": 0.9785045611042923
+            }
+          },
+          "channel": {
+            "residual": {
+              "macro_pr_auc": 0.26658980926796444,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.16889474499152202,
+                  "lift": 4.938444350869181,
+                  "roc_auc": 0.8068476854874809
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.3808160926350781,
+                  "lift": 14.339103092557977,
+                  "roc_auc": 0.9782373016057886
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.2500585901772932,
+                  "lift": 21.434853598801748,
+                  "roc_auc": 0.9841519771301156
+                }
+              }
+            },
+            "raw": {
+              "macro_pr_auc": 0.080400135960552,
+              "family": {
+                "Bot": {
+                  "pr_auc": 0.042900451162734,
+                  "lift": 1.2543995415901052,
+                  "roc_auc": 0.5466145686112637
+                },
+                "Web Attack Brute Force": {
+                  "pr_auc": 0.1348442243921932,
+                  "lift": 5.077372706642741,
+                  "roc_auc": 0.9070746891608134
+                },
+                "Web Attack XSS": {
+                  "pr_auc": 0.06345573232672876,
+                  "lift": 5.439382552160343,
+                  "roc_auc": 0.9100409046083741
+                }
+              }
+            }
+          }
+        }
+      ],
+      "residual_bot_lift": [
+        5.55042983877981,
+        7.417193442393433,
+        4.938444350869181
+      ],
+      "residual_reaches_bot_3of3": true,
+      "univariate_hits_3of3": [
+        {
+          "predicate": "Ports60",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.8085399851294104,
+            0.80928245746245,
+            0.8434923462280693
+          ]
+        },
+        {
+          "predicate": "Ports60",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.848650838756053,
+            0.8373901457089923,
+            0.864670042563939
+          ]
+        },
+        {
+          "predicate": "Flows600",
+          "family": "Bot",
+          "auc": [
+            0.8124727170256829,
+            0.8508551531413641,
+            0.871410369512774
+          ]
+        },
+        {
+          "predicate": "Flows600",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.8513198101937746,
+            0.8466487516259639,
+            0.8770422328906677
+          ]
+        },
+        {
+          "predicate": "Flows600",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.9471825866697557,
+            0.9404412786352528,
+            0.9589678597445852
+          ]
+        },
+        {
+          "predicate": "Dsts600",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.8184741219890753,
+            0.8739609096395493,
+            0.9500071352065724
+          ]
+        },
+        {
+          "predicate": "Dsts600",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.7910476340045477,
+            0.8495393969388572,
+            0.9444232832287329
+          ]
+        },
+        {
+          "predicate": "Ports600",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.9749899086591447,
+            0.968901875791088,
+            0.9776326680810862
+          ]
+        },
+        {
+          "predicate": "Ports600",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.9783484296502156,
+            0.9695507845668042,
+            0.9796429351669342
+          ]
+        },
+        {
+          "predicate": "GapCV600",
+          "family": "Web Attack Brute Force",
+          "auc": [
+            0.9178229267215426,
+            0.9013700737867696,
+            0.903411707521906
+          ]
+        },
+        {
+          "predicate": "GapCV600",
+          "family": "Web Attack XSS",
+          "auc": [
+            0.9663941136636985,
+            0.9570193403083711,
+            0.9785045611042923
+          ]
+        }
+      ],
+      "residual_macro_mean": 0.2251022162299341,
+      "raw_macro_mean": 0.07948505772682356,
+      "verdict": "R2"
+    }
+  }
+}

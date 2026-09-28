@@ -521,6 +521,83 @@ if ep:
     chk("n exogenous predicates", "exogenous_predicate",
         ep.get("n_exogenous"), "{:d}", quoted=False)
 
+
+# ---- the conditional (residual) exogeneity test, 2026-09-28 ----------------
+# Ranges are rendered from the per-seed record exactly as the text states them, so a
+# rounding choice in the prose (3.64 -> "3.6") is checked, not assumed.
+def _rng(vals, fmt, suffix=""):
+    return (fmt + "-" + fmt + suffix) % (min(vals), max(vals))
+
+
+er = load("exogeneity_residual")
+if er:
+    for view, lift_fmt in (("static_host_role", "%.1f"), ("host_window", "%.1f")):
+        v = er["views"][view]
+        ps = v["per_seed"]
+        chk("residual %s Bot lift range" % view, "exogeneity_residual",
+            _rng(v["residual_bot_lift"], lift_fmt, "x"), "{}")
+        chk("residual %s macro range" % view, "exogeneity_residual",
+            _rng([p["channel"]["residual"]["macro_pr_auc"] for p in ps], "%.4f"), "{}")
+        chk("raw %s macro range" % view, "exogeneity_residual",
+            _rng([p["channel"]["raw"]["macro_pr_auc"] for p in ps], "%.4f"), "{}")
+        chk("residual %s verdict" % view, "exogeneity_residual",
+            v["verdict"], "{}", quoted=False)
+    hw = er["views"]["host_window"]["per_seed"]
+    chk("raw window Bot lift range", "exogeneity_residual",
+        _rng([p["channel"]["raw"]["family"]["Bot"]["lift"] for p in hw], "%.1f", "x"), "{}")
+else:
+    unbacked("residual exogeneity figures", "exogeneity_residual.json missing")
+
+hwj = load("hostwindow")
+if hwj and "exogeneity" in hwj:
+    chk("window R2 range without Destination Port", "hostwindow",
+        _rng([v["no_dest_port"] for v in hwj["exogeneity"].values() if "no_dest_port" in v],
+             "%.2f"), "{}")
+
+erc = load("exogeneity_residual_controls")
+if erc:
+    ps = erc["per_seed"]
+    for arm in ("residual", "what_only"):
+        a = [p[arm]["c2_same_host_same_time_auc"] for p in ps]
+        chk("same-host C2 AUC %s range" % arm, "exogeneity_residual_controls",
+            _rng(a, "%.2f"), "{}")
+        chk("same-host C2 AUC %s per seed" % arm, "exogeneity_residual_controls",
+            " / ".join("%.3f" % x for x in a), "{}",
+            alt=(", ".join("%.3f" % x for x in a),), ws=True)
+    chk("C2-server residual AUC range", "exogeneity_residual_controls",
+        _rng([p["residual"]["c3_c2_server_vs_all_benign_auc"] for p in ps], "%.2f"), "{}")
+    chk("CNN same-host AUC per seed", "exogeneity_residual_controls",
+        ", ".join("%.3f" % p["cnn"]["c2_same_host_same_time_auc"] for p in ps[:2]) + " and "
+        + "%.3f" % ps[2]["cnn"]["c2_same_host_same_time_auc"], "{}")
+    chk("same-host control sizes", "exogeneity_residual_controls",
+        "%s against %s" % ("{:,}".format(erc["n"]["c2_pos"]), "{:,}".format(erc["n"]["c2_neg"])),
+        "{}", alt=("%s Bot vs %s benign" % ("{:,}".format(erc["n"]["c2_pos"]),
+                                             "{:,}".format(erc["n"]["c2_neg"])),))
+    chk("C2-server Bot flows", "exogeneity_residual_controls", erc["n"]["c3_pos"], "{:d}")
+    chk("controls verdict", "exogeneity_residual_controls", erc["verdict"], "{}", quoted=False)
+else:
+    unbacked("identity controls", "exogeneity_residual_controls.json missing")
+
+# ---- the low-data axiom test, 2026-09-28 -------------------------------------
+ld = load("ltn_lowdata")
+if ld:
+    import statistics as _st
+    ps = ld["per_seed"]
+    d = ["%+.4f" % p["delta"] for p in ps]
+    chk("low-data paired deltas", "ltn_lowdata", "%s, %s and %s" % tuple(d), "{}",
+        alt=(" / ".join(d),), ws=True)
+    chk("low-data mean delta", "ltn_lowdata", ld["delta_mean"], "{:+.4f}", alt=("%.4f" % ld["delta_mean"],))
+    ax = [p["axioms"]["macro_pr_auc"] for p in ps]
+    ct = [p["control"]["macro_pr_auc"] for p in ps]
+    chk("low-data axioms range", "ltn_lowdata", "%.4f and %.4f" % (min(ax), max(ax)), "{}",
+        alt=(_rng(ax, "%.4f"),))
+    chk("low-data control range", "ltn_lowdata", "%.4f to %.4f" % (min(ct), max(ct)), "{}",
+        alt=(_rng(ct, "%.4f"),))
+    chk("low-data control seed SD", "ltn_lowdata", _st.stdev(ct), "{:.4f}")
+    chk("low-data verdict", "ltn_lowdata", ld["verdict"], "{}", quoted=False)
+else:
+    unbacked("low-data axiom test", "ltn_lowdata.json missing")
+
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")
 # These were listed as hand-checks on the grounds that they are "derived at
@@ -945,6 +1022,11 @@ STALE = [
      "overlap is an account of the CNN's failure; the pre-registered forest test (E4) failed"),
     (r"[Tt]he\s+instability\s+(belongs\s+to|therefore\s+comes\s+from)\s+closed-set",
      "retracted with the Bot-ranking claim"),
+    # 2026-09-28 (exogeneity_residual.py): marginal predictability does not show a
+    # predicate adds no evidence; the residual reached Bot 3.6-7.4x before the identity
+    # controls explained it. The conclusion survives, this justification does not.
+    (r"stronger\s+predictor[^.]{0,60}only\s+(make|strengthen)",
+     "invalid inference: evidence enters through the residual, not the marginal R2"),
 ]
 import re as _re
 _LIVE = _re.sub(r"(?s)~~.*?~~", "", NORM)

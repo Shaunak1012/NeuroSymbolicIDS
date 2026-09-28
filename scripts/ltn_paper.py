@@ -188,7 +188,8 @@ if SUBSET == 0:
     # Determinism state and epochs travel with the numbers (audit F-01): without
     # them a post-flag LTN run is indistinguishable in runs.jsonl from the pre-flag
     # population it must never be pooled with. cnn_paper.py already did this.
-    tracking.log_run(TAG, {"protocol": "paper", "loss": LOSS, "axioms": AXIOMS,
+    tracking.log_run(TAG, {"protocol": "paper", "paper_subdir": os.path.basename(PAPER),
+                           "loss": LOSS, "axioms": AXIOMS,
                            "omega": OMEGA, "omega_mode": OMEGA_MODE, "seed": SEED,
                            "epochs": EPOCHS, "best_epoch": best_ep, "transform": TFM,
                            **{f"det_{k}": v for k, v in DET.items()}},

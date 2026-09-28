@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (92 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, `build_ieee_md.py` 2026-09-19, `hostwindow.py` and `hostwindow_detect.py` 2026-09-28, plus `tests/`).
+> Last verified against source: **2026-09-05** (95 Python scripts, plus 18 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, `build_ieee_md.py` 2026-09-19, `hostwindow.py`, `hostwindow_detect.py`, `exogeneity_residual.py`, `exogeneity_residual_controls.py` and `ltn_lowdata.py` (+ `ltn_lowdata.sh`) 2026-09-28, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -900,6 +900,63 @@ python scripts/hostwindow_detect.py
   shifting PR-AUC by up to 0.0199 — the noise floor's own magnitude. Ordering is preserved (0
   violations, checked by sorting on score; **Spearman ρ = 0.912 is a tie artefact** and was the
   wrong instrument for this).
+
+## `scripts/exogeneity_residual.py`
+
+**Purpose**: Replace the MARGINAL exogeneity test (R²/AUC of predicting a predicate from the 68
+features) with the CONDITIONAL one. Knowledge adds evidence through its residual
+r = W − E[W|X]; a high average R² says nothing about whether the unexplained part is concentrated
+on the zero-day rows. Predictions R1/R2 are in the docstring, committed before the run.
+
+```bash
+python scripts/exogeneity_residual.py
+```
+
+- Both views (static host-role `exo_*.npy`, causal window `hostwin_*.npy`), seeds 42–44 (the seed
+  picks the 200k boosting subsample). Univariate: ROC-AUC of |r| per predicate × powered family.
+  Multivariate: benign-only IsolationForest fitted on **validation** residuals (never in the
+  boosting subsample), scored through `metrics.evaluate`; the raw view is the comparison.
+- **Result (2026-09-28): R2 on both views.** Static residual macro 0.3773–0.4656, Bot lift
+  3.64–5.97×; window residual macro 0.1792–0.2666, Bot lift 4.94–7.42× (raw window 1.25–1.48×).
+  So "not exogenous by R²" does **not** imply "adds no evidence". What the residual carries is
+  settled by the controls below — **identity and X, not host behaviour**.
+
+## `scripts/exogeneity_residual_controls.py`
+
+**Purpose**: Decide whether the window residual's Bot signal is behaviour or something cheaper.
+Predictions K1/K0 in the docstring, committed before the run.
+
+```bash
+python scripts/exogeneity_residual_controls.py
+```
+
+- **C1 X-only**: novelty on Ŵ = E[W|X] alone (no W). **C2 same host, same time**: Bot flows from
+  the seven infected internal hosts vs benign flows from the same hosts inside Bot's own time span
+  (1,255 vs 2,075), so identity and time of day are fixed. **C3**: the 701 Bot flows sourced from
+  the C2 server 205.174.165.73, which sends no benign traffic. Web BF/XSS are not testable: all come
+  from 172.16.0.1, which sends 80 benign test flows.
+- **Result: K0 on 3 of 3 seeds.** C2 AUC residual 0.672 / 0.785 / 0.700 vs **X-only 0.931 / 0.936 /
+  0.946**; C3 residual 0.96–0.97 (identity). The CNN's C2 AUC is 0.71 / 0.28 / 0.22 — within one
+  infected host the flow features separate Bot well, and the CNN does not use them (secondary,
+  not pre-registered).
+- The static view's residual is an identity proxy on inspection: Web BF, XSS, DoS Hulk and PortScan
+  share identical predicate values because they share 172.16.0.1.
+
+## `scripts/ltn_lowdata.py` + `scripts/ltn_lowdata.sh`
+
+**Purpose**: The reviewer reply to the precondition — endogenous knowledge can pay as an inductive
+bias when data is scarce. Same `LTN_CTRL` vs `LTN_AX6` comparison as the paper, log-odds scored,
+seeds 42–44, on the 70,384-flow `paper_subsampled` training set (canonical test set). Predictions
+L1/L2 in the docstring, committed before the run.
+
+```bash
+bash scripts/run_long.sh ltn_lowdata.sh     # trains 6 runs, rescores, evaluates
+```
+
+- **Result (2026-09-28): L1.** Paired deltas +0.0143 / −0.0861 / −0.0796, mean −0.0505, 1 of 3 seeds
+  positive; the control's seed SD at this size is 0.0560, so only the direction is reliable. The axiom
+  arm holds 0.2399–0.2424 (SD 0.0013) — it regularises, below the control's mean.
+- `ltn_lowdata.py` refuses to run unless the split's test labels equal the canonical ones.
 
 ## `scripts/md_to_latex.py` (was `md_to_pmlr.py`)
 
