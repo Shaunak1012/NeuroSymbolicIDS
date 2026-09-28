@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994). Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
+Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the features cannot predict reaches unseen attacks only through the attacker's identity. Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
 
 ## Index Terms
 
@@ -43,7 +43,8 @@ outside the model's learned feature basis. The paper makes four contributions ar
    in which the family is plentiful, corrected labels, an explicitly trained reject class, cross-dataset
    augmentation, and a sweep over architectures and out-of-distribution scorers.
 3. **A negative result on evaluability (§6).** Host-role knowledge built from metadata that the network
-   never sees can still be recovered from the network's features. A benchmark without an external
+   never sees can still be recovered from the network's features, and what cannot be recovered reaches
+   unseen attacks only through the attacker's identity. A benchmark without an external
    knowledge artefact cannot host the experiment on which published neuro-symbolic gains depend.
 4. **A controlled re-examination of the base system (§7).** The satisfiability gain of the neuro-symbolic system our work started from does not appear against a matched control, and our apparent agreement with its CNN does not survive population matching.
 
@@ -125,7 +126,8 @@ entropy, and `BeaconLike` depends on the destination port. `BeaconLike` was also
 encodings against Bot flows, which belong to a zero-day family, so it is not a clean test of transfer to
 unseen attacks. The axioms made no positive difference, so this weakens nothing we conclude, but a
 positive result from it would not have counted. A predicate that the network can compute
-for itself carries no new information. The most it can do is reshape the hypothesis space, which is a
+for itself carries no new information: for any function φ of the input X, I(φ(X); Y) ≤ I(X; Y), the data-processing inequality
+[19]. The inequality is standard; what needs testing is whether a given piece of knowledge is such a function, which §6 does. The most it can do is reshape the hypothesis space, which is a
 form of regularisation. In short, the knowledge we injected was endogenous.
 
 This leads to the precondition we propose: *symbolic knowledge helps a neural detector to the extent
@@ -250,11 +252,25 @@ properties.
 et al. works because their asset inventory comes from outside the traffic capture. Ours was inferred from
 the capture, and whatever can be inferred from the capture can largely be inferred from its features as
 well. CIC-IDS2017 comes with no asset inventory, topology or threat intelligence, so neuro-symbolic
-methods of the kind used in the literature cannot be properly evaluated on it. For this reason we did not
-run the injection experiments: injecting a predicate the model can already compute would present feature
-engineering as a symbolic result. The thresholds we used (AUC < 0.75, R² < 0.5) are conventions, and a
-predicate at R² = 0.90 still leaves some variance unexplained. A stronger predictor, however, could only
-make the conclusion stronger.
+methods of the kind used in the literature cannot be properly evaluated on it.
+
+**Testing the premise conditionally.** High predictability is not by itself the right test. Knowledge
+adds evidence through its residual r = W − E[W | X], the part the features cannot reproduce, and an
+average R² says nothing about whether that part is concentrated on the few zero-day flows. We therefore
+fitted a benign-only novelty model to the residuals of each view, on validation flows never used to fit
+the predictor, and scored the test set over three seeds. The residuals do reach the zero-day families.
+For the host-role predicates Bot's lift is 3.6–6.0×; for a second view, causal 60 s and 600 s per-source
+windows computed over the full capture (R² 0.51–0.87 without the port feature), it is 4.9–7.4×, against
+1.3–1.5× for the raw windows. Controls show what the residuals carry. Every external attack in
+CIC-IDS2017 arrives from one NAT address, so the web families share their host-role values with the
+known DoS and port-scan classes: the residual encodes who the attacker is. For Bot we compared Bot flows
+with benign flows from the same seven infected hosts inside Bot's own time span (1,255 against 2,075
+flows), which holds identity and time fixed. There the window residual reaches an AUC of 0.67–0.78,
+while a novelty model on its prediction from the flow features alone reaches 0.93–0.95; the residual's
+advantage on Bot comes from the 701 Bot flows sent by the command-and-control server, which sends no
+benign traffic (AUC 0.96–0.97). On this capture, what host-level knowledge adds beyond the flow
+features is the attacker's identity, which is a spurious correlation rather than knowledge [6], and a
+design property of synthetic benchmarks [18]. For this reason we did not run injection experiments.
 
 ## 7 Re-examining the base paper
 
@@ -344,8 +360,8 @@ Training is deterministic: two full 50-epoch runs with the same seed produce byt
 **Limitations.** Our two captures come from the same producer and use related methods, so they do not
 show that the findings generalise to other network environments. Under corrected labels only two
 zero-day families have enough samples. We use flow features rather than payload bytes throughout,
-although the oracle result suggests that modality is not the obstacle. The thresholds in our exogeneity
-test are conventions. A bounded, non-adaptive evasion test finds that timing jitter
+although the oracle result suggests that modality is not the obstacle. Our identity controls cover Bot;
+the web families all come from one address and cannot be separated from identity on this capture. A bounded, non-adaptive evasion test finds that timing jitter
 lowers the CNN's macro zero-day PR-AUC to 0.5620, while every perturbation we tried raises the scores
 of the autoencoder and the tuned forest; we do not evaluate an adaptive adversary, and the system has
 not been deployed. Benign traffic is under-sampled 4.11-fold, as in the base paper, so absolute PR-AUC is
@@ -359,7 +375,8 @@ the model's learned feature basis. The same condition accounts for our CNN's fai
 whose features it does not use, a failure that held under every test we designed to break it, although
 a tuned random forest shows that overlap alone does not decide which models reach such a family. The neuro-symbolic systems that
 report gains use knowledge that is truly exogenous. Ours did not, and on CIC-IDS2017 we could not
-construct any, because knowledge aggregated from a capture can be recovered from that capture's features.
+construct any: knowledge aggregated from a capture can be recovered from that capture's features, and
+what cannot be recovered is who the attacker is.
 We suggest that anyone reporting a neuro-symbolic gain should first check that the injected knowledge is
 not already present in the input, and should be aware that some benchmarks make this impossible.
 
@@ -405,3 +422,6 @@ weights are not (§10).*
     vol. 151, 2025, art. 104318.
 17. S. B. Hakim, M. Adil, A. Velasquez, S. Xu, H. H. Song. *Neuro-Symbolic AI for Cybersecurity:
     State of the Art, Challenges, and Opportunities.* arXiv:2509.06921, 2025.
+18. R. Flood, G. Engelen, D. Aspinall, L. Desmet. *Bad Design Smells in Benchmark NIDS Datasets.* IEEE
+    European Symposium on Security and Privacy (EuroS&P), 2024, pp. 658–675.
+19. T. M. Cover, J. A. Thomas. *Elements of Information Theory*, 2nd ed. Wiley, 2006.

@@ -73,7 +73,9 @@ remove attack flows which transmitted no payload.
 
 We then try to satisfy the precondition on CIC-IDS2017 and cannot. Host-role knowledge built from
 metadata the network never sees is still predicted from its features at AUC **0.990–0.994** and
-R² **0.89–0.95**, with an ablation ruling out the obvious shortcut. **Exogenous knowledge cannot be
+R² **0.89–0.95**, with an ablation ruling out the obvious shortcut, and the part the features cannot
+predict reaches unseen attacks only through the attacker's identity (same-host control: 0.93–0.95 for
+the features' own projection against 0.67–0.78 for the residual). **Exogenous knowledge cannot be
 manufactured by aggregating the same data**, and a benchmark shipping no external knowledge artefact
 cannot support the experiment its neuro-symbolic results depend on. We report a measured
 reproducibility floor throughout, and the corrected-label result that retracts two of our own three
@@ -247,8 +249,10 @@ every PR-AUC and lift here is measured at roughly four times the capture's attac
 FPR are within-class rates and are unaffected. At the capture's own benign proportion the deterministic
 CNN's macro zero-day PR-AUC is **0.5845**, not 0.6299, and the online CNN + KG fusion (k = 800, causal)
 falls from 0.5030 to **0.3255** (`rebase_deterministic.py`, 200 thinning draws). Every absolute PR-AUC in
-this paper is therefore an upper bound for deployment; comparisons are made within the 1:1 protocol.
-
+this paper is therefore an upper bound for deployment; comparisons are made within the 1:1 protocol.
+
+
+
 **Split boundary.** The split is stratified at random over a time-ordered capture and is not grouped by
 connection: **54.9 %** of test flows share a Flow ID (5-tuple) with a training flow, **98.9 %** share a
 source address, and every test flow lies inside the training time range (`split_integrity.py`). Bot shares
@@ -660,11 +664,32 @@ topology, no threat intelligence — so on this benchmark the neuro-symbolic app
 practises it **cannot be evaluated at all.** Every symbolic predicate anyone builds from CIC-IDS2017
 alone is a re-encoding of its features.
 
-⚠️ **Stated as thresholds, not proof.** "Exogenous" here means AUC < 0.75 or R² < 0.5, which are
+~~⚠️ **Stated as thresholds, not proof.** "Exogenous" here means AUC < 0.75 or R² < 0.5, which are
 conventions; a predicate at R² = 0.90 still leaves residual variance that could in principle carry
-signal. And a stronger predictor might recover more, which would only strengthen the conclusion. We
-did **not** proceed to the injection arms, because measuring a predicate the model can already
-compute would report feature engineering as a symbolic result.
+signal. And a stronger predictor might recover more, which would only strengthen the conclusion.~~
+*(Struck 2026-09-28. The inference was invalid: marginal predictability does not show that a predicate
+adds no evidence, because evidence enters through the residual W − E[W|X], and an average R² says
+nothing about where that residual is concentrated. ~~"A stronger predictor could only strengthen the
+conclusion"~~ assumed the opposite. The conclusion survives on the conditional test below.)* We did
+**not** proceed to the injection arms.
+
+🔬 **The conditional test (2026-09-28, pre-registered, `exogeneity_residual.py`).** A benign-only
+novelty model on each view's **residual** (fitted on validation flows, never in the booster's
+subsample), three seeds, came out **R2 on both views**: the residual reaches the zero-day families.
+Host-role view: macro 0.3773–0.4656 (raw 0.2315–0.2888), Bot lift 3.6–6.0×. Causal 60 s / 600 s window
+view (`hostwindow.py`, R² 0.51–0.87 without the port feature): macro 0.1792–0.2666 (raw 0.0742–0.0839),
+Bot lift 4.9–7.4× against 1.3–1.5× raw. **So the marginal test was the wrong instrument.**
+
+🪪 **What the residual carries is identity (controls, pre-registered, `exogeneity_residual_controls.py`,
+K0 on 3 of 3 seeds).** Every external attack arrives from NAT address 172.16.0.1, so Web BF, XSS, DoS
+Hulk and PortScan share identical host-role values — the static residual is an attacker-identity
+proxy, the leakage this construction set out to exclude. For Bot, flows from the same seven infected
+hosts inside Bot's own time span (1,255 Bot vs 2,075 benign) hold identity and time fixed: the window
+residual reaches AUC 0.672 / 0.785 / 0.700, the X-only projection 0.931 / 0.936 / 0.946. The residual's
+Bot lift comes from the 701 flows sent by the C2 server, which sends no benign traffic (AUC 0.96–0.97).
+**What host-level knowledge adds on this capture, beyond the flow features, is who the attacker is.**
+The web families cannot be controlled (one source address, 80 benign flows), which is a limit of the
+capture, not a result. *(Secondary, not pre-registered:* in the same same-host comparison the CNN's attack score reaches 0.709, 0.277 and 0.223 on its three deterministic seeds, while the features' own projection reaches 0.93–0.95 with no Bot label — Bot's failure is representational, seen inside a single host.)
 
 **The scope of the fitted-fuser claim, because we got it wrong once.** The wall applies to channels
 whose value is **zero-day-specific**. It does *not* apply to a channel that also carries value on the

@@ -63,7 +63,8 @@ CITE = {1: "sharafaldin2018", 2: "engelen2021", 3: "lanvin2023",
         4: "goldschmidt2025", 5: "sommer2010", 6: "arp2022",
         7: "badreddine2022", 8: "bizzarri2024", 9: "bizzarri2025survey",
         10: "cruz2017", 11: "hendrycks2017", 12: "liang2018", 13: "liu2020",
-        14: "grov2024", 15: "zhou2024", 16: "kalutharage2025", 17: "hakim2025"}
+        14: "grov2024", 15: "zhou2024", 16: "kalutharage2025", 17: "hakim2025",
+        18: "flood2024", 19: "cover2006"}
 
 FIGURES = {"nesy_fig1_thesis": "fig:thesis", "nesy_fig2_mechanism": "fig:mechanism"}
 
@@ -73,7 +74,7 @@ UNICODE = [
     ("\ufe0f", ""),
     ("\u00a7", r"\S{}"), ("\u00d7", r"$\times$"), ("\u00f7", r"$\div$"),
     ("\u03c1", r"$\rho$"), ("\u03c3", r"$\sigma$"), ("\u0394", r"$\Delta$"),
-    ("\u03c9", r"$\omega$"),
+    ("\u03c9", r"$\omega$"), ("\u03c6", r"$\varphi$"),
     ("\u00b5", r"$\mu$"), ("\u00b1", r"$\pm$"), ("\u00b7", r"$\cdot$"),
     ("\u2013", "--"), ("\u2014", "---"), ("\u2192", r"$\rightarrow$"),
     ("\u21d2", r"$\Rightarrow$"), ("\u2212", r"$-$"), ("\u2264", r"$\leq$"),
@@ -454,6 +455,20 @@ BIB = r"""@inproceedings{sharafaldin2018,
   year          = {2025},
   eprint        = {2509.06921},
   archivePrefix = {arXiv}
+}
+@inproceedings{flood2024,
+  author    = {Flood, Robert and Engelen, Gints and Aspinall, David and Desmet, Lieven},
+  title     = {Bad Design Smells in Benchmark {NIDS} Datasets},
+  booktitle = {Proc. IEEE European Symposium on Security and Privacy (EuroS\&P)},
+  pages     = {658--675},
+  year      = {2024}
+}
+@book{cover2006,
+  author    = {Cover, Thomas M. and Thomas, Joy A.},
+  title     = {Elements of Information Theory},
+  edition   = {2nd},
+  publisher = {Wiley},
+  year      = {2006}
 }
 """
 

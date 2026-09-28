@@ -300,6 +300,11 @@ Bot appears to be such a case for our CNN.
   shows that the barrier is the lack of supervision rather than missing information. It also shows that
   input modality is not the barrier, because there is no missing information for packet payloads to
   provide.
+- The same holds without any Bot label, inside a single infected host. Comparing Bot flows with benign
+  flows from the same seven infected hosts during Bot's own time span (1,255 against 2,075 flows), a
+  benign-only novelty model on a projection of the flow features reaches an AUC of 0.93–0.95, while the
+  CNN's attack score reaches 0.709, 0.277 and 0.223 on its three deterministic seeds. This comparison
+  came out of the identity controls in Appendix D and was not specified in advance.
 
 **One cause for several observations.** We first offered the mechanism as the common cause of four
 observations: the variability in cluster purity we met when building the knowledge graph, the spread of
@@ -467,11 +472,16 @@ the attack probability, so the broken experiment produced a believable score clo
 inventory. KnowGraph [15] also uses auxiliary models trained on different objectives in addition to
 relational structure.
 
-On our side, the exogeneity test in §6 did not go on to injection experiments, because injecting a
-predicate the model can already compute would report feature engineering as a symbolic result. The
-"exogenous" thresholds (AUC < 0.75 or R² < 0.5) are conventions. A predicate with R² = 0.90 still leaves
-some variance that could in principle carry signal, and a stronger predictor could recover more, which
-would only strengthen the conclusion.
+On our side, the exogeneity test in §6 did not go on to injection experiments. The marginal thresholds
+(AUC < 0.75 or R² < 0.5) are conventions, and high predictability alone does not show that a predicate
+adds no evidence: what matters is whether its residual, the part the features cannot reproduce, carries
+information about the unseen families. Section 6 therefore tests the residual directly, and the result
+is the one the conclusion rests on. The residual novelty model reaches macro zero-day PR-AUC 0.3773–0.4656
+for the host-role view (raw view 0.2315–0.2888) and 0.1792–0.2666 for the window view (raw view
+0.0742–0.0839). The controls attribute this to identity: the web families share one source address with
+the known DoS and port-scan classes, and within Bot's own infected hosts the residual (AUC 0.672, 0.785,
+0.700) is weaker than the flow features' own projection (0.931, 0.936, 0.946). Both tests and their
+predictions were committed before they ran (`exogeneity_residual.py`, `exogeneity_residual_controls.py`).
 
 **Scope of the fitted-fuser result.** The obstacle described in the table applies to channels whose value
 is specific to zero-day detection. It does not apply to a channel that is also useful on the known classes
