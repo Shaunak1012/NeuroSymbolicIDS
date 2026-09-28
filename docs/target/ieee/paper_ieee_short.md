@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
+Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the features cannot predict reaches unseen attacks through the attacker's identity and otherwise no better than the features themselves. Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
 
 ## Index Terms
 
@@ -43,7 +43,7 @@ outside the model's learned feature basis. The paper makes four contributions ar
    in which the family is plentiful, corrected labels, an explicitly trained reject class, cross-dataset
    augmentation, and a sweep over architectures and out-of-distribution scorers.
 3. **A negative result on evaluability (§6).** Host-role knowledge built from metadata that the network
-   never sees can still be recovered from the network's features, and what cannot be recovered reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. A benchmark without an external
+   never sees can still be recovered from the network's features, and what cannot be recovered reaches unseen attacks through the attacker's identity and otherwise no better than the features themselves. A benchmark without an external
    knowledge artefact cannot host the experiment on which published neuro-symbolic gains depend.
 4. **A controlled re-examination of the base system (§7).** The satisfiability gain of the neuro-symbolic system our work started from does not appear against a matched control.
 
@@ -255,9 +255,6 @@ Our work started from Bizzarri et al. [8], who trained a Logic Tensor Network on
 
 ## 8 What limits the magnitudes
 
-Two measurement problems limit how much weight any of our numbers can bear. We report both, and the
-second one removes two of our own main zero-day families from consideration.
-
 **Label semantics.** Engelen et al. [2] reprocessed CIC-IDS2017 with a corrected flow meter and added an
 `X – Attempted` label for attack flows that carried no payload. About two-thirds of Bot flows and about
 nine-tenths of the web-attack flows fall into this category. After retraining on the corrected release we
@@ -289,7 +286,7 @@ the neural baseline.
 
 **Neuro-symbolic intrusion detection.** Logic Tensor Networks [7] provide the machinery for turning fuzzy
 logic into a loss. Bizzarri et al. [8] applied it to CIC-IDS2017 with a combined cross-entropy and
-satisfiability loss and reported better accuracy on unknown attacks. Section §7 re-examines that result under a matched control. As we read them, the gains reported in
+satisfiability loss and reported better accuracy on unknown attacks. §7 re-examines that result under a matched control. As we read them, the gains reported in
 [14]–[16] come from exogenous knowledge. We do not criticise those papers, since their knowledge really is
 exogenous. Our point is that this property does the work and is usually left implicit, and without it a
 reader cannot tell a knowledge result from a feature-engineering result. We state the property, test it,

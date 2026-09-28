@@ -454,7 +454,8 @@ BIB = r"""@inproceedings{sharafaldin2018,
   title         = {Neuro-Symbolic {AI} for Cybersecurity: State of the Art, Challenges, and Opportunities},
   year          = {2025},
   eprint        = {2509.06921},
-  archivePrefix = {arXiv}
+  archivePrefix = {arXiv},
+  howpublished  = {arXiv:2509.06921}
 }
 @inproceedings{flood2024,
   author    = {Flood, Robert and Engelen, Gints and Aspinall, David and Desmet, Lieven},

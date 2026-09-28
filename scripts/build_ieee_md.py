@@ -70,7 +70,7 @@ ABSTRACT = (
     "in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show "
     "that the benchmark cannot host the experiment published gains rely on, because host-role knowledge "
     "derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the "
-    "features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no "
+    "features cannot predict reaches unseen attacks through the attacker's identity and otherwise no "
     "better than the features themselves. Re-examining the "
     "neuro-symbolic system our work started from, we find that its reported gain does not appear against "
     "a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under "
@@ -163,7 +163,7 @@ def build(short=False):
 
     rel = secs["8 Related work"]
     rel = re.sub(r"(?s)Our work started from that paper,.*?like \(Appendix B\)\. ",
-                 "Section " + SECT + "7 re-examines that result under a matched control. ", rel)
+                 SECT + "7 re-examines that result under a matched control. ", rel)
     rel = sub1(rel, "Supplementary " + SECT + "E checks this work against all ten; two of them, lab-only" + LF +
                "evaluation and the threat model, are not addressed here.",
                "Of the ten, lab-only evaluation is not addressed here, and the threat model only in part" + LF +
@@ -224,6 +224,10 @@ SHORT_DROP = [
     # ...and the low-data comparison in section 3 (~85 words): the base paper's operating-point
     # analysis goes; the matched control that the abstract cites stays. The 9-page version keeps both.
     "**The reported gain is a change of operating point.**",
+    # The section-8 opener says "Two measurement problems ... We report both", but the short cut
+    # drops "Metric resolution" above, so only one is reported here. Found reading the PDF
+    # (2026-09-28); present since the 2026-09-19 cut. The section opens on its first paragraph instead.
+    "Two measurement problems limit how much weight any of our numbers can bear.",
 ]
 # Edits inside kept sentences: each only deletes words, or follows the section renumbering
 # (section 10 is dropped above, so Limitations and conclusion becomes section 10).
