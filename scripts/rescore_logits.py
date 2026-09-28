@@ -45,7 +45,13 @@ from scipy.special import logsumexp
 import paths, config, features, metrics, tracking
 
 cfg = config.get()
-PAPER = os.path.join(paths.PROCESSED, cfg["paths"]["paper_subdir"])
+# PAPER_SUBDIR (added 2026-09-28): the scaler below is fitted on THIS split's training
+# set, so a model trained with `ltn_paper.py`/`cnn_paper.py` under PAPER_SUBDIR must be
+# rescored under the same value. Before this, the split was hard-wired to the canonical
+# one and any non-canonical model would have been rescored with the wrong scaler,
+# silently (no recorded result used that path).
+PAPER = os.path.join(paths.PROCESSED,
+                     os.environ.get("PAPER_SUBDIR", cfg["paths"]["paper_subdir"]))
 TFM = cfg["protocol"]["feature_transform"]
 
 TAGS = ["cnn_paper", "ltn_ctrl_w0", "ltn_repro", "ltn_v2",
@@ -135,6 +141,7 @@ for tag in TAGS:
           f"[{s.min():.1f}, {s.max():.1f}], {len(np.unique(s)):,} distinct)")
     metrics.print_report(res)
     tracking.log_run(f"{tag}_logodds",
-                     {"protocol": "paper", "scoring": "logodds", "seed": tag_seed(tag)},
+                     {"protocol": "paper", "scoring": "logodds", "seed": tag_seed(tag),
+                      "paper_subdir": os.path.basename(PAPER)},
                      metrics.flatten(res))
     print()
