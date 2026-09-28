@@ -1,0 +1,297 @@
+{
+  "raw": {
+    "gbm_known": {
+      "macro_per_seed": [
+        0.6353352420634173,
+        0.6498818369374946,
+        0.636976220199737
+      ],
+      "macro_mean": 0.6407310997335496,
+      "family": {
+        "Bot": {
+          "pr_auc": [
+            0.1934953013753165,
+            0.2545647346816118,
+            0.2107252656030008
+          ],
+          "chance": 0.03419998950920567
+        },
+        "Web Attack Brute Force": {
+          "pr_auc": [
+            0.898012727348777,
+            0.8907423966412551,
+            0.892332516867408
+          ],
+          "chance": 0.026557873960242492
+        },
+        "Web Attack XSS": {
+          "pr_auc": [
+            0.8144976974661583,
+            0.8043383794896168,
+            0.8078708781288022
+          ],
+          "chance": 0.011665980783338402
+        }
+      }
+    },
+    "ae_novelty": {
+      "macro_per_seed": [
+        0.07586216368131869,
+        0.13138545814690392,
+        0.08813757007682767
+      ],
+      "macro_mean": 0.09846173063501674,
+      "family": {
+        "Bot": {
+          "pr_auc": [
+            0.10872041851856576,
+            0.17748803198273888,
+            0.11517119510598128
+          ],
+          "chance": 0.03419998950920567
+        },
+        "Web Attack Brute Force": {
+          "pr_auc": [
+            0.07922474272560556,
+            0.13924942640227717,
+            0.09778577051558085
+          ],
+          "chance": 0.026557873960242492
+        },
+        "Web Attack XSS": {
+          "pr_auc": [
+            0.03964132979978476,
+            0.07741891605569573,
+            0.05145574460892089
+          ],
+          "chance": 0.011665980783338402
+        }
+      }
+    },
+    "cnn_ref": {
+      "macro_per_seed": [
+        0.629768308212828,
+        0.6268946812643791,
+        0.6330470967531493
+      ],
+      "macro_mean": 0.6299033620767855,
+      "family": {
+        "Bot": {
+          "pr_auc": [
+            0.04825033825565475,
+            0.024126904884934446,
+            0.023895055688950347
+          ],
+          "chance": 0.03419998950920567
+        },
+        "Web Attack Brute Force": {
+          "pr_auc": [
+            0.9028072998737224,
+            0.9119929345618719,
+            0.929149802230336
+          ],
+          "chance": 0.026557873960242492
+        },
+        "Web Attack XSS": {
+          "pr_auc": [
+            0.938247286509107,
+            0.9445642043463308,
+            0.9460964323401614
+          ],
+          "chance": 0.011665980783338402
+        }
+      }
+    },
+    "window": {
+      "macro_per_seed": [
+        0.07265627200547971,
+        0.0697863669352415,
+        0.06739319854535018
+      ],
+      "macro_mean": 0.0699452791620238,
+      "family": {
+        "Bot": {
+          "pr_auc": [
+            0.051704797880081366,
+            0.04999925755791759,
+            0.04396270109708807
+          ],
+          "chance": 0.03419998950920567
+        },
+        "Web Attack Brute Force": {
+          "pr_auc": [
+            0.11378257297885401,
+            0.10480651788821363,
+            0.10424016239298631
+          ],
+          "chance": 0.026557873960242492
+        },
+        "Web Attack XSS": {
+          "pr_auc": [
+            0.05248144515750372,
+            0.05455332535959328,
+            0.05397673214597616
+          ],
+          "chance": 0.011665980783338402
+        }
+      }
+    }
+  },
+  "fusion": {
+    "seed_42": {
+      "fused_macro": 0.6694724377677411,
+      "channel_macro": {
+        "gbm_known": 0.7252300881059028,
+        "ae_novelty": 0.1347232961304732,
+        "window": 0.14577258251252398
+      },
+      "best_channel": "gbm_known",
+      "achieved_benign_fpr": {
+        "0.01": 0.02842246279734965,
+        "0.05": 0.13432781780658243
+      },
+      "achieved_benign_fpr_recalibrated": {
+        "0.01": 0.011224157283029798,
+        "0.05": 0.046489735327129876
+      },
+      "fused_family": {
+        "Bot": 0.2753382286998911,
+        "Web Attack Brute Force": 0.9006439784067446,
+        "Web Attack XSS": 0.8324351061965877
+      }
+    },
+    "seed_43": {
+      "fused_macro": 0.6738625795155135,
+      "channel_macro": {
+        "gbm_known": 0.7451905446912623,
+        "ae_novelty": 0.22011522385894566,
+        "window": 0.12865766229236122
+      },
+      "best_channel": "gbm_known",
+      "achieved_benign_fpr": {
+        "0.01": 0.027263840110069156,
+        "0.05": 0.1312140193345161
+      },
+      "achieved_benign_fpr_recalibrated": {
+        "0.01": 0.010210362431659365,
+        "0.05": 0.04895180853760093
+      },
+      "fused_family": {
+        "Bot": 0.30512351418813544,
+        "Web Attack Brute Force": 0.8958444421135845,
+        "Web Attack XSS": 0.8206197822448206
+      }
+    },
+    "seed_44": {
+      "fused_macro": 0.6399858141156345,
+      "channel_macro": {
+        "gbm_known": 0.736260894720249,
+        "ae_novelty": 0.1560422752536663,
+        "window": 0.12435938671546036
+      },
+      "best_channel": "gbm_known",
+      "achieved_benign_fpr": {
+        "0.01": 0.02842246279734965,
+        "0.05": 0.1309605706216735
+      },
+      "achieved_benign_fpr_recalibrated": {
+        "0.01": 0.009594844129041602,
+        "0.05": 0.046815597957927516
+      },
+      "fused_family": {
+        "Bot": 0.2598536977204281,
+        "Web Attack Brute Force": 0.8736635600316129,
+        "Web Attack XSS": 0.7864401845948625
+      }
+    }
+  },
+  "predictions": {},
+  "summary": {
+    "fused_macro_per_seed": [
+      0.6694724377677411,
+      0.6738625795155135,
+      0.6399858141156345
+    ],
+    "best_channel_macro_per_seed": [
+      0.7252300881059028,
+      0.7451905446912623,
+      0.736260894720249
+    ],
+    "delta_mean": -0.07445356537284169,
+    "delta_per_seed": [
+      -0.05575765033816171,
+      -0.0713279651757488,
+      -0.09627508060461454
+    ],
+    "seeds_positive": 0,
+    "channel_calibration_checks": [
+      {
+        "channel": "gbm_known",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.9825022977941177,
+        "raw_macro": 0.7083520903793635,
+        "calibrated_macro": 0.7252300881059028
+      },
+      {
+        "channel": "ae_novelty",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.8877872242647059,
+        "raw_macro": 0.13428287234056202,
+        "calibrated_macro": 0.1347232961304732
+      },
+      {
+        "channel": "window",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.9313993566176471,
+        "raw_macro": 0.1324918719871921,
+        "calibrated_macro": 0.14577258251252398
+      },
+      {
+        "channel": "gbm_known",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.9821231617647059,
+        "raw_macro": 0.7286245933168054,
+        "calibrated_macro": 0.7451905446912623
+      },
+      {
+        "channel": "ae_novelty",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.8893382352941177,
+        "raw_macro": 0.218768397795259,
+        "calibrated_macro": 0.22011522385894566
+      },
+      {
+        "channel": "window",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.9308823529411765,
+        "raw_macro": 0.12798100686828995,
+        "calibrated_macro": 0.12865766229236122
+      },
+      {
+        "channel": "gbm_known",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.984524356617647,
+        "raw_macro": 0.7163565907557629,
+        "calibrated_macro": 0.736260894720249
+      },
+      {
+        "channel": "ae_novelty",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.888131893382353,
+        "raw_macro": 0.1553461292883955,
+        "calibrated_macro": 0.1560422752536663
+      },
+      {
+        "channel": "window",
+        "monotonicity_violations": 0,
+        "tie_fraction": 0.9305606617647059,
+        "raw_macro": 0.12403725604449263,
+        "calibrated_macro": 0.12435938671546036
+      }
+    ],
+    "monotonicity_violations": 0,
+    "max_pr_auc_shift_from_ties": 0.01990430396448617,
+    "noise_sd": 0.0171,
+    "within_noise": false
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "windows": [
+    60,
+    600
+  ],
+  "names": [
+    "Flows60",
+    "Dsts60",
+    "Ports60",
+    "Flows600",
+    "Dsts600",
+    "Ports600",
+    "PairFlows600",
+    "GapCV600"
+  ],
+  "exogeneity": {
+    "Flows60": {
+      "all_features": 0.7153123264388279,
+      "no_dest_port": 0.7132635676714795,
+      "exogenous": false
+    },
+    "Dsts60": {
+      "all_features": 0.5392958892092458,
+      "no_dest_port": 0.5112364728760066,
+      "exogenous": false
+    },
+    "Ports60": {
+      "all_features": 0.7605118038358955,
+      "no_dest_port": 0.7598063938463504,
+      "exogenous": false
+    },
+    "Flows600": {
+      "all_features": 0.7683635342862372,
+      "no_dest_port": 0.7629983906257949,
+      "exogenous": false
+    },
+    "Dsts600": {
+      "all_features": 0.8744519717541264,
+      "no_dest_port": 0.841610110527453,
+      "exogenous": false
+    },
+    "Ports600": {
+      "all_features": 0.7489819769315516,
+      "no_dest_port": 0.7470983993284397,
+      "exogenous": false
+    },
+    "PairFlows600": {
+      "all_features": 0.826202183129484,
+      "no_dest_port": 0.8251996682051751,
+      "exogenous": false
+    },
+    "GapCV600": {
+      "all_features": 0.8675841676202156,
+      "no_dest_port": 0.867349156537503,
+      "exogenous": false
+    }
+  }
+}
