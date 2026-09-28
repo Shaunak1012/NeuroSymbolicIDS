@@ -49,9 +49,12 @@ exogeneity-precondition negative result. **ICC 2027 deadline: 2 Oct 2026.**
 
 ### Next
 
-1. **Author decisions D6 (authors / blind review) and D7 (ICC page limit)** — the only blockers for
-   the ICC submission.
-2. Read both IEEE PDFs end to end as a reviewer (the §6 paragraph is new).
+1. **D6 names only** — confirm author names, order and affiliation (ICC is not blind; D7 answered:
+   6 pages hard). Then build with `md_to_latex.py --ieee docs/target/ieee/paper_ieee_short.md --pages 6
+   --authors --compile`, register every co-author on EDAS exactly as in the PDF, submit by 2 Oct.
+2. ~~Read both IEEE PDFs end to end as a reviewer~~ ✅ done 2026-09-28 for the ICC PDF: four defects
+   fixed ("Section Section", a §8 opener promising a dropped paragraph, a reference without its arXiv
+   id, a doubled "and").
 3. If the work continues past ICC: an exogenous-knowledge experiment needs a capture that ships an asset
    inventory or topology — CIC-IDS2017 cannot supply one, now shown by a sound test.
 
@@ -178,8 +181,8 @@ delta as a **multiple of it** — that ratio, not the raw number, decides whethe
 | 🔴 **D4 — grouped and chronological splits (audit F-02/F-03)** | ~~⬜ OPEN 2026-09-16~~ ✅ **RUN 2026-09-17** — grouped −0.071, chronological halves the AE, the dissociation holds | 54.88 % 5-tuple overlap, 100 % temporal overlap. ~2 days CPU to measure. Recommendation: run them, at least as a measured limitation. |
 | 🔴 **D5 — push the audit branches?** | ~~⬜ OPEN~~ ✅ **DECIDED 2026-09-18: five sequential PRs** (#83–#87), each merged locally `--no-ff` | `docs/paper-revision` and `fix/audit-remediation` are local only; the repository is public. |
 | 🔴 **Reframe the paper after the fusion withdrawal?** | ~~⬜ OPEN 2026-09-16~~ ✅ **DONE 2026-09-17** ("go ahead with it"): the paper is framed around the precondition, with no positive fusion claim | The paper's one positive result is gone. Option A: reframe §6 and the contribution list around "nothing beats the neural baseline, and here is why" (the thesis predicts it). Option B: look for a fusion that is stable across CNN runs (e.g. fuse with an ensemble or with calibrated scores rather than whole-set ranks) — but the 11-run ensemble already fused *worse*. Recommendation: A. |
-| 🔴 **D6 — author list and blind review for the IEEE versions** | ⬜ **OPEN 2026-09-19** | The PDFs build anonymous by default; `md_to_latex.py --ieee ... --authors` fills the block from `AUTHORS`, taken from the weekly report (four PES University students; guide not listed). Confirm names, order, affiliation and whether ICC 2027 review is blind before any camera-ready build. |
-| 🔴 **D7 — ICC 2027 page limit** | ⬜ **OPEN 2026-09-19** | Built to 6 pages including references (the usual ICC limit). Confirm from the ICC 2027 author kit, including whether a paid extra page is allowed; the 7-page full version is ready if so. |
+| 🔴 **D6 — author list and blind review for the IEEE versions** | 🟡 **HALF ANSWERED 2026-09-28: ICC 2027 is NOT blind** — the PDF's author list and title must exactly match the EDAS registration (icc2027.ieee-icc.org/submission-guidelines), so the anonymous build is non-compliant for submission. **Still open: confirm names, order and affiliation.** The named build (`--authors`) is 6 of 6 pages. | The PDFs build anonymous by default; `md_to_latex.py --ieee ... --authors` fills the block from `AUTHORS`, taken from the weekly report (four PES University students; guide not listed). Confirm names, order, affiliation and whether ICC 2027 review is blind before any camera-ready build. |
+| ~~🔴 **D7 — ICC 2027 page limit**~~ | ✅ **ANSWERED 2026-09-28 (official guidelines):** initial submission **6 printed pages, 10-pt, hard** (longer is rejected without review); only an *accepted* paper may add pages 7–8 at US$100 each. Deadline **2 Oct 2026** (EDAS, CISS symposium). Our build: 6 of 6 including references. | Built to 6 pages including references (the usual ICC limit). Confirm from the ICC 2027 author kit, including whether a paid extra page is allowed; the 7-page full version is ready if so. |
 | ~~D2 — was `BeaconLike` chosen before or after the Bot measurement?~~ | ✅ **ANSWERED 2026-09-16** | After — commit 8c9e40f designed it on Bot and validated it against Bot labels. Relabelled oracle-informed in code and paper. |
 | KG backend | NetworkX | If scale demands, → Neo4j |
 | Fusion mechanism | Fixed weights (Phase 1) → logistic (Phase 2) | After KG exists |
