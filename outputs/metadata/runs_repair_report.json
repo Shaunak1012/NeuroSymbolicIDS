@@ -1,13 +1,72 @@
 {
  "applied": true,
- "rows_before": 159,
- "seed_fixes": [],
- "duplicates_removed": [],
+ "rows_before": 314,
+ "seed_fixes": [
+  {
+   "name": "hostwin_s42",
+   "was": null,
+   "now": 42
+  },
+  {
+   "name": "hostwin_s43",
+   "was": null,
+   "now": 43
+  },
+  {
+   "name": "hostwin_s44",
+   "was": null,
+   "now": 44
+  },
+  {
+   "name": "hostwin_s42",
+   "was": null,
+   "now": 42
+  },
+  {
+   "name": "hostwin_s43",
+   "was": null,
+   "now": 43
+  },
+  {
+   "name": "hostwin_s44",
+   "was": null,
+   "now": 44
+  },
+  {
+   "name": "hostwin_s42",
+   "was": null,
+   "now": 42
+  },
+  {
+   "name": "hostwin_s43",
+   "was": null,
+   "now": 43
+  },
+  {
+   "name": "hostwin_s44",
+   "was": null,
+   "now": 44
+  }
+ ],
+ "duplicates_removed": [
+  "hostwin_s42",
+  "hostwin_s43",
+  "hostwin_s44",
+  "hostwindow_fusion",
+  "hostwin_s42",
+  "hostwin_s43",
+  "hostwin_s44",
+  "hostwindow_fusion",
+  "hostwin_s42",
+  "hostwin_s43",
+  "hostwin_s44"
+ ],
  "schema_stamped": 0,
  "duplicate_names_preserved": [
   "cnn_auxhead_l0.5",
   "decision_tree",
   "fusion_cnn_kg",
+  "hostwindow_fusion",
   "isolation_forest",
   "kg",
   "linear_svm",
@@ -21,6 +80,6 @@
   "rbf_svm_nystroem",
   "xgboost"
  ],
- "rows_after": 159,
- "stamp": "2026-08-05T08:30:49+00:00"
+ "rows_after": 303,
+ "stamp": "2026-09-28T14:32:24+00:00"
 }

@@ -3,7 +3,7 @@
 All scripts live in `scripts/`. Run them **from the project root** using the venv interpreter
 (`.venv\Scripts\python.exe`), which puts `scripts/` on `sys.path` so `import paths` works.
 
-> Last verified against source: **2026-09-05** (90 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, `build_ieee_md.py` 2026-09-19, plus `tests/`).
+> Last verified against source: **2026-09-05** (92 Python scripts, plus 17 shell launchers; `basepaper_audit.py`, `split_integrity.py`, `ksweep_heldout.py`, `rebase_deterministic.py`, `fusion_population.py` and `kg_graph.py` added 2026-09-16, `ablation_population.py`, `split_variants.py`, `baselines_tuned.py`, `bot_mechanism_recheck.py` and `repro_compare.py` 2026-09-17, `evasion.py` 2026-09-18, `build_ieee_md.py` 2026-09-19, `hostwindow.py` and `hostwindow_detect.py` 2026-09-28, plus `tests/`).
 
 > 🔴 **Nine scripts were undocumented here until 2026-08-05** (32 covered, of the 41 then on
 > disk) — the entire Phase-4 / fusion /
@@ -846,6 +846,60 @@ figures have a legend and direct labels, and the values are in the text. Print i
 The first version's sub-labels collided and its boundary line inherited the fill's 10 % opacity,
 leaving the one line that carries the argument nearly invisible. The second ran the inside item's
 labels across that boundary. Both were found only by looking at the output.
+
+## `scripts/hostwindow.py`
+
+**Purpose**: Build a HOST-WINDOW view (what a source did in the last 60 s / 600 s) and run the
+exogeneity test that decides whether it is a second view or re-derived features.
+
+```bash
+python scripts/hostwindow.py            # build + exogeneity test
+python scripts/hostwindow.py --build    # build the view only
+python scripts/hostwindow.py --exo      # test only (view must exist)
+```
+
+- **Eight features per flow:** flows, distinct destinations and distinct ports in each window,
+  plus `PairFlows600` (persistence to one destination) and `GapCV600` (arrival regularity, the
+  beaconing shape at the capture's 1-second resolution).
+- **Causal.** Every aggregate uses flows that arrived STRICTLY BEFORE the flow it describes, so
+  nothing is transductive — the defect `kg.py` handles by streaming in chronological order.
+- **Built on the full capture (2,827,876 flows), not the split**, because the paper split
+  under-samples benign traffic 4.11-fold and counting inside it would measure the sampling. Rows
+  are read back by (source, second); the join matched **1.0000** on all three splits, and the
+  script exits if it drops below 0.99.
+- Timestamps go through `timeline.py` (non-negotiable #8) — naive parsing would silently destroy
+  every window.
+- **Result (2026-09-28): 0 of 8 features are exogenous**, R² 0.511–0.867 without `Destination
+  Port`, against 0.949 / 0.914 for the static host-role predicates. Windowing is less derivable
+  but not enough to pass. Same estimator, ablation and thresholds as `exogenous_predicate.py`, so
+  the two tables read side by side.
+- **A two-pointer sweep** gives O(m) per source instead of O(m·w); verified against a brute-force
+  recompute on random arrivals (0 mismatches in 400 events, including the gap statistics).
+
+## `scripts/hostwindow_detect.py`
+
+**Purpose**: Ask, separately, whether the window view DETECTS anything and whether conformal
+min-p fusion beats its own best channel. Predictions P1–P3 are written in the docstring before
+the run.
+
+```bash
+python scripts/hostwindow_detect.py
+```
+
+- **Q1:** a benign-only IsolationForest on the window features scores macro zero-day PR-AUC
+  0.0699 and Bot lift **1.42×** (n=3) — it does not reach Bot, the family whose signature is
+  persistence and which should have been its best case.
+- **Q2:** conformal min-p over {tuned forest, autoencoder, window} scores 0.6611 against the
+  forest's own 0.7356 — **−0.0745, 0 of 3 seeds positive, 4.35× the noise floor**. min-p fires
+  when any channel fires, so it inherits weak channels' false alarms.
+- **Calibration:** split-conformal on half the benign TEST flows (no stored validation scores),
+  evaluated on the other half plus every attack flow, so these numbers are **not comparable**
+  with full-set records. Raw min-p inflates a 1 % request to 2.8 %; a second conformal step on
+  the fused statistic, with its own fold, restores 0.96–1.12 %.
+- ⚠️ **Quantisation caveat:** p-values take at most n_calib+1 values, tying 98.5 % of rows and
+  shifting PR-AUC by up to 0.0199 — the noise floor's own magnitude. Ordering is preserved (0
+  violations, checked by sorting on score; **Spearman ρ = 0.912 is a tie artefact** and was the
+  wrong instrument for this).
 
 ## `scripts/md_to_latex.py` (was `md_to_pmlr.py`)
 

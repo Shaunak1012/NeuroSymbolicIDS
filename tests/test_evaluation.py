@@ -379,6 +379,61 @@ class Evasion(unittest.TestCase):
                     self.assertGreater(d["rf"], 0)
 
 
+class HostWindow(unittest.TestCase):
+    """The host-window sweep (2026-09-28) and the result it produced.
+
+    The sweep is a two-pointer sliding window with eviction, which is exactly the kind of
+    bookkeeping that drifts silently: a wrong aggregate would still look plausible and would
+    quietly decide whether the view is judged exogenous. So it is pinned against a
+    brute-force recompute, and the measured verdict is pinned against the record.
+    """
+
+    def _sweep(self):
+        sys.path.insert(0, os.path.join(ROOT, "scripts"))
+        import hostwindow
+        return hostwindow
+
+    def test_window_aggregates_match_brute_force(self):
+        import numpy as np
+        hw = self._sweep()
+        rng = np.random.RandomState(1)
+        ts = np.sort(rng.randint(0, 5000, size=300)).astype("int64")
+        dst = rng.choice(list("ABCDE"), size=300)
+        port = rng.choice([80, 443, 22, 53], size=300)
+        _, feat = hw._one_source(ts, dst, port)
+        for i in range(len(ts)):
+            sel = [k for k in range(i) if ts[k] >= ts[i] - 600]
+            want = [len(sel), len(set(dst[sel])), len(set(port[sel])),
+                    sum(1 for k in sel if dst[k] == dst[i])]
+            got = np.expm1(feat[i, [3, 4, 5, 6]])
+            self.assertTrue(np.allclose(got, want, atol=1e-4),
+                            "event %d: got %s want %s" % (i, got, want))
+
+    def test_window_is_causal(self):
+        """A flow's window must never see its own arrival or any later one."""
+        import numpy as np
+        hw = self._sweep()
+        ts = np.array([0, 10, 20], dtype="int64")
+        _, feat = hw._one_source(ts, np.array(["A"] * 3),
+                                 np.full(3, 80, dtype="int64"))
+        self.assertEqual(float(feat[0, 0]), 0.0, "the first arrival has no history")
+        self.assertAlmostEqual(float(np.expm1(feat[2, 0])), 2.0, places=4)
+
+    def test_recorded_verdict_is_pinned(self):
+        """0 of 8 window features were exogenous; a change here is a real finding."""
+        p = os.path.join(ROOT, "outputs", "metadata", "hostwindow.json")
+        if not os.path.exists(p):
+            self.skipTest("hostwindow.json not built")
+        with open(p, encoding="utf-8") as f:
+            d = json.load(f)
+        exo = d.get("exogeneity", {})
+        self.assertEqual(len(exo), 8)
+        n = sum(1 for v in exo.values() if v.get("exogenous"))
+        self.assertEqual(n, 0, "the window view was measured as NOT exogenous")
+        worst = min(v["no_dest_port"] for v in exo.values())
+        self.assertGreater(worst, 0.5, "lowest R2 without Destination Port was 0.511")
+
+
 class DraftVerification(unittest.TestCase):
     """The paper's numbers match the records (both the master draft and the split)."""
 

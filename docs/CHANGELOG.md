@@ -2,6 +2,20 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-28 (The proposed redesign, measured: the host-window view fails the same premise)
+
+`hostwindow.py` builds a causal host-window view (60 s / 600 s per source) from the full 2.8 M-flow
+capture rather than the benign-under-sampled split, and re-runs the exogeneity test on it: all eight
+features are predictable from the 68 flow features without `Destination Port` (R² 0.511–0.867), so
+**0 of 8** are exogenous — though windowing is clearly less derivable than the static host-role
+profile (0.949 / 0.914). `hostwindow_detect.py` then answers the two separate questions: the window
+channel does not reach Bot (PR-AUC 0.0486, lift 1.42×, n=3) and conformal min-p fusion loses to its
+best channel by −0.0745 on 3 of 3 seeds (4.35× the noise floor). What does work is the operating
+point: raw min-p inflates a 1 % request to 2.8 % (the 1−(1−t)^k effect), and a second conformal step
+on the fused statistic restores 0.96–1.12 %. Predictions written for three window seeds; an earlier
+`hostwindow_fusion` record (delta −0.0726) is the single-fold calibration variant, superseded by the
+two-fold one (−0.0745) that is logged twice, identically.
+
 ## 2026-09-19 (IEEE conference versions: 7 pages of 9, and a 6-page IEEE ICC 2027 cut)
 
 `build_ieee_md.py` builds both versions as markdown from the verified `paper_body.md`: the full version adds

@@ -273,6 +273,17 @@ direction.**
 
 ### Standing cautions (still current)
 
+🔴 **Do NOT re-propose the "host-window view" as a second channel — it was built and measured
+(2026-09-28, `hostwindow.py`).** All eight window features (flows / distinct destinations /
+distinct ports over 60 s and 600 s, pair persistence, arrival regularity) are predictable from the
+68 flow features at **R² 0.511–0.867 without `Destination Port`**, so **0 of 8 are exogenous** —
+the same premise failure as the static host-role predicates, on a different quantity. The channel
+also does not reach Bot (lift **1.42×**, n=3), and conformal **min-p fusion loses to its own best
+channel by −0.0745 on 3 of 3 seeds** (4.35× the noise floor). ✅ What survives: windowing is
+genuinely *less* derivable than a static host profile (0.51–0.87 vs 0.91–0.95), and a **second**
+conformal step on the fused statistic does deliver a requested FPR (1 % → 0.96–1.12 %, where raw
+min-p gives 2.8 %). See STATUS → "THE PROPOSED 'IMPROVED' ARCHITECTURE, TESTED".
+
 🔴 **Do NOT repeat the "modality analogue" mechanism** (that web attacks transfer because they
 resemble FTP/SSH-Patator) — falsified by `modality_analysis.py`. ✅ **The replacement IS measured**:
 the CNN assigns ~90% of Web BF/XSS flows to **`DoS slowloris`**, a known *attack* class, so their
@@ -389,7 +400,7 @@ provisional**; three findings have already been retracted as single-seed artifac
 
 Utilities: `python scripts/check.py` (print real feature column order — **use before touching behaviour indices**), `python scripts/behavior.py` (regenerate thresholds + validation tables), `python scripts/visual.py` (preprocessing impact).
 
-**All 90 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **17 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `split_variants.sh`, `ae_seeds.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
+**All 92 Python scripts are documented in [docs/scripts_reference.md](docs/scripts_reference.md)** — read it before assuming what a script does. Dependencies are pinned in `requirements.txt`. There are also **17 shell launchers** (`run_long.sh`, `audit_rebase.sh`, `split_variants.sh`, `ae_seeds.sh`, `improved_sweep.sh`, `seed_sweep.sh`, `noise_floor.sh`, `rigor_n6.sh`, `ltn_ctrl_sweep.sh`, `verify_determinism.sh`, `c4_transform_ab.sh`, `noise_postdet.sh`, `replicate_2018.sh`, `kg_ksweep.sh`, `loco_sweep.sh`, `aug_sweep.sh`, `aug_ctrl_sweep.sh`) — long jobs go through `run_long.sh` per non-negotiable #2.
 
 ## Repo layout
 
@@ -402,7 +413,7 @@ NeuroSymbolicIDS/
 │
 ├── config.yaml                ← protocol/experiment config (seed, splits, class lists)
 │
-├── scripts/                   ← 90 Python scripts + 17 shell launchers — see docs/scripts_reference.md
+├── scripts/                   ← 92 Python scripts + 17 shell launchers — see docs/scripts_reference.md
 │   ├── paths.py               ←   central path config — ALL I/O locations
 │   ├── config, features, tracking, metrics        ← infrastructure
 │   ├── preprocess, preprocess_paper, cnn_paper,   ← CURRENT pipeline

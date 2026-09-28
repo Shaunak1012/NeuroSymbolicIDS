@@ -4,6 +4,75 @@
 
 ## ▶ RESUME HERE (next session)
 
+## 🔴 THE PROPOSED "IMPROVED" ARCHITECTURE, TESTED ON CIC-IDS2017 (2026-09-28)
+
+The author proposed a redesign (host-window view + known-attack GBM + benign autoencoder +
+frozen behaviour rules, combined by conformal min-p at a fixed FPR, with three output
+categories). Three of its boxes were already answered by measurements here; the two open
+ones were built and run. Branch `feat/hostwindow-view`. Scripts: `hostwindow.py`,
+`hostwindow_detect.py`.
+
+### 🔴 The host-window view FAILS the exogeneity premise — a second time, on a new quantity
+
+`exogenous_predicate.py` killed STATIC host-role knowledge (R² 0.949 / 0.914). This asked a
+different question — what a source did in the last 60 / 600 **seconds** — on a causal,
+full-capture stream (2,827,876 flows; all three splits matched 1.0000). Gradient boosting
+predicts every one of the eight window features from the 68 flow features, **without**
+`Destination Port`:
+
+| feature | R² (no Dst Port) | | feature | R² (no Dst Port) |
+|---|---:|---|---|---:|
+| Flows60 | 0.713 | | Flows600 | 0.763 |
+| Dsts60 | **0.511** | | Dsts600 | 0.842 |
+| Ports60 | 0.760 | | Ports600 | 0.747 |
+| PairFlows600 | 0.825 | | GapCV600 | 0.867 |
+
+**0 of 8 are outside the basis** (threshold R² < 0.5). ⚠️ **But the direction is real and
+should be reported:** windowing is *substantially less derivable* than the static profile
+(0.51–0.87 vs 0.91–0.95), and `Dsts60` at 0.511 sits on the convention's line. The arrival
+process is partly outside the basis — just not enough to call it exogenous on this capture.
+
+### The window channel does NOT reach Bot (n=3, deterministic population, full test set)
+
+Bot's signature is persistence, so a 600 s window is where it should appear if anywhere.
+
+| channel | macro zero-day PR-AUC | Bot PR-AUC | Bot lift |
+|---|---:|---:|---:|
+| known-attack GBM (tuned forest) | 0.6407 | 0.2196 | 6.42× |
+| CNN (reference) | 0.6299 | 0.0321 | 0.94× |
+| benign autoencoder | 0.0985 | 0.1338 | 3.91× |
+| **host-window novelty** | **0.0699** | **0.0486** | **1.42×** |
+
+### 🔴 Conformal min-p fusion LOSES to its own best channel — 0 of 3 seeds
+
+Fused 0.6611 vs the best channel (the GBM) 0.7356: **−0.0745** (−0.0558 / −0.0713 / −0.0963),
+**4.35× the 0.0171 noise floor**, every seed negative. Mechanism: min-p fires when *any*
+channel fires, so it inherits the false alarms of two channels that score 0.07–0.10 while
+gaining nothing they do not already find. ⚠️ These figures are computed on the benign
+evaluation half and are **not comparable** with the full-set records (0.6299 etc.); each
+channel is evaluated on the same subset, so comparisons *within* the experiment hold.
+
+### ✅ What DID work: the calibrated operating point — and a caveat on how it is built
+
+- **Raw min-p is not calibrated.** A requested 1 % benign FPR fires at 2.7–2.8 %, and 5 % at
+  13.1–13.4 % — the 1−(1−t)^k inflation from minimising over k=3 channels.
+- **A second conformal step on the min-p statistic fixes it:** 1 % → 0.96–1.12 %, 5 % →
+  4.65–4.90 %. It needs its own calibration fold; reusing one fold calibrates the fusion on
+  the flows that defined it.
+- ⚠️ **New caveat worth carrying into any calibrated write-up:** a p-value takes at most
+  n_calib+1 values, which tied **98.5 %** of rows here and moved PR-AUC by up to **0.0199** —
+  the same order as the noise floor (0.0171). A small calibration set perturbs the headline
+  metric as much as re-running the model does. Ordering itself is preserved (0 monotonicity
+  violations; Spearman ρ = 0.912 is a tie artefact and was the wrong instrument).
+
+**Verdict: on CIC-IDS2017 the redesign does not beat the best single channel.** What survives
+is the calibration machinery (a reporting property) and the finding that windowed host
+behaviour is *less* derivable than static host role. The paper's §6 conclusion is unchanged
+and now rests on two independent tests rather than one.
+
+**Next:** nothing here needs a re-run. If this is pursued, it needs a capture that ships an
+asset inventory or topology — the exogenous quantity CIC-IDS2017 does not contain.
+
 ## 📄 IEEE CONFERENCE VERSIONS (2026-09-19) — 7-page and 6-page builds, both checked
 
 The author asked for an IEEE paper at a venue with at least 15 editions, and chose **both**: a
