@@ -122,7 +122,9 @@ Neuro-Symbolic Intrusion Detection"* ([paper_body.md](docs/target/paper_body.md)
 1. **Precondition.** Knowledge helps a neural detector only to the extent it lies outside the learned
    feature basis. Our LTN predicates are fixed functions of the 68 features; alone they move macro
    zero-day PR-AUC by −0.0004 (n.s.) and lose to the no-axiom trainer in all 17 pairings.
-   LOWDATA_LINE
+   **2026-09-28:** not a data-size effect either — on a 12.6× smaller training set the axioms still
+   do not help (paired +0.0143 / −0.0861 / −0.0796, L1, `ltn_lowdata.py`); they regularise hard (seed SD
+   0.0013 vs the control's 0.0560) but pin the score below the control's mean.
 2. **Bot.** 100 % of Bot flows are classified BENIGN in all 17 CNN runs (oracle PR-AUC 0.9988, so the
    information is present). "0/8 feature overlap" is an account of the **CNN** only — pre-registered
    E4 failed for the tuned forest. Never write overlap as a law.
@@ -131,7 +133,7 @@ Neuro-Symbolic Intrusion Detection"* ([paper_body.md](docs/target/paper_body.md)
    replaces it (`exogeneity_residual.py`). The residual *does* reach Bot and the web families — but
    through **attacker identity** (every external attack arrives from NAT address 172.16.0.1; 36 % of
    Bot flows come from the C2 server) and through the **flow features themselves** (same host, same
-   time: X-only AUC 0.93–0.95 > residual 0.67–0.79; `exogeneity_residual_controls.py`, K0 3/3). The
+   time: X-only AUC 0.93–0.95 > residual 0.67–0.78; `exogeneity_residual_controls.py`, K0 3/3). The
    conclusion stands on a sound test; its old justification ("a stronger predictor could only make the
    conclusion stronger") is struck.
 

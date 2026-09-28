@@ -953,7 +953,10 @@ L1/L2 in the docstring, committed before the run.
 bash scripts/run_long.sh ltn_lowdata.sh     # trains 6 runs, rescores, evaluates
 ```
 
-- LOWDATA_RESULT
+- **Result (2026-09-28): L1.** Paired deltas +0.0143 / −0.0861 / −0.0796, mean −0.0505, 1 of 3 seeds
+  positive; the control's seed SD at this size is 0.0560, so only the direction is reliable. The axiom
+  arm holds 0.2399–0.2424 (SD 0.0013) — it regularises, below the control's mean.
+- `ltn_lowdata.py` refuses to run unless the split's test labels equal the canonical ones.
 
 ## `scripts/md_to_latex.py` (was `md_to_pmlr.py`)
 

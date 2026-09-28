@@ -2,6 +2,34 @@
 
 > Append a dated entry whenever something meaningful changes (code, data, decisions, results). Newest first. Keep entries short; link to detail docs.
 
+## 2026-09-28 (later: the exogeneity test is made conditional; low-data axioms; documentation debt)
+
+**Exogeneity, done properly.** The marginal test (R² of predicting a predicate from X) cannot show a
+predicate adds no evidence, because evidence enters through the residual W − E[W|X].
+`exogeneity_residual.py` (pre-registered R1/R2) found **R2 on both views**: the residual reaches Bot at
+3.6–6.0× (host-role) and 4.9–7.4× (window; raw 1.3–1.5×). `exogeneity_residual_controls.py`
+(pre-registered K1/K0) found **K0 on 3 of 3 seeds**: host-role values are shared by every attack from NAT
+address 172.16.0.1, and with host and time held fixed the residual (AUC 0.67–0.78) is weaker than X's own
+projection (0.93–0.95); the residual's Bot lift is the C2 server (701 flows, 0.96–0.97). The paper's §6
+conclusion stands on the sound test; its old justification is struck and guarded.
+
+**Low-data axioms.** `ltn_lowdata.py` (pre-registered L1/L2), the paper's CTRL vs AX6 comparison on the
+70,384-flow `paper_subsampled` split: **L1** — paired deltas +0.0143 / −0.0861 / −0.0796 (mean −0.0505, 1 of 3 positive; control seed SD
+0.0560 at this size, so the magnitude is uncertain). The axioms hold 0.2399–0.2424 on every seed: a
+strong regulariser, below the control's mean (secondary, not pre-registered). The inductive-bias reply
+to the precondition is answered in the paper's §3.
+
+**Paper.** §3 gains the data-processing-inequality framing (Cover & Thomas [19]); §6 the conditional test
+and identity controls (Flood et al. [18]); Appendix C a same-host observation (the CNN scores 0.709 /
+0.277 / 0.223 where X's projection reaches 0.93–0.95; not pre-registered). ICC cut held at 6 of 6 pages by
+dropping two paragraphs whose content survives elsewhere. All three LaTeX builds regenerated.
+
+**Fixes.** `rescore_logits.py` now honours `PAPER_SUBDIR` (latent: the scaler was always the canonical
+split's; no record used that path). `CLAUDE.md` history (247 lines) and STATUS's dated sections (3,699
+lines) moved verbatim to `docs/archive/`, stale claims struck there; `AGENTS.md` became a pointer; the
+roadmap's "current spine" is marked superseded; STATUS rows 4, 6, 9, Phase 7.5 and a KG decision reason
+corrected in place. New lint checks: `onboarding-stale-claims`, `onboarding-single-source`.
+
 ## 2026-09-28 (The proposed redesign, measured: the host-window view fails the same premise)
 
 `hostwindow.py` builds a causal host-window view (60 s / 600 s per source) from the full 2.8 M-flow

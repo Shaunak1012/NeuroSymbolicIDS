@@ -46,7 +46,7 @@ gains in 5, and in 0 of 6 deterministic runs (`fusion_population.py`). **Nothing
 has been shown to beat the neural baseline.** The CNN baseline itself is re-based **0.6399 → 0.6299**
 (deterministic population, `rebase_deterministic.py`); never pool the two populations.
 
-👉 **Component-by-component status: [docs/STATUS.md](docs/STATUS.md) → "Component Status".**
+👉 **Component-by-component status: [docs/STATUS.md](../STATUS.md) → "Component Status".**
 Do not restate it here — that is exactly what kept rotting.
 
 **Next action (resume here — as of 2026-09-17):** read STATUS → "REMEDIATION, DAY 2" and
@@ -262,7 +262,7 @@ emerging-pattern criteria~~ ✅ (growth works, co-occurrence weak) → ~~tempora
 then C4.**~~ *(all four done by 2026-09-05 — stale as of archiving)* LOCO/fusion-repair stays deprioritized; the per-flow "router" idea rested on the
 falsified modality mechanism.
 
-**Phase numbering is canonical in [conference_roadmap.md §1b](docs/target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](docs/STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
+**Phase numbering is canonical in [conference_roadmap.md §1b](../target/conference_roadmap.md)** — three competing schemes were in circulation; don't invent a fourth. Full history, retractions, and decisions in [STATUS.md](../STATUS.md). Training stays on **CPU** (GPU/Blackwell deferred — see STATUS Open Decisions).
 
 
 ---
