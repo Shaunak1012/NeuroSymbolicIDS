@@ -25,8 +25,7 @@ release of the dataset. The overlap account is not complete, however: a random f
 validation reaches Bot in part without relying more on Bot's features, as a test we specified in advance
 showed. We then tried to build knowledge on CIC-IDS2017 that meets the precondition and could not.
 Host-role predicates derived from metadata the network never sees can still be predicted from its
-features, with AUC 0.990–0.994, and the part the features cannot predict reaches unseen attacks only
-through the attacker's identity. A benchmark with no external knowledge source therefore cannot support
+features, with AUC 0.990–0.994, and the part the features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. A benchmark with no external knowledge source therefore cannot support
 the experiment that published neuro-symbolic gains rely on.
 
 ---
@@ -66,8 +65,7 @@ outside the model's learned feature basis. The paper makes three contributions a
    in which the family is plentiful, corrected labels, an explicitly trained reject class, cross-dataset
    augmentation, and a sweep over architectures and out-of-distribution scorers.
 3. **A negative result on evaluability (§6).** Host-role knowledge built from metadata that the network
-   never sees can still be recovered from the network's features, and what cannot be recovered reaches
-   unseen attacks only through the attacker's identity. A benchmark without an external
+   never sees can still be recovered from the network's features, and what cannot be recovered reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. A benchmark without an external
    knowledge artefact cannot host the experiment on which published neuro-symbolic gains depend.
 
 ![Figure 1](../../outputs/figures/nesy_fig1_thesis.png)
@@ -414,7 +412,7 @@ whose features it does not use, a failure that held under every test we designed
 a tuned random forest shows that overlap alone does not decide which models reach such a family. The neuro-symbolic systems that
 report gains use knowledge that is truly exogenous. Ours did not, and on CIC-IDS2017 we could not
 construct any: knowledge aggregated from a capture can be recovered from that capture's features, and
-what cannot be recovered is who the attacker is.
+what cannot be recovered is, on this capture, mostly who the attacker is.
 We suggest that anyone reporting a neuro-symbolic gain should first check that the injected knowledge is
 not already present in the input, and should be aware that some benchmarks make this impossible.
 

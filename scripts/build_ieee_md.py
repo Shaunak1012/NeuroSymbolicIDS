@@ -70,7 +70,8 @@ ABSTRACT = (
     "in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show "
     "that the benchmark cannot host the experiment published gains rely on, because host-role knowledge "
     "derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the "
-    "features cannot predict reaches unseen attacks only through the attacker's identity. Re-examining the "
+    "features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no "
+    "better than the features themselves. Re-examining the "
     "neuro-symbolic system our work started from, we find that its reported gain does not appear against "
     "a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under "
     "deterministic training, and the pipeline reproduces from the raw data.")

@@ -74,7 +74,7 @@ remove attack flows which transmitted no payload.
 We then try to satisfy the precondition on CIC-IDS2017 and cannot. Host-role knowledge built from
 metadata the network never sees is still predicted from its features at AUC **0.990–0.994** and
 R² **0.89–0.95**, with an ablation ruling out the obvious shortcut, and the part the features cannot
-predict reaches unseen attacks only through the attacker's identity (same-host control: 0.93–0.95 for
+predict reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves (same-host control: 0.93–0.95 for
 the features' own projection against 0.67–0.78 for the residual). **Exogenous knowledge cannot be
 manufactured by aggregating the same data**, and a benchmark shipping no external knowledge artefact
 cannot support the experiment its neuro-symbolic results depend on. We report a measured

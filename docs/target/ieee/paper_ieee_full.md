@@ -2,7 +2,7 @@
 
 ## Abstract
 
-Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the features cannot predict reaches unseen attacks only through the attacker's identity. Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
+Neuro-symbolic intrusion detectors that report gains from injected knowledge tend to share a property that is rarely stated: the knowledge they add is information the neural network could not compute from its input. Our own system, a 1D CNN with Logic Tensor Network axioms over CIC-IDS2017 flow features, did not have this property, and its axioms were worse than the same trainer run without them in all 17 CNN training runs we paired them with. We argue that symbolic knowledge can help only to the extent that it lies outside the model's learned feature basis, and test how far the same condition explains a second failure: every Bot flow is classified as benign in all 17 runs, although an oracle reaches a PR-AUC of 0.9988 from the same features. We then show that the benchmark cannot host the experiment published gains rely on, because host-role knowledge derived from the capture is predictable from the flow features (AUC 0.990-0.994), and what the features cannot predict reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. Re-examining the neuro-symbolic system our work started from, we find that its reported gain does not appear against a matched control (+0.55 against +12.13 percentage points). All results are paired on seed under deterministic training, and the pipeline reproduces from the raw data.
 
 ## Index Terms
 
@@ -43,8 +43,7 @@ outside the model's learned feature basis. The paper makes four contributions ar
    in which the family is plentiful, corrected labels, an explicitly trained reject class, cross-dataset
    augmentation, and a sweep over architectures and out-of-distribution scorers.
 3. **A negative result on evaluability (§6).** Host-role knowledge built from metadata that the network
-   never sees can still be recovered from the network's features, and what cannot be recovered reaches
-   unseen attacks only through the attacker's identity. A benchmark without an external
+   never sees can still be recovered from the network's features, and what cannot be recovered reaches unseen attacks through the attacker's identity, and otherwise no better than the features themselves. A benchmark without an external
    knowledge artefact cannot host the experiment on which published neuro-symbolic gains depend.
 4. **A controlled re-examination of the base system (§7).** The satisfiability gain of the neuro-symbolic system our work started from does not appear against a matched control, and our apparent agreement with its CNN does not survive population matching.
 
@@ -376,7 +375,7 @@ whose features it does not use, a failure that held under every test we designed
 a tuned random forest shows that overlap alone does not decide which models reach such a family. The neuro-symbolic systems that
 report gains use knowledge that is truly exogenous. Ours did not, and on CIC-IDS2017 we could not
 construct any: knowledge aggregated from a capture can be recovered from that capture's features, and
-what cannot be recovered is who the attacker is.
+what cannot be recovered is, on this capture, mostly who the attacker is.
 We suggest that anyone reporting a neuro-symbolic gain should first check that the injected knowledge is
 not already present in the input, and should be aware that some benchmarks make this impossible.
 
