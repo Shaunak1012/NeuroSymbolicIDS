@@ -513,5 +513,24 @@ class ConditionalExogeneity(unittest.TestCase):
         self.assertNotIn(self.c["c2_addr"], self.c["bot_hosts"])
 
 
+class LowDataAxioms(unittest.TestCase):
+    """2026-09-28: the inductive-bias reply to the precondition, pre-registered L1/L2."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.r = _load("ltn_lowdata")
+        if cls.r is None:
+            raise unittest.SkipTest("ltn_lowdata.json not generated")
+
+    def test_axioms_do_not_help_when_data_is_scarce(self):
+        self.assertEqual(self.r["verdict"], "L1")
+        self.assertLess(self.r["delta_mean"], 0)
+        self.assertLessEqual(self.r["seeds_positive"], 1)
+
+    def test_evaluated_on_the_canonical_test_set(self):
+        # ltn_lowdata.py refuses to run otherwise; the record must name the subsampled split.
+        self.assertEqual(self.r["subdir"], "paper_subsampled")
+
+
 if __name__ == "__main__":
     unittest.main()

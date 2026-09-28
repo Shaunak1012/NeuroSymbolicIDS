@@ -119,9 +119,16 @@ entropy, and `BeaconLike` depends on the destination port. `BeaconLike` was also
 encodings against Bot flows, which belong to a zero-day family, so it is not a clean test of transfer to
 unseen attacks. The axioms made no positive difference, so this weakens nothing we conclude, but a
 positive result from it would not have counted. A predicate that the network can compute
-for itself carries no new information: for any function φ of the input X, I(φ(X); Y) ≤ I(X; Y), the data-processing inequality
-[19]. The inequality is standard; what needs testing is whether a given piece of knowledge is such a function, which §6 does. The most it can do is reshape the hypothesis space, which is a
-form of regularisation. In short, the knowledge we injected was endogenous.
+for itself carries no new information: for any function φ of the input X, I(φ(X); Y) ≤ I(X; Y), the
+data-processing inequality [19]. The most such a predicate can do is reshape the hypothesis space, which
+is a form of regularisation. In short, the knowledge we injected was endogenous. The inequality itself
+is standard; what needs testing is whether a given piece of knowledge is such a function, which §6 does.
+
+A regulariser should matter most when data is scarce, so we repeated the matched comparison on a
+training set 12.6 times smaller (70,384 flows, the same test set, three seeds). The axioms still did not
+help: the paired change in macro zero-day PR-AUC was +0.0143, −0.0861 and −0.0796. They did act as a
+regulariser, holding the score between 0.2399 and 0.2424 on every seed while the control ranged from
+0.2273 to 0.3285, but at a level below the control's mean.
 
 This leads to the precondition we propose: *symbolic knowledge helps a neural detector to the extent
 that it lies outside the model's learned feature basis.* The next section shows that the same condition
@@ -245,8 +252,6 @@ design property of synthetic benchmarks [18]. For this reason we did not run inj
 Our work started from Bizzarri et al. [8], who trained a Logic Tensor Network on CIC-IDS2017 with a combined cross-entropy and satisfiability loss and reported better accuracy on unknown attacks. We re-examined that result with controls it did not have.
 
 **The gain does not appear against a matched control.** We trained their loss (cross-entropy plus the satisfiability term at ω = 1) and a matched control with the term switched off (ω = 0), identical in every other respect, with three deterministic seeds each. The satisfiability term changes zero-day accuracy by +0.55 percentage points (+0.60, −0.84 and +1.89 on the three seeds), against the +12.13 they report, and changes macro zero-day PR-AUC by −0.0090, better on 1 seed of 3. Neither change is consistent in direction.
-
-**The reported gain is a change of operating point.** Across the five evaluation views, the hybrid LTN model improves on the 1D CNN by +0.09, +0.15, +0.07 and +2.15 percentage points on the four views that contain benign traffic, and by +12.13 points on the one view that does not. On the nine known classes the hybrid model makes 452 false positives against the CNN's 380. The satisfiability term penalises calling an attack benign, so it moves the decision boundary towards the attack class. Their zero-day view contains only attack rows, so precision is always 1, accuracy equals recall, and F1 = 2A/(1+A); a model that flags every flow as an attack would score 100 % on both.
 
 ## 8 What limits the magnitudes
 

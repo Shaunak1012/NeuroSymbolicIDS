@@ -578,6 +578,26 @@ if erc:
 else:
     unbacked("identity controls", "exogeneity_residual_controls.json missing")
 
+# ---- the low-data axiom test, 2026-09-28 -------------------------------------
+ld = load("ltn_lowdata")
+if ld:
+    import statistics as _st
+    ps = ld["per_seed"]
+    d = ["%+.4f" % p["delta"] for p in ps]
+    chk("low-data paired deltas", "ltn_lowdata", "%s, %s and %s" % tuple(d), "{}",
+        alt=(" / ".join(d),), ws=True)
+    chk("low-data mean delta", "ltn_lowdata", ld["delta_mean"], "{:+.4f}", alt=("%.4f" % ld["delta_mean"],))
+    ax = [p["axioms"]["macro_pr_auc"] for p in ps]
+    ct = [p["control"]["macro_pr_auc"] for p in ps]
+    chk("low-data axioms range", "ltn_lowdata", "%.4f and %.4f" % (min(ax), max(ax)), "{}",
+        alt=(_rng(ax, "%.4f"),))
+    chk("low-data control range", "ltn_lowdata", "%.4f to %.4f" % (min(ct), max(ct)), "{}",
+        alt=(_rng(ct, "%.4f"),))
+    chk("low-data control seed SD", "ltn_lowdata", _st.stdev(ct), "{:.4f}")
+    chk("low-data verdict", "ltn_lowdata", ld["verdict"], "{}", quoted=False)
+else:
+    unbacked("low-data axiom test", "ltn_lowdata.json missing")
+
 # ---- claims a human must check by hand -------------------------------------
 unbacked("split sizes 883,796 / 110,475 / 114,658", "config.yaml + preprocess_paper.py, not a JSON")
 # These were listed as hand-checks on the grounds that they are "derived at

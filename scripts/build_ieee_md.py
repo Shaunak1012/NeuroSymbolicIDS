@@ -221,6 +221,9 @@ SHORT_DROP = [
     "The reject-class experiment gave the clearest positive evidence.",
     # ...and the introduction's preview of section 8, which the reader reaches anyway.
     "Two measurement problems limit the magnitudes we can report",
+    # ...and the low-data comparison in section 3 (~85 words): the base paper's operating-point
+    # analysis goes; the matched control that the abstract cites stays. The 9-page version keeps both.
+    "**The reported gain is a change of operating point.**",
 ]
 # Edits inside kept sentences: each only deletes words, or follows the section renumbering
 # (section 10 is dropped above, so Limitations and conclusion becomes section 10).

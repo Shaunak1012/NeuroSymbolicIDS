@@ -150,9 +150,16 @@ entropy, and `BeaconLike` depends on the destination port. `BeaconLike` was also
 encodings against Bot flows, which belong to a zero-day family, so it is not a clean test of transfer to
 unseen attacks. The axioms made no positive difference, so this weakens nothing we conclude, but a
 positive result from it would not have counted. A predicate that the network can compute
-for itself carries no new information: for any function φ of the input X, I(φ(X); Y) ≤ I(X; Y), the data-processing inequality
-[19]. The inequality is standard; what needs testing is whether a given piece of knowledge is such a function, which §6 does. The most it can do is reshape the hypothesis space, which is a
-form of regularisation. In short, the knowledge we injected was endogenous.
+for itself carries no new information: for any function φ of the input X, I(φ(X); Y) ≤ I(X; Y), the
+data-processing inequality [19]. The most such a predicate can do is reshape the hypothesis space, which
+is a form of regularisation. In short, the knowledge we injected was endogenous. The inequality itself
+is standard; what needs testing is whether a given piece of knowledge is such a function, which §6 does.
+
+A regulariser should matter most when data is scarce, so we repeated the matched comparison on a
+training set 12.6 times smaller (70,384 flows, the same test set, three seeds). The axioms still did not
+help: the paired change in macro zero-day PR-AUC was +0.0143, −0.0861 and −0.0796. They did act as a
+regulariser, holding the score between 0.2399 and 0.2424 on every seed while the control ranged from
+0.2273 to 0.3285, but at a level below the control's mean.
 
 This leads to the precondition we propose: *symbolic knowledge helps a neural detector to the extent
 that it lies outside the model's learned feature basis.* The next section shows that the same condition

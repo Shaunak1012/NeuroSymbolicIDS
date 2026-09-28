@@ -483,6 +483,13 @@ the known DoS and port-scan classes, and within Bot's own infected hosts the res
 0.700) is weaker than the flow features' own projection (0.931, 0.936, 0.946). Both tests and their
 predictions were committed before they ran (`exogeneity_residual.py`, `exogeneity_residual_controls.py`).
 
+**The low-data comparison (§3).** The matched comparison, the no-axiom trainer against the axiom
+configuration with log-odds scoring, was repeated on the 70,384-flow training set of Appendix B's
+class-balancing experiment, which keeps the canonical test set. The mean paired change is −0.0505, with 1
+of 3 seeds positive. At this training size the control's own seed standard deviation is 0.0560, so the
+magnitude is uncertain, but nothing points towards a benefit. The narrow range of the axiom arm was not
+part of the prediction (`ltn_lowdata.py`).
+
 **Scope of the fitted-fuser result.** The obstacle described in the table applies to channels whose value
 is specific to zero-day detection. It does not apply to a channel that is also useful on the known classes
 the combiner is fitted on. The next subsection reports a fitted combiner that works, and Appendix E

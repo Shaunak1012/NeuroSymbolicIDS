@@ -632,6 +632,16 @@ They re-encode what is already in the input, so they can supply an inductive bia
 additional evidence. That is section 4's own mechanism turned on the symbolic side: **symbolic
 knowledge helps to the extent it lies outside the learned basis.**
 
+🧪 **The inductive-bias reply, measured (2026-09-28, pre-registered L1/L2, `ltn_lowdata.py`).** An
+inductive bias should pay when data is scarce, so the matched comparison (no-axiom control vs the Ax6
+configuration, log-odds scored) was repeated on the 70,384-flow `paper_subsampled` training set — 12.6×
+smaller, canonical test set, seeds 42–44. **L1: no help.** Paired deltas +0.0143 / −0.0861 / −0.0796, mean
+−0.0505, 1 of 3 seeds positive. ⚠️ At this size the control's own seed SD is 0.0560, so the magnitude is
+uncertain; the direction shows no sign of help. *Secondary, not pre-registered:* the axioms hold the score at
+0.2399–0.2424 on every seed (SD 0.0013) while the control spans 0.2273–0.3285 — the regulariser is visibly
+working, and it pins the model below the control's mean. That is the precondition seen from the inside:
+endogenous knowledge reshapes the hypothesis space without adding evidence.
+
 🔴 **We then tried to build knowledge that does lie outside it, and the benchmark would not let
 us.** Source and destination IP are *not* among the features, and no single flow's vector can express
 a property of a host across many flows, so we derived host-role predicates from the metadata — which
