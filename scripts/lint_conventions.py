@@ -267,6 +267,51 @@ def _c9():
     return bad
 
 
+@check("onboarding-stale-claims",
+       "CLAUDE.md is auto-loaded into every session, and on 2026-09-28 it still presented "
+       "three withdrawn results as current (the CNN+KG fusion gain, Bot's rho = -0.090 as "
+       "the mechanism, 'C4 still open') -- up to 12 days after they were retracted in "
+       "STATUS. verify_draft.py guarded the paper against exactly these phrases; nothing "
+       "guarded the file every session reads first. Struck-through text is ignored, so "
+       "retracting in place (non-negotiable #4) never trips it.")
+def _c10():
+    stale = [
+        (r"ρ\s*=\s*[−-]0\.090", "Bot rho -0.090 was three runs (retracted 2026-09-17)"),
+        (r"unreachable\s+and\s+unstable", "retracted with the rho = -0.090 claim"),
+        (r"CNN\+KG fusion[^\n]*✅", "the CNN+KG fusion gain was withdrawn 2026-09-16"),
+        (r"C4\s+still\s+open", "C4 closed 2026-08-10"),
+        (r"[Ww]e\s+reproduce(d)?\s+(their|its|the base paper'?s)\s+(1D\s+)?CNN",
+         "withdrawn 2026-09-18 (0.69 % on the matched population)"),
+        (r"[Rr]eachability\s+(follows|tracks)\s+overlap", "E4 failed 2026-09-17"),
+    ]
+    bad = []
+    for rel in ("CLAUDE.md", "AGENTS.md"):
+        p = os.path.join(ROOT, rel)
+        if not os.path.exists(p):
+            continue
+        live = re.sub(r"(?s)~~.*?~~", "", _read(p))
+        for pat, why in stale:
+            for m in re.finditer(pat, live):
+                bad.append(f"{rel}: {ascii(m.group(0))} -- {why}")
+    return bad
+
+
+@check("onboarding-single-source",
+       "AGENTS.md was a full copy of CLAUDE.md and had drifted from it within days -- the "
+       "duplication defect non-negotiable #7 names. It must stay a pointer.")
+def _c11():
+    p = os.path.join(ROOT, "AGENTS.md")
+    if not os.path.exists(p):
+        return []
+    txt = _read(p)
+    bad = []
+    if len(txt.splitlines()) > 40:
+        bad.append(f"AGENTS.md has {len(txt.splitlines())} lines -- it is a copy again, not a pointer")
+    if "CLAUDE.md" not in txt:
+        bad.append("AGENTS.md does not point at CLAUDE.md")
+    return bad
+
+
 @check("gitignored-research-record",
        "outputs/metadata/ was gitignored, leaving the entire research record with "
        "no history or backup.")

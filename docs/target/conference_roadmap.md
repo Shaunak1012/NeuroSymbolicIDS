@@ -34,7 +34,21 @@
 > n.s. alone, and **significantly harmful** on the KG, p<0.0001) is untouched by any of this.
 > **Do not repair this thesis by weakening it. The evidence supports a different paper.**
 
-### 0b. THE CURRENT SPINE (decided 2026-08-10)
+### 0c. THE SPINE AS WRITTEN (2026-09-15 onward) — the exogeneity precondition
+
+> **Superseding 0b, recorded 2026-09-28.** The paper that exists
+> ([paper_body.md](paper_body.md), IEEE builds in `ieee/`) is not the 0b spine. Its title is
+> *"Knowledge the Network Already Has: An Exogeneity Precondition for Neuro-Symbolic Intrusion
+> Detection"*, and its three claims are: **(1)** symbolic knowledge helps a neural detector only to
+> the extent it lies outside the learned feature basis — ours did not; **(2)** the CNN's Bot failure
+> as a case of the same condition (an account of the CNN, not a law — E4 failed); **(3)** CIC-IDS2017
+> cannot supply exogenous knowledge (as of 2026-09-28 tested conditionally, by the residual
+> W − E[W|X], not by marginal R²). 0b's resolution-failure result survives as a supporting section,
+> not the opening. This roadmap was not updated when the spine moved — the same drift defect that
+> non-negotiable #7 names, in the one planning document that fixes the paper's shape. **For the
+> spine, trust the paper; for status, trust STATUS.md.**
+
+### ~~0b. THE CURRENT SPINE (decided 2026-08-10)~~ — superseded by 0c above (the paper moved on 2026-09-15)
 
 > **The metric the CIC-IDS2017 literature publishes cannot resolve zero-day capability — and
 > underneath it, a closed-set discriminative model cannot reach a novel class whose signature does
