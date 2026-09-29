@@ -153,8 +153,10 @@ three-run ρ (2026-09-17) · ~~"we reproduce the base paper's CNN"~~ (2026-09-18
 population) · the (A)/(B) method-family thesis · the "modality analogue" mechanism · C2 · "the
 conjunction gives 81 % precision" · the host-window view as a second channel (2026-09-28).
 
-**Next action (resume here):** see STATUS → "RESUME HERE". Open author decisions D6 (authors / blind
-review) and D7 (ICC page limit).
+**Next action (resume here):** see STATUS → "RESUME HERE". ~~Open author decisions D6 (authors / blind
+review) and D7 (ICC page limit).~~ *(2026-09-28: D7 answered — 6 pages hard; ICC is not blind, the PDF's
+author list must match EDAS.)* **Only open item: D6 names** (order, affiliation, guide?) — then build with
+`--authors` and submit by **2 Oct 2026**.
 
 ### Standing cautions
 
